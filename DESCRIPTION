@@ -1,0 +1,20 @@
+Package: amp
+Type: Package
+Title: Smoothing Metabolomics Analyses
+Version: 0.1.0
+Author: Anton Mattsson
+Maintainer: Anton Mattsson <antom@uef.fi>
+Description: Automates common preprocessing steps in a LC-MS metabolomics workflow
+    such as drift correction, quality control and common visualizations.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    ggplot2,
+    missForest,
+    Rtsne,
+    tidyr
+Suggests:
+    ggdendro,
+    mdatools,
