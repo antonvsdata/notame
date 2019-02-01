@@ -18,3 +18,5 @@ Imports:
 Suggests:
     ggdendro,
     mdatools,
+    testthat
+RoxygenNote: 6.1.1
