@@ -14,7 +14,8 @@ Imports:
     ggplot2,
     missForest,
     Rtsne,
-    tidyr
+    tidyr,
+    openxlsx
 Suggests:
     ggdendro,
     mdatools,
