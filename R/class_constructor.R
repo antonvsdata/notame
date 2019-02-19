@@ -3,7 +3,9 @@
 read_from_excel <- function(file, corner_row, corner_column, split_by){
   dada <- openxlsx::read.xlsx(file, colNames = FALSE)
 
-  cc <- corner_column
+  cc <- ifelse(is.character(corner_column),
+               which(LETTERS == corner_column),
+               corner_column)
   cr <- corner_row
 
   # Extract sample information
@@ -89,8 +91,9 @@ name_features <- function(feature_data, split_by){
   feature_data
 }
 
-
-MetaboSet <- setClass("LCMSSet",
+#' @import methods
+#' @importClassesFrom Biobase ExpressionSet
+MetaboSet <- setClass("MetaboSet",
                       slots = c(stage = "character",
                                 group = "character",
                                 time = "character",
@@ -99,7 +102,8 @@ MetaboSet <- setClass("LCMSSet",
 
 
 construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
-                                group_col = NULL, time_col = NULL, subject_id_col = NULL) {
+                                group_col = NA_character_, time_col = NA_character_,
+                                subject_id_col = NA_character_) {
 
   pheno_data <- new("AnnotatedDataFrame",
                     data=pheno_data)
