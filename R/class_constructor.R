@@ -11,12 +11,10 @@ read_from_excel <- function(file, corner_row, corner_column, split_by) {
   # Extract sample information
   pheno_data <- as.data.frame(t(dada[1:cr, (cc+1):ncol(dada)]), stringsAsFactors = FALSE)
   colnames(pheno_data) <- gsub(" ", "_", c(dada[1:(cr-1), cc], "Datafile"))
-  if ("Sample_ID" %in% colnames(pheno_data)) {
-    rownames(pheno_data <- pheno_data$Sample_ID)
-  } else {
-    rownames(pheno_data) <- paste0("ID_", 1:nrow(pheno_data))
+  if (!"Sample_ID" %in% colnames(pheno_data)) {
+    pheno_data$Sample_ID <- paste0("ID_", 1:nrow(pheno_data))
   }
-
+  rownames(pheno_data) <- pheno_data$Sample_ID
 
   # Exctract feature information
   feature_data <- dada[(cr+1):nrow(dada), 1:cc]
@@ -141,7 +139,7 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
   obj_list
 }
 
-
+# ------------ Accessors and Replacers -----------------
 
 setGeneric("lcms_data", signature = "object",
            function(object) standardGeneric("lcms_data"))
@@ -151,8 +149,6 @@ setMethod("lcms_data", c(object = "MetaboSet"),
           function(object) {
             cbind(pData(object), t(exprs(object)))
           })
-
-# ------------ Accessors and Replacers -----------------
 
 # group
 setGeneric("group", signature = "object",
