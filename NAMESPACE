@@ -2,4 +2,9 @@
 
 import(methods)
 importClassesFrom(Biobase,ExpressionSet)
+importFrom(Biobase,"fData<-")
+importFrom(Biobase,exprs)
+importFrom(Biobase,fData)
+importFrom(Biobase,pData)
+importFrom(foreach,"%dopar%")
 importFrom(magrittr,"%>%")

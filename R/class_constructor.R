@@ -1,6 +1,6 @@
 
 #' @importFrom magrittr "%>%"
-read_from_excel <- function(file, corner_row, corner_column, split_by){
+read_from_excel <- function(file, corner_row, corner_column, split_by) {
   dada <- openxlsx::read.xlsx(file, colNames = FALSE)
 
   cc <- ifelse(is.character(corner_column),
@@ -29,6 +29,7 @@ read_from_excel <- function(file, corner_row, corner_column, split_by){
   }
   feature_data <- feature_data %>%
     tidyr::unite("Split", split_by, remove = FALSE) %>%
+    dplyr:: mutate(Flag = NA_character_) %>%
     dplyr::select(Feature_ID, Split, dplyr::everything())
 
   feature_data <- name_features(feature_data, split_by)
@@ -44,14 +45,14 @@ read_from_excel <- function(file, corner_row, corner_column, split_by){
 }
 
 #' @importFrom magrittr "%>%"
-name_features <- function(feature_data, split_by){
+name_features <- function(feature_data, split_by) {
 
   # Find mass and retention time columns
   mz_tags <- c("mass", "average mz", "average.mz")
   rt_tags <-  c("retention time", "retentiontime", "average rt(min)",
                 "^rt$")
 
-  mz_col <- NULL
+  mzCol <- NULL
   for (tag in mz_tags) {
     hits <- grepl(tag, tolower(colnames(feature_data)))
     if (any(hits)) {
@@ -100,6 +101,19 @@ MetaboSet <- setClass("MetaboSet",
                                 subject_id = "character"),
                       contains = "ExpressionSet")
 
+setValidity("MetaboSet",
+            function(object) {
+              if (!is.na(object@group) & !object@group %in% colnames(object@phenoData@data)) {
+                paste0("Column '", object@group, "' not found in pheno data")
+              } else if (!is.na(object@time) & !object@time %in% colnames(object@phenoData@data)) {
+                paste("Column", object@time, "not found in pheno data")
+              } else if (!is.na(object@subject_id) & !object@subject_id %in% colnames(object@phenoData@data)) {
+                paste("Column", object@subject_id, "not found in pheno data")
+              } else {
+                TRUE
+              }
+            })
+
 
 construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
@@ -129,18 +143,70 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
 
 
 
+setGeneric("lcms_data", signature = "object",
+           function(object) standardGeneric("lcms_data"))
 
+#' @importFrom Biobase exprs pData
+setMethod("lcms_data", c(object = "MetaboSet"),
+          function(object) {
+            cbind(pData(object), t(exprs(object)))
+          })
 
+# ------------ Accessors and Replacers -----------------
 
+# group
+setGeneric("group", signature = "object",
+           function(object) standardGeneric("group"))
 
+setMethod("group", "MetaboSet",
+          function(object) object@group)
 
+setGeneric("group<-", signature = "object",
+           function(object, value) standardGeneric("group<-"))
 
+setMethod("group<-", "MetaboSet",
+          function(object, value) {
+            object@group <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
 
+# time
+setGeneric("time", signature = "object",
+           function(object) standardGeneric("time"))
 
+setMethod("time", "MetaboSet",
+          function(object) object@time)
 
+setGeneric("time<-", signature = "object",
+           function(object, value) standardGeneric("time<-"))
 
+setMethod("time<-", "MetaboSet",
+          function(object, value) {
+            object@time <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
 
+# subject_id
+setGeneric("subject_id", signature = "object",
+           function(object) standardGeneric("subject_id"))
 
+setMethod("subject_id", "MetaboSet",
+          function(object) object@subject_id)
+
+setGeneric("subject_id<-", signature = "object",
+           function(object, value) standardGeneric("subject_id<-"))
+
+setMethod("subject_id<-", "MetaboSet",
+          function(object, value) {
+            object@subject_id <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
 
 
 
