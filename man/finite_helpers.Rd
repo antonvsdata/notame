@@ -20,6 +20,6 @@ finite_mad(x)
 \item{x}{a numeric vector.}
 }
 \description{
-First removes non-finite and missing values, then computes the summary statistic in question.
-Helper functions used for computing quality measurements.
+These functions first remove non-finite and missing values, then compute the summary statistic in question.
+They are helper functions used for computing quality measurements.
 }
