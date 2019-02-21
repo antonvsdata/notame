@@ -1,5 +1,11 @@
 
-
+#' Compute quality metrics for each feature
+#' 
+#' @param object A MetaboSet object
+#' 
+#' @details LOL
+#' 
+#' @return A MetaboSet object, with the quality metrics added to feature data
 setGeneric("assess_quality", signature = "object",
            function(object) standardGeneric("assess_quality"))
 
