@@ -1,7 +1,7 @@
 
 #' @importFrom magrittr "%>%"
-read_from_excel <- function(file, corner_row, corner_column, split_by) {
-  dada <- openxlsx::read.xlsx(file, colNames = FALSE)
+read_from_excel <- function(file, sheet, corner_row, corner_column, split_by) {
+  dada <- openxlsx::read.xlsx(file, sheet, colNames = FALSE)
 
   cc <- ifelse(is.character(corner_column),
                which(LETTERS == corner_column),
@@ -94,19 +94,19 @@ name_features <- function(feature_data, split_by) {
 #' @importClassesFrom Biobase ExpressionSet
 MetaboSet <- setClass("MetaboSet",
                       slots = c(stage = "character",
-                                group = "character",
-                                time = "character",
-                                subject_id = "character"),
+                                group_col = "character",
+                                time_col = "character",
+                                subject_col = "character"),
                       contains = "ExpressionSet")
 
 setValidity("MetaboSet",
             function(object) {
-              if (!is.na(object@group) & !object@group %in% colnames(object@phenoData@data)) {
-                paste0("Column '", object@group, "' not found in pheno data")
-              } else if (!is.na(object@time) & !object@time %in% colnames(object@phenoData@data)) {
-                paste("Column", object@time, "not found in pheno data")
-              } else if (!is.na(object@subject_id) & !object@subject_id %in% colnames(object@phenoData@data)) {
-                paste("Column", object@subject_id, "not found in pheno data")
+              if (!is.na(object@group_col) & !object@group_col %in% colnames(object@phenoData@data)) {
+                paste0("Column '", object@group_col, "' not found in pheno data")
+              } else if (!is.na(object@time_col) & !object@time_col %in% colnames(object@phenoData@data)) {
+                paste("Column", object@time_col, "not found in pheno data")
+              } else if (!is.na(object@subject_col) & !object@subject_col %in% colnames(object@phenoData@data)) {
+                paste("Column", object@subject_col, "not found in pheno data")
               } else {
                 TRUE
               }
@@ -115,7 +115,7 @@ setValidity("MetaboSet",
 
 construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
-                                subject_id_col = NA_character_) {
+                                subject_col = NA_character_) {
 
   pheno_data <- new("AnnotatedDataFrame",
                     data=pheno_data)
@@ -131,9 +131,9 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                   phenoData = pheno_data,
                                   featureData = fd_tmp,
                                   stage = "Original",
-                                  group = group_col,
-                                  time = time_col,
-                                  subject_id = subject_id_col)
+                                  group_col = group_col,
+                                  time_col = time_col,
+                                  subject_col = subject_col)
   }
 
   obj_list
@@ -151,54 +151,54 @@ setMethod("lcms_data", c(object = "MetaboSet"),
           })
 
 # group
-setGeneric("group", signature = "object",
-           function(object) standardGeneric("group"))
+setGeneric("group_col", signature = "object",
+           function(object) standardGeneric("group_col"))
 
-setMethod("group", "MetaboSet",
-          function(object) object@group)
+setMethod("group_col", "MetaboSet",
+          function(object) object@group_col)
 
-setGeneric("group<-", signature = "object",
-           function(object, value) standardGeneric("group<-"))
+setGeneric("group_col<-", signature = "object",
+           function(object, value) standardGeneric("group_col<-"))
 
-setMethod("group<-", "MetaboSet",
+setMethod("group_col<-", "MetaboSet",
           function(object, value) {
-            object@group <- value
+            object@group_col <- value
             if (validObject(object)) {
               return(object)
             }
           })
 
 # time
-setGeneric("time", signature = "object",
-           function(object) standardGeneric("time"))
+setGeneric("time_col", signature = "object",
+           function(object) standardGeneric("time_col"))
 
-setMethod("time", "MetaboSet",
-          function(object) object@time)
+setMethod("time_col", "MetaboSet",
+          function(object) object@time_col)
 
-setGeneric("time<-", signature = "object",
-           function(object, value) standardGeneric("time<-"))
+setGeneric("time_col<-", signature = "object",
+           function(object, value) standardGeneric("time_col<-"))
 
-setMethod("time<-", "MetaboSet",
+setMethod("time_col<-", "MetaboSet",
           function(object, value) {
-            object@time <- value
+            object@time_col <- value
             if (validObject(object)) {
               return(object)
             }
           })
 
-# subject_id
-setGeneric("subject_id", signature = "object",
-           function(object) standardGeneric("subject_id"))
+# subject ID
+setGeneric("subject_col", signature = "object",
+           function(object) standardGeneric("subject_col"))
 
-setMethod("subject_id", "MetaboSet",
-          function(object) object@subject_id)
+setMethod("subject_col", "MetaboSet",
+          function(object) object@subject_col)
 
-setGeneric("subject_id<-", signature = "object",
-           function(object, value) standardGeneric("subject_id<-"))
+setGeneric("subject_col<-", signature = "object",
+           function(object, value) standardGeneric("subject_col<-"))
 
-setMethod("subject_id<-", "MetaboSet",
+setMethod("subject_col<-", "MetaboSet",
           function(object, value) {
-            object@subject_id <- value
+            object@subject_col <- value
             if (validObject(object)) {
               return(object)
             }
