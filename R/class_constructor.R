@@ -14,6 +14,7 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, split_by) {
   if (!"Sample_ID" %in% colnames(pheno_data)) {
     pheno_data$Sample_ID <- paste0("ID_", 1:nrow(pheno_data))
   }
+  pheno_data <- best_classes(pheno_data)
   rownames(pheno_data) <- pheno_data$Sample_ID
 
   # Exctract feature information

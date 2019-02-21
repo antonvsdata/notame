@@ -46,3 +46,24 @@ join_fdata <- function(object, dframe) {
   rownames(fData(object)) <- fData(object)$Feature_ID
   object
 }
+
+
+looks_numeric <- function(x) {
+  suppressWarnings(all(!is.na(as.numeric(x))))
+}
+
+best_class <- function(x) {
+  x <- as.character(x)
+  if (looks_numeric(x)) {
+    as.numeric(x)
+  } else if (length(unique(x)) == length(x)) {
+    as.character(x)
+  } else {
+    as.factor(x)
+  }
+}
+
+
+best_classes <- function(x) {
+  as.data.frame(lapply(x, best_class), stringsAsFactors = FALSE)
+}
