@@ -1,6 +1,8 @@
+library(ggplot2)
+
 
 devtools::document()
-
+doParallel::registerDoParallel(cores = 3)
 res <- read_from_excel(file = "~/amp/inst/extdata/split_data.xlsx",
                        sheet = 2,
                        corner_row = 4, corner_column = "G",
@@ -15,70 +17,23 @@ lol <- lcms[[1]]
 
 group_col(lol) <- "Group"
 
-lol <- flag_detection(lol)
 
-fData(lol)
+xd <- correct_drift(lol)
 
-group(lol)
-group(lol) <- "LOL"
-group(lol) <- "Group"
+lol <- assess_quality(lol)
+xd <- assess_quality(xd)
 
-?Biobase::esApply
-
-?spline
+quality(xd)[2:5] - quality(lol)[2:5]
 
 
-object <- lol
+ins <- inspect_dc(lol, xd, condition = "RSD_r < 0 & D_ratio_r < 0")
+
+exprs(ins)
+
+xd <- assess_quality(xd)
+quality(xd)
+
+quality(ins)
 
 
-qc <- object[, object$QC == "QC"]
-qc_order <- qc$Injection_order
-qc_data <- exprs(qc)
-
-full_order <- object$Injection_order
-full_data <- exprs(object)
-
-comb <- function(x, ...) {
-  mapply(rbind,x,...,SIMPLIFY=FALSE)
-}
-
-dc_data <- foreach::foreach(i = seq_len(nrow(object)), .combine = comb) %dopar% {
-
-  # Spline cannot be fitted if there are les than 4 QC values
-  if (sum(!is.na(qc_data[i, ])) < 4) {
-    return(list(dc_row = matrix(NA_real_, nrow = 1, ncol = ncol(full_data)),
-                predicted = matrix(NA_real_, nrow = 1, ncol = ncol(full_data))))
-  }
-
-  fit <- smooth.spline(x = qc_order, y = qc_order)
-
-}
-
-
-
-
-
-
-
-splinem <- function(x) {
-  if (sum(!is.na(x)) >= 4){
-    smooth.spline(x = qc$Injection, y = x[!is.na(x)])
-  } else {
-    NA
-  }
-}
-
-
-
-fit <- Biobase::esApply(qc, 1, splinem)
-
-
-predictem <- function(object, x) {
-  if (!is.na(object)) {
-    predict(object, x = x)$y
-  } else {
-    NA
-  }
-}
-
-lapply(fit, predictem, x = lol$Injection) %>% as.data.frame()
+plot_dc(lol, xd, file = "lolxd.pdf")

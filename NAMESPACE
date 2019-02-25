@@ -2,6 +2,7 @@
 
 import(methods)
 importClassesFrom(Biobase,ExpressionSet)
+importFrom(Biobase,"exprs<-")
 importFrom(Biobase,"fData<-")
 importFrom(Biobase,exprs)
 importFrom(Biobase,fData)

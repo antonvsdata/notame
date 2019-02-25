@@ -25,7 +25,7 @@ finite_median <- function(x) {
 
 #' @rdname finite_helpers
 finite_mad <- function(x) {
-  mad(x[is.finite(x)], center = finite_median(x), na.rm = TRUE)
+  mad(x[is.finite(x)], center = median(x[is.finite(x)], na.rm = TRUE), na.rm = TRUE)
 }
 
 

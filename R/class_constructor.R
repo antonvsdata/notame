@@ -97,7 +97,8 @@ MetaboSet <- setClass("MetaboSet",
                       slots = c(stage = "character",
                                 group_col = "character",
                                 time_col = "character",
-                                subject_col = "character"),
+                                subject_col = "character",
+                                predicted = "matrix"),
                       contains = "ExpressionSet")
 
 setValidity("MetaboSet",
@@ -112,7 +113,6 @@ setValidity("MetaboSet",
                 TRUE
               }
             })
-
 
 construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
@@ -129,12 +129,15 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                   data= feature_data[feature_data$Split == part, ])
     ad_tmp <- assay_data[fd_tmp$Feature_ID,]
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
-                                  phenoData = pheno_data,
-                                  featureData = fd_tmp,
-                                  stage = "Original",
-                                  group_col = group_col,
-                                  time_col = time_col,
-                                  subject_col = subject_col)
+                        phenoData = pheno_data,
+                        featureData = fd_tmp,
+                        stage = "Original",
+                        group_col = group_col,
+                        time_col = time_col,
+                        subject_col = subject_col,
+                        predicted = matrix(NA_real_, nrow = nrow(ad_tmp),
+                                           ncol = ncol(ad_tmp),
+                                           dimnames = dimnames(ad_tmp)))
   }
 
   obj_list
@@ -142,13 +145,32 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
 
 # ------------ Accessors and Replacers -----------------
 
-setGeneric("lcms_data", signature = "object",
-           function(object) standardGeneric("lcms_data"))
+setGeneric("combined_data", signature = "object",
+           function(object) standardGeneric("combined_data"))
 
 #' @importFrom Biobase exprs pData
-setMethod("lcms_data", c(object = "MetaboSet"),
+setMethod("combined_data", c(object = "MetaboSet"),
           function(object) {
             cbind(pData(object), t(exprs(object)))
+          })
+
+
+# stage
+setGeneric("stage", signature = "object",
+           function(object) standardGeneric("stage"))
+
+setMethod("stage", "MetaboSet",
+          function(object) object@stage)
+
+setGeneric("stage<-", signature = "object",
+           function(object, value) standardGeneric("stage<-"))
+
+setMethod("stage<-", "MetaboSet",
+          function(object, value) {
+            object@stage <- value
+            if (validObject(object)) {
+              return(object)
+            }
           })
 
 # group
@@ -205,8 +227,23 @@ setMethod("subject_col<-", "MetaboSet",
             }
           })
 
+# predicted values from spline regression
+setGeneric("predicted", signature = "object",
+           function(object) standardGeneric("predicted"))
 
+setMethod("predicted", "MetaboSet",
+          function(object) object@predicted)
 
+setGeneric("predicted<-", signature = "object",
+           function(object, value) standardGeneric("predicted<-"))
+
+setMethod("predicted<-", "MetaboSet",
+          function(object, value) {
+            object@predicted <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
 
 
 
