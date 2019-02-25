@@ -48,6 +48,14 @@ join_fdata <- function(object, dframe) {
 }
 
 
+mark_nas <- function(object, value) {
+  ex <- exprs(object)
+  ex[ex == value] <- NA
+  exprs(object) <- ex
+  object
+}
+
+
 looks_numeric <- function(x) {
   suppressWarnings(all(!is.na(as.numeric(x))))
 }

@@ -21,13 +21,15 @@ correct_drift <- function(object, spar = NULL, spar_low = 0.5, spar_high = 1.5) 
 
     dnames <- list(rownames(full_data)[i], colnames(full_data))
     # Spline cannot be fitted if there are les than 4 QC values
-    if (sum(!is.na(qc_data[i, ])) < 4) {
+
+    qc_detected <- !is.na(qc_data[i, ])
+    if (sum(qc_detected) < 4) {
       return(list(corrected = matrix(NA_real_, nrow = 1, ncol = n, dimnames = dnames),
                   predicted = matrix(NA_real_, nrow = 1, ncol = n, dimnames = dnames)))
     }
 
     # Spline regression
-    fit <- smooth.spline(x = qc_order, y = qc_data[i, ], all.knots = TRUE,
+    fit <- smooth.spline(x = qc_order[qc_detected], y = qc_data[i, qc_detected], all.knots = TRUE,
                          spar = spar, control.spar = list("low" = spar_low, "high" = spar_high))
     predicted <- predict(fit, full_order)$y
     # Correction

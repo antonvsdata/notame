@@ -1,4 +1,28 @@
+setGeneric("quality", signature = "object",
+           function(object) standardGeneric("quality"))
 
+#' @importFrom Biobase fData
+setMethod("quality", c(object = "MetaboSet"),
+          function(object) {
+            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
+              return(NULL)
+            }
+            fData(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
+                            "D_ratio_r")]
+          })
+
+setGeneric("erase_quality", signature = "object",
+           function(object) standardGeneric("erase_quality"))
+
+#' @importFrom Biobase fData
+setMethod("erase_quality", c(object = "MetaboSet"),
+          function(object) {
+            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
+              return(NULL)
+            }
+            fData(object)[c("RSD", "RSD_r", "D_ratio", "D_ratio_r")] <- NULL
+            object
+          })
 
 setGeneric("assess_quality", signature = "object",
            function(object) standardGeneric("assess_quality"))
@@ -7,34 +31,28 @@ setGeneric("assess_quality", signature = "object",
 #' @importFrom Biobase exprs fData "fData<-"
 setMethod("assess_quality", c(object = "MetaboSet"),
           function(object) {
+            # Remove old quality metrics
+            if (!is.null(quality(object))) {
+              object <- erase_quality(object)
+            }
+
             qc_data <- exprs(object)[, object$QC == "QC"]
             sample_data <- exprs(object)[, object$QC != "QC"]
 
-            quality_metrics <- foreach::foreach(i = 1:nrow(sample_data), .combine = rbind) %dopar% {
+            quality_metrics <- foreach::foreach(i = seq_len(nrow(sample_data)), .combine = rbind,
+                                                .export = c("finite_sd", "finite_mad", "finite_mean", "finite_median")) %dopar% {
               data.frame(Feature_ID = rownames(sample_data)[i],
                          RSD = finite_sd(qc_data[i, ]) / abs(finite_mean(qc_data[i, ])),
                          RSD_r = finite_mad(qc_data[i, ]) / abs(finite_median(qc_data[i, ])),
                          D_ratio = finite_sd(qc_data[i, ]) / finite_sd(sample_data[i, ]),
                          D_ratio_r = finite_mad(qc_data[i, ]) / finite_mad(sample_data[i, ]),
-                         stringsAsFactors = FALSE)
+                         row.names = rownames(sample_data)[i], stringsAsFactors = FALSE)
             }
 
             object <- join_fdata(object, quality_metrics)
 
             object
           })
-
-
-setGeneric("quality", signature = "object",
-           function(object) standardGeneric("quality"))
-
-#' @importFrom Biobase fData
-setMethod("quality", c(object = "MetaboSet"),
-          function(object) {
-            fData(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
-                                     "D_ratio_r")]
-          })
-
 
 
 setGeneric("flag_quality", signature = "object",
@@ -79,7 +97,7 @@ setMethod("flag_detection", c(object = "MetaboSet"),
 
             # Compute proportions found in each study group
             if (!is.na(group)) {
-              proportions <- lcms_data(object)[, c("Sample_ID", group, featureNames(object))] %>%
+              proportions <- combined_data(object)[, c("Sample_ID", group, featureNames(object))] %>%
                 tidyr::gather_("Feature_ID", "Intensity", featureNames(object)) %>%
                 dplyr::group_by_("Feature_ID", group) %>%
                 dplyr::summarise(proportion_found = prop_found(Intensity)) %>%
