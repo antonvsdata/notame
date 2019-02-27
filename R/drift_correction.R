@@ -94,7 +94,10 @@ inspect_dc <- function(orig, dc, condition) {
 }
 
 
-plot_dc <- function(orig, dc, file, width = 8, height = 6, group = group_col(orig)) {
+plot_dc <- function(orig, dc, file, width = 8, height = 6, group = group_col(orig),
+                    color_scale = getOption("amp.color_scale_d")) {
+  # If group column not set, use QC column
+  group <- group %||% "QC"
 
   orig_data <- combined_data(orig)
   dc_data <- combined_data(dc)
@@ -105,7 +108,8 @@ plot_dc <- function(orig, dc, file, width = 8, height = 6, group = group_col(ori
 
   for (fname in Biobase::featureNames(dc)) {
     p <- ggplot(mapping = aes_string(x = "Injection_order", y = fname)) +
-      theme_bw()
+      theme_bw() +
+      color_scale
 
 
     p1 <- p +

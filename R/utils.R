@@ -1,4 +1,19 @@
 
+
+# Set default color scales on load
+.onLoad <- function(libname, pkgname) {
+  op <- options()
+  op.amp <- list(
+    amp.color_scale_c = ggplot2::scale_color_viridis_c(),
+    amp.color_scale_d = ggplot2::scale_color_brewer(palette = "Set1")
+  )
+  toset <- !(names(op.amp) %in% names(op))
+  if(any(toset)) options(op.amp[toset])
+
+  invisible()
+}
+
+
 #' Summary statistics of finite elements
 #'
 #' These functions first remove non-finite and missing values, then compute the summary statistic in question.
@@ -29,11 +44,15 @@ finite_mad <- function(x) {
 }
 
 
+# Defaults for NULL values
+`%||%` <- function(a, b) if (is.null(a) | is.na(a)) b else a
+
+# Proportion of NA values in a vector
 prop_na <- function(x) {
   sum(is.na(x)) / length(x)
 }
 
-
+# Proportion of non-missing values in a vector
 prop_found <- function(x) {
   sum(!is.na(x)) / length(x)
 }
@@ -47,7 +66,7 @@ join_fdata <- function(object, dframe) {
   object
 }
 
-
+# Replace all instances of value in exprs with NA
 mark_nas <- function(object, value) {
   ex <- exprs(object)
   ex[ex == value] <- NA

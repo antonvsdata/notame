@@ -48,10 +48,10 @@ name_features <- function(feature_data, split_by) {
 
   # Find mass and retention time columns
   mz_tags <- c("mass", "average mz", "average.mz")
-  rt_tags <-  c("retention time", "retentiontime", "average rt(min)",
+  rt_tags <-  c("retention time", "retentiontime", "average rt[(]min[)]",
                 "^rt$")
 
-  mzCol <- NULL
+  mz_col <- NULL
   for (tag in mz_tags) {
     hits <- grepl(tag, tolower(colnames(feature_data)))
     if (any(hits)) {
@@ -59,6 +59,7 @@ name_features <- function(feature_data, split_by) {
       break
     }
   }
+  rt_col <- NULL
   for (tag in rt_tags) {
     hits <- grepl(tag, tolower(colnames(feature_data)))
     if (any(hits)) {
