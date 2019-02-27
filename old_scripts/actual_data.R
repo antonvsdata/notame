@@ -1,13 +1,13 @@
-library(ggplot2)
 
+library(ggplot2)
 
 devtools::document()
 doParallel::registerDoParallel(cores = 3)
-res <- read_from_excel(file = "~/amp/inst/extdata/split_data.xlsx",
-                       sheet = 2,
-                       corner_row = 4, corner_column = "G",
-                       split_by = c("Column"))
 
+res <- read_from_excel(file = "~/amp/inst/extdata/HILIC neg final.xlsx",
+                       sheet = 1,
+                       corner_row = 5, corner_column = "V",
+                       split_by = c("Mode"))
 
 
 lcms <- construct_MetaboSet(assay_data = res$assay_data,
@@ -16,15 +16,20 @@ lcms <- construct_MetaboSet(assay_data = res$assay_data,
 
 lol <- lcms[[1]]
 
-group_col(lol) <- "Group"
+dim(lol)
 
-lol <- mark_nas(lol, 0)
+group_col(lol) <- "Class"
+
+
 
 
 xd <- correct_drift(lol)
 
 lol <- assess_quality(lol)
 xd <- assess_quality(xd)
+
+quality(xd)[2:5] - quality(lol)[2:5]
+
 
 ins <- inspect_dc(lol, xd, condition = "RSD_r < 0 & D_ratio_r < 0")
 
@@ -36,6 +41,6 @@ quality(xd)
 quality(ins)
 
 
-plot_dc(lol, xd, file = "lolxd.pdf")
+plot_dc(lol[1:10], xd[1:10], file = "lolxd.pdf")
 
-plot_pca(lol)
+plot_pca(lol, color = "Injection_order")

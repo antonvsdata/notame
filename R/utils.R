@@ -4,8 +4,10 @@
 .onLoad <- function(libname, pkgname) {
   op <- options()
   op.amp <- list(
-    amp.color_scale_c = ggplot2::scale_color_viridis_c(),
-    amp.color_scale_d = ggplot2::scale_color_brewer(palette = "Set1")
+    amp.color_scale_con = ggplot2::scale_color_viridis_c(),
+    amp.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
+    amp.fill_scale_div = ggplot2::scale_fill_distiller(palette = "RdBu"),
+    amp.shape_scale = scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))
   )
   toset <- !(names(op.amp) %in% names(op))
   if(any(toset)) options(op.amp[toset])
@@ -45,7 +47,15 @@ finite_mad <- function(x) {
 
 
 # Defaults for NULL values
-`%||%` <- function(a, b) if (is.null(a) | is.na(a)) b else a
+`%||%` <- function(a, b) {
+  if (is.null(a)){
+    b
+  } else if (is.na(a)){
+    b
+  } else {
+    a
+  }
+}
 
 # Proportion of NA values in a vector
 prop_na <- function(x) {
