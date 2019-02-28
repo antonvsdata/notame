@@ -1,6 +1,6 @@
 
 #' @importFrom magrittr "%>%"
-read_from_excel <- function(file, sheet, corner_row, corner_column, split_by) {
+read_from_excel <- function(file, sheet, corner_row, corner_column, split_by = NULL, name = NULL) {
   dada <- openxlsx::read.xlsx(file, sheet, colNames = FALSE)
 
   cc <- ifelse(is.character(corner_column),
@@ -20,6 +20,11 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, split_by) {
   # Exctract feature information
   feature_data <- dada[(cr+1):nrow(dada), 1:cc]
   colnames(feature_data) <- dada[cr, 1:cc]
+  
+  if (!is.null(name)) {
+    feature_data$Split <- name
+    split_by <- "Split"
+  }
 
   # Create feature ID if necessary
   if (!"Feature_ID" %in% colnames(feature_data)){
