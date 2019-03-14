@@ -15,7 +15,7 @@ plot_pca <- function(object, color = group_col(object), density = FALSE, method 
 
 
 plot_tsne <- function(object, color = group_col(object), density = FALSE, perplexity = 30, center = TRUE, scale = "uv",
-                      title = "t-SNE", subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
+                      title = "t-SNE", subtitle = paste("Perplexity:", perplexity), color_scale = NULL, shape_scale = NULL, ...) {
 
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
   res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
@@ -81,6 +81,5 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
     p <- cowplot::insert_yaxis_grob(p, ydens, grid::unit(.2, "null"), position = "right")
   }
 
-  p
   p
 }
