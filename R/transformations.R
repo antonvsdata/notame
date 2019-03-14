@@ -1,15 +1,19 @@
 
+# Replace all instances of value in exprs with NA
+mark_nas <- function(object, value) {
+  ex <- exprs(object)
+  ex[ex == value] <- NA
+  exprs(object) <- ex
+  object
+}
 
 impute_rf <- function(object, ...) {
 
-  # Extract transposed metabolite data
-  data <- t(exprs(object))
-
   # Impute missing values
-  mf <- missForest(xmis = data.responses, parallelize = parallelize)
+  mf <- missForest::missForest(xmis = t(exprs(object)))
   imputed <- t(mf$ximp)
   # Log imputation error
-  log_text(paste("\n Out-of-bag error in random forest imputation:",
+  log_text(paste0("\nOut-of-bag error in random forest imputation: ",
                  round(mf$OOBerror, digits = 3), "\n"))
   # Assign imputed data to the object
   rownames(imputed) <- rownames(exprs(object))

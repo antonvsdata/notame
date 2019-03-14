@@ -3,7 +3,7 @@ start_log <- function(log_file) {
 
   options(amp.logging = TRUE, amp.log_file = log_file)
 
-  cat(paste0("Logging started: ", log_file, ".\n")
+  cat(paste0("Logging started: ", log_file, ".\n"))
   write(paste(date(), "\n", sep=""), log_file)
 }
 
@@ -14,7 +14,7 @@ log_text <- function(text) {
     if(is.null(getOption("amp.log_file"))) {
       stop("Log file is not defined.")
     }
-    write(text, getOption("amp.log_file")), append=TRUE)
+    write(text, getOption("amp.log_file"), append=TRUE)
   }
 }
 

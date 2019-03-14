@@ -4,8 +4,8 @@
 .onLoad <- function(libname, pkgname) {
   op <- options()
   op.amp <- list(
-    amp.logging <- FALSE,
-    amp.log_file <- NULL,
+    amp.logging = FALSE,
+    amp.log_file = NULL,
     amp.color_scale_con = ggplot2::scale_color_viridis_c(),
     amp.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
     amp.fill_scale_con = ggplot2::scale_fill_viridis_c(),
@@ -79,15 +79,6 @@ join_fdata <- function(object, dframe) {
   rownames(fData(object)) <- fData(object)$Feature_ID
   object
 }
-
-# Replace all instances of value in exprs with NA
-mark_nas <- function(object, value) {
-  ex <- exprs(object)
-  ex[ex == value] <- NA
-  exprs(object) <- ex
-  object
-}
-
 
 looks_numeric <- function(x) {
   suppressWarnings(all(!is.na(as.numeric(x))))
