@@ -4,8 +4,11 @@
 .onLoad <- function(libname, pkgname) {
   op <- options()
   op.amp <- list(
+    amp.logging <- FALSE,
+    amp.log_file <- NULL,
     amp.color_scale_con = ggplot2::scale_color_viridis_c(),
     amp.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
+    amp.fill_scale_con = ggplot2::scale_fill_viridis_c(),
     amp.fill_scale_dis = ggplot2::scale_fill_brewer(palette = "Set1"),
     amp.fill_scale_div = ggplot2::scale_fill_distiller(palette = "RdBu"),
     amp.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))
