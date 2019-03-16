@@ -20,7 +20,7 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, split_by = N
   # Exctract feature information
   feature_data <- dada[(cr+1):nrow(dada), 1:cc]
   colnames(feature_data) <- dada[cr, 1:cc]
-  
+
   if (!is.null(name)) {
     feature_data$Split <- name
     split_by <- "Split"
@@ -100,8 +100,7 @@ name_features <- function(feature_data, split_by) {
 #' @import methods
 #' @importClassesFrom Biobase ExpressionSet
 MetaboSet <- setClass("MetaboSet",
-                      slots = c(stage = "character",
-                                group_col = "character",
+                      slots = c(group_col = "character",
                                 time_col = "character",
                                 subject_col = "character",
                                 predicted = "matrix"),
@@ -137,7 +136,6 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
                         phenoData = pheno_data,
                         featureData = fd_tmp,
-                        stage = "Original",
                         group_col = group_col,
                         time_col = time_col,
                         subject_col = subject_col,
