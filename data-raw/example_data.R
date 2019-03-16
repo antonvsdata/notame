@@ -1,6 +1,6 @@
 library(dplyr)
 library(Biobase)
-
+devtools::load_all()
 # Create a toy dataset for use in examples
 
 # Feature data
@@ -57,9 +57,19 @@ for (i in seq_len(nrow(assay_data))) {
     assay_data[i,] <- assay_data[i,] + means[i] * coefs[i] * 0.08* pheno_data$Injection_order
   }
 }
+# Set random indexes to zero (for missing values)
+n_missing <- 30
+row_zeros <- sample(seq_len(nrow(assay_data)), n_missing, replace = TRUE)
+col_zeros <- sample(seq_len(ncol(assay_data)), n_missing, replace = TRUE)
+for (i in seq_len(n_missing)) {
+  assay_data[row_zeros[i], col_zeros[i]] <- 0
+}
 
+# Set dimension names
 rownames(assay_data) <- rownames(feature_data)
 colnames(assay_data) <- rownames(pheno_data)
+
+
 
 pheno_data <- AnnotatedDataFrame(data = pheno_data)
 feature_data <- AnnotatedDataFrame(data = feature_data)
@@ -76,4 +86,5 @@ example_set <- MetaboSet(exprs = assay_data,
 
 
 
-usethis::use_data(example_set)
+
+usethis::use_data(example_set, overwrite = TRUE)
