@@ -123,15 +123,13 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
                                 subject_col = NA_character_) {
 
-  pheno_data <- new("AnnotatedDataFrame",
-                    data=pheno_data)
+  pheno_data <- AnnotatedDataFrame(data=pheno_data)
 
   # Split the data by the Split column of feature data
   parts <- unique(feature_data$Split)
   obj_list <- list()
   for (part in parts) {
-    fd_tmp <- new("AnnotatedDataFrame",
-                  data= feature_data[feature_data$Split == part, ])
+    fd_tmp <- AnnotatedDataFrame(data= feature_data[feature_data$Split == part, ])
     ad_tmp <- assay_data[fd_tmp$Feature_ID,]
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
                         phenoData = pheno_data,
