@@ -1,7 +1,29 @@
 
-
-plot_pca <- function(object, color = group_col(object), density = FALSE, method = "ppca", center = TRUE, scale = "uv",
-                     title = "PCA", subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
+#' PCA plot
+#'
+#' Computes PCA using one of the methods provided in the Bioconductor package
+#' pcaMethods and plots the two first principal components
+#'
+#' @param object a MetaboSet object
+#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param method the method to use, see documentation in pcaMethods
+#' @param color character, name of the column used for coloring the points
+#' @param shape character, name of the column used for shape
+#' @param density logical, whether to include density plots to both axes
+#' @param color_scale the color scale as returned by a ggplot function
+#' @param shape_scale the shape scale as returned by a ggplot function
+#' @param ... additional arguments passed to pcaMethods::pca
+#'
+#' @return if \code{density} is \code{TRUE}, an object of class gTable (from the cowplot package).
+#' NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
+#'
+#' @seealso \code{\link[pcaMethods]{pca}}
+#'
+#' @export
+plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
+                     color = group_col(object), shape = NULL, density = TRUE,  title = "PCA",
+                     subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
 
   res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
@@ -9,13 +31,36 @@ plot_pca <- function(object, color = group_col(object), density = FALSE, method 
   R2 <- res_pca@R2
   labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
 
-  scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2], color = color, shape = color,
-               density = density, title = title, subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale)
+  scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2],
+               color = color, shape = color, density = density, title = title,
+               subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale)
 }
 
-
-plot_tsne <- function(object, color = group_col(object), density = FALSE, perplexity = 30, center = TRUE, scale = "uv",
-                      title = "t-SNE", subtitle = paste("Perplexity:", perplexity), color_scale = NULL, shape_scale = NULL, ...) {
+#' t-SNE plot
+#'
+#' Computes t-SNE into two dimensions and plots the map points.
+#'
+#' @param object a MetaboSet object
+#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param perplexity the perplexity used in t-SNE
+#' @param color character, name of the column used for coloring the points
+#' @param shape character, name of the column used for shape
+#' @param density logical, whether to include density plots to both axes
+#' @param color_scale the color scale as returned by a ggplot function
+#' @param shape_scale the shape scale as returned by a ggplot function
+#' @param ... additional arguments passed to Rtsne::Rtsne
+#'
+#' @return if \code{density} is \code{TRUE}, an object of class gTable (from the cowplot package).
+#' NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
+#'
+#' @seealso \code{\link[Rtsne]{Rtsne}}
+#'
+#' @export
+plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
+                      color = group_col(object), shape = NULL, density = TRUE, title = "t-SNE",
+                      subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
+                      shape_scale = NULL, ...) {
 
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
   res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
@@ -23,13 +68,14 @@ plot_tsne <- function(object, color = group_col(object), density = FALSE, perple
   tsne_scores[color] <- pData(object)[, color]
 
 
-  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = color, density = density,
-               title = title, subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale)
+  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = color,
+               density = density, title = title, subtitle = subtitle,
+               color_scale = color_scale, shape_scale = shape_scale)
 
 }
 
-scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE, color_scale = NULL, shape_scale = NULL,
-                         title = NULL, subtitle = NULL, xlab = x, ylab = y,
+scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE, color_scale = NULL,
+                         shape_scale = NULL, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape) {
 
   if (is.null(color_scale)) {
@@ -57,7 +103,7 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
         shape_scale +
         labs(shape = shape_lab)
 
-    } else {
+    } else if (is.null(shape_scale)) {
       cat("Only 8 distinct shapes currently available!")
       p <- p +
         geom_point()
