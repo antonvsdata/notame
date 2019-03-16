@@ -2,8 +2,30 @@ comb <- function(x, ...) {
   mapply(rbind,x,...,SIMPLIFY=FALSE)
 }
 
+#' Correct drift
+#'
+#' Corrects the dirft in the features by applying smoothed cubic spline regression
+#' to each feature separately.
+#'
+#' @param object a MetaboSet object
+#' @param spar smoothing parameter
+#' @param spar_lower,spar_upper lower and upper limits for the smoothing parameter
+#'
+#' @return MetaboSet object as the one supplied, with drift corrected fetures
+#'
+#' @details If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
+#' be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
+#' using cross validation.
+#'
+#' @seealso  \code{\link[stats]{smooth.spline}} for details about the regression,
+#' \code{\link{inspect_dc}} for analysing the drift correction results,
+#' \code{\link{plot_dc}} for plotting the drift correction process for each feature
+#'
 #' @importFrom Biobase exprs exprs<-
-correct_drift <- function(object, spar = NULL, spar_low = 0.5, spar_high = 1.5) {
+#' @seealso \code{\link{inspect_dc}}, \code{\link{save_dc_plots}}
+#'
+#' @export
+correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5) {
 
   qc <- object[, object$QC == "QC"]
   qc_order <- qc$Injection_order
@@ -30,7 +52,7 @@ correct_drift <- function(object, spar = NULL, spar_low = 0.5, spar_high = 1.5) 
 
     # Spline regression
     fit <- smooth.spline(x = qc_order[qc_detected], y = qc_data[i, qc_detected], all.knots = TRUE,
-                         spar = spar, control.spar = list("low" = spar_low, "high" = spar_high))
+                         spar = spar, control.spar = list("low" = spar_lower, "high" = spar_upper))
     predicted <- predict(fit, full_order)$y
     # Correction
     corr_factors <- predicted[1]/predicted
@@ -46,7 +68,30 @@ correct_drift <- function(object, spar = NULL, spar_low = 0.5, spar_high = 1.5) 
   object
 }
 
-inspect_dc <- function(orig, dc, condition) {
+#' Flag the results of drift correction
+#'
+#' Chooses whether the drift correction worked well enough by applying
+#' the specified codition for each feature.
+#' If the condition is fulfilled, the drift corrected feature is retained,
+#' otherwise the original feature is retained and the drift corrrected feature is discarded.
+#' The result of this operation is recorded in the feature data
+#'
+#' @param orig a MetaboSet object, before drift correction
+#' @param dc a MetaboSet object, after drift correction
+#' @param condition a character specifying the condition, see Details
+#'
+#' @return MeatboSet object
+#'
+#' @details The \code{condition} parameter should be a character giving a condition combatible
+#' with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
+#' RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
+#' meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the
+#' drift corrected feature is discarded and the original is retained.
+#'
+#' @seealso \code{\link{correct_drift}}, \code{\link{save_dc_plots}}
+#'
+#' @export
+inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
 
   if (is.null(quality(orig))) {
     orig <- assess_quality(orig)
@@ -93,11 +138,31 @@ inspect_dc <- function(orig, dc, condition) {
 
 }
 
-
-plot_dc <- function(orig, dc, file, width = 8, height = 6, group = group_col(orig),
-                    color_scale = getOption("amp.color_scale_d")) {
-  # If group column not set, use QC column
-  group <- group %||% "QC"
+#' Drift correction plots
+#'
+#' Plots the data before and after drift correction, with the regression line drawn with
+#' the original data.
+#'
+#' @param orig a MetaboSet object, before drift correction
+#' @param dc a MetaboSet object, after drift correction as returned by correct_drift
+#' @param file path to the PDF file where the plots should be saved
+#' @param width,height width and height of the plots in inches
+#' @param color character, name of the column used for coloring the points
+#' @param shape character, name of the column used for shape
+#' @param color_scale the color scale as returned by a ggplot function
+#'
+#' @details If \code{shape} is set to \code{NULL} (the default), the column used for color
+#' is also used for shape
+#'
+#' @seealso \code{\link{correct_drift}}, \code{\link{inspect_dc}}
+#'
+#' @export
+save_dc_plots <- function(orig, dc, file, width = 8, height = 6, color = group_col(orig),
+                    shape = NULL, color_scale = NULL) {
+  # If color column not set, use QC column
+  color <- color %||% "QC"
+  shape <- shape %||% color
+  color_scale <- color_scale %||% getOption("amp.color_scale_d")
 
   orig_data <- combined_data(orig)
   dc_data <- combined_data(dc)
@@ -113,11 +178,11 @@ plot_dc <- function(orig, dc, file, width = 8, height = 6, group = group_col(ori
 
 
     p1 <- p +
-      geom_point(data = orig_data, mapping = aes_string(color = group, shape = group)) +
+      geom_point(data = orig_data, mapping = aes_string(color = color, shape = color)) +
       geom_line(data = predictions, color = "grey")
 
     p2 <- p +
-      geom_point(data = dc_data, mapping = aes_string(color = group, shape = group))
+      geom_point(data = dc_data, mapping = aes_string(color = color, shape = color))
 
     p <- gridExtra::arrangeGrob(p1, p2, nrow = 2)
     plot(p)

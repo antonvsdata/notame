@@ -38,3 +38,18 @@ plot_dendrogram <- function(object, color = group_col(object), dist_method = "eu
 }
 
 
+plot_heatmap <- function(object, text_color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
+                         center = TRUE, scale = "uv", title = "Heatmap of distances between samples",
+                         subtitle = NULL, fill_scale = NULL, color_scale = NULL) {
+
+  subtitle <- subtitle %||% paste("Distance method:", dist_method, "Clustering method:", clust_method)
+  fill_scale <- fill_scale %||% getOption("amp.fill_scale_con")
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
+
+  distances <- dist(t(exprs(object)), method = dist_method)
+
+  hc <- hclust(distances, method = clust_method)
+  hc_order <- hc$labels[hc$order]
+
+
+}
