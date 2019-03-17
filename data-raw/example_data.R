@@ -24,19 +24,19 @@ feature_data <- select(feature_data, "Feature_ID", everything())
 rownames(feature_data) <- feature_data$Feature_ID
 
 # Pheno data
-
-
-
 n_samples <- 30
 
 qc_idx <- seq(1, n_samples, length.out = 5) %>% round()
-group <- sample(LETTERS[1:2], n_samples, replace = TRUE)
+subject_ids <- rep(as.character(seq_len(n_samples/2)), 2)
+group <- rep(sample(LETTERS[1:2], n_samples/2, replace = TRUE), 2)
 group[qc_idx] <- "QC"
+subject_ids[qc_idx] <- "QC"
 qc <- ifelse(seq_len(n_samples) %in% qc_idx, "QC", "Sample")
 pheno_data <- data.frame(Injection_order = seq_len(n_samples),
                          Sample_ID = paste0("Demo_", seq_len(n_samples)),
+                         Subject_ID = subject_ids,
                          Group = group, QC = qc,
-                         Time = sample(seq_len(2), n_samples, replace = TRUE))
+                         Time = factor(rep(c(1,2), each = n_samples/2)))
 
 rownames(pheno_data) <- pheno_data$Sample_ID
 
@@ -81,7 +81,7 @@ example_set <- MetaboSet(exprs = assay_data,
                          featureData = feature_data,
                          group_col = "Group",
                          time_col = "Time",
-                         subject_col = NA_character_,
+                         subject_col = "Subject_ID",
                          predicted = matrix(NA_real_, nrow = nrow(assay_data),
                                             ncol = ncol(assay_data),
                                             dimnames = dimnames(assay_data)))
