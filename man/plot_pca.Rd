@@ -31,11 +31,12 @@ plot_pca(object, center = TRUE, scale = "uv", method = "ppca",
 \item{...}{additional arguments passed to pcaMethods::pca}
 }
 \value{
-if
+if \code{density} is \code{TRUE}, an object of class gTable (from the cowplot package).
+NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
 }
 \description{
 Computes PCA using one of the methods provided in the Bioconductor package
-pcaMethods.
+pcaMethods and plots the two first principal components
 }
 \seealso{
 \code{\link[pcaMethods]{pca}}
