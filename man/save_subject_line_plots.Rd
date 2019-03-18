@@ -21,5 +21,5 @@ save_subject_line_plots(object, file, width = 8, height = 6,
 \description{
 Plots the change in the feature abundaces as a function of e.g. time.
 A line is drawn for each subject and a mean line is added.
-One plot is drawn for each feature
+A separate plot is drawn for each feature.
 }
