@@ -26,6 +26,7 @@ save_subject_line_plots <- function(object, file, width = 8, height = 6,
       geom_line(aes_string(group = id), color = "grey20", alpha = 0.35, size = 0.3) +
       stat_summary(aes(group = 1), fun.data = "mean_se",
                    geom = "line", size = 1.2, color = "red") +
+      labs(title = fname, y = "Abundance") +
       theme_bw()
 
     if (class(data[, x]) == "factor") {
@@ -38,4 +39,31 @@ save_subject_line_plots <- function(object, file, width = 8, height = 6,
   dev.off()
 
   log_text(paste("Saved line plots with mean line to:", file))
+}
+
+
+save_group_boxplots <- function(object, file, width = 8, height = 6, group = group_col(object),
+                                color_scale =  NULL) {
+
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
+
+  pdf(file, width = width, height = height)
+
+  data <- combined_data(object)
+
+  for (fname in Biobase::featureNames(object)) {
+
+    p <- ggplot(data, aes_string(x = group, y = fname, color = group)) +
+      geom_boxplot() +
+      color_scale +
+      labs(title = fname, y = "Abundance") +
+      theme_bw()
+
+    plot(p)
+
+  }
+  dev.off()
+
+  log_text(paste("Saved group boxplots to:", file))
+
 }
