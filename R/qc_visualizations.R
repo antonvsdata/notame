@@ -7,8 +7,8 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
   # ggpubr::ggdensity(data, x, fill = fill, palette = c("#00AFBB", "#E7B800")) +
   #   #fill_scale +
   #   labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab)
-  p <- ggplot(data, aes_string(x, fill = fill, color = NULL)) +
-    geom_density(alpha = 0.2) +
+  p <- ggplot(data, aes_string(x, fill = fill)) +
+    geom_density(alpha = 0.2, color = NA) +
     fill_scale +
     labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab, color = NULL) +
     theme_bw() +
@@ -17,9 +17,21 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
   p
 }
 
+#' Distance density plot
+#'
+#' Plot density of distances between samples in QC samples and actual samples
+#'
+#' @param object a MetaboSet object
+#' @param dist_method method for calculating the distances, passed to dist
+#' @param fill_scale a scale for the fill of the density curves, as returned by a ggplot function
+#' @param xlab the x
+#'
+#'
+#' @seealso \code{\link[stats]{dist}}
+#'
+#' @export
 plot_dist_density <- function(object, dist_method = "euclidean", fill_scale = NULL,
-                              title = NULL,
-                              subtitle = NULL, xlab = x, fill_lab = fill) {
+                              title = NULL, subtitle = NULL) {
 
   title <- title %||% paste("Density plot of", dist_method, "distances between samples")
 
@@ -35,3 +47,4 @@ plot_dist_density <- function(object, dist_method = "euclidean", fill_scale = NU
   density_plot(distances, x = "dist", fill = "qc", fill_scale = fill_scale, xlab = "Distance", fill_lab = NULL,
                title = title, subtitle = subtitle)
 }
+
