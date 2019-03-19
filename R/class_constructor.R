@@ -146,20 +146,6 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
 }
 
 
-# ------------- Utility methods --------------------
-
-setGeneric("remove_qcs", signature = "object",
-           function(object) standardGeneric("remove_qcs"))
-
-#' @importFrom Biobase pData pData<-
-setMethod("remove_qcs", c(object = "MetaboSet"),
-          function(object) {
-            object <- object[, object$QC != "QC"]
-            pData(object) <- droplevels(pData(object))
-            object
-          })
-
-
 # ------------ Accessors and Replacers -----------------
 
 setGeneric("combined_data", signature = "object",

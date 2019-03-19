@@ -18,6 +18,19 @@ mark_nas <- function(object, value) {
   object
 }
 
+#' Drop QC samples
+#'
+#' @param object a MetaboSet object
+#'
+#' @return MetaboSet object as the one supplied, withou QC samples
+#'
+#' @export
+drop_qcs <- function(object) {
+  object <- object[, object$QC != "QC"]
+  pData(object) <- droplevels(pData(object))
+  object
+}
+
 #' Impute missing values using random forest
 #'
 #' Impute the missing values in the exprs part of the object using a
