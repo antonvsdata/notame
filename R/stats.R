@@ -1,3 +1,51 @@
+
+#' Summary statistics
+#'
+#' Computes chosen summary statistics for each feature,
+#' possibly grouped by a factor
+#'
+#' @param object a MetaboSet object
+#'
+#' @return a data frame with the summary statistics
+#'
+#' @export
+summary_statistics <- function(object, grouping_cols = group_col(object)) {
+
+  data <- combined_data(object)
+  features <- Biobase::featureNames(object)
+
+  if (!is.na(grouping_cols[1])) {
+    data <- data %>% dplyr::group_by_at(grouping_cols)
+  }
+  statistics <- foreach::foreach(i = seq_along(features), .combine = rbind,
+                                 .export = c("finite_sd", "finite_mad", "finite_mean",
+                                             "finite_median", "finite_quantile")) %dopar% {
+    feature <- features[i]
+    tmp <- data %>%
+      dplyr::summarise_at(dplyr::vars(feature), .funs = list(mean = finite_mean,
+                                               sd = finite_sd,
+                                               median = finite_median,
+                                               mad = finite_mad,
+                                               Q25 = ~finite_quantile(., probs = 0.25),
+                                               Q75 = ~finite_quantile(., probs = 0.75))) %>%
+      dplyr::ungroup()
+    for (grouping_col in grouping_cols) {
+      tmp[grouping_col] <- paste0(grouping_col, "_",
+                                  as.character(tmp[, grouping_col, drop = TRUE]))
+    }
+    tmp <- tmp %>%
+      tidyr::unite("Factors", grouping_cols) %>%
+      tidyr::gather("Statistic", "Value", -Factors) %>%
+      tidyr::unite("Key", c("Factors", "Statistic")) %>%
+      tidyr::spread(Key, Value)
+    tmp <- data.frame(Feature_ID = feature, tmp)
+                                             }
+
+  statistics
+}
+
+
+
 #' Cohen's D
 #'
 #' Computes Cohen's D for each feature
@@ -13,7 +61,7 @@
 cohens_d <- function(object, id = subject_col(object), group = group_col(object),
                      time = time_col(object)) {
 
-  data = combined_data(object)
+  data <- combined_data(object)
   data[time] <- ifelse(data[, time] == levels(data[, time])[1], "time1", "time2")
   data[group] <- ifelse(data[, group] == levels(data[, group])[1], "group1", "group2")
 
@@ -94,7 +142,7 @@ fold_change <- function(object, group = group_col(object)) {
 #' must be used to signal the role of the features in the formula. "Feature" will be replaced
 #' by the actual Feature IDs during model fitting, see the example
 #'
-#' @example
+#' @examples
 #' # A simple example without QC samples
 #' # Features predicted by Group and Time
 #' perform_lm(example_set[, example_set$QC != "QC"], formula_char = "Feature ~ Group + Time")

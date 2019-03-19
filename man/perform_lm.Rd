@@ -30,6 +30,12 @@ in pData(object) can be specified. To make the formulas flexible, the word "Feat
 must be used to signal the role of the features in the formula. "Feature" will be replaced
 by the actual Feature IDs during model fitting, see the example
 }
+\examples{
+# A simple example without QC samples
+# Features predicted by Group and Time
+perform_lm(example_set[, example_set$QC != "QC"], formula_char = "Feature ~ Group + Time")
+
+}
 \seealso{
 \code{\link[stats]{lm}}
 }

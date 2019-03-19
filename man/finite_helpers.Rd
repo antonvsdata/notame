@@ -6,6 +6,7 @@
 \alias{finite_mean}
 \alias{finite_median}
 \alias{finite_mad}
+\alias{finite_quantile}
 \title{Summary statistics of finite elements}
 \usage{
 finite_sd(x)
@@ -15,6 +16,8 @@ finite_mean(x)
 finite_median(x)
 
 finite_mad(x)
+
+finite_quantile(x, ...)
 }
 \arguments{
 \item{x}{a numeric vector.}
