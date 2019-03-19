@@ -70,6 +70,8 @@ for (i in seq_len(n_missing)) {
   assay_data[row_zeros[i], col_zeros[i]] <- 0
 }
 
+assay_data <- abs(assay_data)
+
 # Set dimension names
 rownames(assay_data) <- rownames(feature_data)
 colnames(assay_data) <- rownames(pheno_data)
