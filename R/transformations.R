@@ -24,6 +24,8 @@ mark_nas <- function(object, value) {
 #'
 #' @return MetaboSet object as the one supplied, withou QC samples
 #'
+#' @importFrom Biobase pData "pData<-"
+#'
 #' @export
 drop_qcs <- function(object) {
   object <- object[, object$QC != "QC"]

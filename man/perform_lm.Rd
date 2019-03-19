@@ -14,7 +14,7 @@ perform_lm(object, formula_char, ci_level = 0.95, ...)
 \item{ci_level}{the confidence level used in constructing the confidence intervals
 for regression coefficients}
 
-\item{...}{additional parameters passed to lm function}
+\item{...}{additional parameters passed to lm}
 }
 \value{
 a data frame with one row per feature, with all the
@@ -33,7 +33,7 @@ by the actual Feature IDs during model fitting, see the example
 \examples{
 # A simple example without QC samples
 # Features predicted by Group and Time
-perform_lm(example_set[, example_set$QC != "QC"], formula_char = "Feature ~ Group + Time")
+results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 
 }
 \seealso{
