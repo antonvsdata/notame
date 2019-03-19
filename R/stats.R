@@ -48,7 +48,6 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
 fold_change <- function(object, group = group_col(object)) {
 
   data <- combined_data(object)
-  results <- data.frame()
   groups <- combn(levels(data[, group]), 2)
 
   features <- Biobase::featureNames(object)
@@ -74,3 +73,87 @@ fold_change <- function(object, group = group_col(object)) {
   # Order the columns accordingly
   results_df[c("Feature_ID", comp_labels[order(comp_labels)])]
 }
+
+
+#' Linear models
+#'
+#' Fits a linear model separately for each feature. Returns all relevant
+#' statistics.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param ci_level the confidence level used in constructing the confidence intervals
+#' for regression coefficients
+#' @param ... additional parameters passed to lm function
+#'
+#' @return a data frame with one row per feature, with all the
+#' relevant statistics of the linear model as columns
+#'
+#' @details The linear model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting, see the example
+#'
+#' @example
+#' # A simple example without QC samples
+#' # Features predicted by Group and Time
+#' perform_lm(example_set[, example_set$QC != "QC"], formula_char = "Feature ~ Group + Time")
+#'
+#' @seealso \code{\link[stats]{lm}}
+perform_lm <- function(object, formula_char,  ci_level = 0.95, ...) {
+
+  data <- combined_data(object)
+  features <- Biobase::featureNames(object)
+
+  results <- foreach::foreach(i = seq_along(features), .combine = rbind,
+                              .packages = c("dplyr", "tidyr")) %dopar% {
+    feature <- features[i]
+    # Replace "Feature" with the current feature name
+    tmp_formula <- gsub("Feature", feature, formula_char)
+
+    # Try to fit the linear model
+    fit <- NULL
+    tryCatch({
+      fit <- lm(as.formula(tmp_formula), data = data, ...)
+    }, error = function(e) print(e$message))
+    if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
+      result_row <- NULL
+    } else {
+      # Gather coefficients and CIs to one data frame row
+      coefs <- summary(fit)$coefficients
+      confints <- confint(fit, level = ci_level)
+      coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
+      confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
+
+      result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
+        dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value", "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
+        tidyr::gather("Metric", "Value", -Variable) %>%
+        tidyr::unite("Column", Variable, Metric, sep="_") %>%
+        tidyr::spread(Column, Value)
+      # Add R2 statistics
+      result_row$R2 <- summary(fit)$r.squared
+      result_row$Adj_R2 <- summary(fit)$adj.r.squared
+
+    }
+    result_row
+
+  }
+
+  # FDR correction per column
+  p_cols <- colnames(results)[grep("P$", colnames(results))]
+  for (p_col in p_cols) {
+    results[paste0(p_col, "_FDR")] <- p.adjust(results[, p_col], method = "BH")
+  }
+
+  # Set a good column order
+  variables <- gsub("_P$", "", p_cols)
+  statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
+  col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
+    tidyr::unite("Column", Var2, Var1)
+  col_order <- c(col_order$Column, c("R2", "Adj_R2"))
+
+  results[col_order]
+}
+
+
+
