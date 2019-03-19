@@ -26,19 +26,22 @@ rownames(feature_data) <- feature_data$Feature_ID
 # Pheno data
 n_samples <- 30
 
-qc_idx <- seq(1, n_samples, length.out = 5) %>% round()
-subject_ids <- rep(as.character(seq_len(n_samples/2)), 2)
-group <- rep(sample(LETTERS[1:2], n_samples/2, replace = TRUE), 2)
+qc_idx <- seq(1, n_samples/2, length.out = 3) %>% round()
+subject_ids <- as.character(seq_len(n_samples/2))
+group <- sample(LETTERS[1:2], n_samples/2, replace = TRUE)
+time <- as.character(rep(c(1,2), each = n_samples/2))
 group[qc_idx] <- "QC"
 subject_ids[qc_idx] <- "QC"
+time[c(qc_idx, qc_idx + n_samples/2)] <- "QC"
 qc <- ifelse(seq_len(n_samples) %in% qc_idx, "QC", "Sample")
 pheno_data <- data.frame(Injection_order = seq_len(n_samples),
                          Sample_ID = paste0("Demo_", seq_len(n_samples)),
                          Subject_ID = subject_ids,
-                         Group = group, QC = qc,
-                         Time = factor(rep(c(1,2), each = n_samples/2)))
+                         Group = factor(group), QC = factor(qc),
+                         Time = factor(time))
 
 rownames(pheno_data) <- pheno_data$Sample_ID
+
 
 
 # Assay data
