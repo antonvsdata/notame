@@ -49,6 +49,12 @@ finite_mad <- function(x) {
   mad(x[is.finite(x)], center = median(x[is.finite(x)], na.rm = TRUE), na.rm = TRUE)
 }
 
+#' @rdname finite_helpers
+finite_quantile <- function(x, ...) {
+  quantile(x[is.finite(x)], na.rm = TRUE, ...)
+}
+
+
 
 # Defaults for NULL values
 `%||%` <- function(a, b) {
