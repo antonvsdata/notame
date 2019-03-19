@@ -33,7 +33,7 @@ time <- as.character(rep(c(1,2), each = n_samples/2))
 group[qc_idx] <- "QC"
 subject_ids[qc_idx] <- "QC"
 time[c(qc_idx, qc_idx + n_samples/2)] <- "QC"
-qc <- ifelse(seq_len(n_samples) %in% qc_idx, "QC", "Sample")
+qc <- ifelse(group == "QC", "QC", "Sample")
 pheno_data <- data.frame(Injection_order = seq_len(n_samples),
                          Sample_ID = paste0("Demo_", seq_len(n_samples)),
                          Subject_ID = subject_ids,
