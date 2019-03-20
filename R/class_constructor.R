@@ -1,42 +1,94 @@
 
+check_pheno_data <- function(x, id_prefix) {
+
+  # Check that Injection order is included
+  if (!"Injection_order" %in% colnames(x)) {
+    stop('"Injection_order" not found for the samples')
+  }
+  # Injection order should be unique
+  if (length(unique(x$Injection_order)) != nrow(x)) {
+    stop("Injection_order is not unique")
+  }
+  # If Sample_ID is not provided explicitly, it will be created
+  if (!"Sample_ID" %in% colnames(x)) {
+    x$Sample_ID <- paste0(id_prefix, x$Injection_order)
+  } else {
+    # Add a running index to all "QC" identifiers
+    x$Sample_ID <- as.character(x$Sample_ID)
+    x$Sample_ID[x$Sample_ID == "QC"] <- paste0("QC_", seq_len(sum(x$Sample_ID == "QC")))
+    # After this, the Sample IDs should be unique
+    if (length(unique(x$Sample_ID)) != nrow(x)) {
+      stop("Sample_ID is not unique")
+    }
+  }
+
+  x <- best_classes(x)
+  rownames(x) <- x$Sample_ID
+  x <- as.data.frame(dplyr::select(x, Sample_ID, dplyr::everything()))
+  x
+}
+
+
+check_position <- function(x, cc, cr) {
+  condition <- (is.na(x[cr - 1, cc - 1])) &
+    (is.numeric(type.convert(x[cr + 1, cc + 1]))) &
+    (!is.na(x[cr, cc]))
+  if (!condition) {
+    stop("The corner row and column coordinates seem to be incorrect!")
+  }
+
+}
+
 #' @importFrom magrittr "%>%"
-read_from_excel <- function(file, sheet, corner_row, corner_column, split_by = NULL, name = NULL) {
+read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = "ID_", split_by = NULL, name = NULL) {
+
+  if (is.null(split_by) & is.null(name)) {
+    stop("Etiher namr or split_by needs to be defined, see documentation")
+  } else if ((!is.null(split_by)) & (!is.null(name))) {
+    stop("Only define split_by OR name, see documentation")
+  }
+
   dada <- openxlsx::read.xlsx(file, sheet, colNames = FALSE)
 
+  # Define excel column order A-Z, AA - ZZ
+  combinations <- expand.grid(LETTERS, LETTERS)
+  excel_columns <- c(LETTERS, paste0(combinations$Var2, combinations$Var1))
+
+  # Column can be given as a character
   cc <- ifelse(is.character(corner_column),
-               which(LETTERS == corner_column),
+               which(excel_columns == corner_column),
                corner_column)
   cr <- corner_row
+
+  check_position(dada, cc, cr)
 
   # Extract sample information
   pheno_data <- as.data.frame(t(dada[1:cr, (cc+1):ncol(dada)]), stringsAsFactors = FALSE)
   colnames(pheno_data) <- gsub(" ", "_", c(dada[1:(cr-1), cc], "Datafile"))
-  if (!"Sample_ID" %in% colnames(pheno_data)) {
-    pheno_data$Sample_ID <- paste0("ID_", 1:nrow(pheno_data))
-  }
-  pheno_data <- best_classes(pheno_data)
-  rownames(pheno_data) <- pheno_data$Sample_ID
+
+  pheno_data <- check_pheno_data(x = pheno_data, id_prefix = id_prefix)
 
   # Exctract feature information
   feature_data <- dada[(cr+1):nrow(dada), 1:cc]
   colnames(feature_data) <- dada[cr, 1:cc]
 
+  # If the file only contains one mode, add the mode name as Split column
   if (!is.null(name)) {
     feature_data$Split <- name
     split_by <- "Split"
+  } else { # Multiple modes in the file, create Split column to separate modes
+    feature_data <- feature_data %>%
+      tidyr::unite("Split", split_by, remove = FALSE)
   }
 
   # Create feature ID if necessary
   if (!"Feature_ID" %in% colnames(feature_data)){
-    feature_data <- name_features(feature_data = feature_data,
-                                  split_by = split_by)
+    feature_data <- name_features(feature_data = feature_data)
   }
+  # Reorganise columns and add Flag column
   feature_data <- feature_data %>%
-    tidyr::unite("Split", split_by, remove = FALSE) %>%
-    dplyr:: mutate(Flag = NA_character_) %>%
-    dplyr::select(Feature_ID, Split, dplyr::everything())
-
-  feature_data <- name_features(feature_data, split_by)
+    dplyr::select(Feature_ID, Split, dplyr::everything()) %>%
+    dplyr:: mutate(Flag = NA_character_)
   rownames(feature_data) <- feature_data$Feature_ID
 
   # Extract LC-MS measurements as matrix
@@ -47,9 +99,9 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, split_by = N
 
   return(list(assay_data = assay_data, pheno_data = pheno_data, feature_data = feature_data))
 }
-
+# Combines mode name, mass and retention time to create a Feature ID
 #' @importFrom magrittr "%>%"
-name_features <- function(feature_data, split_by) {
+name_features <- function(feature_data) {
 
   # Find mass and retention time columns
   mz_tags <- c("mass", "average mz", "average.mz")
@@ -92,7 +144,7 @@ name_features <- function(feature_data, split_by) {
   # Add the split columns (usually column, mode and possibly tissue)
 
   feature_data <- feature_data %>%
-    tidyr::unite("Feature_ID", c(split_by, "Feature_ID"), remove = FALSE)
+    tidyr::unite("Feature_ID", c("Split", "Feature_ID"), remove = FALSE)
 
   feature_data
 }
@@ -123,13 +175,13 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
                                 subject_col = NA_character_) {
 
-  pheno_data <- AnnotatedDataFrame(data=pheno_data)
+  pheno_data <- Biobase::AnnotatedDataFrame(data=pheno_data)
 
   # Split the data by the Split column of feature data
   parts <- unique(feature_data$Split)
   obj_list <- list()
   for (part in parts) {
-    fd_tmp <- AnnotatedDataFrame(data= feature_data[feature_data$Split == part, ])
+    fd_tmp <- Biobase::AnnotatedDataFrame(data= feature_data[feature_data$Split == part, ])
     ad_tmp <- assay_data[fd_tmp$Feature_ID,]
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
                         phenoData = pheno_data,

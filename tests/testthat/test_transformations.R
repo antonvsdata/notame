@@ -32,10 +32,12 @@ test_that("Imputation works as expected", {
 
 test_that("Inverse normalization works as expected", {
 
-  normalized <- inverse_normalize(example_set)
+  marked <- mark_nas(example_set, value = 0)
+  imputed <- impute_rf(marked)
+  normalized <- inverse_normalize(imputed)
 
   # Ranks should be identical
-  orig_ranks <- exprs(example_set) %>%
+  orig_ranks <- exprs(imputed) %>%
     apply(1, rank) %>%
     t()
   norm_ranks <- exprs(normalized) %>%

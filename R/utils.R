@@ -88,7 +88,9 @@ join_fdata <- function(object, dframe) {
 
 best_class <- function(x) {
   x <- type.convert(as.character(x), as.is = TRUE)
-  if (length(unique(x)) < length(x)/3) {
+  if (class(x) == "numeric") {
+    x <- x
+  } else if (length(unique(x)) < length(x)/4) {
     x <- as.factor(x)
   } else if (is.integer(x)) {
     x <- as.numeric(x)
