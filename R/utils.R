@@ -86,19 +86,16 @@ join_fdata <- function(object, dframe) {
   object
 }
 
-looks_numeric <- function(x) {
-  suppressWarnings(all(!is.na(as.numeric(x))))
-}
-
 best_class <- function(x) {
-  x <- as.character(x)
-  if (looks_numeric(x)) {
-    as.numeric(x)
-  } else if (length(unique(x)) == length(x)) {
-    as.character(x)
+  x <- type.convert(as.character(x), as.is = TRUE)
+  if (length(unique(x)) < length(x)/3) {
+    x <- as.factor(x)
+  } else if (is.integer(x)) {
+    x <- as.numeric(x)
   } else {
-    as.factor(x)
+    x <- as.character(x)
   }
+  x
 }
 
 
