@@ -2,11 +2,10 @@ Package: amp
 Type: Package
 Title: Smoothing Metabolomics Analyses
 Version: 0.1.0
-uthors@R: c(
+authors@R: c(
     person("Anton", "Mattsson", email = "antom@uef.fi", role = c("aut", "cre")),
     person("Jussi", "Paananen", role = "aut"),
-    person("Oskari", "Timonen", role = "aut")
-)
+    person("Oskari", "Timonen", role = "aut"))
 Description: Automates common preprocessing steps in a LC-MS metabolomics workflow
     such as drift correction, quality control and common visualizations.
 License: MIT license
