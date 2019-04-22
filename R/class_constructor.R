@@ -233,10 +233,60 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                                            ncol = ncol(ad_tmp),
                                            dimnames = dimnames(ad_tmp)),
                         results = data.frame(Feature_ID = fd_tmp$Feature_ID,
-                                             row.names = rownames(fd_tmp)))
+                                             row.names = rownames(fd_tmp),
+                                             stringsAsFactors = FALSE))
   }
 
   obj_list
+}
+
+
+#' Write results to Excel file
+#'
+#' Writes all the data in a MetaboSet object to an Excel spreadsheet.
+#' The format is similar to the one used to read data in, except that
+#' the results from statistics are added to the right.
+#'
+#' @param object a MetaboSet object
+#' @param file path to the file to write
+#' @param ... Additional parameters passed to openxlsx::write.xlsx
+write_to_excel <- function(object, file, ...) {
+
+  # Bottom part consists of (from left to right):
+  # - feature data
+  # - abundance values
+  # - results from statistics
+  bottom <- cbind(fData(object),
+                  exprs(object),
+                  dplyr::select(results(object), -Feature_ID),
+                  results(object)["Feature_ID"])
+
+  # Feature ID column is duplicated on the right for convenience
+  colnames(bottom)[ncol(bottom)] <- "Feature_ID2"
+
+  # All columns must be characters to allow combination with the top block
+  bottom <- bottom %>%
+    dplyr::mutate_all(as.character) %>%
+    rbind(colnames(.), .)
+  # Top block holds the sample information
+  top <- cbind(matrix(colnames(pData(object)), ncol = 1), t(pData(object)))
+
+  # NA blocks to fill the empty space
+  empty1 <- matrix(NA_character_, nrow = nrow(top),
+                   ncol = ncol(fData(object)) - 1)
+  empty2 <- matrix(NA_character_, nrow = nrow(top),
+                   ncol = ncol(results(object)))
+  top <- cbind(empty1, top, empty2)
+  colnames(top) <- colnames(bottom)
+
+
+  replace_idx <- (ncol(fData(object))+1):(ncol(fData(object)) + ncol(exprs(object)))
+  bottom[1, replace_idx] <- top[nrow(top), replace_idx]
+
+  # All combined
+  big <- rbind(top[seq_len(nrow(top) - 1), ], bottom)
+
+  openxlsx::write.xlsx(big, file = "test.xlsx", colNames = FALSE, ...)
 }
 
 
