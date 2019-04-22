@@ -194,7 +194,8 @@ MetaboSet <- setClass("MetaboSet",
                       slots = c(group_col = "character",
                                 time_col = "character",
                                 subject_col = "character",
-                                predicted = "matrix"),
+                                predicted = "matrix",
+                                results = "data.frame"),
                       contains = "ExpressionSet")
 
 setValidity("MetaboSet",
@@ -230,7 +231,9 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                         subject_col = subject_col,
                         predicted = matrix(NA_real_, nrow = nrow(ad_tmp),
                                            ncol = ncol(ad_tmp),
-                                           dimnames = dimnames(ad_tmp)))
+                                           dimnames = dimnames(ad_tmp)),
+                        results = data.frame(Feature_ID = fd_tmp$Feature_ID,
+                                             row.names = rownames(fd_tmp)))
   }
 
   obj_list
@@ -340,7 +343,23 @@ setMethod("predicted<-", "MetaboSet",
           })
 
 
+# results from statistical tests
+setGeneric("results", signature = "object",
+           function(object) standardGeneric("results"))
 
+setMethod("results", "MetaboSet",
+          function(object) object@results)
+
+setGeneric("results<-", signature = "object",
+           function(object, value) standardGeneric("results<-"))
+
+setMethod("results<-", "MetaboSet",
+          function(object, value) {
+            object@results <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
 
 
 
