@@ -104,6 +104,11 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = 
   pheno_data <- as.data.frame(t(dada[1:cr, (cc+1):ncol(dada)]), stringsAsFactors = FALSE)
   colnames(pheno_data) <- gsub(" ", "_", c(dada[1:(cr-1), cc], "Datafile"))
 
+  # If a single mode is given, datafile will indicate the mode
+  if (!is.null(name)) {
+    colnames(pheno_data)[ncol(pheno_data)] <- paste0(name, "_Datafile")
+  }
+
   pheno_data <- check_pheno_data(x = pheno_data, id_prefix = id_prefix)
 
   # Exctract feature information
@@ -127,6 +132,7 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = 
   feature_data <- feature_data %>%
     dplyr::select(Feature_ID, Split, dplyr::everything()) %>%
     best_classes() %>%
+    dplyr::mutate_if(is.factor, as.character) %>%
     dplyr:: mutate(Flag = NA_character_)
   rownames(feature_data) <- feature_data$Feature_ID
 

@@ -104,3 +104,7 @@ best_class <- function(x) {
 best_classes <- function(x) {
   as.data.frame(lapply(x, best_class), stringsAsFactors = FALSE)
 }
+
+all_unique <- function(x) {
+  !any(duplicated(x))
+}
