@@ -1,5 +1,5 @@
 
-#' PCA plot
+#' PCA scatter plot
 #'
 #' Computes PCA using one of the methods provided in the Bioconductor package
 #' pcaMethods and plots the two first principal components
@@ -22,7 +22,7 @@
 #'
 #' @export
 plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
-                     color = group_col(object), shape = NULL, density = TRUE,  title = "PCA",
+                     color = group_col(object), shape = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
 
   res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
@@ -36,7 +36,7 @@ plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
                subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale)
 }
 
-#' t-SNE plot
+#' t-SNE scatter plot
 #'
 #' Computes t-SNE into two dimensions and plots the map points.
 #'
@@ -58,7 +58,7 @@ plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
 #'
 #' @export
 plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
-                      color = group_col(object), shape = NULL, density = TRUE, title = "t-SNE",
+                      color = group_col(object), shape = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
                       shape_scale = NULL, ...) {
 
@@ -79,7 +79,7 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
                          color_lab = color, shape_lab = shape) {
 
   if (is.null(color_scale)) {
-    if (class(data[, color]) == "numeric") {
+    if (class(data[, color]) %in% c("numeric", "integer")) {
       color_scale <- getOption("amp.color_scale_con")
     } else {
       color_scale <- getOption("amp.color_scale_dis")
@@ -129,3 +129,97 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 
   p
 }
+
+# --------------- HEXBIN PLOTS --------------------
+
+
+#' PCA hexbin plot
+#'
+#' Computes PCA using one of the methods provided in the Bioconductor package
+#' pcaMethods and plots the two first principal components
+#'
+#' @param object a MetaboSet object
+#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param method the method to use, see documentation in pcaMethods
+#' @param fill character, name of the column used for coloring the hexagons
+#' @param fill_scale the fill scale as returned by a ggplot function
+#' @param summary_fun the function used to compute the value for each hexagon
+#' @param bins the number of bins in x and y axes
+#' @param ... additional arguments passed to pcaMethods::pca
+#'
+#' @return A ggplot object.
+#'
+#' @seealso \code{\link[pcaMethods]{pca}}
+#'
+#' @export
+plot_pca_hexbin <- function(object, center = TRUE, scale = "uv", method = "ppca",
+                     fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
+                     subtitle = NULL, fill_scale = NULL, ...) {
+
+  res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
+  pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
+  pca_scores[fill] <- pData(object)[, fill]
+  R2 <- res_pca@R2
+  labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
+
+  hexbin_plot(data = pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2],
+              fill = fill, summary_fun = summary_fun, bins = bins, fill_scale = fill_scale,
+                          title = title, subtitle = subtitle)
+}
+
+#' t-SNE hexbin plot
+#'
+#' Computes t-SNE into two dimensions and plots the map points.
+#'
+#' @param object a MetaboSet object
+#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param perplexity the perplexity used in t-SNE
+#' @param color character, name of the column used for coloring the points
+#' @param fill character, name of the column used for coloring the hexagons
+#' @param fill_scale the fill scale as returned by a ggplot function
+#' @param summary_fun the function used to compute the value for each hexagon
+#' @param bins the number of bins in x and y axes
+#' @param ... additional arguments passed to Rtsne::Rtsne
+#'
+#' A ggplot object.
+#'
+#' @seealso \code{\link[Rtsne]{Rtsne}}
+#'
+#' @export
+plot_tsne_hexbin <- function(object, center = TRUE, scale = "uv", perplexity = 30,
+                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
+                      subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...) {
+
+  prepd <- pcaMethods::prep(object, center = center, scale = scale)
+  res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+  tsne_scores <- data.frame(res_tsne$Y)
+  tsne_scores[fill] <- pData(object)[, fill]
+
+
+  hexbin_plot(tsne_scores, x = "X1", y = "X2",
+               fill = fill, summary_fun = summary_fun, bins = bins,
+               fill_scale = fill_scale,
+               title = title, subtitle = subtitle)
+
+}
+
+
+hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_scale = NULL,
+                         title = NULL, subtitle = NULL, xlab = x, ylab = y,
+                         fill_lab = fill) {
+
+  fill_scale <- fill_scale %||% getOption("amp.fill_scale_con")
+
+  p <- ggplot(data, aes_string(x = x, y = y, z = fill)) +
+    stat_summary_hex(bins = bins, fun = summary_fun) +
+    theme_bw() +
+    fill_scale +
+    labs(title = title, subtitle = subtitle, x = xlab, y = ylab,
+         fill = fill_lab) +
+    coord_fixed() +
+    theme(aspect.ratio=1)
+  p
+}
+

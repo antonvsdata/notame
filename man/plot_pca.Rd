@@ -2,10 +2,10 @@
 % Please edit documentation in R/scatter.R
 \name{plot_pca}
 \alias{plot_pca}
-\title{PCA plot}
+\title{PCA scatter plot}
 \usage{
 plot_pca(object, center = TRUE, scale = "uv", method = "ppca",
-  color = group_col(object), shape = NULL, density = TRUE,
+  color = group_col(object), shape = NULL, density = FALSE,
   title = "PCA", subtitle = NULL, color_scale = NULL,
   shape_scale = NULL, ...)
 }

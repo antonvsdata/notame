@@ -2,10 +2,10 @@
 % Please edit documentation in R/scatter.R
 \name{plot_tsne}
 \alias{plot_tsne}
-\title{t-SNE plot}
+\title{t-SNE scatter plot}
 \usage{
 plot_tsne(object, center = TRUE, scale = "uv", perplexity = 30,
-  color = group_col(object), shape = NULL, density = TRUE,
+  color = group_col(object), shape = NULL, density = FALSE,
   title = "t-SNE", subtitle = paste("Perplexity:", perplexity),
   color_scale = NULL, shape_scale = NULL, ...)
 }
