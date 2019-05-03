@@ -11,15 +11,24 @@ Description: Automates common preprocessing steps in a LC-MS metabolomics workfl
 License: MIT license
 Encoding: UTF-8
 LazyData: true
+biocViews:
 Imports:
     dplyr,
     ggplot2,
     missForest,
     Rtsne,
     tidyr,
-    openxlsx
+    openxlsx,
+    Biobase,
+    pcaMethods
 Suggests:
     ggdendro,
     mdatools,
-    testthat
+    testthat,
+    foreach,
+    doParallel,
+    lmer,
+    lmerTest,
+    cowplot,
+    Hmisc
 RoxygenNote: 6.1.1
