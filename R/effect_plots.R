@@ -16,6 +16,13 @@
 save_subject_line_plots <- function(object, file, width = 8, height = 6,
                                     x = time_col(object), id = subject_col(object)) {
 
+  if (is.na(x)) {
+    stop("The time column is missing")
+  }
+  if (is.na(id)) {
+    stop("The subject column is missing")
+  }
+
   pdf(file, width = width, height = height)
 
   data <- combined_data(object)
@@ -58,7 +65,9 @@ save_subject_line_plots <- function(object, file, width = 8, height = 6,
 #' @export
 save_group_boxplots <- function(object, file, width = 8, height = 6, group = group_col(object),
                                 color_scale =  NULL) {
-
+  if (is.na(group)) {
+    stop("The group column is missing")
+  }
   color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   pdf(file, width = width, height = height)
@@ -112,7 +121,12 @@ save_group_lineplots <- function(object, file, width = 8, height = 6,
                                  fun.data = "mean_cl_boot", fun.y = NULL,
                                  fun.ymin = NULL, fun.ymax = NULL, position_dodge_amount = 0.2,
                                  color_scale =  NULL) {
-
+  if (is.na(group)) {
+    stop("The group column is missing")
+  }
+  if (is.na(x)) {
+    stop("The time column is missing")
+  }
   color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   pdf(file, width = width, height = height)
