@@ -1,11 +1,11 @@
 
-#' Check that objects have same special columns
-#'
-#' Used to check that the special columns of pheno data parts of MetaboSet objects
-#' match when merging, called by check_match
-#'
-#' @param x,y MetaboSet objects
-#' @param fun the function to apply, usually one of group_col, time_col or subject_col
+# Check that objects have same special columns
+#
+# Used to check that the special columns of pheno data parts of MetaboSet objects
+# match when merging, called by check_match
+#
+# @param x,y MetaboSet objects
+# @param fun the function to apply, usually one of group_col, time_col or subject_col
 check_column_match <- function(x, y, fun) {
   check <- fun(x) == fun(y)
   if (is.na(check)) {
