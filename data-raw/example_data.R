@@ -89,7 +89,10 @@ example_set <- MetaboSet(exprs = assay_data,
                          subject_col = "Subject_ID",
                          predicted = matrix(NA_real_, nrow = nrow(assay_data),
                                             ncol = ncol(assay_data),
-                                            dimnames = dimnames(assay_data)))
+                                            dimnames = dimnames(assay_data)),
+                         results = data.frame(Feature_ID = feature_data$Feature_ID,
+                                              row.names = rownames(feature_data),
+                                              stringsAsFactors = FALSE))
 
 
 
