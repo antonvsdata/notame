@@ -1,8 +1,9 @@
+# Used to combine multiple obejcts returned from a foreach loop
 comb <- function(x, ...) {
   mapply(rbind,x,...,SIMPLIFY=FALSE)
 }
 
-#' Correct drift
+#' Fit a cubic spline to correct drift
 #'
 #' Corrects the dirft in the features by applying smoothed cubic spline regression
 #' to each feature separately.
@@ -25,7 +26,7 @@ comb <- function(x, ...) {
 #' @seealso \code{\link{inspect_dc}}, \code{\link{save_dc_plots}}
 #'
 #' @export
-correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5) {
+dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5) {
 
   qc <- object[, object$QC == "QC"]
   qc_order <- qc$Injection_order
@@ -58,6 +59,7 @@ correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.
     corr_factors <- predicted[1]/predicted
     corrected <- full_data[i, ] * corr_factors
 
+    # Each iteration of the loop return one row to corrected and one row to predicted
     list(corrected = matrix(corrected, ncol = n, dimnames = dnames),
          predicted = matrix(predicted, ncol = n, dimnames = dnames))
 
@@ -192,5 +194,59 @@ save_dc_plots <- function(orig, dc, file, width = 8, height = 6, color = group_c
 
 }
 
+#' Correct drift using cubic spline
+#'
+#' A wrapper function for applying cubic spline drift correction and saving
+#' before and after plots
+#'
+#' @param object a MetaboSet object
+#' @param spar smoothing parameter
+#' @param spar_lower,spar_upper lower and upper limits for the smoothing parameter
+#' @param condition a character specifying the condition used to decide whether drift correction
+#' works adequately, see Details
+#' @param plotting logical, whether plots should be drawn
+#' @param file path to the PDF file where the plots should be saved
+#' @param width,height width and height of the plots in inches
+#' @param color character, name of the column used for coloring the points
+#' @param shape character, name of the column used for shape
+#' @param color_scale the color scale as returned by a ggplot function
+#'
+#' @return MetaboSet object as the one supplied, with drift corrected fetures
+#'
+#' @details If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
+#' be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
+#' using cross validation. The \code{condition} parameter should be a character giving a condition combatible
+#' with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
+#' RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
+#' meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the
+#' drift corrected feature is discarded and the original is retained. If \code{shape} is set to \code{NULL} (the default), the column used for color
+#' is also used for shape
+#'
+#' @seealso  \code{\link{correct_drift}}, \code{\link[stats]{smooth.spline}} for details about the regression,
+#' \code{\link{inspect_dc}} for analysing the drift correction results,
+#' \code{\link{plot_dc}} for plotting the drift correction process for each feature
+#'
+#'
+#' @export
+correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5,
+                          condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
+                          file = NULL, width = 8, height = 6, color = group_col(orig),
+                          shape = NULL, color_scale = NULL) {
 
+  # Fit cubic spline and correct
+  corrected <- dc_cubic_spline(object, spar = spar,
+                               spar_lower = spar_lower, spar_upper = spar_upper)
+  # Only keep corrected versions of features where drift correction increases quality
+  inspected <- inspect_dc(object, corrected, condition = condition)
+  # Optionally save before and after plots
+  if (plotting) {
+    if (is.null(file)) {
+      stop("File must be specified")
+    }
+    save_dc_plots(object, corrected, file = file, width = width, height = height,
+                  color = color, shape = shape, color_scale = color_scale)
 
+  }
+  # Return the final version
+  inspected
+}

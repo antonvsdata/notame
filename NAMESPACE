@@ -2,6 +2,7 @@
 
 export(cohens_d)
 export(correct_drift)
+export(dc_cubic_spline)
 export(drop_qcs)
 export(finish_log)
 export(fold_change)
