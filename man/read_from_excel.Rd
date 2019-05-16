@@ -44,5 +44,9 @@ Only specify one of \code{split_by} and \code{name}. The feature data returned w
 named "Split", which is used to separate features from different modes. Unless a column named "Feature_ID"
 is found in the file, a feature ID will be generated based on the value of "Split", mass and retention time.
 The function will try to find columns for mass and retention time by looking at a few common alternatives,
-and throw an error if no matching column is found.
+and throw an error if no matching column is found. Sample information needs to contain a row called "Injection_order",
+and the values need to be unique. In addition, a possible sample identifier row needs to be named "Sample_ID",
+and the values need to be unique, with an exception of QC samples: if there are any "QC" identifiers, they will
+be replaced with "QC_1", "QC_2" and so on. If a "Sample_ID" row is not found, it will be created using the \code{id_prefix}
+and injection order.
 }
