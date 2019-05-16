@@ -32,8 +32,8 @@ plot_heatmap(object, dist_method = "euclidean",
 \item{clustering}{method used in clustering, see ?hclust}
 }
 \value{
-if \code{group_bar} is \code{TRUE}, an object of class gTable (from the cowplot package).
-NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
+a ggplot object. If \code{group_bar} is \code{TRUE}, the plot will consist of multiple
+parts and is harder to modify.
 }
 \description{
 Draws a heatmap of the distances between the samples of an experiment,

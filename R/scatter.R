@@ -15,8 +15,8 @@
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
-#' @return if \code{density} is \code{TRUE}, an object of class gTable (from the cowplot package).
-#' NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
+#' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
+#' parts and is harder to modify.
 #'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
@@ -51,8 +51,8 @@ plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param ... additional arguments passed to Rtsne::Rtsne
 #'
-#' @return if \code{density} is \code{TRUE}, an object of class gTable (from the cowplot package).
-#' NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
+#' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
+#' parts and is harder to modify.
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
@@ -125,6 +125,7 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 
     p <- cowplot::insert_xaxis_grob(p, xdens, grid::unit(.2, "null"), position = "top")
     p <- cowplot::insert_yaxis_grob(p, ydens, grid::unit(.2, "null"), position = "right")
+    p <- cowplot::ggdraw(p)
   }
 
   p

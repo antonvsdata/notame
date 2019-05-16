@@ -71,8 +71,8 @@ plot_dendrogram <- function(object, color = group_col(object), dist_method = "eu
 #' @param fill_scale_con Continuous fill scale for the heatmap as returned by a ggplot function
 #' @param fill_scale_dis Discrete fill scale for the group bar as returned by a ggplot function
 #'
-#' @return if \code{group_bar} is \code{TRUE}, an object of class gTable (from the cowplot package).
-#' NOTE this object must be drawn with ggdraw() instead of plot(). Otherwise, a ggplot object.
+#' @return a ggplot object. If \code{group_bar} is \code{TRUE}, the plot will consist of multiple
+#' parts and is harder to modify.
 #'
 #' @seealso \code{\link{dist}} \code{\link{hclust}}
 #'
