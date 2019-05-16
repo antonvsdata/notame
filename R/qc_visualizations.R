@@ -1,6 +1,7 @@
 
 
-density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitle = NULL, xlab = x, fill_lab = fill) {
+density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitle = NULL,
+                         xlab = x, fill_lab = fill) {
 
   fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
 
@@ -44,7 +45,8 @@ plot_dist_density <- function(object, dist_method = "euclidean", fill_scale = NU
   qc <- rep(c("QC", "Sample"), times = c(length(qc_dist), length(sample_dist)))
   distances <- data.frame(dist = c(qc_dist, sample_dist), qc = qc)
 
-  density_plot(distances, x = "dist", fill = "qc", fill_scale = fill_scale, xlab = "Distance", fill_lab = NULL,
+  density_plot(distances, x = "dist", fill = "qc", fill_scale = fill_scale,
+               xlab = "Distance", fill_lab = NULL,
                title = title, subtitle = subtitle)
 }
 
@@ -110,3 +112,83 @@ plot_p_histogram <- function(p_values) {
 
   p
 }
+
+
+#' Plot a boxplot for each sample
+#'
+#' Plots a boxplot of the distribution of the metabolite values for each sample. The boxplots can
+#' be ordered and filled by any combination of columns in the pheno data. By default, order and
+#' fill are both determined by the combination of group and time columns.
+#'
+#' @param object a MetaboSet object
+#' @param order_by character vector, names of columns used to order the samples
+#' @param fill_by character vector, names of columns used to fill the boxplots
+#' @param title,subtitle character, title and subtitle of the plot
+#' @param fill_scale a scale for the fill of the boxplots, as returned by a ggplot function
+#' @param zoom_boxplot logical, whether outliers should be left outside the plot and only
+#' the boxplots shown. Defaults to TRUE.
+#'
+#' @return a ggplot object
+#'
+#' @export
+plot_sample_boxplots <- function(object, order_by = NULL, fill_by = NULL,
+                             title = "Boxplot of samples", subtitle = NULL,
+                             fill_scale = NULL, zoom_boxplot = TRUE) {
+
+  order_by <- order_by %||% as.character(na.omit(c(group_col(object), time_col(object))))
+  fill_by <- fill_by %||% as.character(na.omit(c(group_col(object), time_col(object))))
+  fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
+
+  data <- combined_data(object)
+
+  if (length(order_by) == 1) {
+    data$order_by <- data[, order_by]
+  } else {
+    data <- tidyr::unite(data, "order_by", order_by, remove = FALSE)
+  }
+
+  if (length(fill_by) == 1) {
+    data$fill_by <- data[, fill_by]
+  } else {
+    data <- tidyr::unite(data, "fill_by", fill_by, remove = FALSE)
+  }
+
+  data <- data %>%
+    dplyr::arrange(order_by)
+
+  data$Sample_ID <- factor(data$Sample_ID, levels = data$Sample_ID)
+
+  data <- tidyr::gather(data, "Variable", "Value", rownames(exprs(object)))
+
+  p <- ggplot(data, aes(x = Sample_ID, y = Value, fill = fill_by)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(plot.title = element_text(face="bold"),
+          axis.text.x = element_text(angle=90, vjust=0.3)) +
+    fill_scale
+
+  ## Zooming outliers out of view
+  if(zoom_boxplot){
+    # compute lower and upper whiskers
+    ylimits <- data %>%
+      dplyr::group_by(Sample_ID) %>%
+      dplyr::summarise(low = boxplot.stats(Value)$stats[1],
+                       high = boxplot.stats(Value)$stats[5])
+
+
+    ylimits <- c(min(ylimits$low), max(ylimits$high))
+    # scale y limits based on ylim1
+    p <- p + coord_cartesian(ylim = ylimits)
+    # add text to main title
+    subtitle <- paste(subtitle, "(zoomed in boxplot: outliers out of view)", sep=" ")
+  }
+
+  p <- p +
+    labs(x = paste(order_by, collapse = "_"),
+         y = "Abundance of metabolites",
+         fill = paste(fill_by, collapse = "_"),
+         title = title, subtitle = subtitle)
+
+  p
+}
+
