@@ -9,7 +9,7 @@ read_from_excel(file, sheet, corner_row, corner_column,
 }
 \description{
 Reads data from an Excel file of the following format:
-\itemize {
+\itemize{
   \item Left side of the sheet contains information about the features, size features x feature info columns
   \item Top part contains sample information, size sample info variables x samples
   \item The middle contains the actual abundances, size features x samples
@@ -28,7 +28,7 @@ This function separates the three parts from the file, and returns them in a lis
  @param name in the case where the Excel file only contains one mode, the name of the mode, such as "Hilic_neg"
 
 @return list of three data frames:
-\itemize {
+\itemize{
   \item assay_data: the actual abundances, size features x samples
   \item pheno_data: sample information, size sample info variables x samples
   \item feature_data: information about the features, size features x feature info columns
