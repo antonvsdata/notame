@@ -21,6 +21,13 @@ check_pheno_data <- function(x, id_prefix) {
       stop("Sample_ID is not unique")
     }
   }
+  # If QC column is not provided explicitly, attempt to create it
+  if (!"QC" %in% colnames(x)) {
+    qc_found <- which(sapply(x, function(y) {any(y == "QC")}))
+    if (length(qc_found)) {
+      x$QC <- ifelse(x[, qc_found[1]] == "QC", "QC", "Sample")
+    }
+  }
 
   x <- best_classes(x)
   rownames(x) <- x$Sample_ID
