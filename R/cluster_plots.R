@@ -32,7 +32,7 @@ plot_dendrogram <- function(object, color = group_col(object), dist_method = "eu
     }
   }
 
-  prepd <- pcaMethods::prep(object, center = center, scale = scale)
+  object <- pcaMethods::prep(object, center = center, scale = scale)
 
   d_data <- dist(t(exprs(object)), method = dist_method) %>%
     hclust(method = clust_method) %>%
@@ -86,6 +86,8 @@ plot_heatmap <- function(object, dist_method = "euclidean", clust_method = "ward
   subtitle <- subtitle %||% paste("Distance method:", dist_method, "Clustering method:", clust_method)
   fill_scale_con <- fill_scale_con %||% getOption("amp.fill_scale_con")
   fill_scale_dis <- fill_scale_dis %||% getOption("amp.fill_scale_dis")
+
+  object <- pcaMethods::prep(object, center = center, scale = scale)
 
   # Distances
   distances <- dist(t(exprs(object)), method = dist_method)
