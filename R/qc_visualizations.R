@@ -1,19 +1,28 @@
 
+save_plot <- function(p, file, width, heigth) {
+
+  pdf(file, width = width, height = heigth)
+  plot(p)
+  dev.off()
+  log_text(paste("Saved", file))
+}
 
 density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitle = NULL,
                          xlab = x, fill_lab = fill) {
 
   fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   # ggpubr::ggdensity(data, x, fill = fill, palette = c("#00AFBB", "#E7B800")) +
   #   #fill_scale +
   #   labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab)
-  p <- ggplot(data, aes_string(x, fill = fill)) +
-    geom_density(alpha = 0.2, color = NA) +
+  p <- ggplot(data, aes_string(x, fill = fill, color = fill)) +
+    geom_density(alpha = 0.2) +
     fill_scale +
     labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab, color = NULL) +
     theme_bw() +
-    theme(panel.grid = element_blank())
+    theme(panel.grid = element_blank()) +
+    getOption("amp.color_scale_dis")
 
   p
 }
@@ -24,6 +33,7 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
 #'
 #' @param object a MetaboSet object
 #' @param dist_method method for calculating the distances, passed to dist
+#' @param color_scale a scale for the color of the edge of density curves, as returned by a ggplot function
 #' @param fill_scale a scale for the fill of the density curves, as returned by a ggplot function
 #' @param xlab the x
 #'
@@ -32,6 +42,7 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
 #'
 #' @export
 plot_dist_density <- function(object, dist_method = "euclidean", fill_scale = NULL,
+                              color_scale = NULL,
                               title = NULL, subtitle = NULL) {
 
   title <- title %||% paste("Density plot of", dist_method, "distances between samples")
