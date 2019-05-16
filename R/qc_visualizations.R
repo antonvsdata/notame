@@ -1,7 +1,16 @@
 
-save_plot <- function(p, file, width, heigth) {
+#' Save plot to PDF
+#'
+#' Saves the given plot to a PDF file
+#'
+#' @param p a ggplot object
+#' @param file the file path
+#' @param ... other arguments to pdf, like width and height
+#'
+#' @seealso \code{\link[grDevices]{pdf}}
+save_plot <- function(p, file, ...) {
 
-  pdf(file, width = width, height = heigth)
+  pdf(file, ...)
   plot(p)
   dev.off()
   log_text(paste("Saved", file))
@@ -33,6 +42,8 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
 #'
 #' @param object a MetaboSet object
 #' @param dist_method method for calculating the distances, passed to dist
+#' @param center logical, should the data  be centered?
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param color_scale a scale for the color of the edge of density curves, as returned by a ggplot function
 #' @param fill_scale a scale for the fill of the density curves, as returned by a ggplot function
 #' @param xlab the x
@@ -41,11 +52,14 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
 #' @seealso \code{\link[stats]{dist}}
 #'
 #' @export
-plot_dist_density <- function(object, dist_method = "euclidean", fill_scale = NULL,
-                              color_scale = NULL,
+plot_dist_density <- function(object, dist_method = "euclidean",
+                              center = TRUE, scale = "uv",
+                              fill_scale = NULL, color_scale = NULL,
                               title = NULL, subtitle = NULL) {
 
   title <- title %||% paste("Density plot of", dist_method, "distances between samples")
+
+  object <- pcaMethods::prep(object, center = center, scale = scale)
 
   qc_data <- t(exprs(object)[, object$QC == "QC"])
   sample_data <- t(exprs(object)[, object$QC != "QC"])

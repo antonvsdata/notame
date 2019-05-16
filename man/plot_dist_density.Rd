@@ -4,7 +4,8 @@
 \alias{plot_dist_density}
 \title{Distance density plot}
 \usage{
-plot_dist_density(object, dist_method = "euclidean", fill_scale = NULL,
+plot_dist_density(object, dist_method = "euclidean", center = TRUE,
+  scale = "uv", fill_scale = NULL, color_scale = NULL,
   title = NULL, subtitle = NULL)
 }
 \arguments{
@@ -12,7 +13,13 @@ plot_dist_density(object, dist_method = "euclidean", fill_scale = NULL,
 
 \item{dist_method}{method for calculating the distances, passed to dist}
 
+\item{center}{logical, should the data  be centered?}
+
+\item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
+
 \item{fill_scale}{a scale for the fill of the density curves, as returned by a ggplot function}
+
+\item{color_scale}{a scale for the color of the edge of density curves, as returned by a ggplot function}
 
 \item{xlab}{the x}
 }
