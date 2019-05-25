@@ -1,22 +1,6 @@
 
-#' Save plot to PDF
-#'
-#' Saves the given plot to a PDF file
-#'
-#' @param p a ggplot object
-#' @param file the file path
-#' @param ... other arguments to pdf, like width and height
-#'
-#' @seealso \code{\link[grDevices]{pdf}}
-save_plot <- function(p, file, ...) {
-
-  pdf(file, ...)
-  plot(p)
-  dev.off()
-  log_text(paste("Saved", file))
-}
-
-density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitle = NULL,
+density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
+                         title = NULL, subtitle = NULL,
                          xlab = x, fill_lab = fill) {
 
   fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
@@ -31,7 +15,7 @@ density_plot <- function(data, x, fill, fill_scale = NULL, title = NULL, subtitl
     labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab, color = NULL) +
     theme_bw() +
     theme(panel.grid = element_blank()) +
-    getOption("amp.color_scale_dis")
+    color_scale
 
   p
 }
@@ -71,6 +55,7 @@ plot_dist_density <- function(object, dist_method = "euclidean",
   distances <- data.frame(dist = c(qc_dist, sample_dist), qc = qc)
 
   density_plot(distances, x = "dist", fill = "qc", fill_scale = fill_scale,
+               color_scale = color_scale,
                xlab = "Distance", fill_lab = NULL,
                title = title, subtitle = subtitle)
 }
