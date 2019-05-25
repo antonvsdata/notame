@@ -106,7 +106,7 @@ plot_heatmap <- function(object, dist_method = "euclidean", clust_method = "ward
 
   # Heatmap
   p <- ggplot(distances_df, aes(X, Y, fill = Distance)) +
-    geom_tile(color = "white") +
+    geom_tile(color = NA) +
     fill_scale_con +
     labs(x = NULL, y = NULL, title = title, subtitle = subtitle) +
     theme_minimal() +
