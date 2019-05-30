@@ -30,7 +30,9 @@ save_plot <- function(p, file, ...) {
 #' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/})
 #'
 #'
-visualizations <- function(object, prefix, merge = TRUE) {
+visualizations <- function(object, prefix, all_features = FALSE, merge = TRUE) {
+
+
 
   file_names <- ""
 
@@ -44,7 +46,7 @@ visualizations <- function(object, prefix, merge = TRUE) {
 
   if (sum(object$QC == "QC")) {
     save_name(plot_dist_density(object), "density_plot", width = 8, height = 6)
-    #save_name(plot_injection_lm(object), "lm_p_histograms")
+    save_name(plot_injection_lm(object), "lm_p_histograms")
   }
   # Boxplots
   save_name(plot_sample_boxplots(object), "boxplots_group", width = 15)

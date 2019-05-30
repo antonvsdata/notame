@@ -4,7 +4,7 @@
 \alias{visualizations}
 \title{Write all relevant visualizations to pdf}
 \usage{
-visualizations(object, prefix, merge = TRUE)
+visualizations(object, prefix, all_features = FALSE, merge = TRUE)
 }
 \arguments{
 \item{object}{A MetaboSet object}
