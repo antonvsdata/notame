@@ -11,7 +11,8 @@ feature_data <- data.frame(Split = "HILIC_pos",
                            Mass = runif(n_features, 100, 500),
                            RetentionTime = runif(n_features, 0.5, 8),
                            Column = "HILIC", Mode = "pos",
-                           Flag = NA_character_)
+                           Flag = NA_character_,
+                           stringsAsFactors = FALSE)
 
 # Create Feature ID
 round_mz <- as.numeric(feature_data$Mass) %>% round(digits = 4) %>%
