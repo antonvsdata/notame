@@ -11,11 +11,16 @@
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
 #' @param id character, name of the column containing subject IDs
+#' @param color character, the column name to color the lines by (optional)
+#' @param color_scale the color scale as returned by a ggplot function
+#' @param facet character, the column name to facet by (optional, usually same as color)
 #'
 #' @export
 save_subject_line_plots <- function(object, file, width = 8, height = 6,
-                                    x = time_col(object), id = subject_col(object)) {
+                                    x = time_col(object), id = subject_col(object),
+                                    color = NA, color_scale = NULL, facet = NULL) {
 
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
   if (is.na(x)) {
     stop("The time column is missing")
   }
@@ -34,11 +39,24 @@ save_subject_line_plots <- function(object, file, width = 8, height = 6,
     fname <- Biobase::featureNames(object)[i]
 
     p <- ggplot(data, aes_string(x = x, y = fname)) +
-      geom_line(aes_string(group = id), color = "grey20", alpha = 0.35, size = 0.3) +
-      stat_summary(aes(group = 1), fun.data = "mean_se",
-                   geom = "line", size = 1.2, color = "red") +
       labs(title = fname, y = "Abundance") +
       theme_bw()
+
+    if (is.na(color)) {
+      p <- p +
+        geom_line(aes_string(group = id), color = "grey20", alpha = 0.35, size = 0.3) +
+        stat_summary(aes(group = 1), fun.data = "mean_se",
+                     geom = "line", size = 1.2, color = "red")
+    } else {
+      p <- p +
+        geom_line(aes_string(group = id, color = color), alpha = 0.35, size = 0.3) +
+        stat_summary(aes_string(group = color, color = color), fun.data = "mean_se",
+                     geom = "line", size = 1.2)
+    }
+
+    if (!is.null(facet)) {
+      p <- p + facet_wrap(facets = facet)
+    }
 
     if (class(data[, x]) == "factor") {
       p <- p +
@@ -82,6 +100,8 @@ save_group_boxplots <- function(object, file, width = 8, height = 6, group = gro
 
     p <- ggplot(data, aes_string(x = group, y = fname, color = group)) +
       geom_boxplot() +
+      stat_summary(aes_string(group = group), fun.data = mean_se,
+                   geom = "point", shape = 18, size = 3) +
       color_scale +
       labs(title = fname, y = "Abundance") +
       theme_bw()

@@ -5,7 +5,8 @@
 \title{Save line plots with mean}
 \usage{
 save_subject_line_plots(object, file, width = 8, height = 6,
-  x = time_col(object), id = subject_col(object))
+  x = time_col(object), id = subject_col(object), color = NA,
+  color_scale = NULL, facet = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -17,6 +18,12 @@ save_subject_line_plots(object, file, width = 8, height = 6,
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{id}{character, name of the column containing subject IDs}
+
+\item{color}{character, the column name to color the lines by (optional)}
+
+\item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{facet}{character, the column name to facet by (optional, usually same as color)}
 }
 \description{
 Plots the change in the feature abundaces as a function of e.g. time.
