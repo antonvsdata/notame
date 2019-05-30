@@ -340,4 +340,82 @@ perform_lmer <- function(object, formula_char,  ci_level = 0.95,
   results[col_order]
 }
 
+#' Test homoscedasticity
+#'
+#' Performs Bartlett's, Levene's and  Fligner-Killeen tests for equality of variances
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' variances in study groups, use "Feature ~ Group".
+#'
+#' @export
+perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
+
+  formula_char <- formula_char %||% paste("Feature ~", group_col(object))
+
+  data <- combined_data(object)
+  features <- Biobase::featureNames(object)
+
+  results <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+    feature <- features[i]
+    # Replace "Feature" with the current feature name
+    tmp_formula <- gsub("Feature", feature, formula_char)
+
+    bartlett <- bartlett.test(formula = as.formula(tmp_formula), data = data)
+    levene <- car::leveneTest(y = as.formula(tmp_formula), data = data)
+    fligner <- fligner.test(formula = as.formula(tmp_formula), data = data)
+
+    result_row <- data.frame(Feature_ID = feature,
+                             Bartlett_P = bartlett$p.value,
+                             Levene_P = levene$`Pr(>F)`[1],
+                             Fligner_P = fligner$p.value,
+                             stringsAsFactors = FALSE)
+  }
+
+  results
+}
+
+#' Perform Kruskal-Wallis Rank Sum Tests
+#'
+#' Performs Kruskal-Wallis Rank Sum Test for equality
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' means in study groups, use "Feature ~ Group".
+#'
+#' @export
+perform_kruskal_wallis <- function(object, formula_char = NULL) {
+  formula_char <- formula_char %||% paste("Feature ~", group_col(object))
+
+  data <- combined_data(object)
+  features <- Biobase::featureNames(object)
+
+  results <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+    feature <- features[i]
+    # Replace "Feature" with the current feature name
+    tmp_formula <- gsub("Feature", feature, formula_char)
+
+    kruskal <- kruskal.test(formula = as.formula(tmp_formula), data = data)
+
+    result_row <- data.frame(Feature_ID = feature,
+                             Kruskal_P = kruskal$p.value,
+                             stringsAsFactors = FALSE)
+  }
+
+  results$Kruskal_P_FDR <- p.adjust(results$Kruskal_p, method = "BH")
+
+  results
+}
 
