@@ -47,17 +47,17 @@ test_that("Easy example data is read correctly", {
   pd <- data.frame(Sample_ID = paste0("TEST_", seq_len(12)),
                    Injection_order = seq_len(12),
                    Group = factor(rep(LETTERS[1:2], times = c(5,7))),
-                   Datafile = paste0("190102SR_RP_pos_0", 10:21),
+                   easy_Datafile = paste0("190102SR_RP_pos_0", 10:21),
                    stringsAsFactors = FALSE)
   rownames(pd) <- pd$Sample_ID
 
   # Feature data
   fd <- data.frame(Feature_ID = "",
-                   Split = factor("easy"),
+                   Split = "easy",
                    Alignment = as.numeric(seq_len(10)),
                    Mass = 50 * seq_len(10),
                    RetentionTime = 0.5 *seq_len(10),
-                   "MS/MS Spectrum" = factor(c("(123.45; 678)", rep(NA, 9))),
+                   "MS/MS Spectrum" = c("(123.45; 678)", rep(NA, 9)),
                    Flag = NA_character_,
                    stringsAsFactors = FALSE)
   fd <- name_features(fd)
@@ -105,9 +105,9 @@ test_that("Data is split correctly", {
                    Alignment = as.numeric(seq_len(16)),
                    Mass = 50 * seq_len(16),
                    RetentionTime = 0.5 *seq_len(16),
-                   Column = factor(rep(c("RP", "Hilic", "RP"), times = c(4, 8, 4))),
-                   Mode = factor(rep(c("pos", "neg"), each = 8)),
-                   "MS/MS Spectrum" = factor(c("(123.45; 678)", rep(NA, 15))),
+                   Column = rep(c("RP", "Hilic", "RP"), times = c(4, 8, 4)),
+                   Mode = rep(c("pos", "neg"), each = 8),
+                   "MS/MS Spectrum" = c("(123.45; 678)", rep(NA, 15)),
                    Flag = NA_character_,
                    stringsAsFactors = FALSE)
   fd <- name_features(fd)
