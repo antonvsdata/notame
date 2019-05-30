@@ -4,7 +4,7 @@
 \alias{impute_rf}
 \title{Impute missing values using random forest}
 \usage{
-impute_rf(object, ...)
+impute_rf(object, all_features = FALSE, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}

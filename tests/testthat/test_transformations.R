@@ -29,6 +29,54 @@ test_that("Imputation works as expected", {
   expect_equal(non_na_imputed, non_na_marked)
 })
 
+test_that("Flagging works as expected", {
+
+  single_change <- matrix(1111, nrow = 1, ncol = 1,
+                          dimnames = list("HILIC_neg_108_1065a2_6121",
+                                          "Demo_1"))
+  mrg <- merge_exprs(example_set, single_change)
+  expect_equal(exprs(mrg)[2, 1], 1111)
+
+  block_change <- matrix(runif(9), nrow = 3, ncol = 3,
+                         dimnames = list(rownames(exprs(example_set))[4:6],
+                                         colnames(exprs(example_set))[5:7]))
+  mrg2 <- merge_exprs(example_set, block_change)
+  expect_true(all(exprs(mrg2)[4:6, 5:7] == block_change))
+
+  scattered_change <- matrix(runif(9), nrow = 3, ncol = 3,
+                             dimnames = list(rownames(exprs(example_set))[c(1,5,7)],
+                                             colnames(exprs(example_set))[c(2,5,8)]))
+  mrg3 <- merge_exprs(example_set, scattered_change)
+  expect_true(all(exprs(mrg3)[c(1,5,7), c(2,5,8)] == scattered_change))
+
+  wrong_names <- matrix(runif(9), nrow = 3)
+  expect_error(merge_exprs(example_set, wrong_names), "Column names")
+
+  wrong_names2 <- matrix(runif(9), nrow = 3,
+                         dimnames = list(letters[1:3],
+                         colnames(exprs(example_set))[5:7]))
+  expect_error(merge_exprs(example_set, wrong_names2), "Row names")
+
+})
+
+
+test_that("Flagged compounds are not imputed", {
+
+  marked <- mark_nas(example_set, 0)
+  fData(marked)$Flag[c(1,4,6)] <- "Flagged"
+
+  imputed <- impute_rf(marked)
+  nas <- apply(exprs(imputed), 1, prop_na)
+
+  expect_true(all(nas[c(1,4,6)] > 0))
+  expect_true(all(nas[-c(1,4,6)] == 0))
+
+  # All feature parameter test
+  imputed <- impute_rf(marked, all_features = TRUE)
+  nas <- apply(exprs(imputed), 1, prop_na)
+  expect_true(all(nas == 0))
+
+})
 
 test_that("Inverse normalization works as expected", {
 
