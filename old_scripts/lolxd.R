@@ -18,8 +18,11 @@ lol <- lcms[[1]]
 
 group_col(lol) <- "Group"
 
-lol <- mark_nas(lol, 0)
+missing <- mark_nas(lol, 0)
 
+start_log("~/log.txt")
+
+imputed <- impute_rf(missing)
 
 xd <- correct_drift(lol)
 

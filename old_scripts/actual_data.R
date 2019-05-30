@@ -2,17 +2,44 @@
 library(ggplot2)
 
 devtools::document()
-doParallel::registerDoParallel(cores = 3)
 
-res <- read_from_excel(file = "~/amp/inst/extdata/HILIC neg final.xlsx",
+hilic_neg <- read_from_excel(file = "~/amp/inst/extdata/HILIC neg final.xlsx",
                        sheet = 1,
-                       corner_row = 5, corner_column = "V",
-                       split_by = c("Mode"))
+                       corner_row = 5, corner_column = "U", name = "HILIC_neg")
+
+hilic_pos <- read_from_excel(file = "~/amp/inst/extdata/HILIC pos final.xlsx",
+                             sheet = 1,
+                             corner_row = 4, corner_column = "U",
+                             name = "HILIC_pos")
+
+rp_neg <- read_from_excel(file = "~/amp/inst/extdata/RP neg final.xlsx",
+                             sheet = 1,
+                             corner_row = 4, corner_column = "U",
+                             name = "RP_neg")
+
+rp_pos <- read_from_excel(file = "~/amp/inst/extdata/RP pos final.xlsx",
+                             sheet = 1,
+                             corner_row = 4, corner_column = "U",
+                             name = "RP_pos")
+
+all_modes <- list(hilic_neg, hilic_pos, rp_neg, rp_pos)
+
+lcms <- list()
+
+for (mode in all_modes) {
+  lcms <- c(lcms, construct_MetaboSet(assay_data = mode$assay_data,
+                              pheno_data = mode$pheno_data,
+                              feature_data = mode$feature_data,
+                              group_col = "Class"))
+}
+
+merged <- merge_metabosets(lcms)
+identical(rbind(fData(lcms[[1]]), fData(lcms[[2]]), fData(lcms[[3]]), fData(lcms[[4]])), fData(merged))
+identical(rbind(exprs(lcms[[1]]), exprs(lcms[[2]]), exprs(lcms[[3]]), exprs(lcms[[4]])), exprs(merged))
 
 
-lcms <- construct_MetaboSet(assay_data = res$assay_data,
-                            pheno_data = res$pheno_data,
-                            feature_data = res$feature_data)
+hilics <- merge_metabosets(lcms[[1]], lcms[[2]])
+
 
 lol <- lcms[[1]]
 
@@ -21,7 +48,7 @@ dim(lol)
 group_col(lol) <- "Class"
 
 
-
+normalized <- inverse_normalize(lol)
 
 xd <- correct_drift(lol)
 
@@ -43,4 +70,15 @@ quality(ins)
 
 plot_dc(lol[1:10], xd[1:10], file = "lolxd.pdf")
 
-plot_pca(lol, color = "Injection_order")
+pl <- plot_pca(lol, color = "Injection_order")
+class(pl)
+
+
+lol <- drop_qcs(lol)
+
+
+save_subject_line_plots(drop_qcs(example_set), "xd.pdf")
+
+save_group_lineplots(drop_qcs(example_set), file = "oho.pdf")
+
+save_group_boxplots(drop_qcs(example_set), file = "nais.pdf")

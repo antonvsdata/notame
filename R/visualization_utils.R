@@ -32,17 +32,15 @@ save_plot <- function(p, file, ...) {
 #'
 visualizations <- function(object, prefix, all_features = FALSE, merge = TRUE) {
 
-
-
+  # Helper function
   file_names <- ""
-
   save_name <- function(p, name, ...) {
     file_name <- paste0(prefix, "_", name, ".pdf")
     save_plot(p, file = file_name, ...)
     file_names <<- paste(file_names, file_name)
   }
-
-  object <- object[is.na(fData(object)$Flag), ]
+  # Drop flagged features
+  object <- drop_flagged(object, all_features)
 
   if (sum(object$QC == "QC")) {
     save_name(plot_dist_density(object), "density_plot", width = 8, height = 6)
