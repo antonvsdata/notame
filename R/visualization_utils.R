@@ -76,6 +76,7 @@ visualizations <- function(object, prefix, all_features = FALSE, merge = TRUE) {
     if (os == "Windows") {
       # Merge files
       system(paste("pdftk", file_names, "cat output", merged_file))
+      log_text(paste("Merged plots to", merged_file))
     } else {
 
     }

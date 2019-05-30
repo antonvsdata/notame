@@ -230,7 +230,7 @@ save_dc_plots <- function(orig, dc, file, width = 8, height = 6, color = group_c
 #' @export
 correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5,
                           condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
-                          file = NULL, width = 8, height = 6, color = group_col(orig),
+                          file = NULL, width = 8, height = 6, color = group_col(object),
                           shape = NULL, color_scale = NULL) {
 
   # Fit cubic spline and correct
@@ -243,7 +243,7 @@ correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.
     if (is.null(file)) {
       stop("File must be specified")
     }
-    save_dc_plots(object, corrected, file = file, width = width, height = height,
+    save_dc_plots(orig = object, dc = corrected, file = file, width = width, height = height,
                   color = color, shape = shape, color_scale = color_scale)
 
   }
