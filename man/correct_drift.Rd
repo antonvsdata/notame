@@ -7,7 +7,7 @@
 correct_drift(object, spar = NULL, spar_lower = 0.5,
   spar_upper = 1.5, condition = "RSD_r < 0 & D_ratio_r < 0",
   plotting = FALSE, file = NULL, width = 8, height = 6,
-  color = group_col(orig), shape = NULL, color_scale = NULL)
+  color = group_col(object), shape = NULL, color_scale = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
