@@ -102,7 +102,7 @@ fold_change <- function(object, group = group_col(object)) {
 
   features <- Biobase::featureNames(object)
 
-  results <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
     feature <- features[i]
     result_row <- rep(0, ncol(groups))
     # Calculate fold changes
@@ -117,20 +117,49 @@ fold_change <- function(object, group = group_col(object)) {
   # Create comparison labels for result column names
   comp_labels <- groups %>% t() %>% as.data.frame() %>% unite("Comparison", V2, V1, sep = "_vs_")
   comp_labels <- comp_labels[,1]
-  results_df <- data.frame(features, results, stringsAsFactors = FALSE)
+  results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
   colnames(results_df) <- c("Feature_ID", comp_labels)
   rownames(results_df) <- results_df$Feature_ID
   # Order the columns accordingly
   results_df[c("Feature_ID", comp_labels[order(comp_labels)])]
 }
 
+# Helper function for FDR correction
 adjust_p_values <- function(x) {
-  p_cols <- colnames(x)[grep("P$", colnames(x))]
+  p_cols <- colnames(x)[grepl("_P$", colnames(x))]
   for (p_col in p_cols) {
-    x[paste0(p_col, "_FDR")] <- p.adjust(x[, p_col], method = "BH")
+    x <- tibble::add_column(.data = x,
+                            FDR = p.adjust(x[,p_col], method = "BH"),
+                            .after = p_col)
+    p_idx <- which(colnames(x) == p_col)
+    colnames(x)[p_idx + 1] <- paste0(p_col, "_FDR")
   }
   x
 }
+
+# Helper function for running a variaety of simple statistical tests
+perform_test <- function(object, formula_char, result_fun, fdr = TRUE) {
+
+  formula_char <- formula_char %||% paste("Feature ~", group_col(object))
+
+  data <- combined_data(object)
+  features <- Biobase::featureNames(object)
+
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+    feature <- features[i]
+    # Replace "Feature" with the current feature name
+    tmp_formula <- gsub("Feature", feature, formula_char)
+
+    result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
+  }
+
+  if (fdr) {
+    results_df <- adjust_p_values(results_df)
+  }
+
+  results_df
+}
+
 
 #' Linear models
 #'
@@ -159,18 +188,11 @@ adjust_p_values <- function(x) {
 #' @seealso \code{\link[stats]{lm}}
 perform_lm <- function(object, formula_char,  ci_level = 0.95, ...) {
 
-  data <- combined_data(object)
-  features <- Biobase::featureNames(object)
-
-  results <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
-    feature <- features[i]
-    # Replace "Feature" with the current feature name
-    tmp_formula <- gsub("Feature", feature, formula_char)
-
+  lm_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
     tryCatch({
-      fit <- lm(as.formula(tmp_formula), data = data, ...)
+      fit <- lm(formula, data = data, ...)
     }, error = function(e) print(e$message))
     if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
       result_row <- NULL
@@ -195,20 +217,21 @@ perform_lm <- function(object, formula_char,  ci_level = 0.95, ...) {
 
     }
     result_row
-
   }
 
+  results_df <- perform_test(object, formula_char, lm_fun)
+
   # FDR correction per column
-  results <- adjust_p_values(results)
+  results_df <- adjust_p_values(results_df)
 
   # Set a good column order
-  variables <- gsub("_P$", "", colnames(results)[grep("P$", colnames(results))])
+  variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
   statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
   col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
     tidyr::unite("Column", Var2, Var1)
   col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
-  results[col_order]
+  results_df[col_order]
 }
 
 
@@ -258,7 +281,7 @@ perform_lmer <- function(object, formula_char,  ci_level = 0.95,
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
 
-  results <- foreach::foreach(i = seq_along(features), .combine = rbind, .packages = "lmerTest") %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .packages = "lmerTest") %dopar% {
 
     # Set seed, needed for some of the CI methods
     set.seed(38)
@@ -320,24 +343,24 @@ perform_lmer <- function(object, formula_char,  ci_level = 0.95,
   }
 
   # FDR correction per column
-  results <- adjust_p_values(results)
+  results_df <- adjust_p_values(results_df)
 
   # Set a good column order
-  fixed_effects <- gsub("_Estimate$", "", colnames(results)[grep("Estimate$", colnames(results))])
+  fixed_effects <- gsub("_Estimate$", "", colnames(results_df)[grep("Estimate$", colnames(results_df))])
   statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
   col_order <- expand.grid(statistics, fixed_effects, stringsAsFactors = FALSE) %>%
     tidyr::unite("Column", Var2, Var1)
   col_order <- c("Feature_ID", col_order$Column, c("Marginal_R2", "Conditional_R2"))
 
   if (test_random) {
-    random_effects <- gsub("_SD$", "", colnames(results)[grep("SD$", colnames(results))])
+    random_effects <- gsub("_SD$", "", colnames(results_df)[grep("SD$", colnames(results_df))])
     statistics <- c("SD", "LCI95", "UCI95", "LRT", "P", "P_FDR")
     random_effect_order <- expand.grid(statistics, random_effects, stringsAsFactors = FALSE) %>%
       tidyr::unite("Column", Var2, Var1)
     col_order <- c(col_order, random_effect_order$Column)
   }
 
-  results[col_order]
+  results_df[col_order]
 }
 
 #' Test homoscedasticity
@@ -354,22 +377,23 @@ perform_lmer <- function(object, formula_char,  ci_level = 0.95,
 #' by the actual Feature IDs during model fitting. For example, if testing for equality of
 #' variances in study groups, use "Feature ~ Group".
 #'
+#' @return data frame with the results
+#'
+#' @examples
+#' perform_homoscedasticity_tests(example_set)
+#' # Equivalent
+#' perform_homoscedasticity_tests(example_set, formula_char = "Feature ~ Group")
+#'
+#' @seealso \code{\link{bartlett.test}}, \code{\link[car]{leveneTest}}, \code{\link{fligner.test}}
+#'
 #' @export
 perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
 
-  formula_char <- formula_char %||% paste("Feature ~", group_col(object))
+  homosced_fun <- function(feature, formula, data) {
 
-  data <- combined_data(object)
-  features <- Biobase::featureNames(object)
-
-  results <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
-    feature <- features[i]
-    # Replace "Feature" with the current feature name
-    tmp_formula <- gsub("Feature", feature, formula_char)
-
-    bartlett <- bartlett.test(formula = as.formula(tmp_formula), data = data)
-    levene <- car::leveneTest(y = as.formula(tmp_formula), data = data)
-    fligner <- fligner.test(formula = as.formula(tmp_formula), data = data)
+    bartlett <- bartlett.test(formula = formula, data = data)
+    levene <- car::leveneTest(y = formula, data = data)
+    fligner <- fligner.test(formula = formula, data = data)
 
     result_row <- data.frame(Feature_ID = feature,
                              Bartlett_P = bartlett$p.value,
@@ -378,7 +402,9 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
                              stringsAsFactors = FALSE)
   }
 
-  results
+  results_df <- perform_test(object, formula_char, homosced_fun)
+
+  results_df
 }
 
 #' Perform Kruskal-Wallis Rank Sum Tests
@@ -395,27 +421,113 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
 #' by the actual Feature IDs during model fitting. For example, if testing for equality of
 #' means in study groups, use "Feature ~ Group".
 #'
+#' @return data frame with the results
+#'
+#' @seealso \code{link{kruskal.test}}
+#'
+#' @examples
+#' perform_kruskal_wallis(example_set)
+#' # Equivalent
+#' perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
+#'
 #' @export
 perform_kruskal_wallis <- function(object, formula_char = NULL) {
-  formula_char <- formula_char %||% paste("Feature ~", group_col(object))
 
-  data <- combined_data(object)
-  features <- Biobase::featureNames(object)
-
-  results <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
-    feature <- features[i]
-    # Replace "Feature" with the current feature name
-    tmp_formula <- gsub("Feature", feature, formula_char)
-
-    kruskal <- kruskal.test(formula = as.formula(tmp_formula), data = data)
+  kruskal_fun <- function(feature, formula, data) {
+    kruskal <- kruskal.test(formula = formula, data = data)
 
     result_row <- data.frame(Feature_ID = feature,
                              Kruskal_P = kruskal$p.value,
                              stringsAsFactors = FALSE)
   }
 
-  results$Kruskal_P_FDR <- p.adjust(results$Kruskal_p, method = "BH")
+  results_df <- perform_test(object, formula_char, kruskal_fun)
 
-  results
+  results_df
 }
 
+
+#' Perform Welch's ANOVA
+#'
+#' Performs ANOVA with Welch's correction to deal with meterogenity of variances.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' means in study groups, use "Feature ~ Group".
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{link{oneway.test}}
+#'
+#' @examples
+#' perform_welch(example_set)
+#' # Equivalent
+#' perform_welch(example_set, formula_char = "Feature ~ Group")
+#'
+#' @export
+perform_welch <- function(object, formula_char = NULL) {
+
+  welch_fun <- function(feature, formula, data) {
+    welch <- oneway.test(formula = formula, data = data, var.equal = FALSE)
+
+    result_row <- data.frame(Feature_ID = feature,
+                             Welch_P = welch$p.value,
+                             stringsAsFactors = FALSE)
+  }
+
+  results_df <- perform_test(object, formula_char, welch_fun)
+
+  results_df
+}
+
+#' Perform t-tests
+#'
+#' Performs t-tests, the R default is Welch's t-test (unequal variances), use var.equal = TRUE
+#' for Student's t-test
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#' @param ... additional parameters to t.test
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' means in study groups, use "Feature ~ Group".
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{\link{t.test}}
+#'
+#' @export
+perform_t_test <- function(object, formula_char = NULL, ...) {
+
+  t_fun <- function(feature, formula, data) {
+    t_res <- t.test(formula = formula, data = data, ...)
+
+    conf_level <- attr(t_res$conf.int, "conf.level") * 100
+
+    result_row <- data.frame(Feature_ID = feature,
+                             Mean1 = t_res$estimate[1],
+                             Mean2 = t_res$estimate[2],
+                             Mean_1_minus_2 = t_res$estimate[1] - t_res$estimate[2],
+                             "Lower_CI_" = t_res$conf.int[1],
+                             "Upper_CI_" = t_res$conf.int[2],
+                             t_test_P = t_res$p.value,
+                             stringsAsFactors = FALSE)
+    colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
+    rownames(result_row) <- feature
+    result_row
+  }
+
+  results_df <- perform_test(object, formula_char, t_fun)
+
+  results_df
+}

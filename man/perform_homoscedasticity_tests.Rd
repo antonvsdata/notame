@@ -12,6 +12,9 @@ perform_homoscedasticity_tests(object, formula_char = NULL)
 \item{formula_char}{character, the formula to be used in the linear model (see Details)
 Defaults to "Feature ~ group_col(object)}
 }
+\value{
+data frame with the results
+}
 \description{
 Performs Bartlett's, Levene's and  Fligner-Killeen tests for equality of variances
 }
@@ -21,4 +24,13 @@ in pData(object) can be specified. To make the formulas flexible, the word "Feat
 must be used to signal the role of the features in the formula. "Feature" will be replaced
 by the actual Feature IDs during model fitting. For example, if testing for equality of
 variances in study groups, use "Feature ~ Group".
+}
+\examples{
+perform_homoscedasticity_tests(example_set)
+# Equivalent
+perform_homoscedasticity_tests(example_set, formula_char = "Feature ~ Group")
+
+}
+\seealso{
+\code{\link{bartlett.test}}, \code{\link[car]{leveneTest}}, \code{\link{fligner.test}}
 }
