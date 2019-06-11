@@ -115,8 +115,8 @@ fold_change <- function(object, group = group_col(object)) {
   }
 
   # Create comparison labels for result column names
-  comp_labels <- groups %>% t() %>% as.data.frame() %>% unite("Comparison", V2, V1, sep = "_vs_")
-  comp_labels <- comp_labels[,1]
+  comp_labels <- groups %>% t() %>% as.data.frame() %>% tidyr::unite("Comparison", V2, V1, sep = "_vs_")
+  comp_labels <- paste0("FC_",comp_labels[,1])
   results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
   colnames(results_df) <- c("Feature_ID", comp_labels)
   rownames(results_df) <- results_df$Feature_ID
@@ -125,11 +125,13 @@ fold_change <- function(object, group = group_col(object)) {
 }
 
 # Helper function for FDR correction
-adjust_p_values <- function(x) {
+adjust_p_values <- function(x, flags) {
   p_cols <- colnames(x)[grepl("_P$", colnames(x))]
   for (p_col in p_cols) {
+    p_values <- x[, p_col]
+    p_values[!is.na(flags)] <- NA
     x <- tibble::add_column(.data = x,
-                            FDR = p.adjust(x[,p_col], method = "BH"),
+                            FDR = p.adjust(p_values, method = "BH"),
                             .after = p_col)
     p_idx <- which(colnames(x) == p_col)
     colnames(x)[p_idx + 1] <- paste0(p_col, "_FDR")
@@ -138,7 +140,7 @@ adjust_p_values <- function(x) {
 }
 
 # Helper function for running a variaety of simple statistical tests
-perform_test <- function(object, formula_char, result_fun, fdr = TRUE) {
+perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE) {
 
   formula_char <- formula_char %||% paste("Feature ~", group_col(object))
 
@@ -154,7 +156,12 @@ perform_test <- function(object, formula_char, result_fun, fdr = TRUE) {
   }
 
   if (fdr) {
-    results_df <- adjust_p_values(results_df)
+    if (all_features) {
+      flags <- rep(NA_character, nrow(results_df))
+    } else {
+      flags <- fData(object)$Flag
+    }
+    results_df <- adjust_p_values(results_df, flags)
   }
 
   results_df
@@ -186,7 +193,7 @@ perform_test <- function(object, formula_char, result_fun, fdr = TRUE) {
 #' results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 #'
 #' @seealso \code{\link[stats]{lm}}
-perform_lm <- function(object, formula_char,  ci_level = 0.95, ...) {
+perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
   lm_fun <- function(feature, formula, data) {
     # Try to fit the linear model
@@ -219,10 +226,7 @@ perform_lm <- function(object, formula_char,  ci_level = 0.95, ...) {
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, lm_fun)
-
-  # FDR correction per column
-  results_df <- adjust_p_values(results_df)
+  results_df <- perform_test(object, formula_char, lm_fun, all_features)
 
   # Set a good column order
   variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
@@ -264,7 +268,7 @@ perform_lm <- function(object, formula_char,  ci_level = 0.95, ...) {
 #'
 #' @seealso \code{\link[lmerTest]{lmer}} for model scpecification and
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
-perform_lmer <- function(object, formula_char,  ci_level = 0.95,
+perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
                          ci_method = c("boot", "profile", "Wald"),
                          test_random = FALSE, ...) {
 
@@ -343,7 +347,12 @@ perform_lmer <- function(object, formula_char,  ci_level = 0.95,
   }
 
   # FDR correction per column
-  results_df <- adjust_p_values(results_df)
+  if (all_features) {
+    flags <- rep(NA_character, nrow(results_df))
+  } else {
+    flags <- fData(object)$Flag
+  }
+  results_df <- adjust_p_values(results_df, flags)
 
   # Set a good column order
   fixed_effects <- gsub("_Estimate$", "", colnames(results_df)[grep("Estimate$", colnames(results_df))])
@@ -387,7 +396,7 @@ perform_lmer <- function(object, formula_char,  ci_level = 0.95,
 #' @seealso \code{\link{bartlett.test}}, \code{\link[car]{leveneTest}}, \code{\link{fligner.test}}
 #'
 #' @export
-perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
+perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_features = FALSE) {
 
   homosced_fun <- function(feature, formula, data) {
 
@@ -402,7 +411,7 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
                              stringsAsFactors = FALSE)
   }
 
-  results_df <- perform_test(object, formula_char, homosced_fun)
+  results_df <- perform_test(object, formula_char, homosced_fun, all_features)
 
   results_df
 }
@@ -431,7 +440,7 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL) {
 #' perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_kruskal_wallis <- function(object, formula_char = NULL) {
+perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = FALSE) {
 
   kruskal_fun <- function(feature, formula, data) {
     kruskal <- kruskal.test(formula = formula, data = data)
@@ -441,7 +450,7 @@ perform_kruskal_wallis <- function(object, formula_char = NULL) {
                              stringsAsFactors = FALSE)
   }
 
-  results_df <- perform_test(object, formula_char, kruskal_fun)
+  results_df <- perform_test(object, formula_char, kruskal_fun, all_features)
 
   results_df
 }
@@ -471,7 +480,7 @@ perform_kruskal_wallis <- function(object, formula_char = NULL) {
 #' perform_welch(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_welch <- function(object, formula_char = NULL) {
+perform_welch <- function(object, formula_char = NULL, all_features = FALSE) {
 
   welch_fun <- function(feature, formula, data) {
     welch <- oneway.test(formula = formula, data = data, var.equal = FALSE)
@@ -481,7 +490,7 @@ perform_welch <- function(object, formula_char = NULL) {
                              stringsAsFactors = FALSE)
   }
 
-  results_df <- perform_test(object, formula_char, welch_fun)
+  results_df <- perform_test(object, formula_char, welch_fun, all_features)
 
   results_df
 }
@@ -507,7 +516,7 @@ perform_welch <- function(object, formula_char = NULL) {
 #' @seealso \code{\link{t.test}}
 #'
 #' @export
-perform_t_test <- function(object, formula_char = NULL, ...) {
+perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ...) {
 
   t_fun <- function(feature, formula, data) {
     t_res <- t.test(formula = formula, data = data, ...)
@@ -527,7 +536,57 @@ perform_t_test <- function(object, formula_char = NULL, ...) {
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, t_fun)
+  results_df <- perform_test(object, formula_char, t_fun, all_features)
 
   results_df
 }
+
+#' Perform pairwise t-tests
+#'
+#' Performs pariowise t-tests between all study groups. NOTE! Does not use formula interface
+#'
+#' @param object a MetaboSet object
+#' @param group character, column name of phenoData giving the groups
+#' @param ... other parameters passed to perform_t_test, and eventually to base R t.test
+#'
+#' @details P-values of each comparison are corrected separately from each other.
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{\link{perform_t_test}}, \code{\link{t.test}}
+#'
+#' @export
+perform_pairwise_t_test <- function(object, group = group_col(object), all_features = FALSE, ...) {
+
+  if (class(pData(object)[, group]) == "factor") {
+    groups <- levels(pData(object)[, group])
+  } else {
+    groups <- unique(pData(object)[, group])
+  }
+  combinations <- combn(groups, 2)
+
+  for (i in seq_len(ncol(combinations))) {
+    group1 <- as.character(combinations[1, i])
+    group2 <- as.character(combinations[2, i])
+    # Subset the pair of groups
+    object_tmp <- object[, pData(object)[, group] %in% c(group1, group2)]
+    pData(object_tmp) <- droplevels(pData(object_tmp))
+
+    t_results <- perform_t_test(object_tmp, formula_char = paste("Feature ~", group), all_features)
+    colnames(t_results) <- c("Feature_ID", paste0("Mean_", c(group1, group2)),
+                          paste0("Mean_", group1, "_minus_", group2),
+                          paste0(paste0(group1, "_", group2, "_"), colnames(t_results)[5:8]))
+
+    if (i == 1) {
+      results_df <- t_results
+    } else {
+      results_df <- dplyr::left_join(results_df, t_results)
+    }
+
+  }
+
+  results_df
+}
+
+
+
