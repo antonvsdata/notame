@@ -91,7 +91,6 @@ merge_helper <- function(x, y) {
   merged_exprs <- rbind(exprs(x), exprs(y))
   merged_fdata <- rbind(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
-  merged_predicted <- rbind(predicted(x), predicted(y))
   merged_results <- rbind(results(x), results(y))
 
   merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
@@ -104,7 +103,6 @@ merge_helper <- function(x, y) {
                              group_col = merged_group_col,
                              time_col = merged_time_col,
                              subject_col = merged_subject_col,
-                             predicted = merged_predicted,
                              results = merged_results)
 
   merged_object

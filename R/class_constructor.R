@@ -209,7 +209,6 @@ MetaboSet <- setClass("MetaboSet",
                       slots = c(group_col = "character",
                                 time_col = "character",
                                 subject_col = "character",
-                                predicted = "matrix",
                                 results = "data.frame"),
                       contains = "ExpressionSet")
 
@@ -244,9 +243,6 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
                         group_col = group_col,
                         time_col = time_col,
                         subject_col = subject_col,
-                        predicted = matrix(NA_real_, nrow = nrow(ad_tmp),
-                                           ncol = ncol(ad_tmp),
-                                           dimnames = dimnames(ad_tmp)),
                         results = data.frame(Feature_ID = fd_tmp$Feature_ID,
                                              row.names = rownames(fd_tmp),
                                              stringsAsFactors = FALSE))
@@ -384,24 +380,6 @@ setGeneric("subject_col<-", signature = "object",
 setMethod("subject_col<-", "MetaboSet",
           function(object, value) {
             object@subject_col <- value
-            if (validObject(object)) {
-              return(object)
-            }
-          })
-
-# predicted values from spline regression
-setGeneric("predicted", signature = "object",
-           function(object) standardGeneric("predicted"))
-
-setMethod("predicted", "MetaboSet",
-          function(object) object@predicted)
-
-setGeneric("predicted<-", signature = "object",
-           function(object, value) standardGeneric("predicted<-"))
-
-setMethod("predicted<-", "MetaboSet",
-          function(object, value) {
-            object@predicted <- value
             if (validObject(object)) {
               return(object)
             }

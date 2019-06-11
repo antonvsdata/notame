@@ -4,13 +4,15 @@
 \alias{save_dc_plots}
 \title{Drift correction plots}
 \usage{
-save_dc_plots(orig, dc, file, width = 8, height = 6,
+save_dc_plots(orig, dc, predicted, file, width = 8, height = 6,
   color = group_col(orig), shape = NULL, color_scale = NULL)
 }
 \arguments{
 \item{orig}{a MetaboSet object, before drift correction}
 
 \item{dc}{a MetaboSet object, after drift correction as returned by correct_drift}
+
+\item{predicted}{a matrix of predicted values, as returned by dc_cubic_spline}
 
 \item{file}{path to the PDF file where the plots should be saved}
 

@@ -12,7 +12,8 @@ comb <- function(x, ...) {
 #' @param spar smoothing parameter
 #' @param spar_lower,spar_upper lower and upper limits for the smoothing parameter
 #'
-#' @return MetaboSet object as the one supplied, with drift corrected fetures
+#' @return list with object = MetaboSet object as the one supplied, with drift corrected fetures
+#' and predicted = matrix of the predicted values by the cubic spline (used in visualization)
 #'
 #' @details If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
 #' be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
@@ -66,8 +67,7 @@ dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 
   }
 
   exprs(object) <- dc_data$corrected
-  predicted(object) <- dc_data$predicted
-  object
+  return(list(object = object, predicted = dc_data$predicted))
 }
 
 #' Flag the results of drift correction
@@ -147,6 +147,7 @@ inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
 #'
 #' @param orig a MetaboSet object, before drift correction
 #' @param dc a MetaboSet object, after drift correction as returned by correct_drift
+#' @param predicted a matrix of predicted values, as returned by dc_cubic_spline
 #' @param file path to the PDF file where the plots should be saved
 #' @param width,height width and height of the plots in inches
 #' @param color character, name of the column used for coloring the points
@@ -159,7 +160,7 @@ inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
 #' @seealso \code{\link{correct_drift}}, \code{\link{inspect_dc}}
 #'
 #' @export
-save_dc_plots <- function(orig, dc, file, width = 8, height = 6, color = group_col(orig),
+save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, color = group_col(orig),
                     shape = NULL, color_scale = NULL) {
   # If color column not set, use QC column
   color <- color %||% "QC"
@@ -168,7 +169,7 @@ save_dc_plots <- function(orig, dc, file, width = 8, height = 6, color = group_c
 
   orig_data <- combined_data(orig)
   dc_data <- combined_data(dc)
-  predictions <- as.data.frame(t(predicted(dc)))
+  predictions <- as.data.frame(t(predicted))
   predictions$Injection_order <- orig_data$Injection_order
 
   pdf(file, width = width, height = height)
@@ -234,8 +235,9 @@ correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.
                           shape = NULL, color_scale = NULL) {
 
   # Fit cubic spline and correct
-  corrected <- dc_cubic_spline(object, spar = spar,
+  corrected_list <- dc_cubic_spline(object, spar = spar,
                                spar_lower = spar_lower, spar_upper = spar_upper)
+  corrected <- corrected_list$object
   # Only keep corrected versions of features where drift correction increases quality
   inspected <- inspect_dc(object, corrected, condition = condition)
   # Optionally save before and after plots
@@ -243,7 +245,8 @@ correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.
     if (is.null(file)) {
       stop("File must be specified")
     }
-    save_dc_plots(orig = object, dc = corrected, file = file, width = width, height = height,
+    save_dc_plots(orig = object, dc = corrected, predicted = corrected_list$predicted,
+                  file = file, width = width, height = height,
                   color = color, shape = shape, color_scale = color_scale)
 
   }

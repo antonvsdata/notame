@@ -15,7 +15,8 @@ dc_cubic_spline(object, spar = NULL, spar_lower = 0.5,
 \item{spar_lower, spar_upper}{lower and upper limits for the smoothing parameter}
 }
 \value{
-MetaboSet object as the one supplied, with drift corrected fetures
+list with object = MetaboSet object as the one supplied, with drift corrected fetures
+and predicted = matrix of the predicted values by the cubic spline (used in visualization)
 }
 \description{
 Corrects the dirft in the features by applying smoothed cubic spline regression
