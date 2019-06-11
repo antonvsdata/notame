@@ -4,8 +4,9 @@
 \alias{perform_lmer}
 \title{Linear mixed models}
 \usage{
-perform_lmer(object, formula_char, ci_level = 0.95,
-  ci_method = c("boot", "profile", "Wald"), test_random = FALSE, ...)
+perform_lmer(object, formula_char, all_features = FALSE,
+  ci_level = 0.95, ci_method = c("boot", "profile", "Wald"),
+  test_random = FALSE, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}

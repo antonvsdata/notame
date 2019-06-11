@@ -4,7 +4,8 @@
 \alias{perform_kruskal_wallis}
 \title{Perform Kruskal-Wallis Rank Sum Tests}
 \usage{
-perform_kruskal_wallis(object, formula_char = NULL)
+perform_kruskal_wallis(object, formula_char = NULL,
+  all_features = FALSE)
 }
 \arguments{
 \item{object}{a MetaboSet object}

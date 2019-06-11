@@ -4,7 +4,7 @@
 \alias{perform_welch}
 \title{Perform Welch's ANOVA}
 \usage{
-perform_welch(object, formula_char = NULL)
+perform_welch(object, formula_char = NULL, all_features = FALSE)
 }
 \arguments{
 \item{object}{a MetaboSet object}

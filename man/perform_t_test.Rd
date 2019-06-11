@@ -4,7 +4,7 @@
 \alias{perform_t_test}
 \title{Perform t-tests}
 \usage{
-perform_t_test(object, formula_char = NULL, ...)
+perform_t_test(object, formula_char = NULL, all_features = FALSE, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
