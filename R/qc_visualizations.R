@@ -186,7 +186,7 @@ plot_sample_boxplots <- function(object, order_by = NULL, fill_by = NULL,
                        high = boxplot.stats(Value)$stats[5])
 
 
-    ylimits <- c(min(ylimits$low), max(ylimits$high))
+    ylimits <- c(0, max(ylimits$high))
     # scale y limits based on ylim1
     p <- p + coord_cartesian(ylim = ylimits)
     # add text to main title
