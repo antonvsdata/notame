@@ -301,7 +301,7 @@ write_to_excel <- function(object, file, ...) {
   # All combined
   big <- rbind(top[seq_len(nrow(top) - 1), ], bottom)
 
-  openxlsx::write.xlsx(big, file = "test.xlsx", colNames = FALSE, ...)
+  openxlsx::write.xlsx(big, file = file, colNames = FALSE, ...)
 }
 
 
