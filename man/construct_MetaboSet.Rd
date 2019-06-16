@@ -2,7 +2,7 @@
 % Please edit documentation in R/class_constructor.R
 \name{construct_MetaboSet}
 \alias{construct_MetaboSet}
-\title{Construct MeataboSet objects}
+\title{Construct MetaboSet objects}
 \usage{
 construct_MetaboSet(exprs, pheno_data, feature_data,
   group_col = NA_character_, time_col = NA_character_,
