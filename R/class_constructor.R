@@ -153,6 +153,8 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = 
 
   return(list(exprs = exprs, pheno_data = pheno_data, feature_data = feature_data))
 }
+
+
 # Combines mode name, mass and retention time to create a Feature ID
 #' @importFrom magrittr "%>%"
 name_features <- function(feature_data) {
@@ -225,7 +227,7 @@ setValidity("MetaboSet",
               }
             })
 
-#' Construct MeataboSet objects
+#' Construct MetaboSet objects
 #'
 #' Construct MetaboSet objects from input read by read_from_excel.
 #' Returns a list of MetaboSet objects, one per mode. The modes are separated by the "Split" column
