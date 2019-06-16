@@ -29,7 +29,7 @@ save_plot <- function(p, file, ...) {
 #' named \code{prefix.pdf} will be created. NOTE: on Windows this reuires installation of pdftk
 #' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/})
 #'
-#'
+#' @export
 visualizations <- function(object, prefix, all_features = FALSE, merge = TRUE) {
 
   # Helper function
