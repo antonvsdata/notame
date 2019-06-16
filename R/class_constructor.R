@@ -241,6 +241,8 @@ setValidity("MetaboSet",
 #' @return list of MetaboSet objects
 #'
 #' @seealso \code{\link{[read_from_excel]}}
+#'
+#' @export
 construct_MetaboSet <- function(exprs, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
                                 subject_col = NA_character_) {
