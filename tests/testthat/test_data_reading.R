@@ -77,7 +77,7 @@ test_that("Easy example data is read correctly", {
                           name = "easy", id_prefix = "TEST_")
 
   # Test that the parts are read as expected
-  expect_equal(read$assay_data, ad)
+  expect_equal(read$exprs, ad)
   expect_equal(read$pheno_data, pd)
   expect_equal(read$feature_data, fd)
 })
@@ -133,7 +133,7 @@ test_that("Data is split correctly", {
                           split_by = c("Column", "Mode"), id_prefix = "TEST_")
 
   # Test that the parts are read as expected
-  expect_equal(read$assay_data, ad)
+  expect_equal(read$exprs, ad)
   expect_equal(read$pheno_data, pd)
   expect_equal(read$feature_data, fd)
 

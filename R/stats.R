@@ -193,6 +193,8 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 #'
 #' @seealso \code{\link[stats]{lm}}
+#'
+#' @export
 perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
   lm_fun <- function(feature, formula, data) {
@@ -268,6 +270,8 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #'
 #' @seealso \code{\link[lmerTest]{lmer}} for model scpecification and
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
+#'
+#' @export
 perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
                          ci_method = c("boot", "profile", "Wald"),
                          test_random = FALSE, ...) {

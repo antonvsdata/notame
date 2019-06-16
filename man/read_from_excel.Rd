@@ -25,7 +25,7 @@ read_from_excel(file, sheet, corner_row, corner_column,
 \value{
 list of three data frames:
 \itemize{
-  \item assay_data: the actual abundances, size features x samples
+  \item exprs: the actual abundances, size features x samples
   \item pheno_data: sample information, size sample info variables x samples
   \item feature_data: information about the features, size features x feature info columns
 }

@@ -68,7 +68,7 @@ check_position <- function(x, cc, cr) {
 #'
 #' @return list of three data frames:
 #' \itemize{
-#'   \item assay_data: the actual abundances, size features x samples
+#'   \item exprs: the actual abundances, size features x samples
 #'   \item pheno_data: sample information, size sample info variables x samples
 #'   \item feature_data: information about the features, size features x feature info columns
 #' }
@@ -146,12 +146,12 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = 
   rownames(feature_data) <- feature_data$Feature_ID
 
   # Extract LC-MS measurements as matrix
-  assay_data <- dada[(cr+1):nrow(dada), (cc+1):ncol(dada)] %>%
+  exprs <- dada[(cr+1):nrow(dada), (cc+1):ncol(dada)] %>%
     apply(2, as.numeric)
-  rownames(assay_data) <- rownames(feature_data)
-  colnames(assay_data) <- rownames(pheno_data)
+  rownames(exprs) <- rownames(feature_data)
+  colnames(exprs) <- rownames(pheno_data)
 
-  return(list(assay_data = assay_data, pheno_data = pheno_data, feature_data = feature_data))
+  return(list(exprs = exprs, pheno_data = pheno_data, feature_data = feature_data))
 }
 # Combines mode name, mass and retention time to create a Feature ID
 #' @importFrom magrittr "%>%"
@@ -225,7 +225,23 @@ setValidity("MetaboSet",
               }
             })
 
-construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
+#' Construct MeataboSet objects
+#'
+#' Construct MetaboSet objects from input read by read_from_excel.
+#' Returns a list of MetaboSet objects, one per mode. The modes are separated by the "Split" column
+#' in feature_data.
+#'
+#' @param exprs matrix, the feature abundances, size features x samples
+#' @param pheno_data data frame, sample information, size sample info variables x samples
+#' @param feature_data data frame, information about the features, size features x feature info columns
+#' @param group_col character, the name of the column in pheno_data to use as the grouping variable
+#' @param time_col character, the name of the column in pheno_data to use as the time variable
+#' @param subject_col character, the name of the column in pheno_data to use as the subject ID variable
+#'
+#' @return list of MetaboSet objects
+#'
+#' @seealso \code{\link{[read_from_excel]}}
+construct_MetaboSet <- function(exprs, pheno_data, feature_data,
                                 group_col = NA_character_, time_col = NA_character_,
                                 subject_col = NA_character_) {
 
@@ -236,7 +252,7 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
   obj_list <- list()
   for (part in parts) {
     fd_tmp <- Biobase::AnnotatedDataFrame(data= feature_data[feature_data$Split == part, ])
-    ad_tmp <- assay_data[fd_tmp$Feature_ID,]
+    ad_tmp <- exprs[fd_tmp$Feature_ID,]
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
                         phenoData = pheno_data,
                         featureData = fd_tmp,
@@ -261,6 +277,8 @@ construct_MetaboSet <- function(assay_data, pheno_data, feature_data,
 #' @param object a MetaboSet object
 #' @param file path to the file to write
 #' @param ... Additional parameters passed to openxlsx::write.xlsx
+#'
+#' @export
 write_to_excel <- function(object, file, ...) {
 
   # Bottom part consists of (from left to right):
@@ -403,16 +421,3 @@ setMethod("results<-", "MetaboSet",
               return(object)
             }
           })
-
-
-
-
-
-
-
-
-
-
-
-
-
