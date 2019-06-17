@@ -325,44 +325,32 @@ write_to_excel <- function(object, file, ...) {
 
 # ------------ Accessors and Replacers -----------------
 
+#' @export
 setGeneric("combined_data", signature = "object",
            function(object) standardGeneric("combined_data"))
 
 #' @importFrom Biobase exprs pData
+#' @export
 setMethod("combined_data", c(object = "MetaboSet"),
           function(object) {
             cbind(pData(object), t(exprs(object)))
           })
 
 
-# stage
-setGeneric("stage", signature = "object",
-           function(object) standardGeneric("stage"))
-
-setMethod("stage", "MetaboSet",
-          function(object) object@stage)
-
-setGeneric("stage<-", signature = "object",
-           function(object, value) standardGeneric("stage<-"))
-
-setMethod("stage<-", "MetaboSet",
-          function(object, value) {
-            object@stage <- value
-            if (validObject(object)) {
-              return(object)
-            }
-          })
-
 # group
+#' @export
 setGeneric("group_col", signature = "object",
            function(object) standardGeneric("group_col"))
 
+#' @export
 setMethod("group_col", "MetaboSet",
           function(object) object@group_col)
 
+#' @export
 setGeneric("group_col<-", signature = "object",
            function(object, value) standardGeneric("group_col<-"))
 
+#' @export
 setMethod("group_col<-", "MetaboSet",
           function(object, value) {
             object@group_col <- value
@@ -372,15 +360,19 @@ setMethod("group_col<-", "MetaboSet",
           })
 
 # time
+#' @export
 setGeneric("time_col", signature = "object",
            function(object) standardGeneric("time_col"))
 
+#' @export
 setMethod("time_col", "MetaboSet",
           function(object) object@time_col)
 
+#' @export
 setGeneric("time_col<-", signature = "object",
            function(object, value) standardGeneric("time_col<-"))
 
+#' @export
 setMethod("time_col<-", "MetaboSet",
           function(object, value) {
             object@time_col <- value
@@ -390,15 +382,19 @@ setMethod("time_col<-", "MetaboSet",
           })
 
 # subject ID
+#' @export
 setGeneric("subject_col", signature = "object",
            function(object) standardGeneric("subject_col"))
 
+#' @export
 setMethod("subject_col", "MetaboSet",
           function(object) object@subject_col)
 
+#' @export
 setGeneric("subject_col<-", signature = "object",
            function(object, value) standardGeneric("subject_col<-"))
 
+#' @export
 setMethod("subject_col<-", "MetaboSet",
           function(object, value) {
             object@subject_col <- value
@@ -409,15 +405,19 @@ setMethod("subject_col<-", "MetaboSet",
 
 
 # results from statistical tests
+#' @export
 setGeneric("results", signature = "object",
            function(object) standardGeneric("results"))
 
+#' @export
 setMethod("results", "MetaboSet",
           function(object) object@results)
 
+#' @export
 setGeneric("results<-", signature = "object",
            function(object, value) standardGeneric("results<-"))
 
+#' @export
 setMethod("results<-", "MetaboSet",
           function(object, value) {
             object@results <- value

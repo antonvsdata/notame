@@ -1,7 +1,9 @@
+#' @export
 setGeneric("quality", signature = "object",
            function(object) standardGeneric("quality"))
 
 #' @importFrom Biobase fData
+#' @export
 setMethod("quality", c(object = "MetaboSet"),
           function(object) {
             if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
@@ -11,10 +13,12 @@ setMethod("quality", c(object = "MetaboSet"),
                             "D_ratio_r")]
           })
 
+#' @export
 setGeneric("erase_quality", signature = "object",
            function(object) standardGeneric("erase_quality"))
 
 #' @importFrom Biobase fData
+#' @export
 setMethod("erase_quality", c(object = "MetaboSet"),
           function(object) {
             if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
@@ -24,11 +28,13 @@ setMethod("erase_quality", c(object = "MetaboSet"),
             object
           })
 
+#' @export
 setGeneric("assess_quality", signature = "object",
            function(object) standardGeneric("assess_quality"))
 
 #' @importFrom foreach "%dopar%"
 #' @importFrom Biobase exprs fData "fData<-"
+#' @export
 setMethod("assess_quality", c(object = "MetaboSet"),
           function(object) {
             # Remove old quality metrics
@@ -55,12 +61,14 @@ setMethod("assess_quality", c(object = "MetaboSet"),
           })
 
 
+#' @export
 setGeneric("flag_quality", signature = "object",
            function(object,
                     condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
                                 (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") standardGeneric("flag_quality"))
 
 #' @importFrom Biobase fData "fData<-"
+#' @export
 setMethod("flag_quality", c(object = "MetaboSet"),
           function(object,
                    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
@@ -77,11 +85,13 @@ setMethod("flag_quality", c(object = "MetaboSet"),
           })
 
 
+#' @export
 setGeneric("flag_detection", signature = "object",
            function(object, qc_limit = 0.7, group_limit = 0.8, group = group_col(object)) standardGeneric("flag_detection"))
 
 #' @importFrom Biobase fData "fData<-" featureNames
 #' @importFrom magrittr "%>%"
+#' @export
 setMethod("flag_detection", c(object = "MetaboSet"),
           function(object, qc_limit, group_limit, group) {
 
