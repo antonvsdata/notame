@@ -63,7 +63,16 @@ plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
                       shape_scale = NULL, ...) {
 
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
-  res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+
+  # If there are missing values, use ppca method from pcaMethods instead of usual PCA
+  if (sum(is.na(exprs(prepd))) > 0) {
+    res_pca <- pcaMethods::pca(object, nPcs = 50, method = "ppca", scale = "none", center = FALSE)
+    pca_scores <- pcaMethods::scores(res_pca)
+    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
+  } else {
+    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+  }
+
   tsne_scores <- data.frame(res_tsne$Y)
   tsne_scores[color] <- pData(object)[, color]
 
