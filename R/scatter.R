@@ -202,6 +202,8 @@ plot_tsne_hexbin <- function(object, center = TRUE, scale = "uv", perplexity = 3
                       fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...) {
 
+  prepd <- pcaMethods::prep(object, center = center, scale = scale)
+
   if (sum(is.na(exprs(prepd))) > 0) {
     res_pca <- pcaMethods::pca(object, nPcs = min(ncol(object),50), method = "ppca", scale = "none", center = FALSE)
     pca_scores <- pcaMethods::scores(res_pca)
