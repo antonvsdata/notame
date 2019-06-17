@@ -12,23 +12,28 @@ License: MIT license
 Encoding: UTF-8
 LazyData: true
 biocViews:
+Depends:
+    ggplot2,
+    magrittr,
+    Biobase
 Imports:
     dplyr,
-    ggplot2,
     missForest,
     Rtsne,
     tidyr,
     openxlsx,
-    Biobase,
-    pcaMethods
-Suggests:
+    pcaMethods,
     ggdendro,
     mdatools,
     testthat,
     foreach,
     doParallel,
-    lmer,
-    lmerTest,
     cowplot,
     Hmisc
+Suggests:
+    lmer,
+    lmerTest,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr
