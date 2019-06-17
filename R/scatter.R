@@ -66,7 +66,7 @@ plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
 
   # If there are missing values, use ppca method from pcaMethods instead of usual PCA
   if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, nPcs = 50, method = "ppca", scale = "none", center = FALSE)
+    res_pca <- pcaMethods::pca(object, nPcs = min(ncol(object),50), method = "ppca", scale = "none", center = FALSE)
     pca_scores <- pcaMethods::scores(res_pca)
     res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
   } else {
@@ -202,8 +202,13 @@ plot_tsne_hexbin <- function(object, center = TRUE, scale = "uv", perplexity = 3
                       fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...) {
 
-  prepd <- pcaMethods::prep(object, center = center, scale = scale)
-  res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+  if (sum(is.na(exprs(prepd))) > 0) {
+    res_pca <- pcaMethods::pca(object, nPcs = min(ncol(object),50), method = "ppca", scale = "none", center = FALSE)
+    pca_scores <- pcaMethods::scores(res_pca)
+    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
+  } else {
+    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+  }
   tsne_scores <- data.frame(res_tsne$Y)
   tsne_scores[fill] <- pData(object)[, fill]
 
