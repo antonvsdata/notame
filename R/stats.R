@@ -155,6 +155,16 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
   }
 
+  # Add NA rows for features where the test failed
+  results_df <- results_df %>% dplyr::select(Feature_ID, dplyr::everything())
+  missing_features <- setdiff(features, results_df$Feature_ID)
+  fill_nas <- matrix(NA, nrow = length(missing_features), ncol = ncol(results_df) - 1) %>%
+    as.data.frame()
+  results_fill <- data.frame(Feature_ID = missing_features, fill_nas)
+  rownames(results_fill) <- missing_features
+  colnames(results_fill) <- colnames(results_df)
+  results_df <- rbind(results_df, results_fill)
+
   if (fdr) {
     if (all_features) {
       flags <- rep(NA_character, nrow(results_df))
