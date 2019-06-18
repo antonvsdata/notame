@@ -170,12 +170,7 @@ plot_sample_boxplots <- function(object, order_by = NULL, fill_by = NULL,
 
   data <- tidyr::gather(data, "Variable", "Value", rownames(exprs(object)))
 
-  p <- ggplot(data, aes(x = Sample_ID, y = Value, fill = fill_by)) +
-    geom_boxplot() +
-    theme_bw() +
-    theme(plot.title = element_text(face="bold"),
-          axis.text.x = element_text(angle=90, vjust=0.3)) +
-    fill_scale
+  p <- ggplot(data, aes(x = Sample_ID, y = Value, fill = fill_by))
 
   ## Zooming outliers out of view
   if(zoom_boxplot){
@@ -188,16 +183,25 @@ plot_sample_boxplots <- function(object, order_by = NULL, fill_by = NULL,
 
     ylimits <- c(0, max(ylimits$high))
     # scale y limits based on ylim1
-    p <- p + coord_cartesian(ylim = ylimits)
+    p <- p +
+      geom_boxplot(outlier.shape = NA) +
+      coord_cartesian(ylim = ylimits)
     # add text to main title
     subtitle <- paste(subtitle, "(zoomed in boxplot: outliers out of view)", sep=" ")
+  } else {
+    p <- p +
+      geom_boxplot()
   }
 
   p <- p +
     labs(x = paste(order_by, collapse = "_"),
          y = "Abundance of metabolites",
          fill = paste(fill_by, collapse = "_"),
-         title = title, subtitle = subtitle)
+         title = title, subtitle = subtitle) +
+    theme_bw() +
+    theme(plot.title = element_text(face="bold"),
+          axis.text.x = element_text(angle=90, vjust=0.3)) +
+    fill_scale
 
   p
 }
