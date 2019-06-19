@@ -1,0 +1,126 @@
+---
+title: "Project example"
+author: "Anton Mattsson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Project example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+
+Load the libraries (doParallel is used for parallel processing):
+
+```{r}
+library(amp)
+library(doParallel)
+```
+
+
+Let's set up a path for our project. This is safer than using ```setwd()```
+
+```{r}
+path <- "~/test_project/"
+```
+
+
+Now we can read in the actual data! The file given here includes some example data and can be accessed at INSERT FILE LINK HERE
+
+```{r}
+data <- read_from_excel(file = paste0(path, "example_data.xlsx"), sheet = 1,
+                        corner_row = 6, corner_column = "H",
+                        split_by = c("Column", "Mode"))
+```
+
+The function ````read_from_excel``` can be used to read data from an Excel spreadsheet using the following format:  
+![Data input spreadsheet format](Data_input.png)
+
+
+The first parameters include the file name, sheet number, and coordinates for the corner, in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. 
+
+Some fields in sample information and feaure data have special purposes. 
+
+There are a few obligatory fields:
+- "Injection_order" in sample information. The values must be numeric and unique  
+- "Mass" or "Average mz" in feature data, not case sensitive  
+- "Retention time", "RetentionTime", "Average rt(min)" or "rt"" in feature data, not case sensitive
+
+Additionally, there are a few special cases:
+
+- If sample information does not contain a "Sample_ID" field, one will be created. The sample IDs will be the injection order of the sample combined with a prefix, specified using the argument ```id_prefix```. The default prefix is "ID".  
+- If sample information does not contain a "QC" field that separates between QC samples and regular samples, the function will attempt to automatically create one using one of the columns in sample information. The value will be "QC" for QC samples and "Sample" for regular samples. If the field is given, regular samples can have any value, but the value for QC samples should always be "QC".  
+- One or more fields in feature data can be used to split the data into parts. These field names are given as the ```split_by``` parameter. Usually these columns are the LC column and Ionization mode. A new field "Split" will be added, that contains the combination of the columns given in the given order.  
+ALTERNATIVELY, if the file only contains one mode, specify the name of the mode, e.g. "HILIC_pos" as the ```name``` argument. In this case, the "Split" field will equal "HILIC_pos" for all the features.
+
+The function returns a list holding the three parts of the data:
+
+- ```exprs```: feature abundances across the samples
+
+- ```pheno_data```: sample information
+- ```feature_data```: feature information
+
+```{r}
+names(data)
+sapply(data, class)
+sapply(data, dim)
+```
+
+These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used
+
+
