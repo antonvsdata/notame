@@ -16,55 +16,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
-
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
-
-
 Load the libraries (doParallel is used for parallel processing):
 
 ```{r}
@@ -79,12 +30,21 @@ Let's set up a path for our project. This is safer than using ```setwd()```
 path <- "~/test_project/"
 ```
 
+Then we will set up a log file. many functions of the package will log information when they have finished. This helps monitoring the analysis process in case something goes wrong AND to review the results later.
+
+```{r}
+init_log(log_file = paste0(path, "log.txt"))
+# Check logging state
+log_state()
+```
+
+
 
 Now we can read in the actual data! The file given here includes some example data and can be accessed at INSERT FILE LINK HERE
 
 ```{r}
-data <- read_from_excel(file = paste0(path, "example_data.xlsx"), sheet = 1,
-                        corner_row = 6, corner_column = "H",
+data <- read_from_excel(file = paste0(path, "split_data.xlsx"), sheet = 1,
+                        corner_row = 4, corner_column = "F",
                         split_by = c("Column", "Mode"))
 ```
 
@@ -121,6 +81,133 @@ sapply(data, class)
 sapply(data, dim)
 ```
 
-These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used
+These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in amp. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentattion](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
+
+MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fileds of a MetaboSet object, and are recorded for convenience of the user, Many functions use these columns as default values for visualizations, hypothesis tests etc.
+
+```{r}
+modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,
+                             feature_data = data$feature_data,
+                             group_col = "Group")
+```
+
+The function returns a list of MetaboSet objects, one per mode (LC column x ionization mode).
+
+```{r}
+names(modes)
+sapply(modes, class)
+```
+
+After the creation of the objects, it is common to run a few preprocessing and quality control steps for each mode, before merging them together to a single object for statistical analysis.
+
+```{r}
+for (i in seq_along(modes)) {
+  # PREPROCESSING STEPS
+}
+```
+
+
+Here, the steps are presented one at a time for one mode, so text explanations can be added before each step. This corresponds to one iteration of the above for loop.
+
+```{r}
+i <- 1
+name <- names(modes)[i]
+mode <- modes[[i]]
+```
+
+First, mark the missing values as ```NA```. Many peak picking programs mark missing values as 0 or 1, so they need to be set to the R equivalent so R functions can recognise them.
+
+```{r}
+# Set all zero abundances to NA
+mode <- mark_nas(mode, value = 0)
+```
+
+Next, flag all the features with extensive amounts of missing values. Peak picking software sometimes keep features that are missing from almost all samples, which does not really make sense.  
+There are two limits for the proportion of observed values: ```qc_limit``` for QC samples and ```group_limit``` for study groups. All features that are not observed in at least ```qc_limit``` of QC samples are flagged. In addition, features need to be observed in at least ```group_limit``` of samples in **at least one group**.  
+Adjust the limits as needed.
+
+```{r}
+mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
+```
+
+Next, we draw visualizations of many kind. The function visualizations is handy for saving all the relevant plots as PDF files. Note that this a very high-level function so you might need to modify it to a project specific version! From now on, the visualizations are repeated after each step to observe the effect of preprocessing procedures. The argument ```prefix``` is a prefix for the file paths the figures will be saved to.
+
+```{r}
+visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
+```
+
+Next, we apply drift correction with cubic spline regression. There is an option to save plots of the procedure for each feature in one large PDF file (one page per features). For studies with a relatively small number of features (a few thousand per mode) this is feasible. For plant studies and other studies with tens of thousands of features, it is probably a good idea to draw the drift correction plots after statistical analysis, and only draw them for the modt interesting compounds. 
+
+```{r}
+corrected <- correct_drift(mode)
+visualizations(corrected), prefix = paste0(path, "figures/", name, "_DRIFT"))
+```
+
+Information about the drift correction procedure is recorded in the DC_note column of feature data:  
+- Low-quality = drift correction did not improve signal quality, original feature was retained  
+- Missing_QCs = there were not enough QC samples (minimum 4 is required) to perform drift correction, original feature is retained.
+- Negative_DC = in rare cases, drift correction results in negative values. This is unwanted behavior, so the original feature is retained. 
+- Drift_corrected = everything worked as expected, and the feature was corrected for the drift.
+
+```{r}
+fData(corrected)$DC_note
+```
+
+After drift correction, it is time to flag low-quality features. 
+
+```{r}
+corrected <- corrected %>% assess_quality() %>% flag_quality()
+processed[[i]] <- corrected
+
+visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
+```
+
+
+Next, it is time to merge the modes together and visualizae the complete dataset:
+
+```{r}
+merged <- merge_metabosets(processed)
+
+visualizations(merged, prefix = paste0(path, "figures/", name, "_FULL"))
+```
+
+Then, QC samples can (and should) be removed, as they are no longer needed.
+
+```{r}
+merged <- drop_qcs(merged)
+
+visualizations(mode, prefix = paste0(path, "figures/", name, "_FULL_NO_QC"))
+```
+
+If there are any missing values in the data, they need to be imputed. We use random forest imputation to impute these values.
+
+```{r}
+#Set seed number for reproducibility
+set.seed(38)
+imputed <- impute_rf(merged)
+```
+
+By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, thay should be imputed as well. This can be achieved through a second round of imputation, now with all features included:
+
+```{r}
+imputed <- impute_rf(imputed, all_features = TRUE)
+```
+
+**NOTE:** It is NOT recommended to impute all features in the first round, as low quality features would affect imputation of good quality features.
+
+After imputation, a final round of visualizations is in place.
+
+```{r}
+visualizations(imputed, prefix = paste0(path, "figures/", name, "_FULL_IMPUTED"))
+```
+
+It is a good idea to save the merged and processed data, so experimenting with different statistical analyses becomes easier:
+
+```{r}
+save(imputed, file = paste0(path, "full_data.RData"))
+```
+
+
+Now we are ready for statistical analysis!
 
 
