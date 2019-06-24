@@ -142,8 +142,6 @@ adjust_p_values <- function(x, flags) {
 # Helper function for running a variaety of simple statistical tests
 perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE) {
 
-  formula_char <- formula_char %||% paste("Feature ~", group_col(object))
-
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
 
@@ -153,6 +151,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     tmp_formula <- gsub("Feature", feature, formula_char)
 
     result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
+    # In case Feature is used as predictor, make the column names match
+    colnames(result_row) <- gsub(feature, "Feature", colnames(result_row))
+    result_row
   }
 
   # Add NA rows for features where the test failed
@@ -248,6 +249,86 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
   col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
   results_df[col_order]
+}
+
+
+#' Logistic regression
+#'
+#' Fits a logistic regression model separately for each feature. Returns all relevant
+#' statistics.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param ci_level the confidence level used in constructing the confidence intervals
+#' for regression coefficients
+#' @param ... additional parameters passed to glm
+#'
+#' @return a data frame with one row per feature, with all the
+#' relevant statistics of the linear model as columns
+#'
+#' @details The logistic regression model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting, see the example
+#'
+#' @examples
+#' # A simple example without QC samples
+#' # Features predicted by Group and Time
+#' results <- perform_logistic(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+#'
+#' @seealso \code{\link[stats]{glm}}
+#'
+#' @export
+perform_logistic <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
+
+  logistic_fun <- function(feature, formula, data) {
+    # Try to fit the linear model
+    fit <- NULL
+    tryCatch({
+      fit <- glm(formula, data = data, family = binomial(), ...)
+    }, error = function(e) print(e$message))
+    if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
+      result_row <- NULL
+    } else {
+      # Gather coefficients and CIs to one data frame row
+      coefs <- summary(fit)$coefficients
+      confints <- confint(fit, level = ci_level)
+      coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
+      confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
+
+      result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
+        dplyr::rename("Std_Error" = "Std..Error", "z_value" ="z.value",
+                      "P" = "Pr...z..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
+        tidyr::gather("Metric", "Value", -Variable) %>%
+        tidyr::unite("Column", Variable, Metric, sep="_") %>%
+        tidyr::spread(Column, Value)
+      result_row$Feature_ID <- feature
+      rownames(result_row) <- feature
+    }
+    result_row
+  }
+
+  results_df <- perform_test(object, formula_char, logistic_fun, all_features)
+
+  # Set a good column order
+  variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
+  statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "z_value", "P", "P_FDR")
+  col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
+    tidyr::unite("Column", Var2, Var1)
+  col_order <- c("Feature_ID", col_order$Column)
+  results_df <- results_df[col_order]
+  # Add odds ratios
+  estimate_cols <- colnames(results_df)[grepl("_Estimate$", colnames(results_df))]
+  for (estimate_col in estimate_cols) {
+    estimate_values <- results_df[, estimate_col]
+    results_df <- tibble::add_column(.data = results_df,
+                            OR = exp(estimate_values),
+                            .after = estimate_col)
+    estimate_idx <- which(colnames(results_df) == estimate_col)
+    colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
+  }
+
+  results_df
 }
 
 
