@@ -34,7 +34,7 @@ These functions provide summary statistics and effect sizes for all features:
 
 ### Hypothesis tests
 
-These functions perform univariate hypothesis tests for each feature, report relevant statistics and correct the p-values using FDR correction. For features, where the model fails for some reason, all statistics are recorded as NA. **NOTE** setting ```all_features = FALSE``` does not prevent the tests on the flagged compounds, but only affects p-value correction, where flagged features are not included in the correction and thus do not have an FDR-corrected p-value.
+These functions perform univariate hypothesis tests for each feature, report relevant statistics and correct the p-values using FDR correction. For features, where the model fails for some reason, all statistics are recorded as NA. **NOTE** setting ```all_features = FALSE``` does not prevent the tests on the flagged compounds, but only affects p-value correction, where flagged features are not included in the correction and thus do not have an FDR-corrected p-value. To prevent the testing of flagged features alltogether, use ````drop_flagged``` before the tests.
 
 #### Formula interface
 
