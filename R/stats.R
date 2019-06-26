@@ -168,7 +168,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 
   if (fdr) {
     if (all_features) {
-      flags <- rep(NA_character, nrow(results_df))
+      flags <- rep(NA_character_, nrow(results_df))
     } else {
       flags <- fData(object)$Flag
     }
@@ -551,13 +551,17 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 }
 
 
-#' Perform Welch's ANOVA
+#' Perform ANOVA
 #'
-#' Performs ANOVA with Welch's correction to deal with meterogenity of variances.
+#' Performs ANOVA with Welch's correction as default, to deal with heterogenity of variances.
+#' Can also perform classic ANOVA with asssumption of equal variances.
+#' Uses base R function \code{oneway.test}.
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
+#' @param all_features
+#' @param ...
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
 #' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
@@ -570,22 +574,22 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 #' @seealso \code{link{oneway.test}}
 #'
 #' @examples
-#' perform_welch(example_set)
+#' perform_oneway_anova(example_set)
 #' # Equivalent
-#' perform_welch(example_set, formula_char = "Feature ~ Group")
+#' perform_oneway_anova(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_welch <- function(object, formula_char = NULL, all_features = FALSE) {
+perform_oneway_anova <- function(object, formula_char = NULL, all_features = FALSE, ...) {
 
-  welch_fun <- function(feature, formula, data) {
-    welch <- oneway.test(formula = formula, data = data, var.equal = FALSE)
+  anova_fun <- function(feature, formula, data) {
+    anova_res <- oneway.test(formula = formula, data = data, ...)
 
     result_row <- data.frame(Feature_ID = feature,
-                             Welch_P = welch$p.value,
+                             ANOVA_P = anova_res$p.value,
                              stringsAsFactors = FALSE)
   }
 
-  results_df <- perform_test(object, formula_char, welch_fun, all_features)
+  results_df <- perform_test(object, formula_char, anova_fun, all_features)
 
   results_df
 }
@@ -675,7 +679,8 @@ perform_pairwise_t_test <- function(object, group = group_col(object), all_featu
     if (i == 1) {
       results_df <- t_results
     } else {
-      results_df <- dplyr::left_join(results_df, t_results)
+      results_df <- dplyr::left_join(results_df, t_results,
+                                     by = intersect(colnames(results_df), colnames(t_results)))
     }
 
   }
