@@ -223,9 +223,9 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
 #' drift corrected feature is discarded and the original is retained. If \code{shape} is set to \code{NULL} (the default), the column used for color
 #' is also used for shape
 #'
-#' @seealso  \code{\link{correct_drift}}, \code{\link[stats]{smooth.spline}} for details about the regression,
+#' @seealso  \code{\link{dc_cubic_spline}}, \code{\link[stats]{smooth.spline}} for details about the regression,
 #' \code{\link{inspect_dc}} for analysing the drift correction results,
-#' \code{\link{plot_dc}} for plotting the drift correction process for each feature
+#' \code{\link{save_dc_plots}} for plotting the drift correction process for each feature
 #'
 #'
 #' @export
