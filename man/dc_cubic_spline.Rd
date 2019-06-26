@@ -30,7 +30,5 @@ using cross validation.
 \seealso{
 \code{\link[stats]{smooth.spline}} for details about the regression,
 \code{\link{inspect_dc}} for analysing the drift correction results,
-\code{\link{plot_dc}} for plotting the drift correction process for each feature
-
-\code{\link{inspect_dc}}, \code{\link{save_dc_plots}}
+\code{\link{save_dc_plots}} for plotting the drift correction process for each feature
 }

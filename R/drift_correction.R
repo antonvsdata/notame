@@ -21,10 +21,9 @@ comb <- function(x, ...) {
 #'
 #' @seealso  \code{\link[stats]{smooth.spline}} for details about the regression,
 #' \code{\link{inspect_dc}} for analysing the drift correction results,
-#' \code{\link{plot_dc}} for plotting the drift correction process for each feature
+#' \code{\link{save_dc_plots}} for plotting the drift correction process for each feature
 #'
 #' @importFrom Biobase exprs exprs<-
-#' @seealso \code{\link{inspect_dc}}, \code{\link{save_dc_plots}}
 #'
 #' @export
 dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5) {
