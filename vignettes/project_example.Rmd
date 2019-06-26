@@ -16,13 +16,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+### Project setup
+
+##### Load libraries
+
 Load the libraries (doParallel is used for parallel processing):
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(amp)
 library(doParallel)
 ```
 
+##### Set up path and logging
 
 Let's set up a path for our project. This is safer than using ```setwd()```
 
@@ -38,9 +43,9 @@ init_log(log_file = paste0(path, "log.txt"))
 log_state()
 ```
 
+##### Read data
 
-
-Now we can read in the actual data! The file given here includes some example data and can be accessed at INSERT FILE LINK HERE
+Now we can read in the actual data! The file given here includes some example data and can be accessed at [the GitHub page](https://github.com/antonvsdata/amp/blob/master/inst/extdata/sample_data_bread.xlsx). The data is from a project with cereal samples from different bread varieties. The data is scrambled, though (the feature information does not correspond to the abundances given).
 
 ```{r}
 data <- read_from_excel(file = system.file("extdata", "sample_data_bread.xlsx", package = "amp"), sheet = 1,
@@ -71,9 +76,8 @@ ALTERNATIVELY, if the file only contains one mode, specify the name of the mode,
 
 The function returns a list holding the three parts of the data:
 
-- ```exprs```: feature abundances across the samples
-
-- ```pheno_data```: sample information
+- ```exprs```: feature abundances across the samples  
+- ```pheno_data```: sample information  
 - ```feature_data```: feature information
 
 ```{r}
@@ -81,6 +85,8 @@ names(data)
 sapply(data, class)
 sapply(data, dim)
 ```
+
+##### Construct MetaboSet objects
 
 These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in amp. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
 
@@ -142,7 +148,7 @@ mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
 Next, we draw visualizations of many kind. The function visualizations is handy for saving all the relevant plots as PDF files. Note that this a very high-level function so you might need to modify it to a project specific version! From now on, the visualizations are repeated after each step to observe the effect of preprocessing procedures. The argument ```prefix``` is a prefix for the file paths the figures will be saved to.
 
 ```{r}
-#visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
+visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
 ```
 
 ##### Drift correction
@@ -151,7 +157,7 @@ Next, we apply drift correction with cubic spline regression. There is an option
 
 ```{r}
 corrected <- correct_drift(mode)
-#visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
+visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
 ```
 
 Information about the drift correction procedure is recorded in the DC_note column of feature data:  
@@ -172,7 +178,7 @@ After drift correction, it is time to flag low-quality features.
 corrected <- corrected %>% assess_quality() %>% flag_quality()
 processed[[i]] <- corrected
 
-#visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
+visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
 ```
 
 ###### Preprocessing for each mode
@@ -209,7 +215,7 @@ Next, it is time to merge the modes together and visualizae the complete dataset
 ```{r}
 merged <- merge_metabosets(processed)
 
-#visualizations(merged, prefix = paste0(path, "figures/", name, "_FULL"))
+visualizations(merged, prefix = paste0(path, "figures/", name, "_FULL"))
 ```
 
 ##### Remove QCs
@@ -219,7 +225,7 @@ Then, QC samples can (and should) be removed, as they are no longer needed.
 ```{r}
 merged <- drop_qcs(merged)
 
-#visualizations(mode, prefix = paste0(path, "figures/", name, "_FULL_NO_QC"))
+visualizations(mode, prefix = paste0(path, "figures/", name, "_FULL_NO_QC"))
 ```
 
 ##### Imputation of missing values
@@ -243,7 +249,7 @@ imputed <- impute_rf(imputed, all_features = TRUE)
 After imputation, a final round of visualizations is in place.
 
 ```{r}
-#visualizations(imputed, prefix = paste0(path, "figures/", name, "_FULL_IMPUTED"))
+visualizations(imputed, prefix = paste0(path, "figures/", name, "_FULL_IMPUTED"))
 ```
 
 It is a good idea to save the merged and processed data, so experimenting with different statistical analyses becomes easier:
@@ -283,5 +289,10 @@ results(imputed) <- dplyr::left_join(anova_results, pairwise_results)
 write_to_excel(imputed, file = paste0(path, "results.xlsx"))
 ```
 
-And that concludes our project example!
+And that concludes our project example! The last thing to do is finish the log we started. This will record the time and date when the project finished, as well as the output of ```sessionInfo()```, which contains information about the system, and most importantly version numbers of R and all the packages used.
+
+```{r}
+finish_log()
+```
+
 
