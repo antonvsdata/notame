@@ -188,6 +188,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param ci_level the confidence level used in constructing the confidence intervals
 #' for regression coefficients
+#' @param all_features should all features be included in FDR correction?
 #' @param ... additional parameters passed to lm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -261,6 +262,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param ci_level the confidence level used in constructing the confidence intervals
 #' for regression coefficients
+#' @param all_features should all features be included in FDR correction?
 #' @param ... additional parameters passed to glm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -339,6 +341,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param all_features should all features be included in FDR correction?
 #' @param ci_level the confidence level used in constructing the confidence intervals
 #' for regression coefficients
 #' @param ci_method The method for calculating th confidence intervals, see documentation
@@ -474,6 +477,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
 #' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
@@ -518,6 +522,7 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
 #' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
@@ -560,7 +565,7 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
-#' @param all_features
+#' @param all_features should all features be included in FDR correction?
 #' @param ...
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
@@ -602,6 +607,7 @@ perform_oneway_anova <- function(object, formula_char = NULL, all_features = FAL
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
 #' @param ... additional parameters to t.test
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
@@ -646,6 +652,7 @@ perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ..
 #'
 #' @param object a MetaboSet object
 #' @param group character, column name of phenoData giving the groups
+#' @param all_features should all features be included in FDR correction?
 #' @param ... other parameters passed to perform_t_test, and eventually to base R t.test
 #'
 #' @details P-values of each comparison are corrected separately from each other.

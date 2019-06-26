@@ -12,6 +12,8 @@ perform_homoscedasticity_tests(object, formula_char = NULL,
 
 \item{formula_char}{character, the formula to be used in the linear model (see Details)
 Defaults to "Feature ~ group_col(object)}
+
+\item{all_features}{should all features be included in FDR correction?}
 }
 \value{
 data frame with the results

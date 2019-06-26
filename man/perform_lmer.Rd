@@ -13,6 +13,8 @@ perform_lmer(object, formula_char, all_features = FALSE,
 
 \item{formula_char}{character, the formula to be used in the linear model (see Details)}
 
+\item{all_features}{should all features be included in FDR correction?}
+
 \item{ci_level}{the confidence level used in constructing the confidence intervals
 for regression coefficients}
 

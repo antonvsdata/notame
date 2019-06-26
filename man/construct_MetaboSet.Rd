@@ -30,5 +30,5 @@ Returns a list of MetaboSet objects, one per mode. The modes are separated by th
 in feature_data.
 }
 \seealso{
-\code{\link{[read_from_excel]}}
+\code{\link{read_from_excel}}
 }

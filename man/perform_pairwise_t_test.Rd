@@ -12,6 +12,8 @@ perform_pairwise_t_test(object, group = group_col(object),
 
 \item{group}{character, column name of phenoData giving the groups}
 
+\item{all_features}{should all features be included in FDR correction?}
+
 \item{...}{other parameters passed to perform_t_test, and eventually to base R t.test}
 }
 \value{

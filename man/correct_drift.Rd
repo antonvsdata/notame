@@ -49,7 +49,7 @@ drift corrected feature is discarded and the original is retained. If \code{shap
 is also used for shape
 }
 \seealso{
-\code{\link{correct_drift}}, \code{\link[stats]{smooth.spline}} for details about the regression,
+\code{\link{dc_cubic_spline}}, \code{\link[stats]{smooth.spline}} for details about the regression,
 \code{\link{inspect_dc}} for analysing the drift correction results,
-\code{\link{plot_dc}} for plotting the drift correction process for each feature
+\code{\link{save_dc_plots}} for plotting the drift correction process for each feature
 }
