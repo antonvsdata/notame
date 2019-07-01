@@ -29,17 +29,22 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
                                                Q25 = ~finite_quantile(., probs = 0.25),
                                                Q75 = ~finite_quantile(., probs = 0.75))) %>%
       dplyr::ungroup()
-    for (grouping_col in grouping_cols) {
-      tmp[grouping_col] <- paste0(grouping_col, "_",
-                                  as.character(tmp[, grouping_col, drop = TRUE]))
+
+    if (!is.na(grouping_cols[1])) {
+      for (grouping_col in grouping_cols) {
+        tmp[grouping_col] <- paste0(grouping_col, "_",
+                                    as.character(tmp[, grouping_col, drop = TRUE]))
+      }
+      tmp <- tmp %>%
+        tidyr::unite("Factors", grouping_cols) %>%
+        tidyr::gather("Statistic", "Value", -Factors) %>%
+        tidyr::unite("Key", c("Factors", "Statistic")) %>%
+        tidyr::spread(Key, Value)
     }
-    tmp <- tmp %>%
-      tidyr::unite("Factors", grouping_cols) %>%
-      tidyr::gather("Statistic", "Value", -Factors) %>%
-      tidyr::unite("Key", c("Factors", "Statistic")) %>%
-      tidyr::spread(Key, Value)
-    tmp <- data.frame(Feature_ID = feature, tmp)
-                                             }
+
+     tmp <- tmp
+    tmp <- data.frame(Feature_ID = feature, tmp, stringsAsFactors = FALSE)
+  }
 
   statistics
 }
@@ -78,7 +83,8 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
       dplyr::summarise(mean_diff = mean(diff, na.rm = TRUE), sd_diff = sd(diff, na.rm = TRUE))
 
     d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] - tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff))
+                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] - tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff),
+                    stringsAsFactors = FALSE)
     d
   }
   rownames(ds) <- ds$Feature_ID
