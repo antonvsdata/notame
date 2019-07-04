@@ -192,6 +192,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     dplyr::arrange(Feature_ID) %>%
     dplyr::mutate(Feature_ID = as.character(Feature_ID))
 
+  # FDR correction
   if (fdr) {
     if (all_features) {
       flags <- rep(NA_character_, nrow(results_df))
@@ -235,6 +236,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @export
 perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
+  # Start log
+  log_text(paste("\nStarting linear regression at", Sys.time()))
+
   lm_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
@@ -275,6 +279,9 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     tidyr::unite("Column", Var2, Var1)
   col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
+  # End log
+  log_text(paste("Linear regression performed at", Sys.time()))
+
   results_df[col_order]
 }
 
@@ -308,6 +315,9 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #'
 #' @export
 perform_logistic <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
+
+  # Start log
+  log_text(paste("\nStarting logistic regression at", Sys.time()))
 
   logistic_fun <- function(feature, formula, data) {
     # Try to fit the linear model
@@ -356,6 +366,9 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
   }
 
+  # End log
+  log_text(paste("Logistic regression performed at", Sys.time()))
+
   results_df
 }
 
@@ -395,6 +408,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
                          ci_method = c("boot", "profile", "Wald"),
                          test_random = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting fitting linear mixed models at", Sys.time()))
 
   if (!requireNamespace("lmerTest", quietly = TRUE)) {
     stop('package "lmerTest" required')
@@ -493,6 +508,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     col_order <- c(col_order, random_effect_order$Column)
   }
 
+  # End log
+  log_text(paste("Linear mixed models fit at", Sys.time()))
+
   results_df[col_order]
 }
 
@@ -523,6 +541,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 #' @export
 perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_features = FALSE) {
 
+  # Start log
+  log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
+
   homosced_fun <- function(feature, formula, data) {
 
     bartlett <- bartlett.test(formula = formula, data = data)
@@ -537,6 +558,9 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
   }
 
   results_df <- perform_test(object, formula_char, homosced_fun, all_features)
+
+  # Start log
+  log_text(paste("Homoscedasticity tests performed at", Sys.time()))
 
   results_df
 }
@@ -567,6 +591,8 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
 #'
 #' @export
 perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = FALSE) {
+  # Start log
+  log_text(paste("\nStarting Kruskal_wallis tests at", Sys.time()))
 
   kruskal_fun <- function(feature, formula, data) {
     kruskal <- kruskal.test(formula = formula, data = data)
@@ -577,6 +603,8 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
   }
 
   results_df <- perform_test(object, formula_char, kruskal_fun, all_features)
+
+  log_text(paste("Kruskal_wallis tests performed at", Sys.time()))
 
   results_df
 }
@@ -611,6 +639,8 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 #'
 #' @export
 perform_oneway_anova <- function(object, formula_char = NULL, all_features = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting ANOVA tests at", Sys.time()))
 
   anova_fun <- function(feature, formula, data) {
     anova_res <- oneway.test(formula = formula, data = data, ...)
@@ -621,6 +651,8 @@ perform_oneway_anova <- function(object, formula_char = NULL, all_features = FAL
   }
 
   results_df <- perform_test(object, formula_char, anova_fun, all_features)
+
+  log_text(paste("ANOVA performed at", Sys.time()))
 
   results_df
 }
@@ -648,6 +680,8 @@ perform_oneway_anova <- function(object, formula_char = NULL, all_features = FAL
 #'
 #' @export
 perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting t-tests at", Sys.time()))
 
   t_fun <- function(feature, formula, data) {
     t_res <- t.test(formula = formula, data = data, ...)
@@ -668,6 +702,8 @@ perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ..
   }
 
   results_df <- perform_test(object, formula_char, t_fun, all_features)
+  # Start log
+  log_text(paste("t-tests perfomred at", Sys.time()))
 
   results_df
 }
