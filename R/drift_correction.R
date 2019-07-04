@@ -205,7 +205,7 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
 
   dev.off()
 
-  log_text(paste("Saved drift correction plots to:", file))
+  log_text(paste("\nSaved drift correction plots to:", file))
 }
 
 #' Correct drift using cubic spline
