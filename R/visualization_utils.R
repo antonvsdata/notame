@@ -8,6 +8,8 @@
 #' @param ... other arguments to pdf, like width and height
 #'
 #' @seealso \code{\link[grDevices]{pdf}}
+#'
+#' @export
 save_plot <- function(p, file, ...) {
 
   pdf(file, ...)
@@ -26,11 +28,11 @@ save_plot <- function(p, file, ...) {
 #' @param merge logical, whether the files should be merged to a single PDF, see Details
 #'
 #' @details If \code{merge} is \code{TRUE}, then a file containing all the visualizations
-#' named \code{prefix.pdf} will be created. NOTE: on Windows this reuires installation of pdftk
-#' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/})
+#' named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
+#' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux yyou need to have pdfunite installed.
 #'
 #' @export
-visualizations <- function(object, prefix, all_features = FALSE, merge = TRUE) {
+visualizations <- function(object, prefix, all_features = FALSE, merge = FALSE) {
 
   # Helper function
   file_names <- ""
