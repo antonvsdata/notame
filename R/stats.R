@@ -710,7 +710,7 @@ perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ..
 
 #' Perform pairwise t-tests
 #'
-#' Performs pariowise t-tests between all study groups. NOTE! Does not use formula interface
+#' Performs pairwise t-tests between all study groups. NOTE! Does not use formula interface
 #'
 #' @param object a MetaboSet object
 #' @param group character, column name of phenoData giving the groups

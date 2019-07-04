@@ -20,7 +20,7 @@ perform_pairwise_t_test(object, group = group_col(object),
 data frame with the results
 }
 \description{
-Performs pariowise t-tests between all study groups. NOTE! Does not use formula interface
+Performs pairwise t-tests between all study groups. NOTE! Does not use formula interface
 }
 \details{
 P-values of each comparison are corrected separately from each other.
