@@ -28,6 +28,9 @@ comb <- function(x, ...) {
 #' @export
 dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.5) {
 
+  # Start log
+  log_text(paste("\nStarting drift correction at", Sys.time()))
+
   qc <- object[, object$QC == "QC"]
   qc_order <- qc$Injection_order
   qc_data <- exprs(qc)
@@ -36,9 +39,6 @@ dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 
   full_data <- exprs(object)
 
   n <- ncol(full_data)
-
-
-
 
   dc_data <- foreach::foreach(i = seq_len(nrow(object)), .combine = comb) %dopar% {
 
@@ -66,6 +66,10 @@ dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 
   }
 
   exprs(object) <- dc_data$corrected
+
+
+  log_text(paste("Drift correction performed at", Sys.time()))
+
   return(list(object = object, predicted = dc_data$predicted))
 }
 
@@ -135,8 +139,17 @@ inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
   exprs(dc) <- inspected$data
   dc <- assess_quality(dc)
   dc <- join_fdata(dc, inspected$dc_notes)
-  dc
 
+  # Log information
+  dc_note <- inspected$dc_notes$DC_note
+  note_counts <- table(dc_note) %>% unname()
+  note_percentage <- note_counts/sum(note_counts)
+  note_percentage <- scales::percent(as.numeric(note_percentage))
+  note_labels <- table(dc_note) %>% names()
+  report <- paste(note_labels, note_percentage, sep = ": ", collapse = ",  ")
+  log_text(paste0("\nDrift correction results inspected, report:\n", report))
+
+  dc
 }
 
 #' Drift correction plots
@@ -192,6 +205,7 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
 
   dev.off()
 
+  log_text(paste("Saved drift correction plots to:", file))
 }
 
 #' Correct drift using cubic spline
