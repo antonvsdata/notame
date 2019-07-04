@@ -29,7 +29,7 @@ save_plot <- function(p, file, ...) {
 #'
 #' @details If \code{merge} is \code{TRUE}, then a file containing all the visualizations
 #' named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
-#' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux yyou need to have pdfunite installed.
+#' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
 #'
 #' @export
 visualizations <- function(object, prefix, all_features = FALSE, merge = FALSE) {
