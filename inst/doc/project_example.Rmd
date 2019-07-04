@@ -53,16 +53,17 @@ data <- read_from_excel(file = system.file("extdata", "sample_data_bread.xlsx", 
                         split_by = c("Column", "Ion mode"))
 ```
 
-The function ````read_from_excel``` can be used to read data from an Excel spreadsheet using the following format:  
+The function ```read_from_excel``` can be used to read data from an Excel spreadsheet using the following format:  
 ```{r, out.width = "600px"}
 knitr::include_graphics("Data_input.png")
 ```
 
-The first parameters include the file name, sheet number, and coordinates for the corner, in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. 
+The first parameters include the file name, sheet number, and coordinates for the corner ("Ion Mode" in the above examples), in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. 
 
 Some fields in sample information and feaure data have special purposes. 
 
-There are a few obligatory fields:
+There are a few obligatory fields:  
+
 - "Injection_order" in sample information. The values must be numeric and unique  
 - "Mass" or "Average mz" in feature data, not case sensitive  
 - "Retention time", "RetentionTime", "Average rt(min)" or "rt"" in feature data, not case sensitive
@@ -145,9 +146,9 @@ Adjust the limits as needed.
 mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
 ```
 
-Next, we draw visualizations of many kind. The function visualizations is handy for saving all the relevant plots as PDF files. Note that this a very high-level function so you might need to modify it to a project specific version! From now on, the visualizations are repeated after each step to observe the effect of preprocessing procedures. The argument ```prefix``` is a prefix for the file paths the figures will be saved to.
+Next, we draw visualizations of many kind. The function ```visualizations``` is handy for saving all the relevant plots as PDF files. Note that this a very high-level function so you might need to modify it to a project specific version! For more information, read [the visualizations vignette](visualizations.html). From now on, the visualizations are repeated after each step to observe the effect of preprocessing procedures. The argument ```prefix``` is a prefix for the file paths the figures will be saved to.
 
-```{r}
+```{r, eval=FALSE}
 visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
 ```
 
@@ -155,10 +156,15 @@ visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
 
 Next, we apply drift correction with cubic spline regression. There is an option to save plots of the procedure for each feature in one large PDF file (one page per features). For studies with a relatively small number of features (a few thousand per mode) this is feasible. For plant studies and other studies with tens of thousands of features, it is probably a good idea to draw the drift correction plots after statistical analysis, and only draw them for the modt interesting compounds. 
 
-```{r}
+```{r, include = FALSE}
+corrected <- correct_drift(mode)
+```
+
+```{r eval = FALSE}
 corrected <- correct_drift(mode)
 visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
 ```
+
 
 Information about the drift correction procedure is recorded in the DC_note column of feature data:  
 - Low-quality = drift correction did not improve signal quality, original feature was retained  
@@ -173,8 +179,12 @@ fData(corrected)$DC_note
 ##### Flag low-quality features
 
 After drift correction, it is time to flag low-quality features. 
+```{r, include = FALSE}
+corrected <- corrected %>% assess_quality() %>% flag_quality()
+processed[[i]] <- corrected
+```
 
-```{r}
+```{r, eval = FALSE}
 corrected <- corrected %>% assess_quality() %>% flag_quality()
 processed[[i]] <- corrected
 
@@ -210,32 +220,39 @@ for (i in seq_along(modes)) {
 
 ##### Merge modes
 
-Next, it is time to merge the modes together and visualizae the complete dataset:
+Next, it is time to merge the modes together and visualize the complete dataset:
+```{r, include = FALSE}
+merged <- merge_metabosets(processed)
+```
 
-```{r}
+```{r, eval = FALSE}
 merged <- merge_metabosets(processed)
 
-visualizations(merged, prefix = paste0(path, "figures/", name, "_FULL"))
+visualizations(merged, prefix = paste0(path, "figures/_FULL"))
 ```
 
 ##### Remove QCs
 
 Then, QC samples can (and should) be removed, as they are no longer needed.
+```{r, include = FALSE}
+merged_no_qc <- drop_qcs(merged)
 
-```{r}
-merged <- drop_qcs(merged)
+```
 
-visualizations(mode, prefix = paste0(path, "figures/", name, "_FULL_NO_QC"))
+```{r, eval = FALSE}
+merged_no_qc <- drop_qcs(merged)
+
+visualizations(merged_no_qc, prefix = paste0(path, "figures/FULL_NO_QC"))
 ```
 
 ##### Imputation of missing values
 
-If there are any missing values in the data, they need to be imputed. We use random forest imputation to impute these values.
+If there are any missing values in the data, they need to be imputed. We use random forest imputation to impute these values. Seed number should be set before random forest imputation to guarantee reproducibiilty of results.
 
 ```{r}
 #Set seed number for reproducibility
 set.seed(38)
-imputed <- impute_rf(merged)
+imputed <- impute_rf(merged_no_qc)
 ```
 
 By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, thay should be imputed as well. This can be achieved through a second round of imputation, now with all features included:
@@ -246,15 +263,17 @@ imputed <- impute_rf(imputed, all_features = TRUE)
 
 **NOTE:** It is NOT recommended to impute all features in the first round, as low quality features would affect imputation of good quality features.
 
+**NOTE** If the dataset consists of a very large number of features (tens of thousands) it might be a good idea to run the imputation inside each mode, since in that case each mode has enough features to guarantee good imputation results, and running the algorithm on the complete dataset would take too long to be practical.
+
 After imputation, a final round of visualizations is in place.
 
-```{r}
-visualizations(imputed, prefix = paste0(path, "figures/", name, "_FULL_IMPUTED"))
+```{r, eval = FALSE}
+visualizations(imputed, prefix = paste0(path, "figures/FULL_IMPUTED"))
 ```
 
 It is a good idea to save the merged and processed data, so experimenting with different statistical analyses becomes easier:
 
-```{r}
+```{r, eval = FALSE}
 save(imputed, file = paste0(path, "full_data.RData"))
 ```
 
@@ -283,7 +302,7 @@ pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Bread
 
 And there are our final results! The next step is then to combine the results and save the object to an output Excel file:
 
-```{r}
+```{r, eval = FALSE}
 results(imputed) <- dplyr::left_join(anova_results, pairwise_results)
 
 write_to_excel(imputed, file = paste0(path, "results.xlsx"))

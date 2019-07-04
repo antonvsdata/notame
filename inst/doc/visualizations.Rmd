@@ -55,7 +55,11 @@ The following visualizations are applied to each feature and directly saved to a
 - ```save_group_line_plots```: line plots of changes in group means
 
 
+### One function to rule them all
 
+The function ```visualizations``` automatically runs many of the visualizations for an object, ignoreing flagged features. It also allows you to merge all saved plots into one file by setting ```merge = TRUE```. NOTE that this requires you to install external tools. For Windows, install [pdftk](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/). For linux, make sure ```pdfunite``` is installed.
+
+If you want to modify the visualizations, it is a very good idea to create a project specific version, e.g. ```myproject_visualizations```. To do this, simply run ````visualizations``` **without parentheses** and copy-paste the code to an external file for modifications. You might want to add visualizations or modify the size of the figures to be saved.
 
 
 

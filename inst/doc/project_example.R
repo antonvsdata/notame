@@ -57,21 +57,28 @@ mode <- mark_nas(mode, value = 0)
 ## ------------------------------------------------------------------------
 mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
 
-## ------------------------------------------------------------------------
-visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
+## ---- eval=FALSE---------------------------------------------------------
+#  visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
 
-## ------------------------------------------------------------------------
+## ---- include = FALSE----------------------------------------------------
 corrected <- correct_drift(mode)
-visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
+
+## ----eval = FALSE--------------------------------------------------------
+#  corrected <- correct_drift(mode)
+#  visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
 
 ## ------------------------------------------------------------------------
 fData(corrected)$DC_note
 
-## ------------------------------------------------------------------------
+## ---- include = FALSE----------------------------------------------------
 corrected <- corrected %>% assess_quality() %>% flag_quality()
 processed[[i]] <- corrected
 
-visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
+## ---- eval = FALSE-------------------------------------------------------
+#  corrected <- corrected %>% assess_quality() %>% flag_quality()
+#  processed[[i]] <- corrected
+#  
+#  visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
 
 ## ------------------------------------------------------------------------
 # Initialize empty list for processed objects
@@ -92,29 +99,36 @@ for (i in seq_along(modes)) {
   # visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
 }
 
-## ------------------------------------------------------------------------
+## ---- include = FALSE----------------------------------------------------
 merged <- merge_metabosets(processed)
 
-visualizations(merged, prefix = paste0(path, "figures/", name, "_FULL"))
+## ---- eval = FALSE-------------------------------------------------------
+#  merged <- merge_metabosets(processed)
+#  
+#  visualizations(merged, prefix = paste0(path, "figures/_FULL"))
 
-## ------------------------------------------------------------------------
-merged <- drop_qcs(merged)
+## ---- include = FALSE----------------------------------------------------
+merged_no_qc <- drop_qcs(merged)
 
-visualizations(mode, prefix = paste0(path, "figures/", name, "_FULL_NO_QC"))
+
+## ---- eval = FALSE-------------------------------------------------------
+#  merged_no_qc <- drop_qcs(merged)
+#  
+#  visualizations(merged_no_qc, prefix = paste0(path, "figures/FULL_NO_QC"))
 
 ## ------------------------------------------------------------------------
 #Set seed number for reproducibility
 set.seed(38)
-imputed <- impute_rf(merged)
+imputed <- impute_rf(merged_no_qc)
 
 ## ------------------------------------------------------------------------
 imputed <- impute_rf(imputed, all_features = TRUE)
 
-## ------------------------------------------------------------------------
-visualizations(imputed, prefix = paste0(path, "figures/", name, "_FULL_IMPUTED"))
+## ---- eval = FALSE-------------------------------------------------------
+#  visualizations(imputed, prefix = paste0(path, "figures/FULL_IMPUTED"))
 
-## ------------------------------------------------------------------------
-save(imputed, file = paste0(path, "full_data.RData"))
+## ---- eval = FALSE-------------------------------------------------------
+#  save(imputed, file = paste0(path, "full_data.RData"))
 
 ## ------------------------------------------------------------------------
 anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Bread")
@@ -126,10 +140,10 @@ top_index <- fData(imputed)$Feature_ID %in% top_features
 # Setting the group column is redundant, but made for clarity
 pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Bread")
 
-## ------------------------------------------------------------------------
-results(imputed) <- dplyr::left_join(anova_results, pairwise_results)
-
-write_to_excel(imputed, file = paste0(path, "results.xlsx"))
+## ---- eval = FALSE-------------------------------------------------------
+#  results(imputed) <- dplyr::left_join(anova_results, pairwise_results)
+#  
+#  write_to_excel(imputed, file = paste0(path, "results.xlsx"))
 
 ## ------------------------------------------------------------------------
 finish_log()
