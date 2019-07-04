@@ -44,6 +44,8 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
 
      tmp <- tmp
     tmp <- data.frame(Feature_ID = feature, tmp, stringsAsFactors = FALSE)
+    rownames(tmp) <- feature
+    tmp
   }
 
   statistics
@@ -67,6 +69,17 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
                      time = time_col(object)) {
 
   data <- combined_data(object)
+
+  # Check that both group and time have exactly 2 levels
+  for (column in c(group, time)) {
+    if (class(data[, column]) != "factor") {
+      data[, column] <- as.factor(data[, column])
+    }
+    if (length(levels(data[, column])) != 2) {
+      stop(paste("Column", column, "should contain exactly 2 levels!"))
+    }
+  }
+
   data[time] <- ifelse(data[, time] == levels(data[, time])[1], "time1", "time2")
   data[group] <- ifelse(data[, group] == levels(data[, group])[1], "group1", "group2")
 
@@ -108,14 +121,14 @@ fold_change <- function(object, group = group_col(object)) {
 
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .export = "finite_mean") %dopar% {
     feature <- features[i]
     result_row <- rep(0, ncol(groups))
     # Calculate fold changes
     for(i in 1:ncol(groups)){
       group1 <- data[data[, group] == groups[1,i], feature]
       group2 <- data[data[, group] == groups[2,i], feature]
-      result_row[i] <- mean(group2)/mean(group1)
+      result_row[i] <- finite_mean(group2)/finite_mean(group1)
     }
     result_row
   }
@@ -158,7 +171,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 
     result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
     # In case Feature is used as predictor, make the column names match
-    colnames(result_row) <- gsub(feature, "Feature", colnames(result_row))
+    if (!is.null(result_row)){
+      colnames(result_row) <- gsub(feature, "Feature", colnames(result_row))
+    }
     result_row
   }
 
@@ -171,6 +186,11 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
   rownames(results_fill) <- missing_features
   colnames(results_fill) <- colnames(results_df)
   results_df <- rbind(results_df, results_fill)
+  # Set Feature ID to the original order
+  results_df <- results_df %>%
+    dplyr::mutate(Feature_ID = factor(Feature_ID, levels = featureNames(object))) %>%
+    dplyr::arrange(Feature_ID) %>%
+    dplyr::mutate(Feature_ID = as.character(Feature_ID))
 
   if (fdr) {
     if (all_features) {
@@ -300,7 +320,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     } else {
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
-      confints <- confint(fit, level = ci_level)
+      suppressMessages(confints <- confint(fit, level = ci_level))
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
