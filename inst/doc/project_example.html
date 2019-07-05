@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-04" />
+<meta name="date" content="2019-07-05" />
 
 <title>Project example</title>
 
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Project example</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-07-04</em></h4>
+<h4 class="date"><em>2019-07-05</em></h4>
 
 
 
@@ -243,7 +243,31 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
   processed[[i]] &lt;-<span class="st"> </span>corrected
 
   <span class="co"># visualizations(corrected, prefix = paste0(path, &quot;figures/&quot;, name, &quot;_CLEANED&quot;))</span>
-}</code></pre></div>
+}
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting drift correction at 2019-07-05 10:57:19</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-05 10:57:19</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Drift correction results inspected, report:</span>
+<span class="co">#&gt; Drift_corrected: 63.6%,  Low_quality: 36.4%</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting drift correction at 2019-07-05 10:57:19</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-05 10:57:19</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Drift correction results inspected, report:</span>
+<span class="co">#&gt; Drift_corrected: 33.3%,  Low_quality: 66.7%</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting drift correction at 2019-07-05 10:57:20</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-05 10:57:20</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Drift correction results inspected, report:</span>
+<span class="co">#&gt; Drift_corrected: 40.0%,  Low_quality: 60.0%</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting drift correction at 2019-07-05 10:57:20</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-05 10:57:20</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Drift correction results inspected, report:</span>
+<span class="co">#&gt; Drift_corrected: 36.8%,  Low_quality: 63.2%</span></code></pre></div>
 </div>
 </div>
 </div>
@@ -295,20 +319,53 @@ imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(merged_n
 <h3>Statistics</h3>
 <p>For more detailed information about how statistics work in this package, look at the Statistics vignette.</p>
 <p>Let’s try to find features that separate the different bread varieties. First, we’ll Welch’s analysis of variance to find features that have different levels in any of the varieties:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">anova_results &lt;-<span class="st"> </span><span class="kw">perform_oneway_anova</span>(imputed, <span class="dt">formula_char =</span> <span class="st">&quot;Feature ~ Bread&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">anova_results &lt;-<span class="st"> </span><span class="kw">perform_oneway_anova</span>(imputed, <span class="dt">formula_char =</span> <span class="st">&quot;Feature ~ Bread&quot;</span>)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting ANOVA tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; ANOVA performed at 2019-07-05 10:57:26</span></code></pre></div>
 <p>Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pariwise Welch’s t-tests on them:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">top_features &lt;-<span class="st"> </span>anova_results<span class="op">$</span>Feature_ID[<span class="kw">which</span>(anova_results<span class="op">$</span>ANOVA_P_FDR <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.2</span>)]
 
 top_index &lt;-<span class="st"> </span><span class="kw">fData</span>(imputed)<span class="op">$</span>Feature_ID <span class="op">%in%</span><span class="st"> </span>top_features
 <span class="co"># Setting the group column is redundant, but made for clarity</span>
-pairwise_results &lt;-<span class="st"> </span><span class="kw">perform_pairwise_t_test</span>(imputed[top_index, ], <span class="dt">group =</span> <span class="st">&quot;Bread&quot;</span>)</code></pre></div>
+pairwise_results &lt;-<span class="st"> </span><span class="kw">perform_pairwise_t_test</span>(imputed[top_index, ], <span class="dt">group =</span> <span class="st">&quot;Bread&quot;</span>)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:26</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Starting t-tests at 2019-07-05 10:57:27</span>
+<span class="co">#&gt; t-tests perfomred at 2019-07-05 10:57:27</span></code></pre></div>
 <p>And there are our final results! The next step is then to combine the results and save the object to an output Excel file:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">results</span>(imputed) &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">left_join</span>(anova_results, pairwise_results)
 
 <span class="kw">write_to_excel</span>(imputed, <span class="dt">file =</span> <span class="kw">paste0</span>(path, <span class="st">&quot;results.xlsx&quot;</span>))</code></pre></div>
 <p>And that concludes our project example! The last thing to do is finish the log we started. This will record the time and date when the project finished, as well as the output of <code>sessionInfo()</code>, which contains information about the system, and most importantly version numbers of R and all the packages used.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">finish_log</span>()
-<span class="co">#&gt; Finished analysis. Thu Jul 04 14:34:11 2019</span>
+<span class="co">#&gt; Finished analysis. Fri Jul 05 10:57:27 2019</span>
 <span class="co">#&gt; Session info:</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; R version 3.5.3 (2019-03-11)</span>

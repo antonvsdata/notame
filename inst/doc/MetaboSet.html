@@ -12,9 +12,9 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-04" />
+<meta name="date" content="2019-07-05" />
 
-<title>Utility functions</title>
+<title>MetaboSet utility</title>
 
 
 
@@ -30,14 +30,22 @@
 
 
 
-<h1 class="title toc-ignore">Utility functions</h1>
+<h1 class="title toc-ignore">MetaboSet utility</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-07-04</em></h4>
+<h4 class="date"><em>2019-07-05</em></h4>
 
 
 
-<p>This vignette provides a short summary of many of the functions for accessing elements of MetaboSet objects and other utility functions.</p>
-<p>These functions from Biobase might be useful:</p>
+<div id="metaboset-utility-vignette" class="section level3">
+<h3>MetaboSet utility vignette</h3>
+<p>This vignette provides a short summary of many of the functions for accessing elements of <code>MetaboSet</code> objects and other utility functions.</p>
+<div id="construction-of-objects" class="section level4">
+<h4>Construction of objects</h4>
+<p><code>MetaboSet</code> objects are constructed with the <code>construct_MetaboSet</code> function. <code>MetaboSet</code> class is built upon the <code>ExpressionSet</code> class from the Biobase package by Bioconductor. <code>ExpressionSet</code> is used to record gene expression data, but many</p>
+</div>
+<div id="inherited-from-expressionset" class="section level4">
+<h4>Inherited from ExpressionSet</h4>
+<p>For more information, read the <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf">ExpressionSet documentation</a> For a short summary, these functions from Biobase might be useful:</p>
 <ul>
 <li><code>fData</code>: access feature data<br />
 </li>
@@ -45,7 +53,18 @@
 </li>
 <li><code>exprs</code>: access feature abundances</li>
 </ul>
-<p>Functions for MetaboSet in particular:</p>
+<p>In addition, MetaboSets can be subset using the syntax for ExpressionSets, namely:</p>
+<ul>
+<li>Subsetting the <code>exprs</code> part holding the abundaces can be done with simple square brackets. For example, <code>example_set[1:5, 1:3]</code> would get the first 5 features and the first 3 samples out of the <code>example_set</code> object.<br />
+</li>
+<li>Columns in <code>pData</code> can be accessed via a shortcut, for example <code>example_set$Group</code><br />
+</li>
+<li>So to get rid of a particular group, you can run <code>example_set[, example_set$Group != &quot;B&quot;&quot;]</code></li>
+</ul>
+</div>
+<div id="metaboset-specific" class="section level4">
+<h4>MetaboSet-specific</h4>
+<p>Utility functions for MetaboSet in particular:</p>
 <ul>
 <li><code>group_col</code>, <code>time_col</code> and <code>subject_col</code> for the special column names<br />
 </li>
@@ -57,6 +76,17 @@
 </li>
 <li><code>write_to_excel</code> writes the whole object to an Excel spreadsheet</li>
 </ul>
+<p>In addition, there are many functions that modify MetaboSets:</p>
+<ul>
+<li><code>mark_nas</code> can be used to mark missing values as <code>NA</code> (peak picking software tend to report them as 0 or 1)</li>
+<li><code>drop_qcs</code> removes the QC samples<br />
+</li>
+<li><code>drop_flagged</code> removes all features that have been flagged (low-quality features)<br />
+</li>
+<li><code>merge_metabosets</code> is used to merge MetaboSets from multiple modes together</li>
+</ul>
+</div>
+</div>
 
 
 
