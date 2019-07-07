@@ -29,17 +29,24 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
                                                Q25 = ~finite_quantile(., probs = 0.25),
                                                Q75 = ~finite_quantile(., probs = 0.75))) %>%
       dplyr::ungroup()
-    for (grouping_col in grouping_cols) {
-      tmp[grouping_col] <- paste0(grouping_col, "_",
-                                  as.character(tmp[, grouping_col, drop = TRUE]))
+
+    if (!is.na(grouping_cols[1])) {
+      for (grouping_col in grouping_cols) {
+        tmp[grouping_col] <- paste0(grouping_col, "_",
+                                    as.character(tmp[, grouping_col, drop = TRUE]))
+      }
+      tmp <- tmp %>%
+        tidyr::unite("Factors", grouping_cols) %>%
+        tidyr::gather("Statistic", "Value", -Factors) %>%
+        tidyr::unite("Key", c("Factors", "Statistic")) %>%
+        tidyr::spread(Key, Value)
     }
-    tmp <- tmp %>%
-      tidyr::unite("Factors", grouping_cols) %>%
-      tidyr::gather("Statistic", "Value", -Factors) %>%
-      tidyr::unite("Key", c("Factors", "Statistic")) %>%
-      tidyr::spread(Key, Value)
-    tmp <- data.frame(Feature_ID = feature, tmp)
-                                             }
+
+     tmp <- tmp
+    tmp <- data.frame(Feature_ID = feature, tmp, stringsAsFactors = FALSE)
+    rownames(tmp) <- feature
+    tmp
+  }
 
   statistics
 }
@@ -62,6 +69,17 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
                      time = time_col(object)) {
 
   data <- combined_data(object)
+
+  # Check that both group and time have exactly 2 levels
+  for (column in c(group, time)) {
+    if (class(data[, column]) != "factor") {
+      data[, column] <- as.factor(data[, column])
+    }
+    if (length(levels(data[, column])) != 2) {
+      stop(paste("Column", column, "should contain exactly 2 levels!"))
+    }
+  }
+
   data[time] <- ifelse(data[, time] == levels(data[, time])[1], "time1", "time2")
   data[group] <- ifelse(data[, group] == levels(data[, group])[1], "group1", "group2")
 
@@ -78,7 +96,8 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
       dplyr::summarise(mean_diff = mean(diff, na.rm = TRUE), sd_diff = sd(diff, na.rm = TRUE))
 
     d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] - tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff))
+                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] - tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff),
+                    stringsAsFactors = FALSE)
     d
   }
   rownames(ds) <- ds$Feature_ID
@@ -102,14 +121,14 @@ fold_change <- function(object, group = group_col(object)) {
 
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .export = "finite_mean") %dopar% {
     feature <- features[i]
     result_row <- rep(0, ncol(groups))
     # Calculate fold changes
     for(i in 1:ncol(groups)){
       group1 <- data[data[, group] == groups[1,i], feature]
       group2 <- data[data[, group] == groups[2,i], feature]
-      result_row[i] <- mean(group2)/mean(group1)
+      result_row[i] <- finite_mean(group2)/finite_mean(group1)
     }
     result_row
   }
@@ -152,7 +171,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 
     result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
     # In case Feature is used as predictor, make the column names match
-    colnames(result_row) <- gsub(feature, "Feature", colnames(result_row))
+    if (!is.null(result_row)){
+      colnames(result_row) <- gsub(feature, "Feature", colnames(result_row))
+    }
     result_row
   }
 
@@ -165,7 +186,13 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
   rownames(results_fill) <- missing_features
   colnames(results_fill) <- colnames(results_df)
   results_df <- rbind(results_df, results_fill)
+  # Set Feature ID to the original order
+  results_df <- results_df %>%
+    dplyr::mutate(Feature_ID = factor(Feature_ID, levels = featureNames(object))) %>%
+    dplyr::arrange(Feature_ID) %>%
+    dplyr::mutate(Feature_ID = as.character(Feature_ID))
 
+  # FDR correction
   if (fdr) {
     if (all_features) {
       flags <- rep(NA_character_, nrow(results_df))
@@ -209,6 +236,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @export
 perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
+  # Start log
+  log_text(paste("\nStarting linear regression at", Sys.time()))
+
   lm_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
@@ -249,6 +279,9 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     tidyr::unite("Column", Var2, Var1)
   col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
+  # End log
+  log_text(paste("Linear regression performed at", Sys.time()))
+
   results_df[col_order]
 }
 
@@ -283,6 +316,9 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @export
 perform_logistic <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
+  # Start log
+  log_text(paste("\nStarting logistic regression at", Sys.time()))
+
   logistic_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
@@ -294,7 +330,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     } else {
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
-      confints <- confint(fit, level = ci_level)
+      suppressMessages(confints <- confint(fit, level = ci_level))
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
@@ -329,6 +365,9 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     estimate_idx <- which(colnames(results_df) == estimate_col)
     colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
   }
+
+  # End log
+  log_text(paste("Logistic regression performed at", Sys.time()))
 
   results_df
 }
@@ -369,6 +408,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
                          ci_method = c("boot", "profile", "Wald"),
                          test_random = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting fitting linear mixed models at", Sys.time()))
 
   if (!requireNamespace("lmerTest", quietly = TRUE)) {
     stop('package "lmerTest" required')
@@ -467,6 +508,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     col_order <- c(col_order, random_effect_order$Column)
   }
 
+  # End log
+  log_text(paste("Linear mixed models fit at", Sys.time()))
+
   results_df[col_order]
 }
 
@@ -497,6 +541,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 #' @export
 perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_features = FALSE) {
 
+  # Start log
+  log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
+
   homosced_fun <- function(feature, formula, data) {
 
     bartlett <- bartlett.test(formula = formula, data = data)
@@ -511,6 +558,9 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
   }
 
   results_df <- perform_test(object, formula_char, homosced_fun, all_features)
+
+  # Start log
+  log_text(paste("Homoscedasticity tests performed at", Sys.time()))
 
   results_df
 }
@@ -541,6 +591,8 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
 #'
 #' @export
 perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = FALSE) {
+  # Start log
+  log_text(paste("\nStarting Kruskal_wallis tests at", Sys.time()))
 
   kruskal_fun <- function(feature, formula, data) {
     kruskal <- kruskal.test(formula = formula, data = data)
@@ -551,6 +603,8 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
   }
 
   results_df <- perform_test(object, formula_char, kruskal_fun, all_features)
+
+  log_text(paste("Kruskal_wallis tests performed at", Sys.time()))
 
   results_df
 }
@@ -585,6 +639,8 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 #'
 #' @export
 perform_oneway_anova <- function(object, formula_char = NULL, all_features = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting ANOVA tests at", Sys.time()))
 
   anova_fun <- function(feature, formula, data) {
     anova_res <- oneway.test(formula = formula, data = data, ...)
@@ -595,6 +651,8 @@ perform_oneway_anova <- function(object, formula_char = NULL, all_features = FAL
   }
 
   results_df <- perform_test(object, formula_char, anova_fun, all_features)
+
+  log_text(paste("ANOVA performed at", Sys.time()))
 
   results_df
 }
@@ -622,6 +680,8 @@ perform_oneway_anova <- function(object, formula_char = NULL, all_features = FAL
 #'
 #' @export
 perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting t-tests at", Sys.time()))
 
   t_fun <- function(feature, formula, data) {
     t_res <- t.test(formula = formula, data = data, ...)
@@ -642,13 +702,15 @@ perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ..
   }
 
   results_df <- perform_test(object, formula_char, t_fun, all_features)
+  # Start log
+  log_text(paste("t-tests perfomred at", Sys.time()))
 
   results_df
 }
 
 #' Perform pairwise t-tests
 #'
-#' Performs pariowise t-tests between all study groups. NOTE! Does not use formula interface
+#' Performs pairwise t-tests between all study groups. NOTE! Does not use formula interface
 #'
 #' @param object a MetaboSet object
 #' @param group character, column name of phenoData giving the groups

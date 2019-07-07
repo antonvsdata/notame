@@ -1,0 +1,58 @@
+---
+title: "MetaboSet utility"
+author: "Anton Mattsson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MetaboSet utility}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+### MetaboSet utility vignette
+
+This vignette provides a short summary of many of the functions for accessing elements of ```MetaboSet``` objects and other utility functions.
+
+#### Construction of objects
+
+```MetaboSet``` objects are constructed with the ```construct_MetaboSet``` function. ```MetaboSet``` class is built upon the ```ExpressionSet``` class from the Biobase package by Bioconductor. ```ExpressionSet``` is used to record gene expression data, but many
+
+#### Inherited from ExpressionSet
+
+For more information, read the [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf) For a short summary, these functions from Biobase might be useful:
+
+- ```fData```: access feature data  
+- ```pData```: access pheno data/sample information  
+- ```exprs```: access feature abundances
+
+In addition, MetaboSets can be subset using the syntax for ExpressionSets, namely:  
+
+- Subsetting the ```exprs``` part holding the abundaces can be done with simple square brackets. For example, ```example_set[1:5, 1:3]``` would get the first 5 features and the first 3 samples out of the ```example_set``` object.  
+- Columns in ```pData``` can be accessed via a shortcut, for example ```example_set$Group```  
+- So to get rid of a particular group, you can run ```example_set[, example_set$Group != "B""]```
+
+#### MetaboSet-specific
+
+Utility functions for MetaboSet in particular:
+
+- ```group_col```, ```time_col``` and ```subject_col``` for the special column names  
+- ```quality``` for the quality metrics of signals  
+- ```combined_data``` for a data frame with sample information and feature abundances as columns (one row per smaple).  
+- ```results``` access and set results  
+- ```write_to_excel``` writes the whole object to an Excel spreadsheet
+
+In addition, there are many functions that modify MetaboSets:
+
+- ```mark_nas``` can be used to mark missing values as ```NA``` (peak picking software tend to report them as 0 or 1)
+- ```drop_qcs``` removes the QC samples  
+- ```drop_flagged``` removes all features that have been flagged (low-quality features)  
+- ```merge_metabosets``` is used to merge MetaboSets from multiple modes together
+
+

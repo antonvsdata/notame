@@ -1,0 +1,65 @@
+---
+title: "Visualizations"
+author: "Anton Mattsson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualizations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Visualizations
+
+This vignette lists all the visualizations found in the package.  The visualizations have a few elements in common:
+
+- Built using ```ggplot2``` and most return ```ggplot``` objects.  
+- First argument is always a MetaboSet object  
+- column names of pheno data (pData(object)) can be given to be used as ggplot aesthetics, such as color, shape or fill. Often these default to either ```group_col``` or other special columns.
+
+
+Color scales and other scales can be set separately for each function call, and the defaults are set as options in the package. The scales are ggplot scales, returned by e.g. ```scale_color_x```. It is also possible to change the scales globally for the complete project. . To do this, use e.g. ```options("amp.color_scale") <- scale_color_brewer(palette = "Dark2")```. Below is a list of all the scales used in the package and their default values (con = continuous, dis = discrete, div = diverging):
+
+- ```amp.color_scale_con = ggplot2::scale_color_viridis_c()```
+- ```amp.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1")```
+- ```amp.fill_scale_con = ggplot2::scale_fill_viridis_c()```
+- ```amp.fill_scale_dis = ggplot2::scale_fill_brewer(palette = "Set1")```
+- ```amp.fill_scale_div = ggplot2::scale_fill_distiller(palette = "RdBu")```
+- ```amp.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))```
+
+List of common visualizations that return a ggplot object, see individual documentation for more details:
+
+- ```plot_dist_density```: density plot of inter-sample distances in both QC and biological samples  
+- ```plot_injection_lm```: histogram of p-values from linear models predicting each feature by injection order of samples  
+- ```plot_sample_boxplots```: plot all abundances as boxplots, separated by sample (one boxplot per sample)  
+- ```plot_pca```: PCA scatter plot, possibly with density functions of groups at x and y axes  
+- ```plot_pca_hexbin```: PCA hexbin plot  
+- ```plot_tsne```: t-SNE scatter plot, possibly with density functions of groups at x and y axes
+- ```plot_tsne_hexbin```: t-SNE hexbin plot  
+- ```plot_dendrogram```: dendrogram of hierarchical clustering on the samples  
+- ```plot_heatmap```: heatmap of intersample distances  
+
+To save these functions to a PDF file, use ```save_plot```
+
+The following visualizations are applied to each feature and directly saved to a PDF file, one page per feature.
+
+- ```save_subject_line_plots```: line plots of changes in each subject  
+- ```save_group_boxplost```: boxplots of metabolite levels in each study group  
+- ```save_group_line_plots```: line plots of changes in group means
+
+
+### One function to rule them all
+
+The function ```visualizations``` automatically runs many of the visualizations for an object, ignoreing flagged features. It also allows you to merge all saved plots into one file by setting ```merge = TRUE```. NOTE that this requires you to install external tools. For Windows, install [pdftk](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/). For linux, make sure ```pdfunite``` is installed.
+
+If you want to modify the visualizations, it is a very good idea to create a project specific version, e.g. ```myproject_visualizations```. To do this, simply run ````visualizations``` **without parentheses** and copy-paste the code to an external file for modifications. You might want to add visualizations or modify the size of the figures to be saved.
+
+
+

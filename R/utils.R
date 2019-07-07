@@ -36,6 +36,9 @@ finite_sd <- function(x) {
 
 #' @rdname finite_helpers
 finite_mean <- function(x) {
+  if (all(is.na(x))) {
+    return(NA_real_)
+  }
   mean(x[is.finite(x)], na.rm = TRUE)
 }
 
@@ -51,7 +54,7 @@ finite_mad <- function(x) {
 
 #' @rdname finite_helpers
 finite_quantile <- function(x, ...) {
-  quantile(x[is.finite(x)], na.rm = TRUE, ...)
+  unname(quantile(x[is.finite(x)], na.rm = TRUE, ...))
 }
 
 

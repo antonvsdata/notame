@@ -4,7 +4,7 @@
 \alias{visualizations}
 \title{Write all relevant visualizations to pdf}
 \usage{
-visualizations(object, prefix, all_features = FALSE, merge = TRUE)
+visualizations(object, prefix, all_features = FALSE, merge = FALSE)
 }
 \arguments{
 \item{object}{A MetaboSet object}
@@ -19,6 +19,6 @@ major steps of data preprocessing. Saves all visualizations as PDFs with a set p
 }
 \details{
 If \code{merge} is \code{TRUE}, then a file containing all the visualizations
-named \code{prefix.pdf} will be created. NOTE: on Windows this reuires installation of pdftk
-(\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/})
+named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
+(\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
 }
