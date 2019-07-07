@@ -24,15 +24,18 @@
 plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
                      color = group_col(object), shape = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
+  shape <- shape %||% color
 
   res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
   pca_scores[color] <- pData(object)[, color]
+  pca_scores[shape] <- pData(object)[, shape]
   R2 <- res_pca@R2
   labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
 
+
   scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2],
-               color = color, shape = color, density = density, title = title,
+               color = color, shape = shape, density = density, title = title,
                subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale)
 }
 
@@ -61,7 +64,7 @@ plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
                       color = group_col(object), shape = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
                       shape_scale = NULL, ...) {
-
+  shape <- shape %||% color
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
   # If there are missing values, use ppca method from pcaMethods instead of usual PCA
@@ -75,9 +78,9 @@ plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
 
   tsne_scores <- data.frame(res_tsne$Y)
   tsne_scores[color] <- pData(object)[, color]
+  tsne_scores[shape] <- pData(object)[, shape]
 
-
-  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = color,
+  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = shape,
                density = density, title = title, subtitle = subtitle,
                color_scale = color_scale, shape_scale = shape_scale)
 
