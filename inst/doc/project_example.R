@@ -21,7 +21,7 @@ data <- read_from_excel(file = system.file("extdata", "sample_data_bread.xlsx", 
                         corner_row = 5, corner_column = "X",
                         split_by = c("Column", "Ion mode"))
 
-## ---- out.width = "600px"------------------------------------------------
+## ---- out.width = "600px", echo=FALSE------------------------------------
 knitr::include_graphics("Data_input.png")
 
 ## ------------------------------------------------------------------------
@@ -68,14 +68,14 @@ corrected <- correct_drift(mode)
 #  visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
 
 ## ------------------------------------------------------------------------
-fData(corrected)$DC_note
+results(corrected)$DC_note
 
 ## ---- include = FALSE----------------------------------------------------
-corrected <- corrected %>% assess_quality() %>% flag_quality()
+corrected <- flag_quality(corrected)
 processed[[i]] <- corrected
 
 ## ---- eval = FALSE-------------------------------------------------------
-#  corrected <- corrected %>% assess_quality() %>% flag_quality()
+#  corrected <- flag_quality(corrected)
 #  processed[[i]] <- corrected
 #  
 #  visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
@@ -141,7 +141,8 @@ top_index <- fData(imputed)$Feature_ID %in% top_features
 pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Bread")
 
 ## ---- eval = FALSE-------------------------------------------------------
-#  results(imputed) <- dplyr::left_join(anova_results, pairwise_results)
+#  combined_results <- dplyr::left_join(anova_results, pairwise_results)
+#  imputed <- join_results(imputed, combined_results)
 #  
 #  write_to_excel(imputed, file = paste0(path, "results.xlsx"))
 

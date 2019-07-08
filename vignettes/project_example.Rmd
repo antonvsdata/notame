@@ -54,7 +54,7 @@ data <- read_from_excel(file = system.file("extdata", "sample_data_bread.xlsx", 
 ```
 
 The function ```read_from_excel``` can be used to read data from an Excel spreadsheet using the following format:  
-```{r, out.width = "600px"}
+```{r, out.width = "600px", echo=FALSE}
 knitr::include_graphics("Data_input.png")
 ```
 
@@ -91,7 +91,7 @@ sapply(data, dim)
 
 These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in amp. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
 
-MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fileds of a MetaboSet object, and are recorded for convenience of the user, Many functions use these columns as default values for visualizations, hypothesis tests etc.
+MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object, and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
 
 ```{r}
 modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,

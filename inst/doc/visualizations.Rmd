@@ -44,7 +44,7 @@ List of common visualizations that return a ggplot object, see individual docume
 - ```plot_tsne```: t-SNE scatter plot, possibly with density functions of groups at x and y axes
 - ```plot_tsne_hexbin```: t-SNE hexbin plot  
 - ```plot_dendrogram```: dendrogram of hierarchical clustering on the samples  
-- ```plot_heatmap```: heatmap of intersample distances  
+- ```plot_sample_heatmap```: heatmap of intersample distances  
 
 To save these functions to a PDF file, use ```save_plot```
 
