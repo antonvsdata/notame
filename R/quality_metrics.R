@@ -70,6 +70,9 @@ setMethod("flag_quality", c(object = "MetaboSet"),
           function(object,
                    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
                                 (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") {
+            if (is.null(quality(object))) {
+              object <- assess_quality(object)
+            }
 
             good <- paste0("results(object) %>% dplyr::filter(", condition, ")") %>%
               parse(text = .) %>% eval()
