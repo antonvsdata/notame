@@ -81,6 +81,9 @@ setMethod("flag_quality", c(object = "MetaboSet"),
             idx <- is.na(results(object)$Flag) & !results(object)$Feature_ID %in% good
             results(object)$Flag[idx] <- "Low_quality"
 
+            percentage <- scales::percent(sum(results(object)$Flag == "Low_quality", na.rm = TRUE)/nrow(results(object)))
+            log_text(paste0("\n", percentage, " of features flagged for low quality"))
+
             object
           })
 
@@ -126,7 +129,8 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               proportions <- found_qc_df
             }
 
-
+            percentage <- scales::percent(sum(results(object)$Flag %in% c("Low_QC_detection", "Low_group_detection"), na.rm = TRUE)/nrow(results(object)))
+            log_text(paste0("\n", percentage, " of features flagged for low detection rate"))
 
             object <- join_results(object, proportions)
 
