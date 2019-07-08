@@ -96,6 +96,8 @@ merge_exprs <- function(object, y) {
 #'
 #' @export
 impute_rf <- function(object, all_features = FALSE, ...) {
+  # Start log
+  log_text(paste("\nStarting random forest imputation at", Sys.time()))
   # Drop flagged features
   dropped <- drop_flagged(object, all_features)
 
@@ -107,13 +109,14 @@ impute_rf <- function(object, all_features = FALSE, ...) {
   mf <- missForest::missForest(xmis = t(exprs(dropped)))
   imputed <- t(mf$ximp)
   # Log imputation error
-  log_text(paste0("\nOut-of-bag error in random forest imputation: ",
+  log_text(paste0("Out-of-bag error in random forest imputation: ",
                  round(mf$OOBerror, digits = 3), "\n"))
   # Assign imputed data to the droppped
   rownames(imputed) <- rownames(exprs(dropped))
   colnames(imputed) <- colnames(exprs(dropped))
   # Attach imputed abundances to object
   object <- merge_exprs(object, imputed)
+  log_text(paste("Random forest imputation finished at", Sys.time()))
   object
 }
 

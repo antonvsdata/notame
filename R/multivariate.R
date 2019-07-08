@@ -16,7 +16,6 @@
 #' @seealso \code{\link[randomForest]{randomForest}}, \code{\link{rf_importance}}
 #'
 #' @examples
-#'
 #' rf <- fit_rf(example_set, response = "Group")
 #' rf
 #' rf_importance(rf)
@@ -45,7 +44,6 @@ fit_rf <- function(object, response, importance = TRUE, all_features = FALSE, ..
 #' @seealso \code{\link[randomForest]{randomForest}}, \code{\link{fit_rf}}
 #'
 #' @examples
-#'
 #' rf <- fit_rf(example_set, response = "Group")
 #' rf
 #' rf_importance(rf)

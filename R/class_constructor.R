@@ -204,6 +204,23 @@ name_features <- function(feature_data) {
   feature_data
 }
 
+#' An S4 class used to represent LC-MS datasets
+#'
+#' MetaboSet is the main class used to represent data in the amp package.
+#' It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
+#' package. For more information, read the MetaboSet utility vignette.
+#' In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},
+#' \code{MetaboSet} has four slots of its own. The first three slots hold special
+#' column names that are stored purely for convenience, as many functions use these as
+#' defaults. The fourth slot is a data frame with one row per feature that holds all
+#' relevant results from the analyses.
+#'
+#' @slot group_col character, name of the column holding group information
+#' @slot time_col character, name of the column holding time points
+#' @slot subject_col character, name of the column holding subject identifiers
+#' @slot results data frame, holds results of analyses
+#'
+#'
 #' @import methods
 #' @importClassesFrom Biobase ExpressionSet
 MetaboSet <- setClass("MetaboSet",
@@ -325,11 +342,23 @@ write_to_excel <- function(object, file, ...) {
 
 # ------------ Accessors and Replacers -----------------
 
+#' Retrieve both sample information and features
+#'
+#' Returns a data frame with sample information plus all features as columns.
+#' The data frame thus has one row per sample.
+#'
+#' @param object a MetaboSet object
+#'
+#' @examples
+#' combined_data(example_set)
+#'
+#'
+#' @importFrom Biobase exprs pData
 #' @export
 setGeneric("combined_data", signature = "object",
            function(object) standardGeneric("combined_data"))
 
-#' @importFrom Biobase exprs pData
+#' @describeIn MetaboSet sample information and features combined to a single data frame, one row per sample
 #' @export
 setMethod("combined_data", c(object = "MetaboSet"),
           function(object) {
@@ -338,10 +367,12 @@ setMethod("combined_data", c(object = "MetaboSet"),
 
 
 # group
+
 #' @export
 setGeneric("group_col", signature = "object",
            function(object) standardGeneric("group_col"))
-
+#' @describeIn MetaboSet access and set group_col
+#'
 #' @export
 setMethod("group_col", "MetaboSet",
           function(object) object@group_col)
@@ -364,6 +395,7 @@ setMethod("group_col<-", "MetaboSet",
 setGeneric("time_col", signature = "object",
            function(object) standardGeneric("time_col"))
 
+#' @describeIn MetaboSet access and set time_col
 #' @export
 setMethod("time_col", "MetaboSet",
           function(object) object@time_col)
@@ -386,6 +418,7 @@ setMethod("time_col<-", "MetaboSet",
 setGeneric("subject_col", signature = "object",
            function(object) standardGeneric("subject_col"))
 
+#' @describeIn MetaboSet access and set subject_col
 #' @export
 setMethod("subject_col", "MetaboSet",
           function(object) object@subject_col)
@@ -409,6 +442,7 @@ setMethod("subject_col<-", "MetaboSet",
 setGeneric("results", signature = "object",
            function(object) standardGeneric("results"))
 
+#' @describeIn MetaboSet access and set results
 #' @export
 setMethod("results", "MetaboSet",
           function(object) object@results)
@@ -430,6 +464,7 @@ setMethod("results<-", "MetaboSet",
 setGeneric("join_results", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_results"))
 
+#' @describeIn MetaboSet join new information to results
 #' @export
 setMethod("join_results", c("MetaboSet", "data.frame"),
           function(object, dframe) {
@@ -443,10 +478,12 @@ setMethod("join_results", c("MetaboSet", "data.frame"),
           })
 
 
+
 #' @export
 setGeneric("join_fData", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_fData"))
 
+#' @describeIn MetaboSet join new information to fData
 #' @export
 setMethod("join_fData", c("MetaboSet", "data.frame"),
           function(object, dframe) {
