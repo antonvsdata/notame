@@ -68,7 +68,7 @@ visualizations <- function(object, prefix, all_features = FALSE, merge = FALSE) 
   save_name(plot_tsne_hexbin(object), "tSNE_hexbin")
   # Clustering
   save_name(plot_dendrogram(object), "dendrogram", width = 15)
-  save_name(plot_heatmap(object), "heatmap_samples", width = 15, height = 16)
+  save_name(plot_sample_heatmap(object), "heatmap_samples", width = 15, height = 16)
 
 
   if (merge) {

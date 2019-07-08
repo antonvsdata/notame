@@ -4,11 +4,13 @@
 \alias{save_group_boxplots}
 \title{Save box plots of each feature by group}
 \usage{
-save_group_boxplots(object, file, width = 8, height = 6,
-  group = group_col(object), color_scale = NULL)
+save_group_boxplots(object, all_features = FALSE, file, width = 8,
+  height = 6, group = group_col(object), color_scale = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
 \item{file}{path to the PDF file where the plots should be saved}
 

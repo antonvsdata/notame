@@ -9,6 +9,8 @@ impute_rf(object, all_features = FALSE, ...)
 \arguments{
 \item{object}{a MetaboSet object}
 
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.}
+
 \item{...}{passed to MissForest function}
 }
 \value{

@@ -4,12 +4,15 @@
 \alias{plot_dist_density}
 \title{Distance density plot}
 \usage{
-plot_dist_density(object, dist_method = "euclidean", center = TRUE,
-  scale = "uv", fill_scale = NULL, color_scale = NULL,
-  title = NULL, subtitle = NULL)
+plot_dist_density(object, all_features = FALSE,
+  dist_method = "euclidean", center = TRUE, scale = "uv",
+  fill_scale = NULL, color_scale = NULL, title = NULL,
+  subtitle = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
 \item{dist_method}{method for calculating the distances, passed to dist}
 

@@ -25,6 +25,7 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' Plot density of distances between samples in QC samples and actual samples
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param dist_method method for calculating the distances, passed to dist
 #' @param center logical, should the data  be centered?
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
@@ -36,10 +37,12 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' @seealso \code{\link[stats]{dist}}
 #'
 #' @export
-plot_dist_density <- function(object, dist_method = "euclidean",
+plot_dist_density <- function(object, all_features = FALSE, dist_method = "euclidean",
                               center = TRUE, scale = "uv",
                               fill_scale = NULL, color_scale = NULL,
                               title = NULL, subtitle = NULL) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   title <- title %||% paste("Density plot of", dist_method, "distances between samples")
 
@@ -66,13 +69,16 @@ plot_dist_density <- function(object, dist_method = "euclidean",
 #' by injection order alone. The expected uniform distribution is represented by a dashed red line.
 #'
 #' @param object A MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #'
 #' @return A ggplot object
 #'
 #' @seealso \code{\link{plot_p_histogram}}
 #'
 #' @export
-plot_injection_lm <- function(object) {
+plot_injection_lm <- function(object, all_features = FALSE) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   # Apply linear model to QC samples and biological samples separately
   lm_all <- perform_lm(object, "Feature ~ Injection_order")
@@ -131,6 +137,7 @@ plot_p_histogram <- function(p_values) {
 #' fill are both determined by the combination of group and time columns.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param order_by character vector, names of columns used to order the samples
 #' @param fill_by character vector, names of columns used to fill the boxplots
 #' @param title,subtitle character, title and subtitle of the plot
@@ -141,9 +148,11 @@ plot_p_histogram <- function(p_values) {
 #' @return a ggplot object
 #'
 #' @export
-plot_sample_boxplots <- function(object, order_by = NULL, fill_by = NULL,
+plot_sample_boxplots <- function(object, all_features = FALSE, order_by = NULL, fill_by = NULL,
                              title = "Boxplot of samples", subtitle = NULL,
                              fill_scale = NULL, zoom_boxplot = TRUE) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   order_by <- order_by %||% as.character(na.omit(c(group_col(object), time_col(object))))
   fill_by <- fill_by %||% as.character(na.omit(c(group_col(object), time_col(object))))

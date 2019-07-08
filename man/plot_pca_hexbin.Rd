@@ -4,14 +4,17 @@
 \alias{plot_pca_hexbin}
 \title{PCA hexbin plot}
 \usage{
-plot_pca_hexbin(object, center = TRUE, scale = "uv", method = "ppca",
-  fill = "Injection_order", summary_fun = "mean", bins = 10,
-  title = "PCA", subtitle = NULL, fill_scale = NULL, ...)
+plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
+  scale = "uv", method = "ppca", fill = "Injection_order",
+  summary_fun = "mean", bins = 10, title = "PCA", subtitle = NULL,
+  fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{center}{logical, should the data  be centered prior to PCA (usually yes)}
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+
+\item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 

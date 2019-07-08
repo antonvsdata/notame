@@ -4,6 +4,7 @@
 #' Draws a dendrogram of a hierarchical clustering applied to the samples of an experiment
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param color character, name of the column used for coloring the sample labels
 #' @param dist_method distance method used in clustering, see ?dist
 #' @param clustering method used in clustering, see ?hclust
@@ -18,9 +19,11 @@
 #' @seealso \code{\link{dist}} \code{\link{hclust}}
 #'
 #' @export
-plot_dendrogram <- function(object, color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
+plot_dendrogram <- function(object, all_features = FALSE, color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
                      center = TRUE, scale = "uv", title = "Dendrogram of hierarchical clustering",
                      subtitle = NULL, color_scale = NULL) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   subtitle <- subtitle %||% paste("Distance method:", dist_method, "Clustering method:", clust_method)
 
@@ -61,6 +64,7 @@ plot_dendrogram <- function(object, color = group_col(object), dist_method = "eu
 #' the samples are ordered by hierarchical clustering.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param dist_method distance method used in clustering, see ?dist
 #' @param clustering method used in clustering, see ?hclust
 #' @param center logical, should the data  be centered?
@@ -77,11 +81,14 @@ plot_dendrogram <- function(object, color = group_col(object), dist_method = "eu
 #' @seealso \code{\link{dist}} \code{\link{hclust}}
 #'
 #' @export
-plot_heatmap <- function(object, dist_method = "euclidean", clust_method = "ward.D2",
+plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euclidean", clust_method = "ward.D2",
                          center = TRUE, scale = "uv",
                          group_bar = TRUE, group = group_col(object),
                          title = "Heatmap of distances between samples",
                          subtitle = NULL, fill_scale_con = NULL, fill_scale_dis = NULL) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
   # Default settings
   subtitle <- subtitle %||% paste("Distance method:", dist_method, "Clustering method:", clust_method)
   fill_scale_con <- fill_scale_con %||% getOption("amp.fill_scale_con")

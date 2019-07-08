@@ -4,13 +4,15 @@
 \alias{save_group_lineplots}
 \title{Save line plots with errorbars by group}
 \usage{
-save_group_lineplots(object, file, width = 8, height = 6,
-  x = time_col(object), group = group_col(object),
+save_group_lineplots(object, all_features = FALSE, file, width = 8,
+  height = 6, x = time_col(object), group = group_col(object),
   fun.data = "mean_cl_boot", fun.y = NULL, fun.ymin = NULL,
   fun.ymax = NULL, position_dodge_amount = 0.2, color_scale = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
 \item{file}{path to the PDF file where the plots should be saved}
 

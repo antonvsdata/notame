@@ -4,13 +4,16 @@
 \alias{plot_dendrogram}
 \title{Draw dendrograms}
 \usage{
-plot_dendrogram(object, color = group_col(object),
-  dist_method = "euclidean", clust_method = "ward.D2", center = TRUE,
-  scale = "uv", title = "Dendrogram of hierarchical clustering",
-  subtitle = NULL, color_scale = NULL)
+plot_dendrogram(object, all_features = FALSE,
+  color = group_col(object), dist_method = "euclidean",
+  clust_method = "ward.D2", center = TRUE, scale = "uv",
+  title = "Dendrogram of hierarchical clustering", subtitle = NULL,
+  color_scale = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
 \item{color}{character, name of the column used for coloring the sample labels}
 

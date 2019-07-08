@@ -7,6 +7,7 @@
 #' A separate plot is drawn for each feature.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param file path to the PDF file where the plots should be saved
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
@@ -16,9 +17,11 @@
 #' @param facet character, the column name to facet by (optional, usually same as color)
 #'
 #' @export
-save_subject_line_plots <- function(object, file, width = 8, height = 6,
+save_subject_line_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                     x = time_col(object), id = subject_col(object),
                                     color = NA, color_scale = NULL, facet = NULL) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   color_scale <- color_scale %||% getOption("amp.color_scale_dis")
   if (is.na(x)) {
@@ -76,13 +79,17 @@ save_subject_line_plots <- function(object, file, width = 8, height = 6,
 #' A separate plot is drawn for each feature.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param file path to the PDF file where the plots should be saved
 #' @param width,height width and height of the plots in inches
 #' @param group character, name of the column to be used as x-axis and color
 #'
 #' @export
-save_group_boxplots <- function(object, file, width = 8, height = 6, group = group_col(object),
+save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6, group = group_col(object),
                                 color_scale =  NULL) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
   if (is.na(group)) {
     stop("The group column is missing")
   }
@@ -122,6 +129,7 @@ save_group_boxplots <- function(object, file, width = 8, height = 6, group = gro
 #' A separate plot is drawn for each feature.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param file path to the PDF file where the plots should be saved
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
@@ -136,11 +144,14 @@ save_group_boxplots <- function(object, file, width = 8, height = 6, group = gro
 #' @seealso \code{\link[ggplot2]{stat_summary}}
 #'
 #' @export
-save_group_lineplots <- function(object, file, width = 8, height = 6,
+save_group_lineplots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                  x = time_col(object), group = group_col(object),
                                  fun.data = "mean_cl_boot", fun.y = NULL,
                                  fun.ymin = NULL, fun.ymax = NULL, position_dodge_amount = 0.2,
                                  color_scale =  NULL) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
   if (is.na(group)) {
     stop("The group column is missing")
   }

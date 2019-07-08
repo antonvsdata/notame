@@ -4,12 +4,14 @@
 \alias{save_subject_line_plots}
 \title{Save line plots with mean}
 \usage{
-save_subject_line_plots(object, file, width = 8, height = 6,
-  x = time_col(object), id = subject_col(object), color = NA,
-  color_scale = NULL, facet = NULL)
+save_subject_line_plots(object, all_features = FALSE, file, width = 8,
+  height = 6, x = time_col(object), id = subject_col(object),
+  color = NA, color_scale = NULL, facet = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
 \item{file}{path to the PDF file where the plots should be saved}
 

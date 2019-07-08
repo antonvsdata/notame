@@ -4,15 +4,17 @@
 \alias{plot_tsne_hexbin}
 \title{t-SNE hexbin plot}
 \usage{
-plot_tsne_hexbin(object, center = TRUE, scale = "uv",
-  perplexity = 30, fill = "Injection_order", summary_fun = "mean",
-  bins = 10, title = "t-SNE", subtitle = paste("Perplexity:",
-  perplexity), fill_scale = NULL, ...)
+plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
+  scale = "uv", perplexity = 30, fill = "Injection_order",
+  summary_fun = "mean", bins = 10, title = "t-SNE",
+  subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{center}{logical, should the data  be centered prior to PCA (usually yes)}
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+
+\item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 

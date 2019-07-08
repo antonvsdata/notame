@@ -9,7 +9,7 @@ drop_flagged(object, all_features = FALSE)
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be retained? Mainy used by internal functions}
+\item{all_features}{logical, should all features be retained? Mainly used by internal functions}
 }
 \description{
 Removes all features that have been flagged by quality control functions.

@@ -4,10 +4,12 @@
 \alias{plot_injection_lm}
 \title{Estimate the magnitude of drift}
 \usage{
-plot_injection_lm(object)
+plot_injection_lm(object, all_features = FALSE)
 }
 \arguments{
 \item{object}{A MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 }
 \value{
 A ggplot object

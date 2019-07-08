@@ -40,7 +40,7 @@ drop_qcs <- function(object) {
 #' Only features that do not have a flag (Flag == NA) are retained.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be retained? Mainy used by internal functions
+#' @param all_features logical, should all features be retained? Mainly used by internal functions
 #'
 #' @export
 drop_flagged <- function(object, all_features = FALSE) {
@@ -87,6 +87,7 @@ merge_exprs <- function(object, y) {
 #' NOTE: running in parallel prevents user from setting a seed number.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.
 #' @param ... passed to MissForest function
 #'
 #' @return MetaboSet object as the one supplied, with missing values imputed.

@@ -4,12 +4,14 @@
 \alias{plot_sample_boxplots}
 \title{Plot a boxplot for each sample}
 \usage{
-plot_sample_boxplots(object, order_by = NULL, fill_by = NULL,
-  title = "Boxplot of samples", subtitle = NULL, fill_scale = NULL,
-  zoom_boxplot = TRUE)
+plot_sample_boxplots(object, all_features = FALSE, order_by = NULL,
+  fill_by = NULL, title = "Boxplot of samples", subtitle = NULL,
+  fill_scale = NULL, zoom_boxplot = TRUE)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
 \item{order_by}{character vector, names of columns used to order the samples}
 

@@ -4,15 +4,17 @@
 \alias{plot_tsne}
 \title{t-SNE scatter plot}
 \usage{
-plot_tsne(object, center = TRUE, scale = "uv", perplexity = 30,
-  color = group_col(object), shape = NULL, density = FALSE,
-  title = "t-SNE", subtitle = paste("Perplexity:", perplexity),
-  color_scale = NULL, shape_scale = NULL, ...)
+plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
+  perplexity = 30, color = group_col(object), shape = NULL,
+  density = FALSE, title = "t-SNE", subtitle = paste("Perplexity:",
+  perplexity), color_scale = NULL, shape_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{center}{logical, should the data  be centered prior to PCA (usually yes)}
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+
+\item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 

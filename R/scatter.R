@@ -5,7 +5,8 @@
 #' pcaMethods and plots the two first principal components
 #'
 #' @param object a MetaboSet object
-#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param center logical, should the data  be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param method the method to use, see documentation in pcaMethods
 #' @param color character, name of the column used for coloring the points
@@ -21,9 +22,12 @@
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
+plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", method = "ppca",
                      color = group_col(object), shape = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
   shape <- shape %||% color
 
   res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
@@ -44,7 +48,8 @@ plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
 #' Computes t-SNE into two dimensions and plots the map points.
 #'
 #' @param object a MetaboSet object
-#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param center logical, should the data  be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
 #' @param color character, name of the column used for coloring the points
@@ -60,10 +65,13 @@ plot_pca <- function(object, center = TRUE, scale = "uv", method = "ppca",
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
 #' @export
-plot_tsne <- function(object, center = TRUE, scale = "uv", perplexity = 30,
+plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       color = group_col(object), shape = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
                       shape_scale = NULL, ...) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
   shape <- shape %||% color
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
@@ -152,7 +160,8 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 #' pcaMethods and plots the two first principal components
 #'
 #' @param object a MetaboSet object
-#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param center logical, should the data  be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param method the method to use, see documentation in pcaMethods
 #' @param fill character, name of the column used for coloring the hexagons
@@ -166,9 +175,11 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca_hexbin <- function(object, center = TRUE, scale = "uv", method = "ppca",
+plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", method = "ppca",
                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
                      subtitle = NULL, fill_scale = NULL, ...) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
@@ -186,7 +197,8 @@ plot_pca_hexbin <- function(object, center = TRUE, scale = "uv", method = "ppca"
 #' Computes t-SNE into two dimensions and plots the map points.
 #'
 #' @param object a MetaboSet object
-#' @param center logical, should the data  be centered prior to PCA (usually yes)
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param center logical, should the data  be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
 #' @param color character, name of the column used for coloring the points
@@ -201,9 +213,11 @@ plot_pca_hexbin <- function(object, center = TRUE, scale = "uv", method = "ppca"
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
 #' @export
-plot_tsne_hexbin <- function(object, center = TRUE, scale = "uv", perplexity = 30,
+plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
 
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
