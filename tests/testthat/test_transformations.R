@@ -63,7 +63,7 @@ test_that("Flagging works as expected", {
 test_that("Flagged compounds are not imputed", {
 
   marked <- mark_nas(example_set, 0)
-  fData(marked)$Flag[c(1,4,6)] <- "Flagged"
+  results(marked)$Flag[c(1,4,6)] <- "Flagged"
 
   imputed <- impute_rf(marked)
   nas <- apply(exprs(imputed), 1, prop_na)

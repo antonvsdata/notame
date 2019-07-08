@@ -58,7 +58,6 @@ test_that("Easy example data is read correctly", {
                    Mass = 50 * seq_len(10),
                    RetentionTime = 0.5 *seq_len(10),
                    "MS/MS Spectrum" = c("(123.45; 678)", rep(NA, 9)),
-                   Flag = NA_character_,
                    stringsAsFactors = FALSE)
   fd <- name_features(fd)
   rownames(fd) <- fd$Feature_ID
@@ -108,7 +107,6 @@ test_that("Data is split correctly", {
                    Column = rep(c("RP", "Hilic", "RP"), times = c(4, 8, 4)),
                    Mode = rep(c("pos", "neg"), each = 8),
                    "MS/MS Spectrum" = c("(123.45; 678)", rep(NA, 15)),
-                   Flag = NA_character_,
                    stringsAsFactors = FALSE)
   fd <- name_features(fd)
   rownames(fd) <- fd$Feature_ID

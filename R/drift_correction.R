@@ -138,7 +138,7 @@ inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
 
   exprs(dc) <- inspected$data
   dc <- assess_quality(dc)
-  dc <- join_fdata(dc, inspected$dc_notes)
+  dc <- join_results(dc, inspected$dc_notes)
 
   # Log information
   dc_note <- inspected$dc_notes$DC_note

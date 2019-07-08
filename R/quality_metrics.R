@@ -2,14 +2,13 @@
 setGeneric("quality", signature = "object",
            function(object) standardGeneric("quality"))
 
-#' @importFrom Biobase fData
 #' @export
 setMethod("quality", c(object = "MetaboSet"),
           function(object) {
-            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
+            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(results(object)))) {
               return(NULL)
             }
-            fData(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
+            results(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
                             "D_ratio_r")]
           })
 
@@ -17,14 +16,13 @@ setMethod("quality", c(object = "MetaboSet"),
 setGeneric("erase_quality", signature = "object",
            function(object) standardGeneric("erase_quality"))
 
-#' @importFrom Biobase fData
 #' @export
 setMethod("erase_quality", c(object = "MetaboSet"),
           function(object) {
-            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
+            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(results(object)))) {
               return(NULL)
             }
-            fData(object)[c("RSD", "RSD_r", "D_ratio", "D_ratio_r")] <- NULL
+            results(object)[c("RSD", "RSD_r", "D_ratio", "D_ratio_r")] <- NULL
             object
           })
 
@@ -33,7 +31,7 @@ setGeneric("assess_quality", signature = "object",
            function(object) standardGeneric("assess_quality"))
 
 #' @importFrom foreach "%dopar%"
-#' @importFrom Biobase exprs fData "fData<-"
+#' @importFrom Biobase exprs
 #' @export
 setMethod("assess_quality", c(object = "MetaboSet"),
           function(object) {
@@ -55,7 +53,7 @@ setMethod("assess_quality", c(object = "MetaboSet"),
                          row.names = rownames(sample_data)[i], stringsAsFactors = FALSE)
             }
 
-            object <- join_fdata(object, quality_metrics)
+            object <- join_results(object, quality_metrics)
 
             object
           })
@@ -67,19 +65,18 @@ setGeneric("flag_quality", signature = "object",
                     condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
                                 (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") standardGeneric("flag_quality"))
 
-#' @importFrom Biobase fData "fData<-"
 #' @export
 setMethod("flag_quality", c(object = "MetaboSet"),
           function(object,
                    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
                                 (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") {
 
-            good <- paste0("fData(object) %>% dplyr::filter(", condition, ")") %>%
+            good <- paste0("results(object) %>% dplyr::filter(", condition, ")") %>%
               parse(text = .) %>% eval()
             good <- good$Feature_ID
 
-            idx <- is.na(fData(object)$Flag) & !fData(object)$Feature_ID %in% good
-            fData(object)$Flag[idx] <- "Low_quality"
+            idx <- is.na(results(object)$Flag) & !results(object)$Feature_ID %in% good
+            results(object)$Flag[idx] <- "Low_quality"
 
             object
           })
@@ -89,8 +86,7 @@ setMethod("flag_quality", c(object = "MetaboSet"),
 setGeneric("flag_detection", signature = "object",
            function(object, qc_limit = 0.7, group_limit = 0.8, group = group_col(object)) standardGeneric("flag_detection"))
 
-#' @importFrom Biobase fData "fData<-" featureNames
-#' @importFrom magrittr "%>%"
+#' @importFrom Biobase featureNames
 #' @export
 setMethod("flag_detection", c(object = "MetaboSet"),
           function(object, qc_limit, group_limit, group) {
@@ -102,8 +98,8 @@ setMethod("flag_detection", c(object = "MetaboSet"),
                                       Detection_rate_QC = found_qc,
                                       stringsAsFactors = FALSE)
 
-            idx <- is.na(fData(object)$Flag) & fData(object)$Feature_ID %in% bad_qc
-            fData(object)$Flag[idx] <- "Low_qc_detection"
+            idx <- is.na(results(object)$Flag) & results(object)$Feature_ID %in% bad_qc
+            results(object)$Flag[idx] <- "Low_qc_detection"
 
             # Compute proportions found in each study group
             if (!is.na(group)) {
@@ -118,8 +114,8 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               # Check if any group has enough non-missing entries
               proportions$good <- apply(proportions[-1], 1, function(x){any(x >= group_limit)})
 
-              idx <- is.na(fData(object)$Flag) & (!fData(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
-              fData(object)$Flag[idx] <- "Low_group_detection"
+              idx <- is.na(results(object)$Flag) & (!results(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
+              results(object)$Flag[idx] <- "Low_group_detection"
               # Add detection rates to feature data
               proportions <- dplyr::left_join(proportions, found_qc_df, by = "Feature_ID")
               proportions$good <- NULL
@@ -129,8 +125,7 @@ setMethod("flag_detection", c(object = "MetaboSet"),
 
 
 
-            object <- join_fdata(object, proportions)
+            object <- join_results(object, proportions)
 
             object
           })
-

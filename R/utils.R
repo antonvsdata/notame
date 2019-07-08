@@ -80,15 +80,6 @@ prop_found <- function(x) {
   sum(!is.na(x)) / length(x)
 }
 
-# Join a dataframe to fData
-join_fdata <- function(object, dframe) {
-  fData(object) <- dplyr::left_join(fData(object),
-                                    dframe,
-                                    by = "Feature_ID")
-  rownames(fData(object)) <- fData(object)$Feature_ID
-  object
-}
-
 best_class <- function(x) {
   x <- type.convert(as.character(x), as.is = TRUE)
   if (class(x) == "numeric") {

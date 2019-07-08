@@ -1,5 +1,4 @@
 library(dplyr)
-library(Biobase)
 devtools::load_all()
 # Create a toy dataset for use in examples
 
@@ -11,7 +10,6 @@ feature_data <- data.frame(Split = "HILIC_pos",
                            Mass = runif(n_features, 100, 500),
                            RetentionTime = runif(n_features, 0.5, 8),
                            Column = "HILIC", Mode = "pos",
-                           Flag = NA_character_,
                            stringsAsFactors = FALSE)
 
 # Create Feature ID
@@ -77,24 +75,9 @@ assay_data <- abs(assay_data)
 rownames(assay_data) <- rownames(feature_data)
 colnames(assay_data) <- rownames(pheno_data)
 
-
-
-pheno_data <- AnnotatedDataFrame(data = pheno_data)
-feature_data <- AnnotatedDataFrame(data = feature_data)
-
-example_set <- MetaboSet(exprs = assay_data,
-                         phenoData = pheno_data,
-                         featureData = feature_data,
-                         group_col = "Group",
-                         time_col = "Time",
-                         subject_col = "Subject_ID",
-                         predicted = matrix(NA_real_, nrow = nrow(assay_data),
-                                            ncol = ncol(assay_data),
-                                            dimnames = dimnames(assay_data)),
-                         results = data.frame(Feature_ID = feature_data$Feature_ID,
-                                              row.names = rownames(feature_data),
-                                              stringsAsFactors = FALSE))
-
+# Construct object
+example_set <- construct_MetaboSet(exprs = assay_data, pheno_data = pheno_data, feature_data = feature_data,
+                                   group_col = "Group", time_col = "Time", subject_col = "Subject_ID")[[1]]
 
 
 

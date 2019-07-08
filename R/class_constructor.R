@@ -137,12 +137,11 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = 
   if (!"Feature_ID" %in% colnames(feature_data)){
     feature_data <- name_features(feature_data = feature_data)
   }
-  # Reorganise columns and add Flag column
+  # Reorganise columns and change classes
   feature_data <- feature_data %>%
     dplyr::select(Feature_ID, Split, dplyr::everything()) %>%
     best_classes() %>%
-    dplyr::mutate_if(is.factor, as.character) %>%
-    dplyr:: mutate(Flag = NA_character_)
+    dplyr::mutate_if(is.factor, as.character)
   rownames(feature_data) <- feature_data$Feature_ID
 
   # Extract LC-MS measurements as matrix
@@ -264,6 +263,7 @@ construct_MetaboSet <- function(exprs, pheno_data, feature_data,
                         time_col = time_col,
                         subject_col = subject_col,
                         results = data.frame(Feature_ID = fd_tmp$Feature_ID,
+                                             Flag = NA_character_,
                                              row.names = rownames(fd_tmp),
                                              stringsAsFactors = FALSE))
   }
@@ -425,3 +425,37 @@ setMethod("results<-", "MetaboSet",
               return(object)
             }
           })
+
+#' @export
+setGeneric("join_results", signature = c("object", "dframe"),
+           function(object, dframe) standardGeneric("join_results"))
+
+#' @export
+setMethod("join_results", c("MetaboSet", "data.frame"),
+          function(object, dframe) {
+            results(object) <- dplyr::left_join(results(object),
+                                              dframe,
+                                              by = "Feature_ID")
+            rownames(results(object)) <- results(object)$Feature_ID
+            if (validObject(object)) {
+              return(object)
+            }
+          })
+
+
+#' @export
+setGeneric("join_fData", signature = c("object", "dframe"),
+           function(object, dframe) standardGeneric("join_fData"))
+
+#' @export
+setMethod("join_fData", c("MetaboSet", "data.frame"),
+          function(object, dframe) {
+            fData(object) <- dplyr::left_join(fData(object),
+                                              dframe,
+                                              by = "Feature_ID")
+            rownames(fData(object)) <- fData(object)$Feature_ID
+            if (validObject(object)) {
+              return(object)
+            }
+          })
+
