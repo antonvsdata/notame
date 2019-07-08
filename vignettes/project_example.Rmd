@@ -173,19 +173,19 @@ Information about the drift correction procedure is recorded in the DC_note colu
 - Drift_corrected = everything worked as expected, and the feature was corrected for the drift.
 
 ```{r}
-fData(corrected)$DC_note
+results(corrected)$DC_note
 ```
 
 ##### Flag low-quality features
 
 After drift correction, it is time to flag low-quality features. 
 ```{r, include = FALSE}
-corrected <- corrected %>% assess_quality() %>% flag_quality()
+corrected <- flag_quality(corrected)
 processed[[i]] <- corrected
 ```
 
 ```{r, eval = FALSE}
-corrected <- corrected %>% assess_quality() %>% flag_quality()
+corrected <- flag_quality(corrected)
 processed[[i]] <- corrected
 
 visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
@@ -300,10 +300,11 @@ top_index <- fData(imputed)$Feature_ID %in% top_features
 pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Bread")
 ```
 
-And there are our final results! The next step is then to combine the results and save the object to an output Excel file:
+And there are our final results! The next step is then to combine the results, add them to the object and save the object to an output Excel file:
 
 ```{r, eval = FALSE}
-results(imputed) <- dplyr::left_join(anova_results, pairwise_results)
+combined_results <- dplyr::left_join(anova_results, pairwise_results)
+imputed <- join_results(imputed, combined_results)
 
 write_to_excel(imputed, file = paste0(path, "results.xlsx"))
 ```

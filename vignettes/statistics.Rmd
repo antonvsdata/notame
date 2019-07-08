@@ -56,3 +56,14 @@ Now that we know how the formula interface looks like, let's list the univariate
 - two-sample t-test (Welch or Student): ```perform_t_test```  
 - pairwise t-tests: ```perform_pairwise_t_test```
 
+## Multivariate functions
+
+### Random forest  
+
+- ```fit_rf``` fits a random forest predicting a column in the sample information (```pData(obejct)```) by the features  
+- ```importance_rf```extracts the feature importance in random forest prediction in a nice format
+
+
+### PLS-DA
+
+Not yet implemented, but coming soon!

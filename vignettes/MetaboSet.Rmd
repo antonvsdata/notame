@@ -53,6 +53,8 @@ In addition, there are many functions that modify MetaboSets:
 - ```mark_nas``` can be used to mark missing values as ```NA``` (peak picking software tend to report them as 0 or 1)
 - ```drop_qcs``` removes the QC samples  
 - ```drop_flagged``` removes all features that have been flagged (low-quality features)  
-- ```merge_metabosets``` is used to merge MetaboSets from multiple modes together
+- ```merge_metabosets``` is used to merge MetaboSets from multiple modes together  
+- ```join_fData``` can be used to merge a data frame to the ```fData``` part of an object  
+- ```join_results``` merges data frames to the ```results``` part of an object. Useful for adding results from any statistical tests to the object.
 
 

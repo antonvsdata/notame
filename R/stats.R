@@ -703,7 +703,7 @@ perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ..
 
   results_df <- perform_test(object, formula_char, t_fun, all_features)
   # Start log
-  log_text(paste("t-tests perfomred at", Sys.time()))
+  log_text(paste("t-tests performed at", Sys.time()))
 
   results_df
 }
