@@ -30,7 +30,7 @@ Imports:
     doParallel,
     cowplot,
     Hmisc,
-    lmer,
+    lme4,
     lmerTest,
     hexbin
 Suggests:
