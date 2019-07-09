@@ -199,7 +199,7 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
     p2 <- p +
       geom_point(data = dc_data, mapping = aes_string(color = color, shape = color))
 
-    p <- gridExtra::arrangeGrob(p1, p2, nrow = 2)
+    p <- cowplot::plot_grid(p1, p2, nrow = 2)
     plot(p)
   }
 
