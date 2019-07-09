@@ -61,7 +61,7 @@ Now that we know how the formula interface looks like, let's list the univariate
 ### Random forest  
 
 - ```fit_rf``` fits a random forest predicting a column in the sample information (```pData(obejct)```) by the features  
-- ```importance_rf```extracts the feature importance in random forest prediction in a nice format
+- ```importance_rf``` extracts the feature importance in random forest prediction in a nice format
 
 
 ### PLS-DA

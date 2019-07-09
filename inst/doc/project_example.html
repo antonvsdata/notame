@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-08" />
+<meta name="date" content="2019-07-09" />
 
 <title>Project example</title>
 
@@ -95,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Project example</h1>
 <h4 class="author">Anton Mattsson</h4>
-<h4 class="date">2019-07-08</h4>
+<h4 class="date">2019-07-09</h4>
 
 
 
@@ -251,8 +251,8 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2019-07-08 15:50:06</span>
-<span class="co">#&gt; Drift correction performed at 2019-07-08 15:50:06</span>
+<span class="co">#&gt; Starting drift correction at 2019-07-09 15:30:48</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-09 15:30:48</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 63.6%,  Low_quality: 36.4%</span>
@@ -261,8 +261,8 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2019-07-08 15:50:08</span>
-<span class="co">#&gt; Drift correction performed at 2019-07-08 15:50:08</span>
+<span class="co">#&gt; Starting drift correction at 2019-07-09 15:30:49</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-09 15:30:49</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 33.3%,  Low_quality: 66.7%</span>
@@ -271,8 +271,8 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2019-07-08 15:50:09</span>
-<span class="co">#&gt; Drift correction performed at 2019-07-08 15:50:09</span>
+<span class="co">#&gt; Starting drift correction at 2019-07-09 15:30:51</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-09 15:30:51</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 40.0%,  Low_quality: 60.0%</span>
@@ -281,8 +281,8 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2019-07-08 15:50:11</span>
-<span class="co">#&gt; Drift correction performed at 2019-07-08 15:50:11</span>
+<span class="co">#&gt; Starting drift correction at 2019-07-09 15:30:52</span>
+<span class="co">#&gt; Drift correction performed at 2019-07-09 15:30:52</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 36.8%,  Low_quality: 63.2%</span>
@@ -314,24 +314,24 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="kw">set.seed</span>(<span class="dv">38</span>)
 imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(merged_no_qc)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting random forest imputation at 2019-07-08 15:50:13</span>
+<span class="co">#&gt; Starting random forest imputation at 2019-07-09 15:30:54</span>
 <span class="co">#&gt;   missForest iteration 1 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 2 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 3 in progress...done!</span>
 <span class="co">#&gt; Out-of-bag error in random forest imputation: 0.01</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Random forest imputation finished at 2019-07-08 15:50:13</span></code></pre></div>
+<span class="co">#&gt; Random forest imputation finished at 2019-07-09 15:30:54</span></code></pre></div>
 <p>By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, thay should be imputed as well. This can be achieved through a second round of imputation, now with all features included:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(imputed, <span class="dt">all_features =</span> <span class="ot">TRUE</span>)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting random forest imputation at 2019-07-08 15:50:13</span>
+<span class="co">#&gt; Starting random forest imputation at 2019-07-09 15:30:54</span>
 <span class="co">#&gt;   missForest iteration 1 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 2 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 3 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 4 in progress...done!</span>
 <span class="co">#&gt; Out-of-bag error in random forest imputation: 0.123</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Random forest imputation finished at 2019-07-08 15:50:19</span></code></pre></div>
+<span class="co">#&gt; Random forest imputation finished at 2019-07-09 15:31:00</span></code></pre></div>
 <p><strong>NOTE:</strong> It is NOT recommended to impute all features in the first round, as low quality features would affect imputation of good quality features.</p>
 <p><strong>NOTE</strong> If the dataset consists of a very large number of features (tens of thousands) it might be a good idea to run the imputation inside each mode, since in that case each mode has enough features to guarantee good imputation results, and running the algorithm on the complete dataset would take too long to be practical.</p>
 <p>After imputation, a final round of visualizations is in place.</p>
@@ -347,8 +347,8 @@ imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(merged_n
 <p>Let’s try to find features that separate the different bread varieties. First, we’ll Welch’s analysis of variance to find features that have different levels in any of the varieties:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">anova_results &lt;-<span class="st"> </span><span class="kw">perform_oneway_anova</span>(imputed, <span class="dt">formula_char =</span> <span class="st">&quot;Feature ~ Bread&quot;</span>)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting ANOVA tests at 2019-07-08 15:50:19</span>
-<span class="co">#&gt; ANOVA performed at 2019-07-08 15:50:19</span></code></pre></div>
+<span class="co">#&gt; Starting ANOVA tests at 2019-07-09 15:31:00</span>
+<span class="co">#&gt; ANOVA performed at 2019-07-09 15:31:00</span></code></pre></div>
 <p>Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pariwise Welch’s t-tests on them:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">top_features &lt;-<span class="st"> </span>anova_results<span class="op">$</span>Feature_ID[<span class="kw">which</span>(anova_results<span class="op">$</span>ANOVA_P_FDR <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.2</span>)]
 
@@ -356,35 +356,35 @@ top_index &lt;-<span class="st"> </span><span class="kw">fData</span>(imputed)<s
 <span class="co"># Setting the group column is redundant, but made for clarity</span>
 pairwise_results &lt;-<span class="st"> </span><span class="kw">perform_pairwise_t_test</span>(imputed[top_index, ], <span class="dt">group =</span> <span class="st">&quot;Bread&quot;</span>)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:19</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:19</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:00</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:00</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:19</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:19</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:00</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:00</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:19</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:19</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:00</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:00</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:00</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:00</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:01</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:01</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:01</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:01</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:01</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:01</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:01</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:01</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:01</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:01</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2019-07-08 15:50:20</span>
-<span class="co">#&gt; t-tests performed at 2019-07-08 15:50:20</span></code></pre></div>
+<span class="co">#&gt; Starting t-tests at 2019-07-09 15:31:01</span>
+<span class="co">#&gt; t-tests performed at 2019-07-09 15:31:01</span></code></pre></div>
 <p>And there are our final results! The next step is then to combine the results, add them to the object and save the object to an output Excel file:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">combined_results &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">left_join</span>(anova_results, pairwise_results)
 imputed &lt;-<span class="st"> </span><span class="kw">join_results</span>(imputed, combined_results)
@@ -392,7 +392,7 @@ imputed &lt;-<span class="st"> </span><span class="kw">join_results</span>(imput
 <span class="kw">write_to_excel</span>(imputed, <span class="dt">file =</span> <span class="kw">paste0</span>(path, <span class="st">&quot;results.xlsx&quot;</span>))</code></pre></div>
 <p>And that concludes our project example! The last thing to do is finish the log we started. This will record the time and date when the project finished, as well as the output of <code>sessionInfo()</code>, which contains information about the system, and most importantly version numbers of R and all the packages used.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">finish_log</span>()
-<span class="co">#&gt; Finished analysis. Mon Jul 08 15:50:20 2019</span>
+<span class="co">#&gt; Finished analysis. Tue Jul 09 15:31:01 2019</span>
 <span class="co">#&gt; Session info:</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; R version 3.5.0 (2018-04-23)</span>
