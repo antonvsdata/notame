@@ -17,22 +17,26 @@ Depends:
     magrittr,
     Biobase
 Imports:
-    dplyr,
-    missForest,
-    Rtsne,
-    tidyr,
-    openxlsx,
-    pcaMethods,
-    ggdendro,
-    mdatools,
-    testthat,
-    foreach,
-    doParallel,
+    car,
     cowplot,
+    doParallel,
+    dplyr,
+    foreach,
+    ggdendro,
+    grid,
     Hmisc,
+    hexbin,
     lme4,
     lmerTest,
-    hexbin
+    mdatools,
+    missForest,
+    openxlsx,
+    pcaMethods,
+    randomForest,
+    Rtsne,
+    testthat,
+    tibble,
+    tidyr
 Suggests:
     knitr,
     rmarkdown
