@@ -14,6 +14,7 @@
 #' @param density logical, whether to include density plots to both axes
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param shape_scale the shape scale as returned by a ggplot function
+#' @param fill_scale the fill scale used for density curves
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -24,7 +25,7 @@
 #' @export
 plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", method = "ppca",
                      color = group_col(object), shape = NULL, density = FALSE,  title = "PCA",
-                     subtitle = NULL, color_scale = NULL, shape_scale = NULL, ...) {
+                     subtitle = NULL, color_scale = NULL, shape_scale = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -40,7 +41,8 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", 
 
   scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2],
                color = color, shape = shape, density = density, title = title,
-               subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale)
+               subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
+               fill_scale = fill_scale)
 }
 
 #' t-SNE scatter plot
@@ -57,6 +59,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", 
 #' @param density logical, whether to include density plots to both axes
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param shape_scale the shape scale as returned by a ggplot function
+#' @param fill_scale the fill scale used for density curves
 #' @param ... additional arguments passed to Rtsne::Rtsne
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -68,7 +71,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", 
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       color = group_col(object), shape = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
-                      shape_scale = NULL, ...) {
+                      shape_scale = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -90,12 +93,12 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
   scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = shape,
                density = density, title = title, subtitle = subtitle,
-               color_scale = color_scale, shape_scale = shape_scale)
+               color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale)
 
 }
 
 scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE, color_scale = NULL,
-                         shape_scale = NULL, title = NULL, subtitle = NULL, xlab = x, ylab = y,
+                         shape_scale = NULL, fill_scale = NULL, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape) {
 
   if (is.null(color_scale)) {
@@ -103,6 +106,14 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
       color_scale <- getOption("amp.color_scale_con")
     } else {
       color_scale <- getOption("amp.color_scale_dis")
+    }
+  }
+
+  if (is.null(fill_scale)) {
+    if (class(data[, color]) %in% c("numeric", "integer")) {
+      fill_scale <- getOption("amp.fill_scale_con")
+    } else {
+      fill_scale <- getOption("amp.fill_scale_dis")
     }
   }
 
@@ -136,12 +147,14 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
   if (density) {
     xdens <- cowplot::axis_canvas(p, axis = "x")+
       geom_density(data = data, aes_string(x = x, fill = color),
-                   alpha = 0.7, size = 0.2)
+                   alpha = 0.7, size = 0.2) +
+      fill_scale
 
     ydens <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE)+
       geom_density(data = data, aes_string(x = y, fill = color),
                    alpha = 0.7, size = 0.2)+
-      coord_flip()
+      coord_flip() +
+      fill_scale
 
     p <- cowplot::insert_xaxis_grob(p, xdens, grid::unit(.2, "null"), position = "top")
     p <- cowplot::insert_yaxis_grob(p, ydens, grid::unit(.2, "null"), position = "right")
