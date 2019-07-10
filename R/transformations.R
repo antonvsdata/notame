@@ -107,7 +107,7 @@ impute_rf <- function(object, all_features = FALSE, ...) {
   }
 
   # Impute missing values
-  mf <- missForest::missForest(xmis = t(exprs(dropped)))
+  mf <- missForest::missForest(xmis = t(exprs(dropped)), ...)
   imputed <- t(mf$ximp)
   # Log imputation error
   log_text(paste0("Out-of-bag error in random forest imputation: ",
