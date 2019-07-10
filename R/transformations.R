@@ -46,7 +46,7 @@ drop_qcs <- function(object) {
 drop_flagged <- function(object, all_features = FALSE) {
   if (!all_features) {
     object <- object[is.na(results(object)$Flag), ]
-    results(object) <- results(object[is.na(results(object)$Flag), ])
+    results(object) <- results(object)[is.na(results(object)$Flag), ]
   }
   object
 }
