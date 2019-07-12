@@ -496,3 +496,16 @@ setMethod("join_fData", c("MetaboSet", "data.frame"),
             }
           })
 
+
+# Subsetting that also subsets results
+#
+#' @export
+setMethod("[", "MetaboSet", function(x, i, j, ..., drop = FALSE) {
+
+  x <- callNextMethod()
+  results(x) <- results(x)[i,]
+  x
+})
+
+
+
