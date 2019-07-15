@@ -7,7 +7,8 @@
 plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
   perplexity = 30, color = group_col(object), shape = NULL,
   density = FALSE, title = "t-SNE", subtitle = paste("Perplexity:",
-  perplexity), color_scale = NULL, shape_scale = NULL, ...)
+  perplexity), color_scale = NULL, shape_scale = NULL,
+  fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -29,6 +30,8 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 \item{color_scale}{the color scale as returned by a ggplot function}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
+
+\item{fill_scale}{the fill scale used for density curves}
 
 \item{...}{additional arguments passed to Rtsne::Rtsne}
 }
