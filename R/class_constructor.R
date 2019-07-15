@@ -153,13 +153,10 @@ read_from_excel <- function(file, sheet, corner_row, corner_column, id_prefix = 
   return(list(exprs = exprs, pheno_data = pheno_data, feature_data = feature_data))
 }
 
-
-# Combines mode name, mass and retention time to create a Feature ID
-#' @importFrom magrittr "%>%"
-name_features <- function(feature_data) {
-
+# Helper function to search for mass and retention time column names
+find_mz_rt_cols <- function(feature_data) {
   # Find mass and retention time columns
-  mz_tags <- c("mass", "average mz", "average.mz")
+  mz_tags <- c("mass", "average mz", "average.mz", "molecularweight", "molecular weight")
   rt_tags <-  c("retention time", "retentiontime", "average rt[(]min[)]",
                 "^rt$")
 
@@ -179,7 +176,7 @@ name_features <- function(feature_data) {
       break
     }
   }
-
+  # If not found, throw error
   if (is.null(mz_col)){
     stop(paste0("No mass to charge ratio column found - should match one of:\n",
                 paste(mz_tags, collapse = ", "), " (not case-sensitive)"))
@@ -188,6 +185,17 @@ name_features <- function(feature_data) {
     stop(paste0("No retention time column found - should match one of:\n",
                 paste(rt_tags, collapse = ", "), " (not case-sensitive)"))
   }
+
+  return(list(mz_col = mz_col, rt_col = rt_col))
+}
+
+# Combines mode name, mass and retention time to create a Feature ID
+#' @importFrom magrittr "%>%"
+name_features <- function(feature_data) {
+
+  cols <- find_mz_rt_cols(feature_data)
+  mz_col = cols$mz_col
+  rt_col = cols$rt_col
 
   # Concatenate rounded mass and retention time
   round_mz <- as.numeric(feature_data[, mz_col]) %>% round(digits = 4) %>%
