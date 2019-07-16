@@ -488,6 +488,21 @@ setMethod("results<-", "MetaboSet",
             }
           })
 
+#' Join results to a MetaboSet object
+#'
+#' Join a new data frame of results to a MetaboSet object. The data frame needs to have a column "Feature_ID".
+#' This function is usually called on the results of one of the statistics functions.
+#'
+#' @param object a MetaboSet object
+#' @param dframe a dataframe with the results
+#'
+#' @examples
+#' lm_results <- perform_lm(example_set, formula_char = "Feature ~ Group")
+#' with_results <- join_results(example_set, lm_results)
+#' colnames(results(with_results))
+#'
+#' @return a MetaboSet object with the new information added to results(object)
+#'
 #' @export
 setGeneric("join_results", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_results"))
@@ -506,7 +521,21 @@ setMethod("join_results", c("MetaboSet", "data.frame"),
           })
 
 
-
+#' Join new columns to feature data
+#'
+#' Join a new data frame of information to feature data of a MetaboSet object. The data frame needs to have a column "Feature_ID".
+#' This function is usually used internally by some of the functions in the package, but can be useful.
+#'
+#' @param object a MetaboSet object
+#' @param dframe a dataframe with the new information
+#'
+#' @examples
+#' new_info <- data.frame(Feature_ID = featureNames(example_set), Feature_number = seq_len(nrow(example_set)))
+#' with_new_info <- join_fData(example_set, new_info)
+#' colnames(fData(with_new_info))
+#'
+#' @return a MetaboSet object with the new information added to fData(object)
+#'
 #' @export
 setGeneric("join_fData", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_fData"))
