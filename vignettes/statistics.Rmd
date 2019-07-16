@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 This vignette provides an overview of the different statistical tests provided in the package. The first section discusses univariate tests, which are repeated for each feature.
 
-Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object results using ```results(object) <- ```
+Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object results using ```join_results(object, results)```
 
 ## Univariate functions
 

@@ -4,7 +4,7 @@
 \alias{assign_cluster_id}
 \title{Assign Cluster ID to features}
 \usage{
-assign_cluster_id(clusters, features, name_col)
+assign_cluster_id(data, clusters, features, name_col)
 }
 \arguments{
 \item{clusters}{a list of clusters as returned by find_clusters}

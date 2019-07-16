@@ -66,11 +66,11 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
   clusters <- find_clusters(conn, d_thresh)
   lens <- sapply(clusters, function(x){length(x$features)})
   log_text(paste("Found", sum(lens > 1),
-                 "clusters of 2 or more features, clustering finsihed at", Sys.time()))
+                 "clusters of 2 or more features, clustering finished at", Sys.time()))
 
   # Compute median peak area and assing cluster ID
   features$MPA <- apply(exprs(object), 1, finite_median)
-  features <- assign_cluster_id(clusters, features, "Feature_ID")
+  features <- assign_cluster_id(data, clusters, features, "Feature_ID")
 
   if (plotting) {
     visualize_clusters(data = data,
@@ -94,7 +94,11 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
 #' @param clusters a list of clusters as returned by find_clusters
 #' @param features data frame with feature information, fData(object)
 #' @param name_col character, name of the column in features that contains feature names
-assign_cluster_id <- function(clusters, features, name_col) {
+assign_cluster_id <- function(data, clusters, features, name_col) {
+
+  if (!"MPA" %in% colnames(features)) {
+    features$MPA <- sapply(data[, features[, name_col]] , finite_median)
+  }
 
   features$Cluster_ID <- features[, name_col]
   features$Cluster_features <- features[, name_col]
@@ -149,7 +153,42 @@ compress_clusters <- function(object) {
   object
 }
 
+#' Extract information of the features in clusters
+#'
+#' For each cluster, the LC-MS data of the feature with largest median peak area is retained,
+#' all the features inside every cluster are recorded
+#'
+#' @param data data frame of the original LC-MS data
+#' @param features data frame holding the feature information
+#' @param name_col name_col character, name of the column in features that contains feature names
+#'
+#' @return a list of two items:
+#' \begin{itemize}
+#' \item cdata: a new data frame with the combined LC-MS data
+#' \item cfeatures: data frame, feature information per cluster
+#' \end{itemize}
+#'
+#' @export
+pull_clusters <- function(data, features, name_col) {
 
+  cluster_names <- features$Cluster_ID
+  if (is.null(cluster_names)) {
+    stop('No "Cluster_ID" found in features, please run assign_cluster_id first!')
+  }
+  # Get only "real" clusters
+  clusters <- cluster_names[grepl("^Cluster_", cluster_names)] %>%
+    gsub("^Cluster_", "", .) %>% unique()
+  alone_features <- cluster_names[!grepl("^Cluster_", cluster_names)]
+  # This ensures the order of the features stays the same
+  idx <- features[, name_col] %in% c(clusters, alone_features)
+  # Get sample features
+  sample_cols <- setdiff(colnames(data), features[, name_col])
+
+  features <- features[idx, ]
+  data <- data[, c(sample_cols, features[, name_col])]
+
+  return(list(cdata = data, cfeatures = features))
+}
 
 
 #' Find out which features are correlated within a specified retention time window
@@ -292,83 +331,6 @@ find_clusters <- function(connections, d_thresh = 0.8){
   clusters
 }
 
-# NO LONGER USED IN AMP !!!
-# Extract information of the features in clusters
-#
-# The LC-MS data of the feature with largest median peak area is retained,
-# all the features in every cluster are recorded
-#
-# @param clusters list of cluster information, as returned by find_clusters
-# @param data data frame of the original LC-MS data
-# @param features data frame holding the feature information
-# @param name_col name_col character, name of the column in features that contains feature names
-#
-# @return a list of two items:
-# \begin{itemize}
-# \item cdata: a new data frame with the combined LC-MS data
-# \item cfeatures: data frame, feature information per cluster
-# \end{itemize}
-pull_features <- function(clusters, data, features,
-                          name_col){
-
-  # Median peak area
-  features$MPA <- sapply(data[features[, name_col]], median, na.rm = TRUE)
-
-  cfeatures <- data.frame()
-  sample_cols <- setdiff(colnames(data), features[, name_col])
-  cdata <- data[sample_cols]
-  handled_features <- c()
-
-  n_clusters <- length(clusters)
-  # Retain the strongest signal (MPA) from each cluster
-  for (i in seq_along(clusters)) {
-    if (i %% 100 == 0) {
-      cat(paste("Cluster", i, "/", n_clusters, "\n"))
-    }
-
-    cluster <- clusters[[i]]
-    if (length(cluster$features) > 1) {
-      features_tmp <- features[features[, name_col] %in% cluster$features, ]
-
-      # Find the feature with maximal MPA
-      max_mpa_idx <- which(features_tmp$MPA == max(features_tmp$MPA, na.rm = TRUE))[1]
-      cluster_row <- features_tmp[max_mpa_idx, ]
-      # Record all the features in the cluster
-      cluster_row$Features <- paste(sort(cluster$features), collapse = ";")
-      cluster_row$n_features <- length(cluster$features)
-      # Create cluster ID
-      cluster_row$Cluster_ID <- paste0("Cluster_", cluster_row[, name_col])
-      cfeatures <- rbind(cfeatures, cluster_row)
-
-      # Take the LC-MS data of the largest feature
-      cdata_col <- data[features_tmp[max_mpa_idx, name_col]]
-      colnames(cdata_col) <- cluster_row$Cluster_ID
-      cdata <- cbind(cdata, cdata_col)
-
-      handled_features <- c(handled_features, cluster$features)
-    }
-  }
-
-  # Reorganise
-  cfeatures <- dplyr::arrange(cfeatures, Cluster_ID)
-  cdata <- cdata[c(sample_cols, cfeatures$Cluster_ID)]
-
-  # All the features that were not in the clusters are retained unchanged
-  missed_features <- features[!features[, name_col] %in% handled_features, ]
-  missed_features$Features <- missed_features[, name_col]
-  missed_features$n_features <- 1
-  missed_features$Cluster_ID <- missed_features[, name_col]
-
-
-  cfeatures <- rbind(cfeatures, missed_features)
-  cdata <- cbind(cdata, data[missed_features[, name_col]])
-
-  # Reorder columns
-  cfeatures <- dplyr::select(cfeatures, "Cluster_ID", "n_features", "Features", name_col, dplyr::everything())
-  rownames(cfeatures) <- 1:nrow(cfeatures)
-
-  list(cdata = cdata, cfeatures = cfeatures)
-}
 
 # A helper function for plotting, scales the values in X
 # between new min and max

@@ -58,7 +58,7 @@ The function ```read_from_excel``` can be used to read data from an Excel spread
 knitr::include_graphics("Data_input.png")
 ```
 
-The first parameters include the file name, sheet number, and coordinates for the corner ("Ion Mode" in the above examples), in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. 
+The first parameters include the file name, sheet number, and coordinates for the corner ("Ion Mode" in the above examples), in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. **NOTE:** the sheet number (default 1) and corner coordinates are now optional, as the function will try to determine them automatically. You only need to specify corner coordinates if you have information such as comments in the empty upper left corner of the sheet.
 
 Some fields in sample information and feaure data have special purposes. 
 
