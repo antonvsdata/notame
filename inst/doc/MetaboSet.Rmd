@@ -25,11 +25,11 @@ This vignette provides an introduction to the ```MetaboSet``` class, along with 
 ```MetaboSet``` objects are the primary data structure of this package. ```MetaboSet``` is built upon the ```ExpressionSet``` class from the Biobase package by Bioconductor. ```ExpressionSet``` is used to record gene expression data, but the structure of the class is easily adaptable to LC-MS. For more information, read the [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf). ```MetaboSet``` objects consist of four main parts, each a matrix or a data frame:
 
 - Information about the samples (phenotype) such as injection order, group label, time point etc. Accessible with ```pData(object)```
-- Feature data: information about the feaures such as retention time and mass . Accessible with ```fData(object)```
-- Abundances of features in each sample . Accessible with ```exprs(object)```
+- Feature data: information about the features such as retention time and mass. Accessible with ```fData(object)```
+- Abundances of features in each sample. Accessible with ```exprs(object)```
 - Results from statistical analyses. Accessible with ```results(object)```
 
-In addition to these, a ```MetaboSet``` can store the names of special columns in ```pData``` that store group labels, time points or subject identifiers.These columns are used as defaults in many of the functions of the package.  
+In addition to these, a ```MetaboSet``` can store the names of special columns in ```pData``` that store group labels, time points or subject identifiers. These columns are used as defaults in many of the functions of the package.  
 
 - ```group_col``` holds the group column name  
 - ```time_col``` holds the time point column name  
@@ -41,15 +41,15 @@ Let's look at the four main parts in more detail:
 
 The sample information data frame, or ```pData``` has many special column names that are created when data is read from the Excel spreadsheet.  
 
-- ```Sample_ID``` holds sample identifiers and must be present, and can be automatically created. It is often used to label samples in visualizations, and as column names of ```exprs```. 
-- ```Injection_order``` holds the injection order of samples, and must be present. It is used in drift correction and commonly in some visualizations for quality control. 
+- ```Sample_ID``` holds sample identifiers and must be present and can be automatically created. It is often used to label samples in visualizations, and as column names of ```exprs```. 
+- ```Injection_order``` holds the injection order of samples and must be present. It is used in drift correction and commonly in some visualizations for quality control. 
 - ```QC``` tells whether a sample is a QC sample ("QC") or a biological sample ("Sample"). This column can be created automatically, as long as there is any column (usually a group column) that has the value "QC" for QC samples and something else for the biological samples. This column is used by many quality control functions.
 
 In addition to these three columns, pheno data often holds at least one of the group, time and subject ID columns that are defined separately. They are used as defaults by many functions for visualization and quality control.
 
 ##### Feature data
 
-The feature data part usually has a many columns that are created by the peak picking software, but for the sake of this package, the most important are:  
+The feature data part usually has many columns that are created by the peak picking software, but for the sake of this package, the most important are:  
 
 - Mass and retention time columns  
 - Columns to identify the column and ionization mode to be used  
@@ -75,7 +75,7 @@ knitr::include_graphics("Data_input.png")
 
 To construct a ```MetaboSet``` object, you need to have the data read in R. This can be achieved with ```read_from_excel``` function, which reads Excel spreadsheets in the format shown in the figure above. The first parameters include the file name, sheet number, and coordinates for the corner ("Ion Mode" in the above example), in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. 
 
-Some fields in sample information and feaure data have special purposes. 
+Some fields in sample information and feature data have special purposes. 
 
 There are a few obligatory fields:  
 
@@ -110,7 +110,7 @@ These functions from Biobase might be useful:
 
 In addition, MetaboSets can be subset using the syntax for ExpressionSets, namely:  
 
-- Subsetting the ```exprs``` part holding the abundaces can be done with simple square brackets. For example, ```example_set[1:5, 1:3]``` would get the first 5 features and the first 3 samples out of the ```example_set``` object.  
+- Subsetting the ```exprs``` part holding the abundances can be done with simple square brackets. For example, ```example_set[1:5, 1:3]``` would get the first 5 features and the first 3 samples out of the ```example_set``` object.  
 - Columns in ```pData``` can be accessed via a shortcut, for example ```example_set$Group```  
 - So to get rid of a particular group, you can run ```example_set[, example_set$Group != "B""]```
 

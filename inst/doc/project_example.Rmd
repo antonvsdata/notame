@@ -60,7 +60,7 @@ knitr::include_graphics("Data_input.png")
 
 The first parameters include the file name, sheet number, and coordinates for the corner ("Ion Mode" in the above examples), in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. **NOTE:** the sheet number (default 1) and corner coordinates are now optional, as the function will try to determine them automatically. You only need to specify corner coordinates if you have information such as comments in the empty upper left corner of the sheet.
 
-Some fields in sample information and feaure data have special purposes. 
+Some fields in sample information and feature data have special purposes. 
 
 There are a few obligatory fields:  
 
@@ -91,7 +91,7 @@ sapply(data, dim)
 
 These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in amp. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
 
-MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object, and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
+MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
 
 ```{r}
 modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,
@@ -154,7 +154,7 @@ visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
 
 ##### Drift correction
 
-Next, we apply drift correction with cubic spline regression. There is an option to save plots of the procedure for each feature in one large PDF file (one page per features). For studies with a relatively small number of features (a few thousand per mode) this is feasible. For plant studies and other studies with tens of thousands of features, it is probably a good idea to draw the drift correction plots after statistical analysis, and only draw them for the modt interesting compounds. 
+Next, we apply drift correction with cubic spline regression. There is an option to save plots of the procedure for each feature in one large PDF file (one page per features). For studies with a relatively small number of features (a few thousand per mode) this is feasible. For plant studies and other studies with tens of thousands of features, it is probably a good idea to draw the drift correction plots after statistical analysis, and only draw them for the most interesting compounds. 
 
 ```{r, include = FALSE}
 corrected <- correct_drift(mode)
@@ -193,7 +193,7 @@ visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
 
 ###### Preprocessing for each mode
 
-Before we move on, we should actually run the above preprocessing steps for each mode. We will skip the visualizations to cut down the running time, but with a real project we would natrually run those for each mode.
+Before we move on, we should actually run the above preprocessing steps for each mode. We will skip the visualizations to cut down the running time, but with a real project we would naturally run those for each mode.
 
 ```{r}
 # Initialize empty list for processed objects
@@ -247,7 +247,7 @@ visualizations(merged_no_qc, prefix = paste0(path, "figures/FULL_NO_QC"))
 
 ##### Imputation of missing values
 
-If there are any missing values in the data, they need to be imputed. We use random forest imputation to impute these values. Seed number should be set before random forest imputation to guarantee reproducibiilty of results.
+If there are any missing values in the data, they need to be imputed. We use random forest imputation to impute these values. Seed number should be set before random forest imputation to guarantee reproducibility of results.
 
 ```{r}
 #Set seed number for reproducibility
@@ -290,7 +290,7 @@ Let's try to find features that separate the different bread varieties. First, w
 anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Bread")
 ```
 
-Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pariwise Welch's t-tests on them:
+Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pairwise Welch's t-tests on them:
 
 ```{r}
 top_features <- anova_results$Feature_ID[which(anova_results$ANOVA_P_FDR < 0.2)]

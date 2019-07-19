@@ -25,7 +25,7 @@ This vignette lists all the visualizations found in the package.  The visualizat
 - column names of pheno data (pData(object)) can be given to be used as ggplot aesthetics, such as color, shape or fill. Often these default to either ```group_col``` or other special columns.
 
 
-Color scales and other scales can be set separately for each function call, and the defaults are set as options in the package. The scales are ggplot scales, returned by e.g. ```scale_color_x```. It is also possible to change the scales globally for the complete project. . To do this, use e.g. ```options("amp.color_scale") <- scale_color_brewer(palette = "Dark2")```. Below is a list of all the scales used in the package and their default values (con = continuous, dis = discrete, div = diverging):
+Color scales and other scales can be set separately for each function call, and the defaults are set as options in the package. The scales are ggplot scales, returned by e.g. ```scale_color_x```. It is also possible to change the scales globally for the complete project. To do this, use e.g. ```options("amp.color_scale") <- scale_color_brewer(palette = "Dark2")```. Below is a list of all the scales used in the package and their default values (con = continuous, dis = discrete, div = diverging):
 
 - ```amp.color_scale_con = ggplot2::scale_color_viridis_c()```
 - ```amp.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1")```
@@ -57,9 +57,9 @@ The following visualizations are applied to each feature and directly saved to a
 
 ### One function to rule them all
 
-The function ```visualizations``` automatically runs many of the visualizations for an object, ignoreing flagged features. It also allows you to merge all saved plots into one file by setting ```merge = TRUE```. NOTE that this requires you to install external tools. For Windows, install [pdftk](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/). For linux, make sure ```pdfunite``` is installed.
+The function ```visualizations``` automatically runs many of the visualizations for an object, ignoring flagged features. It also allows you to merge all saved plots into one file by setting ```merge = TRUE```. NOTE that this requires you to install external tools. For Windows, install [pdftk](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/). For linux, make sure ```pdfunite``` is installed.
 
-If you want to modify the visualizations, it is a very good idea to create a project specific version, e.g. ```myproject_visualizations```. To do this, simply run ````visualizations``` **without parentheses** and copy-paste the code to an external file for modifications. You might want to add visualizations or modify the size of the figures to be saved.
+If you want to modify the visualizations, it is a very good idea to create a project specific version, e.g. ```myproject_visualizations```. To do this, simply run ```visualizations``` **without parentheses** and copy-paste the code to an external file for modifications. You might want to add visualizations or modify the size of the figures to be saved.
 
 
 
