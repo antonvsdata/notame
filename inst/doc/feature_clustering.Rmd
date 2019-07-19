@@ -87,6 +87,8 @@ The state of the example graph after clustering, with each final cluster colored
 
 For MetaboSet object, performing feature clustering is quite simple. All you have to do is call ```cluster_features```. The below example illustrates this on the toy dataset included in the package. Note that the values of the parameters are non-sensible! For real datasets, please use values close to the defaults. In addition, when performing the clustering on real life datasets, it is probably a good idea to use parallel processing to speed things up (to find the connections between features, the algorithm needs to go through all possible pairs of features).
 
+To get visualizations of the clusters, set ```plotting = TRUE``` and specify a ```prefix``` for the file path. The function will create one file per cluster, with visualizations of the clusters.
+
 
 ```{r}
 clustered <- cluster_features(example_set, rt_window = 2, corr_thresh = 0.4, d_thresh = 0.6)
@@ -146,7 +148,18 @@ After we have found the clusters, we can assign a cluster id to all features. Ea
 features_clustered <- assign_cluster_id(data, clusters, features, name_col = "Feature_ID")
 ```
 
-As before, this will assign cluster ID to all features, and record which features belong to the same cluster. If you only want to use the clustering to help identification, you can stop here. If you want to only keep one feature per cluster, you can do so by running:
+As before, this will assign cluster ID to all features, and record which features belong to the same cluster. If you only want to use the clustering to help identification, you can stop here.
+
+If you want to get visualizations of the clusters, run:
+
+```{r, eval=FALSE}
+visualize_clusters(data, features, clusters, min_size = 3, rt_window = 2,
+                   name_col = "Feature_ID", mz_col = "Mass", rt_col = "RetentionTime",
+                   file_path = "~/path/to/project/")
+```
+
+
+If you want to only keep one feature per cluster, you can do so by running:
 
 ```{r}
 pulled <- pull_clusters(data, features_clustered, name_col = "Feature_ID")

@@ -61,6 +61,11 @@ clusters <- find_clusters(connections = conn, d_thresh = 0.6)
 ## ------------------------------------------------------------------------
 features_clustered <- assign_cluster_id(data, clusters, features, name_col = "Feature_ID")
 
+## ---- eval=FALSE---------------------------------------------------------
+#  visualize_clusters(data, features, clusters, min_size = 3, rt_window = 2,
+#                     name_col = "Feature_ID", mz_col = "Mass", rt_col = "RetentionTime",
+#                     file_path = "~/path/to/project/")
+
 ## ------------------------------------------------------------------------
 pulled <- pull_clusters(data, features_clustered, name_col = "Feature_ID")
 cluster_data <- pulled$cdata
