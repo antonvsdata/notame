@@ -17,7 +17,7 @@ a MetaboSet object with the features flagged
 }
 \description{
 Flags low-quality features using the quality metrics defined in (Broadhurst 2018). The metrics are described in
-more detain in Details. A condition for keeping the features is given as a character,wihch is passed to \code{dplyr::filter}.
+more detain in Details. A condition for keeping the features is given as a character, which is passed to \code{dplyr::filter}.
 }
 \details{
 The quality metrics measure two things: internal spread of the QCs, and spread of the QCs compared to the spread of the biological samples.

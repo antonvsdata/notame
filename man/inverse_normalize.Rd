@@ -13,6 +13,6 @@ inverse_normalize(object)
 MetaboSet object as the one supplied, with normalized features
 }
 \description{
-Applies inverse rank normalization to all features to approxiamte
+Applies inverse rank normalization to all features to approximate
 a normal distribution.
 }

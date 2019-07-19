@@ -33,8 +33,8 @@ save_group_lineplots(object, all_features = FALSE, file, width = 8,
 \item{position_dodge_amout}{numeric: how much the group mean points should dodge away from each other}
 }
 \description{
-Plots the change in the feature abundaces as a function of e.g. time.
-A line is drawn for each group and errorbars are added.
+Plots the change in the feature abundances as a function of e.g. time.
+A line is drawn for each group and error bars are added.
 A separate plot is drawn for each feature.
 }
 \seealso{

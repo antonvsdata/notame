@@ -5,14 +5,14 @@ comb <- function(x, ...) {
 
 #' Fit a cubic spline to correct drift
 #'
-#' Corrects the dirft in the features by applying smoothed cubic spline regression
+#' Corrects the drift in the features by applying smoothed cubic spline regression
 #' to each feature separately.
 #'
 #' @param object a MetaboSet object
 #' @param spar smoothing parameter
 #' @param spar_lower,spar_upper lower and upper limits for the smoothing parameter
 #'
-#' @return list with object = MetaboSet object as the one supplied, with drift corrected fetures
+#' @return list with object = MetaboSet object as the one supplied, with drift corrected features
 #' and predicted = matrix of the predicted values by the cubic spline (used in visualization)
 #'
 #' @details If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
@@ -76,9 +76,9 @@ dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 
 #' Flag the results of drift correction
 #'
 #' Chooses whether the drift correction worked well enough by applying
-#' the specified codition for each feature.
+#' the specified condition for each feature.
 #' If the condition is fulfilled, the drift corrected feature is retained,
-#' otherwise the original feature is retained and the drift corrrected feature is discarded.
+#' otherwise the original feature is retained and the drift corrected feature is discarded.
 #' The result of this operation is recorded in the feature data
 #'
 #' @param orig a MetaboSet object, before drift correction
@@ -87,7 +87,7 @@ dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 
 #'
 #' @return MeatboSet object
 #'
-#' @details The \code{condition} parameter should be a character giving a condition combatible
+#' @details The \code{condition} parameter should be a character giving a condition compatible
 #' with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
 #' RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
 #' meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the
@@ -225,11 +225,11 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
 #' @param shape character, name of the column used for shape
 #' @param color_scale the color scale as returned by a ggplot function
 #'
-#' @return MetaboSet object as the one supplied, with drift corrected fetures
+#' @return MetaboSet object as the one supplied, with drift corrected features
 #'
 #' @details If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
 #' be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
-#' using cross validation. The \code{condition} parameter should be a character giving a condition combatible
+#' using cross validation. The \code{condition} parameter should be a character giving a condition compatible
 #' with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
 #' RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
 #' meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the

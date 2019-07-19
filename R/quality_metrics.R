@@ -64,7 +64,7 @@ setMethod("assess_quality", c(object = "MetaboSet"),
 #' Flag low-quality features
 #'
 #' Flags low-quality features using the quality metrics defined in (Broadhurst 2018). The metrics are described in
-#' more detain in Details. A condition for keeping the features is given as a character,wihch is passed to \code{dplyr::filter}.
+#' more detain in Details. A condition for keeping the features is given as a character, which is passed to \code{dplyr::filter}.
 #'
 #' @param object a MetaboSet object
 #' @param condition character, condition for keeping the features, see Details

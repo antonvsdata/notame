@@ -2,7 +2,7 @@
 #' Mark specified values as missing
 #'
 #' Replaces all values in the exprs part that equal the specified value with NA.
-#' For example, vendor softwares might use 0 or 1 to signal a missing value,
+#' For example, vendor software might use 0 or 1 to signal a missing value,
 #' which is not understood by R.
 #'
 #' @param object a MetaboSet object
@@ -22,7 +22,7 @@ mark_nas <- function(object, value) {
 #'
 #' @param object a MetaboSet object
 #'
-#' @return MetaboSet object as the one supplied, withou QC samples
+#' @return MetaboSet object as the one supplied, without QC samples
 #'
 #' @importFrom Biobase pData "pData<-"
 #'
@@ -80,7 +80,7 @@ merge_exprs <- function(object, y) {
 #'
 #' Impute the missing values in the exprs part of the object using a
 #' random forest. The estimated error in the imputation is logged.
-#' It is recommended to ste the seed number for reproducibility
+#' It is recommended to set the seed number for reproducibility
 #' (it is called random forest for a reason).
 #' This a wrapper around \code{missForest::missForest}.
 #' Use parallelize = "variables" to run in parallel for faster testing.
@@ -123,7 +123,7 @@ impute_rf <- function(object, all_features = FALSE, ...) {
 
 #' Inverse-rank normalization
 #'
-#' Applies inverse rank normalization to all features to approxiamte
+#' Applies inverse rank normalization to all features to approximate
 #' a normal distribution.
 #'
 #' @param object a MetaboSet object

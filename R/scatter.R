@@ -7,11 +7,12 @@
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param center logical, should the data  be centered prior to PCA? (usually yes)
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param density logical, whether to include density plots to both axes
+#' @param title,subtitle the titles of the plot
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param fill_scale the fill scale used for density curves
@@ -52,12 +53,13 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param center logical, should the data  be centered prior to PCA? (usually yes)
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param density logical, whether to include density plots to both axes
+#' @param title,subtitle the titles of the plot
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param fill_scale the fill scale used for density curves
@@ -171,17 +173,19 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 #' PCA hexbin plot
 #'
 #' Computes PCA using one of the methods provided in the Bioconductor package
-#' pcaMethods and plots the two first principal components
+#' pcaMethods and plots the two first principal components as hexagonal bins, where the value of the coloring
+#' variable is summarised for each bin, by default as the mean of the values inside the bin.
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param center logical, should the data  be centered prior to PCA? (usually yes)
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param fill character, name of the column used for coloring the hexagons
-#' @param fill_scale the fill scale as returned by a ggplot function
 #' @param summary_fun the function used to compute the value for each hexagon
 #' @param bins the number of bins in x and y axes
+#' @param title,subtitle the titles of the plot
+#' @param fill_scale the fill scale as returned by a ggplot function
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return A ggplot object.
@@ -208,19 +212,21 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 
 #' t-SNE hexbin plot
 #'
-#' Computes t-SNE into two dimensions and plots the map points.
+#' Computes t-SNE into two dimensions and plots the map as hexagonal bins, where the value of the coloring
+#' variable is summarised for each bin, by default as the mean of the values inside the bin.
+#'
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param center logical, should the data  be centered prior to PCA? (usually yes)
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
-#' @param color character, name of the column used for coloring the points
 #' @param fill character, name of the column used for coloring the hexagons
-#' @param fill_scale the fill scale as returned by a ggplot function
 #' @param summary_fun the function used to compute the value for each hexagon
 #' @param bins the number of bins in x and y axes
+#' @param title,subtitle the titles of the plot
+#' @param fill_scale the fill scale as returned by a ggplot function
 #' @param ... additional arguments passed to Rtsne::Rtsne
 #'
 #' @return

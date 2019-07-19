@@ -230,9 +230,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param all_features should all features be included in FDR correction?
 #' @param ci_level the confidence level used in constructing the confidence intervals
 #' for regression coefficients
-#' @param all_features should all features be included in FDR correction?
 #' @param ... additional parameters passed to lm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -310,9 +310,9 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param all_features should all features be included in FDR correction?
 #' @param ci_level the confidence level used in constructing the confidence intervals
 #' for regression coefficients
-#' @param all_features should all features be included in FDR correction?
 #' @param ... additional parameters passed to glm
 #'
 #' @return a data frame with one row per feature, with all the

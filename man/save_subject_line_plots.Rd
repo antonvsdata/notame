@@ -28,7 +28,7 @@ save_subject_line_plots(object, all_features = FALSE, file, width = 8,
 \item{facet}{character, the column name to facet by (optional, usually same as color)}
 }
 \description{
-Plots the change in the feature abundaces as a function of e.g. time.
+Plots the change in the feature abundances as a function of e.g. time.
 A line is drawn for each subject and a mean line is added.
 A separate plot is drawn for each feature.
 }

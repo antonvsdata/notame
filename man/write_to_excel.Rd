@@ -11,7 +11,7 @@ write_to_excel(object, file, ...)
 
 \item{file}{path to the file to write}
 
-\item{...}{Additional parameters passed to openxlsx::write.xlsx}
+\item{...}{Additional parameters passed to \code{openxlsx::write.xlsx}}
 }
 \description{
 Writes all the data in a MetaboSet object to an Excel spreadsheet.

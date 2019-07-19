@@ -32,7 +32,7 @@ works adequately, see Details}
 \item{color_scale}{the color scale as returned by a ggplot function}
 }
 \value{
-MetaboSet object as the one supplied, with drift corrected fetures
+MetaboSet object as the one supplied, with drift corrected features
 }
 \description{
 A wrapper function for applying cubic spline drift correction and saving
@@ -41,7 +41,7 @@ before and after plots
 \details{
 If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
 be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
-using cross validation. The \code{condition} parameter should be a character giving a condition combatible
+using cross validation. The \code{condition} parameter should be a character giving a condition compatible
 with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
 RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
 meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the

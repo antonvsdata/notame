@@ -16,6 +16,6 @@ MetaboSet object as the one supplied, with missing values correctly set to NA
 }
 \description{
 Replaces all values in the exprs part that equal the specified value with NA.
-For example, vendor softwares might use 0 or 1 to signal a missing value,
+For example, vendor software might use 0 or 1 to signal a missing value,
 which is not understood by R.
 }

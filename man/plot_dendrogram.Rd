@@ -19,17 +19,17 @@ plot_dendrogram(object, all_features = FALSE,
 
 \item{dist_method}{distance method used in clustering, see ?dist}
 
-\item{center}{logical, should the data  be centered?}
+\item{clust_method}{method used in clustering, see ?hclust}
 
-\item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
+\item{center}{logical, should the data be centered?}
+
+\item{scale}{scaling used, as in \code{pcaMethods::prep}. Default is "uv" for unit variance}
 
 \item{title}{The plot title}
 
 \item{subtitle}{The plot subtitle}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
-
-\item{clustering}{method used in clustering, see ?hclust}
 }
 \value{
 A ggplot object.

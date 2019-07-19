@@ -7,9 +7,9 @@
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param color character, name of the column used for coloring the sample labels
 #' @param dist_method distance method used in clustering, see ?dist
-#' @param clustering method used in clustering, see ?hclust
-#' @param center logical, should the data  be centered?
-#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param clust_method method used in clustering, see ?hclust
+#' @param center logical, should the data be centered?
+#' @param scale scaling used, as in \code{pcaMethods::prep}. Default is "uv" for unit variance
 #' @param title The plot title
 #' @param subtitle The plot subtitle
 #' @param color_scale the color scale as returned by a ggplot function
@@ -66,9 +66,10 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param dist_method distance method used in clustering, see ?dist
-#' @param clustering method used in clustering, see ?hclust
+#' @param clust_method method used in clustering, see ?hclust
 #' @param center logical, should the data  be centered?
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param group_ber logical, should a bar showing the groups be drawn under the heat map?
 #' @param group character, name of the column used for coloring the group bar
 #' @param title The plot title
 #' @param subtitle The plot subtitle

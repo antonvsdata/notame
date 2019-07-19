@@ -24,7 +24,7 @@ check_column_match <- function(x, y, fun) {
 # Check that two MetaboSet object can be combined
 #
 # Checks many matching criteria, basically pheno data needs to have similar special columns,
-# the amount of samples needs to be the same and feature data and results need to have the
+# the number of samples needs to be the same and feature data and results need to have the
 # same columns names. Throws an error if any of the criteria is not fulfilled.
 #
 # @param x,y MetaboSet objects
@@ -79,7 +79,7 @@ check_match <- function(x, y) {
 
 }
 
-# Merge two metaboset objects together
+# Merge two MetaboSet objects together
 merge_helper <- function(x, y) {
   # Check that the match is ok
   check_match(x,y)

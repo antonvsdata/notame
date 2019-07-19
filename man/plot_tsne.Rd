@@ -15,7 +15,7 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
+\item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
@@ -26,6 +26,8 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 \item{shape}{character, name of the column used for shape}
 
 \item{density}{logical, whether to include density plots to both axes}
+
+\item{title, subtitle}{the titles of the plot}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 

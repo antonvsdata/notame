@@ -10,7 +10,7 @@ drop_qcs(object)
 \item{object}{a MetaboSet object}
 }
 \value{
-MetaboSet object as the one supplied, withou QC samples
+MetaboSet object as the one supplied, without QC samples
 }
 \description{
 Drop QC samples

@@ -18,13 +18,13 @@ MeatboSet object
 }
 \description{
 Chooses whether the drift correction worked well enough by applying
-the specified codition for each feature.
+the specified condition for each feature.
 If the condition is fulfilled, the drift corrected feature is retained,
-otherwise the original feature is retained and the drift corrrected feature is discarded.
+otherwise the original feature is retained and the drift corrected feature is discarded.
 The result of this operation is recorded in the feature data
 }
 \details{
-The \code{condition} parameter should be a character giving a condition combatible
+The \code{condition} parameter should be a character giving a condition compatible
 with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
 RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
 meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the

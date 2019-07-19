@@ -14,7 +14,7 @@ plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
+\item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
@@ -23,6 +23,8 @@ plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
 \item{summary_fun}{the function used to compute the value for each hexagon}
 
 \item{bins}{the number of bins in x and y axes}
+
+\item{title, subtitle}{the titles of the plot}
 
 \item{fill_scale}{the fill scale as returned by a ggplot function}
 
@@ -33,7 +35,8 @@ A ggplot object.
 }
 \description{
 Computes PCA using one of the methods provided in the Bioconductor package
-pcaMethods and plots the two first principal components
+pcaMethods and plots the two first principal components as hexagonal bins, where the value of the coloring
+variable is summarised for each bin, by default as the mean of the values inside the bin.
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
 \seealso{

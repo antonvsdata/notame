@@ -19,7 +19,7 @@ MetaboSet object as the one supplied, with missing values imputed.
 \description{
 Impute the missing values in the exprs part of the object using a
 random forest. The estimated error in the imputation is logged.
-It is recommended to ste the seed number for reproducibility
+It is recommended to set the seed number for reproducibility
 (it is called random forest for a reason).
 This a wrapper around \code{missForest::missForest}.
 Use parallelize = "variables" to run in parallel for faster testing.

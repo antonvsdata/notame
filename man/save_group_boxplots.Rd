@@ -17,6 +17,8 @@ save_group_boxplots(object, all_features = FALSE, file, width = 8,
 \item{width, height}{width and height of the plots in inches}
 
 \item{group}{character, name of the column to be used as x-axis and color}
+
+\item{color_scale}{the color scale as returned by a ggplot function}
 }
 \description{
 Draws a boxplot of feature abundances in each group.

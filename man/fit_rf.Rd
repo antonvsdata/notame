@@ -4,16 +4,16 @@
 \alias{fit_rf}
 \title{Fit Random Forest}
 \usage{
-fit_rf(object, response, importance = TRUE, all_features = FALSE, ...)
+fit_rf(object, response, all_features = FALSE, importance = TRUE, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
 \item{response}{character, column name of phenoData giving response}
 
-\item{importance}{Should importance of features be assessed?}
-
 \item{all_features}{should all features be included in the model? if FALSE, flagged features are left out}
+
+\item{importance}{Should importance of features be assessed?}
 
 \item{...}{other parameters passed to \code{randomForest::randomForest}}
 }

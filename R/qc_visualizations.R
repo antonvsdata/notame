@@ -27,11 +27,12 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param dist_method method for calculating the distances, passed to dist
-#' @param center logical, should the data  be centered?
+#' @param center logical, should the data be centered?
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param color_scale a scale for the color of the edge of density curves, as returned by a ggplot function
 #' @param fill_scale a scale for the fill of the density curves, as returned by a ggplot function
-#' @param xlab the x
+#' @param title the plot title
+#' @param subtitle the plot subtitle
 #'
 #'
 #' @seealso \code{\link[stats]{dist}}
@@ -39,7 +40,7 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' @export
 plot_dist_density <- function(object, all_features = FALSE, dist_method = "euclidean",
                               center = TRUE, scale = "uv",
-                              fill_scale = NULL, color_scale = NULL,
+                              color_scale = NULL, fill_scale = NULL,
                               title = NULL, subtitle = NULL) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)

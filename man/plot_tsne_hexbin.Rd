@@ -14,7 +14,7 @@ plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
+\item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
@@ -26,17 +26,20 @@ plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
 
 \item{bins}{the number of bins in x and y axes}
 
+\item{title, subtitle}{the titles of the plot}
+
 \item{fill_scale}{the fill scale as returned by a ggplot function}
 
 \item{...}{additional arguments passed to Rtsne::Rtsne}
-
-\item{color}{character, name of the column used for coloring the points}
 }
 \value{
 A ggplot object.
 }
 \description{
-Computes t-SNE into two dimensions and plots the map points.
+Computes t-SNE into two dimensions and plots the map as hexagonal bins, where the value of the coloring
+variable is summarised for each bin, by default as the mean of the values inside the bin.
+}
+\details{
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
 \seealso{

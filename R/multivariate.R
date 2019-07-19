@@ -21,7 +21,7 @@
 #' rf_importance(rf)
 #'
 #' @export
-fit_rf <- function(object, response, importance = TRUE, all_features = FALSE, ...) {
+fit_rf <- function(object, response, all_features = FALSE, importance = TRUE, ...) {
 
   if (!all_features) {
     object <- drop_flagged(object)
@@ -50,15 +50,9 @@ fit_rf <- function(object, response, importance = TRUE, all_features = FALSE, ..
 #'
 #' @export
 importance_rf <- function(rf) {
-  # Choose importance metrics based on RF type
-  if (rf$type == "classification") {
-    cols <- c("MeanDecreaseAccuracy", "MeanDecreaseGini")
-  } else {
-    cols <- c("%IncMSE", "IncNodePurity")
-  }
   # Extract metrics and feature ID
   df <- data.frame(Feature_ID = rownames(rf$importance),
-                   as.data.frame(rf$importance)[cols],
+                   as.data.frame(rf$importance),
                    stringsAsFactors = FALSE, check.names = FALSE)
   df
 }

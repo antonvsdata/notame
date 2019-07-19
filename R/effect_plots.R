@@ -2,7 +2,7 @@
 
 #' Save line plots with mean
 #'
-#' Plots the change in the feature abundaces as a function of e.g. time.
+#' Plots the change in the feature abundances as a function of e.g. time.
 #' A line is drawn for each subject and a mean line is added.
 #' A separate plot is drawn for each feature.
 #'
@@ -83,6 +83,7 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
 #' @param file path to the PDF file where the plots should be saved
 #' @param width,height width and height of the plots in inches
 #' @param group character, name of the column to be used as x-axis and color
+#' @param color_scale the color scale as returned by a ggplot function
 #'
 #' @export
 save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6, group = group_col(object),
@@ -124,8 +125,8 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
 
 #' Save line plots with errorbars by group
 #'
-#' Plots the change in the feature abundaces as a function of e.g. time.
-#' A line is drawn for each group and errorbars are added.
+#' Plots the change in the feature abundances as a function of e.g. time.
+#' A line is drawn for each group and error bars are added.
 #' A separate plot is drawn for each feature.
 #'
 #' @param object a MetaboSet object
