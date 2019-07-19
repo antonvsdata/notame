@@ -115,10 +115,10 @@ setMethod("flag_quality", c(object = "MetaboSet"),
               parse(text = .) %>% eval()
             good <- good$Feature_ID
 
-            idx <- is.na(results(object)$Flag) & !results(object)$Feature_ID %in% good
-            results(object)$Flag[idx] <- "Low_quality"
+            idx <- is.na(flag(object)) & !results(object)$Feature_ID %in% good
+            flag(object)[idx] <- "Low_quality"
 
-            percentage <- scales::percent(sum(results(object)$Flag == "Low_quality", na.rm = TRUE)/nrow(results(object)))
+            percentage <- scales::percent(sum(flag(object) == "Low_quality", na.rm = TRUE)/nrow(results(object)))
             log_text(paste0("\n", percentage, " of features flagged for low quality"))
 
             object
@@ -160,8 +160,8 @@ setMethod("flag_detection", c(object = "MetaboSet"),
                                       Detection_rate_QC = found_qc,
                                       stringsAsFactors = FALSE)
 
-            idx <- is.na(results(object)$Flag) & results(object)$Feature_ID %in% bad_qc
-            results(object)$Flag[idx] <- "Low_qc_detection"
+            idx <- is.na(flag(object)) & results(object)$Feature_ID %in% bad_qc
+            flag(object)[idx] <- "Low_qc_detection"
 
             # Compute proportions found in each study group
             if (!is.na(group)) {
@@ -176,8 +176,8 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               # Check if any group has enough non-missing entries
               proportions$good <- apply(proportions[-1], 1, function(x){any(x >= group_limit)})
 
-              idx <- is.na(results(object)$Flag) & (!results(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
-              results(object)$Flag[idx] <- "Low_group_detection"
+              idx <- is.na(flag(object)) & (!results(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
+              flag(object)[idx] <- "Low_group_detection"
               # Add detection rates to feature data
               proportions <- dplyr::left_join(proportions, found_qc_df, by = "Feature_ID")
               proportions$good <- NULL
@@ -185,7 +185,7 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               proportions <- found_qc_df
             }
 
-            percentage <- scales::percent(sum(results(object)$Flag %in% c("Low_QC_detection", "Low_group_detection"), na.rm = TRUE)/nrow(results(object)))
+            percentage <- scales::percent(sum(flag(object) %in% c("Low_QC_detection", "Low_group_detection"), na.rm = TRUE)/nrow(results(object)))
             log_text(paste0("\n", percentage, " of features flagged for low detection rate"))
 
             object <- join_results(object, proportions)

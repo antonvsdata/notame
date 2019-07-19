@@ -15,5 +15,12 @@ fold_change(object, group = group_col(object))
 data frame with fold changes for each feature
 }
 \description{
-Computes fold change between eeach group for each feature.
+Computes fold change between each group for each feature.
+}
+\examples{
+# Between groups
+fc <- fold_change(example_set)
+# Between time points
+fc <- fold_change(example_set, group = "Time")
+
 }

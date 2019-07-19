@@ -45,7 +45,7 @@ drop_qcs <- function(object) {
 #' @export
 drop_flagged <- function(object, all_features = FALSE) {
   if (!all_features) {
-    object <- object[is.na(results(object)$Flag), ]
+    object <- object[is.na(flag(object)), ]
   }
   object
 }
@@ -82,9 +82,10 @@ merge_exprs <- function(object, y) {
 #' random forest. The estimated error in the imputation is logged.
 #' It is recommended to ste the seed number for reproducibility
 #' (it is called random forest for a reason).
-#' This a wrapper around missForest::missForest.
+#' This a wrapper around \code{missForest::missForest}.
 #' Use parallelize = "variables" to run in parallel for faster testing.
 #' NOTE: running in parallel prevents user from setting a seed number.
+#' \strong{CITATION:} When using this function, cite the \code{missForest} package
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.

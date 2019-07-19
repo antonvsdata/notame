@@ -4,8 +4,7 @@
 \alias{perform_kruskal_wallis}
 \title{Perform Kruskal-Wallis Rank Sum Tests}
 \usage{
-perform_kruskal_wallis(object, formula_char = NULL,
-  all_features = FALSE)
+perform_kruskal_wallis(object, formula_char, all_features = FALSE)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -35,5 +34,5 @@ perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
 
 }
 \seealso{
-\code{link{kruskal.test}}
+\code{\link{kruskal.test}}
 }

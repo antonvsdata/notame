@@ -9,6 +9,7 @@
 \alias{time_col,MetaboSet-method}
 \alias{subject_col,MetaboSet-method}
 \alias{results,MetaboSet-method}
+\alias{flag,MetaboSet-method}
 \alias{join_results,MetaboSet,data.frame-method}
 \alias{join_fData,MetaboSet,data.frame-method}
 \alias{quality,MetaboSet-method}
@@ -26,6 +27,8 @@
 \S4method{subject_col}{MetaboSet}(object)
 
 \S4method{results}{MetaboSet}(object)
+
+\S4method{flag}{MetaboSet}(object)
 
 \S4method{join_results}{MetaboSet,data.frame}(object, dframe)
 
@@ -62,6 +65,8 @@ relevant results from the analyses.
 \item \code{subject_col}: access and set subject_col
 
 \item \code{results}: access and set results
+
+\item \code{flag}: access and set results
 
 \item \code{join_results}: join new information to results
 

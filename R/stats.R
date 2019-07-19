@@ -1,10 +1,21 @@
 
 #' Summary statistics
 #'
-#' Computes chosen summary statistics for each feature,
-#' possibly grouped by a factor
+#' Computes summary statistics for each feature, possibly grouped by a factor.
+#' The statistics include mean, standard deviation (sd), median,
+#' median absolute deviation (mad), and 25% and 75% quantiles (Q25 & Q75).
 #'
 #' @param object a MetaboSet object
+#' @param grouping_cols character vector, the columns by which grouping should be done. Use \code{NA}
+#' to compute statistics without grouping.
+#'
+#' @examples
+#' # Group by "Group"
+#' sum_stats <- summary_statistics(example_set)
+#' # Group by Group and Time
+#'  sum_stats <- summary_statistics(example_set, grouping_cols = c("Group", "Time"))
+#' # No Grouping
+#' sum_stats <- summary_statistics(example_set, grouping_cols = NA)
 #'
 #' @return a data frame with the summary statistics
 #'
@@ -13,7 +24,7 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
 
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
-
+  # Possible grouping
   if (!is.na(grouping_cols[1])) {
     data <- data %>% dplyr::group_by_at(grouping_cols)
   }
@@ -30,6 +41,7 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
                                                Q75 = ~finite_quantile(., probs = 0.75))) %>%
       dplyr::ungroup()
 
+    # Attach the grouping column values to column names
     if (!is.na(grouping_cols[1])) {
       for (grouping_col in grouping_cols) {
         tmp[grouping_col] <- paste0(grouping_col, "_",
@@ -42,7 +54,6 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
         tidyr::spread(Key, Value)
     }
 
-     tmp <- tmp
     tmp <- data.frame(Feature_ID = feature, tmp, stringsAsFactors = FALSE)
     rownames(tmp) <- feature
     tmp
@@ -106,12 +117,18 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
 
 #' Fold change
 #'
-#' Computes fold change between eeach group for each feature.
+#' Computes fold change between each group for each feature.
 #'
 #' @param object a MetaboSet object
 #' @param group character, name of the group column
 #'
 #' @return data frame with fold changes for each feature
+#'
+#' @examples
+#' # Between groups
+#' fc <- fold_change(example_set)
+#' # Between time points
+#' fc <- fold_change(example_set, group = "Time")
 #'
 #' @export
 fold_change <- function(object, group = group_col(object)) {
@@ -158,7 +175,7 @@ adjust_p_values <- function(x, flags) {
   x
 }
 
-# Helper function for running a variaety of simple statistical tests
+# Helper function for running a variety of simple statistical tests
 perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE) {
 
   data <- combined_data(object)
@@ -197,7 +214,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     if (all_features) {
       flags <- rep(NA_character_, nrow(results_df))
     } else {
-      flags <- fData(object)$Flag
+      flags <- flag(object)
     }
     results_df <- adjust_p_values(results_df, flags)
   }
@@ -377,13 +394,14 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #'
 #' Fits a linear mixed model separately for each feature. Returns all relevant
 #' statistics.
+#' \strong{CITATION:} When using this function, cite \code{lme4} and \code{lmerTest} packages
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
 #' @param ci_level the confidence level used in constructing the confidence intervals
 #' for regression coefficients
-#' @param ci_method The method for calculating th confidence intervals, see documentation
+#' @param ci_method The method for calculating the confidence intervals, see documentation
 #' of confint below
 #' @param test_random logical, whether tests for the significance of the random effects should be performed
 #' @param ... additional parameters passed to lmer
@@ -396,12 +414,13 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' must be used to signal the role of the features in the formula. "Feature" will be replaced
 #' by the actual Feature IDs during model fitting, see the example
 #'
+#'
 #' @examples
 #' # A simple example without QC samples
 #' # Features predicted by Group and Time as fixed effects with Subject ID as a random effect
 #' results <- perform_lmer(drop_qcs(example_set), formula_char = "Feature ~ Group + Time + (1 | Subject_ID)")
 #'
-#' @seealso \code{\link[lmerTest]{lmer}} for model scpecification and
+#' @seealso \code{\link[lmerTest]{lmer}} for model specification and
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
 #'
 #' @export
@@ -489,7 +508,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
   if (all_features) {
     flags <- rep(NA_character, nrow(results_df))
   } else {
-    flags <- fData(object)$Flag
+    flags <- flag(object)
   }
   results_df <- adjust_p_values(results_df, flags)
 
@@ -516,7 +535,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 
 #' Test homoscedasticity
 #'
-#' Performs Bartlett's, Levene's and  Fligner-Killeen tests for equality of variances
+#' Performs Bartlett's, Levene's and Fligner-Killeen tests for equality of variances
+#' \strong{CITATION:} When using this function, cite the \code{car} package, which
+#' provides the function for Levene's test. (The other tests are included in base R).
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
@@ -539,7 +560,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 #' @seealso \code{\link{bartlett.test}}, \code{\link[car]{leveneTest}}, \code{\link{fligner.test}}
 #'
 #' @export
-perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_features = FALSE) {
+perform_homoscedasticity_tests <- function(object, formula_char, all_features = FALSE) {
 
   # Start log
   log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
@@ -582,7 +603,7 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
 #'
 #' @return data frame with the results
 #'
-#' @seealso \code{link{kruskal.test}}
+#' @seealso \code{\link{kruskal.test}}
 #'
 #' @examples
 #' perform_kruskal_wallis(example_set)
@@ -590,7 +611,7 @@ perform_homoscedasticity_tests <- function(object, formula_char = NULL, all_feat
 #' perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = FALSE) {
+perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
   # Start log
   log_text(paste("\nStarting Kruskal_wallis tests at", Sys.time()))
 
@@ -612,8 +633,8 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 
 #' Perform ANOVA
 #'
-#' Performs ANOVA with Welch's correction as default, to deal with heterogenity of variances.
-#' Can also perform classic ANOVA with asssumption of equal variances.
+#' Performs ANOVA with Welch's correction as default, to deal with heterogeneity of variances.
+#' Can also perform classic ANOVA with assumption of equal variances.
 #' Uses base R function \code{oneway.test}.
 #'
 #' @param object a MetaboSet object
@@ -630,7 +651,7 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 #'
 #' @return data frame with the results
 #'
-#' @seealso \code{link{oneway.test}}
+#' @seealso \code{\link{oneway.test}}
 #'
 #' @examples
 #' perform_oneway_anova(example_set)
@@ -638,7 +659,7 @@ perform_kruskal_wallis <- function(object, formula_char = NULL, all_features = F
 #' perform_oneway_anova(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_oneway_anova <- function(object, formula_char = NULL, all_features = FALSE, ...) {
+perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...) {
   # Start log
   log_text(paste("\nStarting ANOVA tests at", Sys.time()))
 
@@ -679,7 +700,7 @@ perform_oneway_anova <- function(object, formula_char = NULL, all_features = FAL
 #' @seealso \code{\link{t.test}}
 #'
 #' @export
-perform_t_test <- function(object, formula_char = NULL, all_features = FALSE, ...) {
+perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   # Start log
   log_text(paste("\nStarting t-tests at", Sys.time()))
 

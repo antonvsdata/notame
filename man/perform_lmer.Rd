@@ -18,7 +18,7 @@ perform_lmer(object, formula_char, all_features = FALSE,
 \item{ci_level}{the confidence level used in constructing the confidence intervals
 for regression coefficients}
 
-\item{ci_method}{The method for calculating th confidence intervals, see documentation
+\item{ci_method}{The method for calculating the confidence intervals, see documentation
 of confint below}
 
 \item{test_random}{logical, whether tests for the significance of the random effects should be performed}
@@ -32,6 +32,7 @@ relevant statistics of the linear mixed model as columns
 \description{
 Fits a linear mixed model separately for each feature. Returns all relevant
 statistics.
+\strong{CITATION:} When using this function, cite \code{lme4} and \code{lmerTest} packages
 }
 \details{
 The model is fit on combined_data(object). Thus, column names
@@ -46,6 +47,6 @@ results <- perform_lmer(drop_qcs(example_set), formula_char = "Feature ~ Group +
 
 }
 \seealso{
-\code{\link[lmerTest]{lmer}} for model scpecification and
+\code{\link[lmerTest]{lmer}} for model specification and
 \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
 }

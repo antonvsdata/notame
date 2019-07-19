@@ -21,9 +21,10 @@ Impute the missing values in the exprs part of the object using a
 random forest. The estimated error in the imputation is logged.
 It is recommended to ste the seed number for reproducibility
 (it is called random forest for a reason).
-This a wrapper around missForest::missForest.
+This a wrapper around \code{missForest::missForest}.
 Use parallelize = "variables" to run in parallel for faster testing.
 NOTE: running in parallel prevents user from setting a seed number.
+\strong{CITATION:} When using this function, cite the \code{missForest} package
 }
 \seealso{
 \code{\link[missForest]{missForest}} for detail about the algorithm and the parameters

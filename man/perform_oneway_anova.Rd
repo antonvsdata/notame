@@ -4,8 +4,7 @@
 \alias{perform_oneway_anova}
 \title{Perform ANOVA}
 \usage{
-perform_oneway_anova(object, formula_char = NULL, all_features = FALSE,
-  ...)
+perform_oneway_anova(object, formula_char, all_features = FALSE, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -21,8 +20,8 @@ Defaults to "Feature ~ group_col(object)}
 data frame with the results
 }
 \description{
-Performs ANOVA with Welch's correction as default, to deal with heterogenity of variances.
-Can also perform classic ANOVA with asssumption of equal variances.
+Performs ANOVA with Welch's correction as default, to deal with heterogeneity of variances.
+Can also perform classic ANOVA with assumption of equal variances.
 Uses base R function \code{oneway.test}.
 }
 \details{
@@ -39,5 +38,5 @@ perform_oneway_anova(example_set, formula_char = "Feature ~ Group")
 
 }
 \seealso{
-\code{link{oneway.test}}
+\code{\link{oneway.test}}
 }

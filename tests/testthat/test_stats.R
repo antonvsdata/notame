@@ -179,6 +179,7 @@ test_that("Linear model works", {
                data = cd)
   smry <- summary(lm_fit)
 
+  # Works for a simple example
   lm_res <- perform_lm(drop_qcs(example_set),
                        formula_char = "Feature ~ Time")
 
@@ -189,7 +190,7 @@ test_that("Linear model works", {
   expect_equal(lm_res$R2[1], smry$r.squared)
   expect_equal(lm_res$Adj_R2[1], smry$adj.r.squared)
 
-
+  # Works with column with only NA values
   ex_set_na <- drop_qcs(mark_nas(example_set, 0))
   exprs(ex_set_na)[1:2, ] <- NA
 
@@ -198,6 +199,13 @@ test_that("Linear model works", {
   expect_equal(nrow(lm_res), nrow(exprs(example_set)))
   expect_equal(lm_res$Feature_ID, featureNames(example_set))
   expect_true(all(is.na(lm_res[1:2, 2:ncol(lm_res)])))
+
+  # FDR correction ignored for flagged compounds
+  ex_set_na <- flag_quality(ex_set_na)
+  lm_res2 <- perform_lm(ex_set_na, formula_char = "Feature ~ Group")
+  flag_idx <- !is.na(flag(ex_set_na))
+  expect_true(all(is.na(lm_res2$Group_P_FDR[flag_idx])))
+
 })
 
 test_that("Logistic regression works", {

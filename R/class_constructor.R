@@ -460,6 +460,31 @@ setMethod("results<-", "MetaboSet",
             }
           })
 
+
+#' Extract flags of features
+#'
+#' @export
+setGeneric("flag", signature = "object",
+           function(object) standardGeneric("flag"))
+
+#' @describeIn MetaboSet access and set results
+#' @export
+setMethod("flag", "MetaboSet",
+          function(object) object@results$Flag)
+
+#' @export
+setGeneric("flag<-", signature = "object",
+           function(object, value) standardGeneric("flag<-"))
+
+#' @export
+setMethod("flag<-", "MetaboSet",
+          function(object, value) {
+            object@results$Flag <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
+
 #' @export
 setGeneric("join_results", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_results"))

@@ -4,7 +4,7 @@
 \alias{perform_homoscedasticity_tests}
 \title{Test homoscedasticity}
 \usage{
-perform_homoscedasticity_tests(object, formula_char = NULL,
+perform_homoscedasticity_tests(object, formula_char,
   all_features = FALSE)
 }
 \arguments{
@@ -19,7 +19,9 @@ Defaults to "Feature ~ group_col(object)}
 data frame with the results
 }
 \description{
-Performs Bartlett's, Levene's and  Fligner-Killeen tests for equality of variances
+Performs Bartlett's, Levene's and Fligner-Killeen tests for equality of variances
+\strong{CITATION:} When using this function, cite the \code{car} package, which
+provides the function for Levene's test. (The other tests are included in base R).
 }
 \details{
 The model is fit on combined_data(object). Thus, column names
