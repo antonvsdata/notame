@@ -28,14 +28,16 @@ plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
 
 \item{fill_scale}{the fill scale as returned by a ggplot function}
 
-\item{...}{additional arguments passed to Rtsne::Rtsne
-
-A ggplot object.}
+\item{...}{additional arguments passed to Rtsne::Rtsne}
 
 \item{color}{character, name of the column used for coloring the points}
 }
+\value{
+A ggplot object.
+}
 \description{
 Computes t-SNE into two dimensions and plots the map points.
+\strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
 \seealso{
 \code{\link[Rtsne]{Rtsne}}

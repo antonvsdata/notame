@@ -7,7 +7,8 @@
 plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
   perplexity = 30, color = group_col(object), shape = NULL,
   density = FALSE, title = "t-SNE", subtitle = paste("Perplexity:",
-  perplexity), color_scale = NULL, shape_scale = NULL, ...)
+  perplexity), color_scale = NULL, shape_scale = NULL,
+  fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -30,7 +31,9 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
-\item{...}{additional arguments passed to Rtsne::Rtsne}
+\item{fill_scale}{the fill scale used for density curves}
+
+\item{...}{additional arguments passed to \code{Rtsne::Rtsne}}
 }
 \value{
 a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -38,6 +41,7 @@ parts and is harder to modify.
 }
 \description{
 Computes t-SNE into two dimensions and plots the map points.
+\strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
 \seealso{
 \code{\link[Rtsne]{Rtsne}}

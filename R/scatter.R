@@ -3,12 +3,12 @@
 #'
 #' Computes PCA using one of the methods provided in the Bioconductor package
 #' pcaMethods and plots the two first principal components
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param center logical, should the data  be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
-#' @param method the method to use, see documentation in pcaMethods
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param density logical, whether to include density plots to both axes
@@ -23,7 +23,7 @@
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", method = "ppca",
+plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                      color = group_col(object), shape = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NULL, shape_scale = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
@@ -31,7 +31,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", 
 
   shape <- shape %||% color
 
-  res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
+  res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
   pca_scores[color] <- pData(object)[, color]
   pca_scores[shape] <- pData(object)[, shape]
@@ -48,6 +48,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", 
 #' t-SNE scatter plot
 #'
 #' Computes t-SNE into two dimensions and plots the map points.
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
@@ -60,7 +61,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv", 
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param fill_scale the fill scale used for density curves
-#' @param ... additional arguments passed to Rtsne::Rtsne
+#' @param ... additional arguments passed to \code{Rtsne::Rtsne}
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
 #' parts and is harder to modify.
@@ -80,7 +81,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
   # If there are missing values, use ppca method from pcaMethods instead of usual PCA
   if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, nPcs = min(nrow(object), ncol(object), 50), method = "ppca", scale = "none", center = FALSE)
+    res_pca <- pcaMethods::pca(object, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
     pca_scores <- pcaMethods::scores(res_pca)
     res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
   } else {
@@ -171,12 +172,12 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 #'
 #' Computes PCA using one of the methods provided in the Bioconductor package
 #' pcaMethods and plots the two first principal components
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param center logical, should the data  be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
-#' @param method the method to use, see documentation in pcaMethods
 #' @param fill character, name of the column used for coloring the hexagons
 #' @param fill_scale the fill scale as returned by a ggplot function
 #' @param summary_fun the function used to compute the value for each hexagon
@@ -188,13 +189,13 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", method = "ppca",
+plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
                      subtitle = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  res_pca <- pcaMethods::pca(object, method = method, scale = scale, center = center, ...)
+  res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
   pca_scores[fill] <- pData(object)[, fill]
   R2 <- res_pca@R2
@@ -208,6 +209,7 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #' t-SNE hexbin plot
 #'
 #' Computes t-SNE into two dimensions and plots the map points.
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
@@ -221,6 +223,7 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #' @param bins the number of bins in x and y axes
 #' @param ... additional arguments passed to Rtsne::Rtsne
 #'
+#' @return
 #' A ggplot object.
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}
@@ -235,7 +238,7 @@ plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale 
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
   if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, nPcs = min(nrow(object), ncol(object), 50), method = "ppca", scale = "none", center = FALSE)
+    res_pca <- pcaMethods::pca(object, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
     pca_scores <- pcaMethods::scores(res_pca)
     res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
   } else {

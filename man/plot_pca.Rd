@@ -5,9 +5,9 @@
 \title{PCA scatter plot}
 \usage{
 plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
-  method = "ppca", color = group_col(object), shape = NULL,
-  density = FALSE, title = "PCA", subtitle = NULL,
-  color_scale = NULL, shape_scale = NULL, ...)
+  color = group_col(object), shape = NULL, density = FALSE,
+  title = "PCA", subtitle = NULL, color_scale = NULL,
+  shape_scale = NULL, fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -17,8 +17,6 @@ plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
 \item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
-
-\item{method}{the method to use, see documentation in pcaMethods}
 
 \item{color}{character, name of the column used for coloring the points}
 
@@ -30,6 +28,8 @@ plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
+\item{fill_scale}{the fill scale used for density curves}
+
 \item{...}{additional arguments passed to pcaMethods::pca}
 }
 \value{
@@ -39,6 +39,7 @@ parts and is harder to modify.
 \description{
 Computes PCA using one of the methods provided in the Bioconductor package
 pcaMethods and plots the two first principal components
+\strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
 \seealso{
 \code{\link[pcaMethods]{pca}}

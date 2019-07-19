@@ -5,9 +5,9 @@
 \title{PCA hexbin plot}
 \usage{
 plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
-  scale = "uv", method = "ppca", fill = "Injection_order",
-  summary_fun = "mean", bins = 10, title = "PCA", subtitle = NULL,
-  fill_scale = NULL, ...)
+  scale = "uv", fill = "Injection_order", summary_fun = "mean",
+  bins = 10, title = "PCA", subtitle = NULL, fill_scale = NULL,
+  ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -17,8 +17,6 @@ plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
 \item{center}{logical, should the data  be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
-
-\item{method}{the method to use, see documentation in pcaMethods}
 
 \item{fill}{character, name of the column used for coloring the hexagons}
 
@@ -36,6 +34,7 @@ A ggplot object.
 \description{
 Computes PCA using one of the methods provided in the Bioconductor package
 pcaMethods and plots the two first principal components
+\strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
 \seealso{
 \code{\link[pcaMethods]{pca}}
