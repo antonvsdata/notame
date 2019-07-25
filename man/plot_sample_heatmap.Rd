@@ -15,13 +15,15 @@ plot_sample_heatmap(object, all_features = FALSE,
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{dist_method}{distance method used in clustering, see ?dist}
+\item{dist_method}{distance method used in clustering, see \code{\link{dist}}}
 
-\item{clust_method}{method used in clustering, see ?hclust}
+\item{clust_method}{clustering method used in clustering, see \code{\link{hclust}}}
 
 \item{center}{logical, should the data  be centered?}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
+
+\item{group_bar}{logical, should a bar showing the groups be drawn under the heat map?}
 
 \item{group}{character, name of the column used for coloring the group bar}
 
@@ -32,8 +34,6 @@ plot_sample_heatmap(object, all_features = FALSE,
 \item{fill_scale_con}{Continuous fill scale for the heatmap as returned by a ggplot function}
 
 \item{fill_scale_dis}{Discrete fill scale for the group bar as returned by a ggplot function}
-
-\item{group_ber}{logical, should a bar showing the groups be drawn under the heat map?}
 }
 \value{
 a ggplot object. If \code{group_bar} is \code{TRUE}, the plot will consist of multiple
