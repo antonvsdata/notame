@@ -160,6 +160,101 @@ fold_change <- function(object, group = group_col(object)) {
   results_df[c("Feature_ID", comp_labels[order(comp_labels)])]
 }
 
+
+
+#' Perform correlation tests
+#'
+#' Performs a correlation test between two sets of variables. All the variables must be either
+#' feature names or column names of pheno data (sample information). There are two ways to use this function:
+#' either provide a set of variables as \code{x}, and all correlations between those variables are computed. Or
+#' provide two distinct sets of variables \code{x, y} and correlations between each x variable
+#' and each y variable are computed.
+#'
+#' @param object a MetaboSet object
+#' @param x character vector, names of variables to be correlated
+#' @param y character vector, either identical to x (the default) or a distinct set of variables
+#' to be correlated agains x
+#' @param fdr logical, whether p-values from the correlation test should be adjusted with FDR correction
+#' @param duplicated logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
+#' will be included in the results twice, where the order of the variables (which is x and which is y)
+#' is changed. Can be useful for e.g. plotting a heatmap of the results, see examples of
+#' \code{\link{plot_effect_heatmap}}
+#' @param ... other parameters passed to \code{\link{cor.test}}, such as method
+#'
+#' @return a data frame with the results of correlation tests: the pair of variables, correlation coefficient
+#' and p-value
+#'
+#' @examples
+#' # Correlations between all features
+#' correlations <- perform_correlation_tests(example_set, x = featureNames(example_set))
+#'
+#' # Spearman Correlations between features and sample information variables
+#' # Drop QCs and convert time to numeric
+#' no_qc <- drop_qcs(example_set)
+#' no_qc$Time <- as.numeric(no_qc$Time)
+#' correlations <- perform_correlation_tests(no_qc, x = featureNames(example_set),
+#'                                          y = c("Time", "Injection_order"), method = "spearman")
+#'
+#' @seealso \code{\link{cor.test}}
+#'
+#' @importFrom foreach %do%
+#' @export
+perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
+                                      duplicates = FALSE, ...) {
+
+  data <- combined_data(object)
+  # All x and y should be columns names of combined data
+  not_found <- setdiff(c(x,y), colnames(data))
+  if (length(not_found)) {
+    stop(paste("Following variables do not match to know variables in the object:",
+               paste(not_found, collapse = ", ")))
+  }
+
+  # If the same variable is present in x and y, the correlation would be computed
+  # twice. This makes sure only unique combinations of variables are treated.
+  if (identical(x,y)) {
+    var_pairs <- combn(x, 2) %>% t() %>% data.frame(stringsAsFactors = FALSE)
+    colnames(var_pairs) <- c("x", "y")
+    # Add correlations of all variables with themselves (useful for plotting)
+    var_pairs <- rbind(var_pairs, data.frame(x = x, y = x, stringsAsFactors = FALSE))
+  } else if (length(intersect(x, y))) {
+    stop("Currently only identical x & y or completely separate x & y are supported")
+  } else {
+    var_pairs <- expand.grid(x, y, stringsAsFactors = FALSE)
+    colnames(var_pairs) <- c("x", "y")
+  }
+
+  # Compute correlations
+  cor_results <- foreach::foreach(i = seq_len(nrow(var_pairs)), .combine = rbind) %dopar% {
+    x_tmp = var_pairs$x[i]
+    y_tmp = var_pairs$y[i]
+    cor_tmp <- cor.test(data[, x_tmp], data[, y_tmp], ...)
+    data.frame(X = x_tmp, Y = y_tmp,
+               Correlation_coefficient = cor_tmp$estimate,
+               Correlation_P = cor_tmp$p.value,
+               stringsAsFactors = FALSE)
+
+  }
+
+  if (duplicates) {
+    cor_results_dup <- cor_results
+    cor_results_dup$X <- cor_results$Y
+    cor_results_dup$Y <- cor_results$X
+    # Remove possible duplicated correlations of a variable with itself
+    cor_results_dup <- dplyr::filter(cor_results_dup, X != Y)
+    cor_results <- rbind(cor_results, cor_results_dup)
+  }
+
+  # FDR correction
+  if (fdr) {
+    flags <- rep(NA_character_, nrow(cor_results))
+    cor_results <- adjust_p_values(cor_results, flags)
+  }
+
+  rownames(cor_results) <- seq_len(nrow(cor_results))
+  cor_results
+}
+
 # Helper function for FDR correction
 adjust_p_values <- function(x, flags) {
   p_cols <- colnames(x)[grepl("_P$", colnames(x))]
