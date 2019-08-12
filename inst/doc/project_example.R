@@ -17,8 +17,8 @@ init_log(log_file = paste0(path, "log.txt"))
 log_state()
 
 ## ------------------------------------------------------------------------
-data <- read_from_excel(file = system.file("extdata", "sample_data_bread.xlsx", package = "amp"), sheet = 1,
-                        corner_row = 5, corner_column = "X",
+data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "amp"), sheet = 1,
+                        corner_row = 4, corner_column = "X",
                         split_by = c("Column", "Ion mode"))
 
 ## ---- out.width = "600px", echo=FALSE------------------------------------
@@ -32,7 +32,7 @@ sapply(data, dim)
 ## ------------------------------------------------------------------------
 modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,
                              feature_data = data$feature_data,
-                             group_col = "Bread")
+                             group_col = "Group")
 
 ## ------------------------------------------------------------------------
 names(modes)
@@ -131,14 +131,14 @@ imputed <- impute_rf(imputed, all_features = TRUE)
 #  save(imputed, file = paste0(path, "full_data.RData"))
 
 ## ------------------------------------------------------------------------
-anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Bread")
+anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Group")
 
 ## ------------------------------------------------------------------------
 top_features <- anova_results$Feature_ID[which(anova_results$ANOVA_P_FDR < 0.2)]
 
 top_index <- fData(imputed)$Feature_ID %in% top_features
-# Setting the group column is redundant, but made for clarity
-pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Bread")
+
+pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Group")
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  combined_results <- dplyr::left_join(anova_results, pairwise_results)

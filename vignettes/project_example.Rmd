@@ -45,11 +45,11 @@ log_state()
 
 ##### Read data
 
-Now we can read in the actual data! The file given here includes some example data and can be accessed at [the GitHub page](https://github.com/antonvsdata/amp/blob/master/inst/extdata/sample_data_bread.xlsx). The data is from a project with cereal samples from different bread varieties. The data is scrambled, though (the feature information does not correspond to the abundances given).
+Now we can read in the actual data! The file given here includes some example data and can be accessed at [the GitHub page](https://github.com/antonvsdata/amp/blob/master/inst/extdata/sample_data_whole.xlsx). The data is from a project with samples from three different groups. The data is scrambled, though (the feature information does not correspond to the abundances given).
 
 ```{r}
-data <- read_from_excel(file = system.file("extdata", "sample_data_bread.xlsx", package = "amp"), sheet = 1,
-                        corner_row = 5, corner_column = "X",
+data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "amp"), sheet = 1,
+                        corner_row = 4, corner_column = "X",
                         split_by = c("Column", "Ion mode"))
 ```
 
@@ -96,7 +96,7 @@ MetaboSet objects are constructed using ```construct_MetaboSet``` function. The 
 ```{r}
 modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,
                              feature_data = data$feature_data,
-                             group_col = "Bread")
+                             group_col = "Group")
 ```
 
 The function returns a list of MetaboSet objects, one per mode (LC column x ionization mode).
@@ -284,10 +284,10 @@ Now we are ready for statistical analysis!
 
 For more detailed information about how statistics work in this package, look at the Statistics vignette.
 
-Let's try to find features that separate the different bread varieties. First, we'll Welch's analysis of variance to find features that have different levels in any of the varieties: 
+Let's try to find features that separate the different groups. First, we'll Welch's analysis of variance to find features that have different levels in any of the varieties: 
 
 ```{r}
-anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Bread")
+anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Group")
 ```
 
 Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pairwise Welch's t-tests on them:
@@ -296,8 +296,8 @@ Next, we will choose all the features that show relevant difference between the 
 top_features <- anova_results$Feature_ID[which(anova_results$ANOVA_P_FDR < 0.2)]
 
 top_index <- fData(imputed)$Feature_ID %in% top_features
-# Setting the group column is redundant, but made for clarity
-pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Bread")
+
+pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Group")
 ```
 
 And there are our final results! The next step is then to combine the results, add them to the object and save the object to an output Excel file:
