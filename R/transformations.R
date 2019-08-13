@@ -18,6 +18,27 @@ mark_nas <- function(object, value) {
   object
 }
 
+
+
+#' Replace NA values in pheno data columns with "QC"
+#'
+#' Loops through specified columns in pheno data and replaces all NA values with "QC". Also transforms
+#' the column to factor and sets "QC" as the first level.
+#'
+#' @param data a data frame such as pheno_data returned by \code{\link{read_from_excel}}
+#' @param cols the columns to fix
+mark_qcs <- function(data, cols) {
+
+  for (col in cols) {
+    data[col] <- as.character(data[, col])
+    data[is.na(data[, col]), col] <- "QC"
+    data[col] <- factor(data[, col])
+    data[col] <- relevel(data[, col], ref = "QC")
+  }
+  data
+}
+
+
 #' Drop QC samples
 #'
 #' @param object a MetaboSet object
