@@ -48,14 +48,22 @@ check_position <- function(x, cc, cr) {
 
 }
 
+# Check if a vector can be safely converted to numeric
+looks_numeric <- function(x) {
+  stopifnot(is.atomic(x) || is.list(x)) # check if x is a vector
+  num_nas <- sum(is.na(x))
+  num_nas_new <- suppressWarnings(sum(is.na(as.numeric(x))))
+  return(num_nas_new == num_nas)
+}
+
+
 # Check that all abundances look OK
 check_exprs <- function(exprs_) {
   # Check that all rows are full of numbers
-  classes <- exprs_ %>%
-    apply(1, function(x){class(best_class(x))})
-  non_numerics <- which(classes != "numeric")
-  if (length(non_numerics)) {
-    stop(paste("Non-numeric values found in the abundances on rows", paste(non_numerics, collapse = ", ")))
+  non_numerics <- exprs_ %>%
+    apply(1, function(x){!looks_numeric(x)})
+  if (sum(non_numerics)) {
+    stop(paste("Non-numeric values found in the abundances on rows", paste(which(non_numerics), collapse = ", ")))
   }
   # Convert to numeric
   exprs_ <- exprs_ %>%
