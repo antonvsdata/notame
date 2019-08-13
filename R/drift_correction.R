@@ -177,7 +177,7 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
   # If color column not set, use QC column
   color <- color %||% "QC"
   shape <- shape %||% color
-  color_scale <- color_scale %||% getOption("amp.color_scale_d")
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   orig_data <- combined_data(orig)
   dc_data <- combined_data(dc)
