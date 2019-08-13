@@ -28,6 +28,8 @@ mark_nas <- function(object, value) {
 #' @param data a data frame such as pheno_data returned by \code{\link{read_from_excel}}
 #' @param cols the columns to fix
 #'
+#' @return a data frame with the column modified
+#'
 #' @export
 mark_qcs <- function(data, cols) {
 
