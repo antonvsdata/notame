@@ -49,6 +49,8 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #' t-SNE scatter plot
 #'
 #' Computes t-SNE into two dimensions and plots the map points.
+#' In case there are missing values, PCA is performed using the nipals method of \code{pcaMethods::pca},
+#' the  method can be changed to "ppca" if niipals fails.
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
@@ -56,6 +58,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
+#' @param pca_method the method used in PCA if there
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param density logical, whether to include density plots to both axes
@@ -72,6 +75,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #'
 #' @export
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
+                      pca_method = "nipals",
                       color = group_col(object), shape = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
                       shape_scale = NULL, fill_scale = NULL, ...) {
@@ -83,7 +87,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
   # If there are missing values, use ppca method from pcaMethods instead of usual PCA
   if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
+    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
     pca_scores <- pcaMethods::scores(res_pca)
     res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
   } else {

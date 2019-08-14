@@ -5,10 +5,10 @@
 \title{t-SNE scatter plot}
 \usage{
 plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
-  perplexity = 30, color = group_col(object), shape = NULL,
-  density = FALSE, title = "t-SNE", subtitle = paste("Perplexity:",
-  perplexity), color_scale = NULL, shape_scale = NULL,
-  fill_scale = NULL, ...)
+  perplexity = 30, pca_method = "nipals", color = group_col(object),
+  shape = NULL, density = FALSE, title = "t-SNE",
+  subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
+  shape_scale = NULL, fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -20,6 +20,8 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
 \item{perplexity}{the perplexity used in t-SNE}
+
+\item{pca_method}{the method used in PCA if there}
 
 \item{color}{character, name of the column used for coloring the points}
 
@@ -43,6 +45,8 @@ parts and is harder to modify.
 }
 \description{
 Computes t-SNE into two dimensions and plots the map points.
+In case there are missing values, PCA is performed using the nipals method of \code{pcaMethods::pca},
+the  method can be changed to "ppca" if niipals fails.
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
 \seealso{
