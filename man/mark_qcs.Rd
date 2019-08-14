@@ -16,5 +16,5 @@ a data frame with the column modified
 }
 \description{
 Loops through specified columns in pheno data and replaces all NA values with "QC". Also transforms
-the column to factor and sets "QC" as the first level.
+the column to factor and sets "QC" as the last level.
 }
