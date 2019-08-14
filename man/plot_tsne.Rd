@@ -21,7 +21,7 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 \item{perplexity}{the perplexity used in t-SNE}
 
-\item{pca_method}{the method used in PCA if there}
+\item{pca_method}{the method used in PCA if there are missing values}
 
 \item{color}{character, name of the column used for coloring the points}
 

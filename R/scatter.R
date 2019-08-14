@@ -58,7 +58,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
-#' @param pca_method the method used in PCA if there
+#' @param pca_method the method used in PCA if there are missing values
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param density logical, whether to include density plots to both axes
@@ -218,6 +218,8 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #'
 #' Computes t-SNE into two dimensions and plots the map as hexagonal bins, where the value of the coloring
 #' variable is summarised for each bin, by default as the mean of the values inside the bin.
+#' In case there are missing values, PCA is performed using the nipals method of \code{pcaMethods::pca},
+#' the  method can be changed to "ppca" if niipals fails.
 #'
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
@@ -225,6 +227,7 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param pca_method the method used in PCA if there are missing values
 #' @param perplexity the perplexity used in t-SNE
 #' @param fill character, name of the column used for coloring the hexagons
 #' @param summary_fun the function used to compute the value for each hexagon
@@ -239,7 +242,7 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
 #' @export
-plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
+plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", pca_method = "nipals", perplexity = 30,
                       fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
@@ -248,7 +251,7 @@ plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale 
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
   if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
+    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
     pca_scores <- pcaMethods::scores(res_pca)
     res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
   } else {

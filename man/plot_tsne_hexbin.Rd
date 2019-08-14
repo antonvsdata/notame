@@ -5,9 +5,10 @@
 \title{t-SNE hexbin plot}
 \usage{
 plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
-  scale = "uv", perplexity = 30, fill = "Injection_order",
-  summary_fun = "mean", bins = 10, title = "t-SNE",
-  subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...)
+  scale = "uv", pca_method = "nipals", perplexity = 30,
+  fill = "Injection_order", summary_fun = "mean", bins = 10,
+  title = "t-SNE", subtitle = paste("Perplexity:", perplexity),
+  fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -17,6 +18,8 @@ plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
 \item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
+
+\item{pca_method}{the method used in PCA if there are missing values}
 
 \item{perplexity}{the perplexity used in t-SNE}
 
@@ -38,6 +41,8 @@ A ggplot object.
 \description{
 Computes t-SNE into two dimensions and plots the map as hexagonal bins, where the value of the coloring
 variable is summarised for each bin, by default as the mean of the values inside the bin.
+In case there are missing values, PCA is performed using the nipals method of \code{pcaMethods::pca},
+the  method can be changed to "ppca" if niipals fails.
 }
 \details{
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
