@@ -286,3 +286,49 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
   p
 }
 
+#' Volcano plot
+#'
+#' Draws a volcano plot of effect size and p-values.
+#'
+#' @param data a data frame with the effect size and p-values
+#' @param effect,p the column names of effect size and p-values
+#' @param log2_effect logical, whether effect size should be plotted on a log2 axis
+#' @param center_x_axis logical, whether x-axis should be centered. If \code{TRUE}, the "zero-effect" will
+#' be on the middle of the plot. The "zero effect" is 0 if \code{log2_effect = FALSE} and 1 if  \code{log2_effect = TRUE}
+#' @param title,subtitle the title and subtitle of the plot
+#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values.
+#'
+#' @return a ggplot object
+#'
+#' @export
+volcano_plot <- function(data, effect, p, log2_effect = FALSE, center_x_axis = TRUE,
+                         title = "Volcano plot", subtitle = NA, ...) {
+
+  p <- ggplot(data, aes_string(x = effect, y = p)) +
+    geom_point(...) +
+    theme_bw() +
+    scale_y_continuous(trans = minus_log10) +
+    labs(title = title, subtitle = subtitle)
+
+  if (log2_effect) {
+    if (center_x_axis) {
+      x_lim <- max(abs(log2(data[, effect])))
+      x_lim <- c(2^(-x_lim), 2^x_lim)
+    } else {
+      x_lim = NULL
+    }
+    p <- p +
+      scale_x_continuous(trans = "log2", limits = x_lim)
+  } else {
+    if (center_x_axis) {
+      x_lim <- max(abs(data[, effect]))
+      x_lim <- c(-x_lim, x_lim)
+    } else {
+      x_lim = NULL
+    }
+    p <- p +
+      scale_x_continuous(limits = x_lim)
+  }
+
+  p
+}
