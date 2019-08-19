@@ -54,7 +54,8 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
       p <- p +
         geom_line(aes_string(group = id, color = color), alpha = 0.35, size = 0.3) +
         stat_summary(aes_string(group = color, color = color), fun.data = "mean_se",
-                     geom = "line", size = 1.2)
+                     geom = "line", size = 1.2) +
+        color_scale
     }
 
     if (!is.null(facet)) {
