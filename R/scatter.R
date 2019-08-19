@@ -286,6 +286,11 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
   p
 }
 
+
+minus_log10 <- scales::trans_new("minus_log19",
+                                 transform = function(x) {-log10(x)},
+                                 inverse = function(x) {10^{-x}})
+
 #' Volcano plot
 #'
 #' Draws a volcano plot of effect size and p-values.
