@@ -166,3 +166,30 @@ inverse_normalize <- function(object) {
     t()
   object
 }
+
+
+#' A report of flagged features
+#'
+#' Computes the number of features at each stage of flagging for each mode.
+#'
+#' @param object a MetaboSet object
+#'
+#' @return data frame with the number of features at each stage of flagging
+#'
+#' @export
+flag_report <- function(object) {
+
+  splits <- sort(unique(fData(object)$Split))
+  report <- data.frame()
+  flag(object)[is.na(flag(object))] <- "Kept"
+  for (split in splits) {
+    tmp <- object[fData(object)$Split == split, ]
+    report_row <- flag(tmp) %>% table %>% as.matrix() %>% t()
+    report_row <- data.frame(Split = split, report_row)
+    report_row$Total <- nrow(tmp)
+    report_row$Flagged <- report_row$Total - report_row$Kept
+    report <- rbind(report, report_row)
+  }
+  report
+}
+
