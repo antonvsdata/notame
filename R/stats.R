@@ -140,13 +140,16 @@ fold_change <- function(object, group = group_col(object)) {
 
   results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .export = "finite_mean") %dopar% {
     feature <- features[i]
-    result_row <- rep(0, ncol(groups))
+    result_row <- rep(NA_real_, ncol(groups))
     # Calculate fold changes
-    for(i in 1:ncol(groups)){
-      group1 <- data[data[, group] == groups[1,i], feature]
-      group2 <- data[data[, group] == groups[2,i], feature]
-      result_row[i] <- finite_mean(group2)/finite_mean(group1)
-    }
+    tryCatch({
+      for(i in 1:ncol(groups)){
+        group1 <- data[data[, group] == groups[1,i], feature]
+        group2 <- data[data[, group] == groups[2,i], feature]
+        result_row[i] <- finite_mean(group2)/finite_mean(group1)
+      }
+    })
+
     result_row
   }
 
@@ -271,12 +274,12 @@ adjust_p_values <- function(x, flags) {
 }
 
 # Helper function for running a variety of simple statistical tests
-perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE) {
+perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE, packages = NULL) {
 
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .packages = packages) %dopar% {
     feature <- features[i]
     # Replace "Feature" with the current feature name
     tmp_formula <- gsub("Feature", feature, formula_char)
@@ -535,26 +538,16 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
   # Check that ci_method is one of the accepted choices
   ci_method <- match.arg(ci_method)
 
-  data <- combined_data(object)
-  features <- Biobase::featureNames(object)
-
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .packages = "lmerTest") %dopar% {
-
+  lmer_fun <- function(feature, formula, data) {
     # Set seed, needed for some of the CI methods
     set.seed(38)
 
-    feature <- features[i]
-    # Replace "Feature" with the current feature name
-    tmp_formula <- gsub("Feature", feature, formula_char)
-
     # Try to fit the linear model
     fit <- NULL
+    # If fitting causes an error, a NULL row is returned
+    result_row <- NULL
     tryCatch({
-      fit <- lmer(as.formula(tmp_formula), data = data, ...)
-    }, error = function(e) print(e$message))
-    if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
-      result_row <- NULL
-    } else {
+      fit <- lmer(formula, data = data, ...)
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
       confints <- confint(fit, level = ci_level, nsim = 1000, method = ci_method, oldNames = FALSE)
@@ -594,18 +587,12 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       # Add feature ID
       result_row$Feature_ID <- feature
       rownames(result_row) <- feature
+    }, error = function(e) print(e$message))
 
-    }
     result_row
   }
 
-  # FDR correction per column
-  if (all_features) {
-    flags <- rep(NA_character, nrow(results_df))
-  } else {
-    flags <- flag(object)
-  }
-  results_df <- adjust_p_values(results_df, flags)
+  results_df <- perform_test(object, formula_char, lmer_fun, all_features, packages = "lmerTest")
 
   # Set a good column order
   fixed_effects <- gsub("_Estimate$", "", colnames(results_df)[grep("Estimate$", colnames(results_df))])
