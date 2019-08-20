@@ -262,7 +262,7 @@ perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
 adjust_p_values <- function(x, flags) {
   p_cols <- colnames(x)[grepl("_P$", colnames(x))]
   for (p_col in p_cols) {
-    p_values <- x[, p_col]
+    p_values <- x[, p_col, drop = TRUE]
     p_values[!is.na(flags)] <- NA
     x <- tibble::add_column(.data = x,
                             FDR = p.adjust(p_values, method = "BH"),
@@ -279,7 +279,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .packages = packages) %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = dplyr::bind_rows, .packages = packages) %dopar% {
     feature <- features[i]
     # Replace "Feature" with the current feature name
     tmp_formula <- gsub("Feature", feature, formula_char)
@@ -548,12 +548,20 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     result_row <- NULL
     tryCatch({
       fit <- lmer(formula, data = data, ...)
-      # Gather coefficients and CIs to one data frame row
+    },error = function(e) print(e$message))
+    if (!is.null(fit)) {
+      # Extract model coefficients
       coefs <- summary(fit)$coefficients
-      confints <- confint(fit, level = ci_level, nsim = 1000, method = ci_method, oldNames = FALSE)
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
-      confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
+      # Try to compute confidence intervals
+      # If the computation fails, all CIs are NA
+      confints <- data.frame(Variable = rownames(coefs), "X2.5.." = NA, "X97.5.." = NA)
+      tryCatch({
+        confints <- confint(fit, nsim = 1000, method = ci_method, oldNames = FALSE)
+        confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
+      },error = function(e) print(e$message))
 
+      # Gather coefficients and CIs to one data frame row
       result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
         dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value",
                       "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
@@ -561,12 +569,21 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
         tidyr::unite("Column", Variable, Metric, sep="_") %>%
         tidyr::spread(Column, Value)
       # Add R2 statistics
-      R2s <- suppressWarnings(MuMIn::r.squaredGLMM(fit))
-      result_row$Marginal_R2 <- R2s[1]
-      result_row$Conditional_R2 <- R2s[2]
+      result_row$Marginal_R2 <- NA
+      result_row$Conditional_R2 <- NA
+      tryCatch({
+        R2s <- suppressWarnings(MuMIn::r.squaredGLMM(fit))
+        result_row$Marginal_R2 <- R2s[1]
+        result_row$Conditional_R2 <- R2s[2]
+      },error = function(e) print(e$message))
+      # Add Feature ID
+      result_row$Feature_ID <- feature
+      rownames(result_row) <- feature
+    }
 
-      # Add optional test results for the random effects
-      if(test_random) {
+    # Add optional test results for the random effects
+    if(test_random) {
+      tryCatch({
         r_tests <- as.data.frame(ranova(fit))[-1,c(4,6)]
         r_tests$Variable <- rownames(r_tests) %>%
           gsub("[(]1 [|] ", "", .) %>% gsub("[)]", "", .)
@@ -583,11 +600,8 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
           tidyr::unite("Column", grp, Metric, sep="_") %>%
           tidyr::spread(Column, Value)
         result_row <- cbind(result_row, r_result_row)
-      }
-      # Add feature ID
-      result_row$Feature_ID <- feature
-      rownames(result_row) <- feature
-    }, error = function(e) print(e$message))
+      },error = function(e) print(e$message))
+    }
 
     result_row
   }
