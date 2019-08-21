@@ -1,4 +1,15 @@
 
+
+pca_helper <- function(object, center, scale, ...) {
+  res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
+  pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
+  R2 <- res_pca@R2
+  labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
+
+  return(list(pca_scores = pca_scores, labels = labels))
+}
+
+
 #' PCA scatter plot
 #'
 #' Computes PCA using one of the methods provided in the Bioconductor package
@@ -32,18 +43,29 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
   shape <- shape %||% color
 
-  res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
-  pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
+  pca_results <- pca_helper(object, center, scale, ...)
+  pca_scores <- pca_results$pca_scores
   pca_scores[color] <- pData(object)[, color]
   pca_scores[shape] <- pData(object)[, shape]
-  R2 <- res_pca@R2
-  labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
 
-
-  scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2],
+  scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = pca_results$labels[1], ylab = pca_results$labels[2],
                color = color, shape = shape, density = density, title = title,
                subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
                fill_scale = fill_scale)
+}
+
+# Help0er function for computing t-SNE
+t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
+  prepd <- pcaMethods::prep(object, center = center, scale = scale)
+
+  if (sum(is.na(exprs(prepd))) > 0) {
+    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
+    pca_scores <- pcaMethods::scores(res_pca)
+    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
+  } else {
+    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+  }
+  data.frame(res_tsne$Y)
 }
 
 #' t-SNE scatter plot
@@ -81,20 +103,11 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                       shape_scale = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
-
   shape <- shape %||% color
-  prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
-  # If there are missing values, use ppca method from pcaMethods instead of usual PCA
-  if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
-    pca_scores <- pcaMethods::scores(res_pca)
-    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
-  } else {
-    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
-  }
-
-  tsne_scores <- data.frame(res_tsne$Y)
+  # t-SNE
+  tsne_scores <- t_sne_helper(object, center, scale, perplexity, pca_method, ...)
+  # Add columns for plotting
   tsne_scores[color] <- pData(object)[, color]
   tsne_scores[shape] <- pData(object)[, shape]
 
@@ -203,13 +216,11 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
-  pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
+  pca_results <- pca_helper(object, center, scale, ...)
+  pca_scores <- pca_results$pca_scores
   pca_scores[fill] <- pData(object)[, fill]
-  R2 <- res_pca@R2
-  labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
 
-  hexbin_plot(data = pca_scores, x = "PC1", y = "PC2", xlab = labels[1], ylab = labels[2],
+  hexbin_plot(data = pca_scores, x = "PC1", y = "PC2", xlab = pca_results$labels[1], ylab = pca_results$labels[2],
               fill = fill, summary_fun = summary_fun, bins = bins, fill_scale = fill_scale,
                           title = title, subtitle = subtitle)
 }
@@ -248,18 +259,10 @@ plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale 
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  prepd <- pcaMethods::prep(object, center = center, scale = scale)
-
-  if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
-    pca_scores <- pcaMethods::scores(res_pca)
-    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
-  } else {
-    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
-  }
-  tsne_scores <- data.frame(res_tsne$Y)
+  # t-SNE
+  tsne_scores <- t_sne_helper(object, center, scale, perplexity, pca_method, ...)
+  # Add columns for plotting
   tsne_scores[fill] <- pData(object)[, fill]
-
 
   hexbin_plot(tsne_scores, x = "X1", y = "X2",
                fill = fill, summary_fun = summary_fun, bins = bins,
