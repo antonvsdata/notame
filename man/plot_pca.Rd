@@ -12,7 +12,8 @@ plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 

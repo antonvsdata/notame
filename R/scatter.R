@@ -1,5 +1,8 @@
 
 
+# ------- HELPER FUNCTIONS ----------------
+
+# Helper function for computing PCA
 pca_helper <- function(object, center, scale, ...) {
   res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
@@ -9,6 +12,22 @@ pca_helper <- function(object, center, scale, ...) {
   return(list(pca_scores = pca_scores, labels = labels))
 }
 
+# Helper function for computing t-SNE
+t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
+  prepd <- pcaMethods::prep(object, center = center, scale = scale)
+
+  if (sum(is.na(exprs(prepd))) > 0) {
+    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50),
+                               scale = "none", center = FALSE)
+    pca_scores <- pcaMethods::scores(res_pca)
+    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
+  } else {
+    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
+  }
+  data.frame(res_tsne$Y)
+}
+
+# -------------- SCATTER PLOTS ---------------
 
 #' PCA scatter plot
 #'
@@ -17,7 +36,8 @@ pca_helper <- function(object, center, scale, ...) {
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param color character, name of the column used for coloring the points
@@ -54,25 +74,11 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                fill_scale = fill_scale)
 }
 
-# Help0er function for computing t-SNE
-t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
-  prepd <- pcaMethods::prep(object, center = center, scale = scale)
-
-  if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50), scale = "none", center = FALSE)
-    pca_scores <- pcaMethods::scores(res_pca)
-    res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
-  } else {
-    res_tsne <- Rtsne::Rtsne(t(exprs(prepd)), perplexity = perplexity, ...)
-  }
-  data.frame(res_tsne$Y)
-}
-
 #' t-SNE scatter plot
 #'
 #' Computes t-SNE into two dimensions and plots the map points.
 #' In case there are missing values, PCA is performed using the nipals method of \code{pcaMethods::pca},
-#' the  method can be changed to "ppca" if niipals fails.
+#' the  method can be changed to "ppca" if nipals fails.
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
@@ -289,6 +295,123 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
   p
 }
 
+
+# --------- ARROW PLOTS -----------
+
+arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
+                       color_scale, title, subtitle, xlab, ylab) {
+
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
+
+  data <- data[order(data[, subject], data[, time]), ]
+
+  p <- ggplot(data, aes_string(x = x, y = y, color = color, group = subject)) +
+    geom_path(arrow = arrow_style, alpha = alpha) +
+    theme_bw() +
+    color_scale +
+    coord_fixed() +
+    theme(aspect.ratio=1) +
+    labs(x = xlab, y = ylab, title = title, subtitle = subtitle)
+  p
+}
+
+#' PCA plot with arrows
+#'
+#' Plots changes in PCA space according to time. All the observations of a single subject are connected
+#' by an arrow ending at the last observation.
+#'
+#' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param color character, name of the column used for coloring the arrows
+#' @param time character, name of the column containing timepoints
+#' @param subject character, name of the column containing subject identifiers
+#' @param alpha numeric, value for the alpha parameter of the arrows (transparency)
+#' @param arrow_style a description of arrow heads, the size and angle can be modified, see \code{?arrow}
+#' @param title,subtitle the titles of the plot
+#' @param color_scale the color scale as returned by a ggplot function
+#' @param ... additional arguments passed to pcaMethods::pca
+#'
+#' @return a ggplot object.
+#'
+#' @seealso \code{\link[pcaMethods]{pca}}
+#'
+#' @export
+plot_pca_arrows <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+                            color = group_col(object), time = time_col(object), subject = subject_col(object),
+                            alpha = 0.6, arrow_style = arrow(), title = "PCA changes",
+                            subtitle = NULL, color_scale = NULL, ...) {
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
+  pca_results <- pca_helper(object, center, scale, ...)
+  pca_scores <- pca_results$pca_scores
+  pca_scores[color] <- pData(object)[, color]
+  pca_scores[time] <- pData(object)[, time]
+  pca_scores[subject] <- pData(object)[, subject]
+
+  arrow_plot(data = pca_scores, x = "PC1", y = "PC2", color = color, time = time, subject = subject,
+             alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
+             title = title, subtitle = subtitle,
+             xlab = pca_results$labels[1], ylab = pca_results$labels[2])
+
+}
+
+
+
+#' t-SNE plot with arrows
+#'
+#' Computes t-SNE into two dimensions and plots changes according to time.
+#' All the observations of a single subject are connected by an arrow ending at the last observation.
+#' In case there are missing values, PCA is performed using the nipals method of \code{pcaMethods::pca},
+#' the  method can be changed to "ppca" if nipals fails.
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
+#'
+#' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param perplexity the perplexity used in t-SNE
+#' @param pca_method the method used in PCA if there are missing values
+#' @param color character, name of the column used for coloring the points
+#' @param time character, name of the column containing timepoints
+#' @param subject character, name of the column containing subject identifiers
+#' @param alpha numeric, value for the alpha parameter of the arrows (transparency)
+#' @param arrow_style a description of arrow heads, the size and angle can be modified, see \code{?arrow}
+#' @param title,subtitle the titles of the plot
+#' @param color_scale the color scale as returned by a ggplot function
+#' @param ... additional arguments passed to \code{Rtsne::Rtsne}
+#'
+#' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
+#' parts and is harder to modify.
+#'
+#' @seealso \code{\link[Rtsne]{Rtsne}}
+#'
+#' @export
+plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+                             perplexity = 30, pca_method = "nipals",
+                             color = group_col(object), time = time_col(object), subject = subject_col(object),
+                             alpha = 0.6, arrow_style = arrow(), title = "t-SNE changes",
+                             subtitle = paste("Perplexity:", perplexity), color_scale = NULL, ...) {
+
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
+  tsne_scores <- t_sne_helper(object, center, scale, perplexity, pca_method, ...)
+  tsne_scores[color] <- pData(object)[, color]
+  tsne_scores[time] <- pData(object)[, time]
+  tsne_scores[subject] <- pData(object)[, subject]
+
+  arrow_plot(data = tsne_scores, x = "X1", y = "X2", color = color, time = time, subject = subject,
+             alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
+             title = title, subtitle = subtitle,
+             xlab = "X1", ylab = "X2")
+}
+
+
+# -------- VOLCANO PLOT -----------
 
 minus_log10 <- scales::trans_new("minus_log19",
                                  transform = function(x) {-log10(x)},
