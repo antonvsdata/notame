@@ -83,18 +83,17 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param file path to the PDF file where the plots should be saved
 #' @param width,height width and height of the plots in inches
-#' @param group character, name of the column to be used as x-axis and color
+#' @param x character, name of the column to be used as x-axis
+#' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
 #'
 #' @export
-save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6, group = group_col(object),
+save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6,
+                                x = group_col(object), color = group_col(object),
                                 color_scale =  NULL) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  if (is.na(group)) {
-    stop("The group column is missing")
-  }
   color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   pdf(file, width = width, height = height)
@@ -107,10 +106,11 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
     }
     fname <- Biobase::featureNames(object)[i]
 
-    p <- ggplot(data, aes_string(x = group, y = fname, color = group)) +
-      geom_boxplot() +
-      stat_summary(aes_string(group = group), fun.data = mean_se,
-                   geom = "point", shape = 18, size = 3) +
+    p <- ggplot(data, aes_string(x = x, y = fname, color = color)) +
+      geom_boxplot(position = position_dodge(0.6), width = 0.5) +
+      stat_summary(fun.data = mean_se,
+                   geom = "point", shape = 18, size = 3,
+                   position = position_dodge(0.6)) +
       color_scale +
       labs(title = fname, y = "Abundance") +
       theme_bw()

@@ -5,7 +5,8 @@
 \title{Save box plots of each feature by group}
 \usage{
 save_group_boxplots(object, all_features = FALSE, file, width = 8,
-  height = 6, group = group_col(object), color_scale = NULL)
+  height = 6, x = group_col(object), color = group_col(object),
+  color_scale = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -16,7 +17,9 @@ save_group_boxplots(object, all_features = FALSE, file, width = 8,
 
 \item{width, height}{width and height of the plots in inches}
 
-\item{group}{character, name of the column to be used as x-axis and color}
+\item{x}{character, name of the column to be used as x-axis}
+
+\item{color}{character, name of the column to be used for coloring}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 }
