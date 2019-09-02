@@ -359,7 +359,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     fit <- NULL
     tryCatch({
       fit <- lm(formula, data = data, ...)
-    }, error = function(e) print(e$message))
+    }, error = function(e) print(paste0(feature, ": ", e$message)))
     if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
       result_row <- NULL
     } else {
@@ -439,7 +439,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     fit <- NULL
     tryCatch({
       fit <- glm(formula, data = data, family = binomial(), ...)
-    }, error = function(e) print(e$message))
+    }, error = function(e) print(paste0(feature, ": ", e$message)))
     if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
       result_row <- NULL
     } else {
@@ -548,7 +548,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     result_row <- NULL
     tryCatch({
       fit <- lmer(formula, data = data, ...)
-    },error = function(e) print(e$message))
+    },error = function(e) print(paste0(feature, ": ", e$message)))
     if (!is.null(fit)) {
       # Extract model coefficients
       coefs <- summary(fit)$coefficients
@@ -559,7 +559,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       tryCatch({
         confints <- confint(fit, nsim = 1000, method = ci_method, oldNames = FALSE)
         confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
-      },error = function(e) print(e$message))
+      },error = function(e) print(paste0(feature, ": ", e$message)))
 
       # Gather coefficients and CIs to one data frame row
       result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
@@ -575,7 +575,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
         R2s <- suppressWarnings(MuMIn::r.squaredGLMM(fit))
         result_row$Marginal_R2 <- R2s[1]
         result_row$Conditional_R2 <- R2s[2]
-      },error = function(e) print(e$message))
+      },error = function(e) print(paste0(feature, ": ", e$message)))
       # Add Feature ID
       result_row$Feature_ID <- feature
       rownames(result_row) <- feature
@@ -600,7 +600,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
           tidyr::unite("Column", grp, Metric, sep="_") %>%
           tidyr::spread(Column, Value)
         result_row <- cbind(result_row, r_result_row)
-      },error = function(e) print(e$message))
+      },error = function(e) print(paste0(feature, ": ", e$message)))
     }
 
     result_row
@@ -662,16 +662,21 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
   log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
 
   homosced_fun <- function(feature, formula, data) {
+    result_row <- NULL
+    tryCatch({
+      bartlett <- bartlett.test(formula = formula, data = data)
+      levene <- car::leveneTest(y = formula, data = data)
+      fligner <- fligner.test(formula = formula, data = data)
 
-    bartlett <- bartlett.test(formula = formula, data = data)
-    levene <- car::leveneTest(y = formula, data = data)
-    fligner <- fligner.test(formula = formula, data = data)
+      result_row <- data.frame(Feature_ID = feature,
+                               Bartlett_P = bartlett$p.value,
+                               Levene_P = levene$`Pr(>F)`[1],
+                               Fligner_P = fligner$p.value,
+                               stringsAsFactors = FALSE)
+    }, error = function(e) {print(paste0(feature, ": ", e$message))})
 
-    result_row <- data.frame(Feature_ID = feature,
-                             Bartlett_P = bartlett$p.value,
-                             Levene_P = levene$`Pr(>F)`[1],
-                             Fligner_P = fligner$p.value,
-                             stringsAsFactors = FALSE)
+    result_row
+
   }
 
   results_df <- perform_test(object, formula_char, homosced_fun, all_features)
@@ -712,11 +717,16 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
   log_text(paste("\nStarting Kruskal_wallis tests at", Sys.time()))
 
   kruskal_fun <- function(feature, formula, data) {
-    kruskal <- kruskal.test(formula = formula, data = data)
+    result_row <- NULL
+    tryCatch({
+      kruskal <- kruskal.test(formula = formula, data = data)
 
-    result_row <- data.frame(Feature_ID = feature,
-                             Kruskal_P = kruskal$p.value,
-                             stringsAsFactors = FALSE)
+      result_row <- data.frame(Feature_ID = feature,
+                               Kruskal_P = kruskal$p.value,
+                               stringsAsFactors = FALSE)
+    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+
+    result_row
   }
 
   results_df <- perform_test(object, formula_char, kruskal_fun, all_features)
@@ -760,11 +770,17 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
   log_text(paste("\nStarting ANOVA tests at", Sys.time()))
 
   anova_fun <- function(feature, formula, data) {
-    anova_res <- oneway.test(formula = formula, data = data, ...)
+    result_row <- NULL
+    tryCatch({
+      anova_res <- oneway.test(formula = formula, data = data, ...)
 
-    result_row <- data.frame(Feature_ID = feature,
-                             ANOVA_P = anova_res$p.value,
-                             stringsAsFactors = FALSE)
+      result_row <- data.frame(Feature_ID = feature,
+                               ANOVA_P = anova_res$p.value,
+                               stringsAsFactors = FALSE)
+    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+
+    result_row
+
   }
 
   results_df <- perform_test(object, formula_char, anova_fun, all_features)
@@ -801,20 +817,24 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   log_text(paste("\nStarting t-tests at", Sys.time()))
 
   t_fun <- function(feature, formula, data) {
-    t_res <- t.test(formula = formula, data = data, ...)
+    result_row <- NULL
+    tryCatch({
+      t_res <- t.test(formula = formula, data = data, ...)
 
-    conf_level <- attr(t_res$conf.int, "conf.level") * 100
+      conf_level <- attr(t_res$conf.int, "conf.level") * 100
 
-    result_row <- data.frame(Feature_ID = feature,
-                             Mean1 = t_res$estimate[1],
-                             Mean2 = t_res$estimate[2],
-                             Mean_1_minus_2 = t_res$estimate[1] - t_res$estimate[2],
-                             "Lower_CI_" = t_res$conf.int[1],
-                             "Upper_CI_" = t_res$conf.int[2],
-                             t_test_P = t_res$p.value,
-                             stringsAsFactors = FALSE)
-    colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
-    rownames(result_row) <- feature
+      result_row <- data.frame(Feature_ID = feature,
+                               Mean1 = t_res$estimate[1],
+                               Mean2 = t_res$estimate[2],
+                               Mean_1_minus_2 = t_res$estimate[1] - t_res$estimate[2],
+                               "Lower_CI_" = t_res$conf.int[1],
+                               "Upper_CI_" = t_res$conf.int[2],
+                               t_test_P = t_res$p.value,
+                               stringsAsFactors = FALSE)
+      colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
+      rownames(result_row) <- feature
+    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+
     result_row
   }
 
