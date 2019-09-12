@@ -95,6 +95,10 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
 #' @param clusters a list of clusters as returned by find_clusters
 #' @param features data frame with feature information, fData(object)
 #' @param name_col character, name of the column in features that contains feature names
+#'
+#' @return a data frame similar to features, with cluster ID added
+#'
+#' @export
 assign_cluster_id <- function(data, clusters, features, name_col) {
 
   if (!"MPA" %in% colnames(features)) {
@@ -136,6 +140,8 @@ assign_cluster_id <- function(data, clusters, features, name_col) {
 #' compressed <- compress_clusters(clustered)
 #'
 #' @seealso \code{\link{cluster_features}}
+#'
+#' @export
 compress_clusters <- function(object) {
 
   cluster_names <- results(object)$Cluster_ID
