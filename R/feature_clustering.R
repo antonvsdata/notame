@@ -342,14 +342,13 @@ find_clusters <- function(connections, d_thresh = 0.8){
 # A helper function for plotting, scales the values in X
 # between new min and max
 rescale <- function(x, new_min, new_max) {
-  if (length(unique(x)) > 1) {
-    (new_max - new_min) * (x - min(x)) / (max(x) - min(x)) + new_min
-  } else {
-    rep(mean(c(new_min, new_max)), length(x))
+  y <- (new_max - new_min) * (x - min(x)) / (max(x) - min(x)) + new_min
+  # If all MPAs are equal, the sizes are NaN (possibly other reasons)
+  if (sum(is.na(y))) {
+    y <- rep(mean(c(new_min, new_max)), length(x))
   }
-
+  y
 }
-
 
 # UNFINISHED!!
 plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
