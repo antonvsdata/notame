@@ -378,7 +378,7 @@ plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window
   p1 <- ggplot(features_tmp, aes_string(mz_col, "MPA")) +
     geom_point(size = 3, color = "steelblue4") +
     geom_segment(aes_string(x = mz_col, yend = "MPA", xend = mz_col), y = 0, color = "steelblue4") +
-    geom_label_repel(aes_string(label = mz_col), color = "steelblue4") +
+    ggrepel::geom_label_repel(aes_string(label = mz_col), color = "steelblue4") +
     theme_minimal() +
     xlim(0.9*min(features_tmp[, mz_col], na.rm = TRUE),
          1.15*max(features_tmp[, mz_col], na.rm = FALSE)) +
