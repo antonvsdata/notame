@@ -449,6 +449,8 @@ plot_heatmaps <- function(data, features, cluster, name_col, mz_col, rt_col) {
 #' @param mz_col character, name of the column in features that contains mass-to-charge ratios
 #' @param rt_col character, name of the column in features that contains retention times
 #' @param file_path the prefix to the files to be plotted
+#'
+#' @export
 visualize_clusters <- function(data, features, clusters, min_size, rt_window, name_col, mz_col, rt_col, file_path) {
 
   for (i in seq_along(clusters)) {
