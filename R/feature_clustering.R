@@ -342,7 +342,12 @@ find_clusters <- function(connections, d_thresh = 0.8){
 # A helper function for plotting, scales the values in X
 # between new min and max
 rescale <- function(x, new_min, new_max) {
-  (new_max - new_min) * (x - min(x)) / (max(x) - min(x)) + new_min
+  if (length(unique(x)) > 1) {
+    (new_max - new_min) * (x - min(x)) / (max(x) - min(x)) + new_min
+  } else {
+    rep(mean(c(new_min, new_max)), length(x))
+  }
+
 }
 
 
@@ -460,9 +465,9 @@ visualize_clusters <- function(data, features, clusters, min_size, rt_window, na
     cluster <- clusters[[i]]
     if (length(cluster$features) >= min_size) {
       features_tmp <- features[features[, name_col] %in% cluster$features, ]
-      cluster_id <- features_tmp[, name_col][which(features_tmp$MPA == max(features_tmp$MPA, na.rm = TRUE))[1]]
+      cluster_id <- features_tmp$Cluster_ID[1]
 
-      pdf(paste0(file_path, "Cluster_", i, "_", cluster_id, ".pdf"), width = 10, height = 10)
+      pdf(paste0(file_path, cluster_id, ".pdf"), width = 10, height = 10)
       plot_heatmaps(data, features, cluster, name_col, mz_col, rt_col)
       plot_features(features, cluster, name_col, mz_col, rt_col, rt_window)
       plot_graph(features, cluster, name_col, mz_col, rt_col)
