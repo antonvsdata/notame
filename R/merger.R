@@ -142,3 +142,94 @@ merge_metabosets <- function(...) {
 
   merged
 }
+
+
+fdata_batch_helper <- function(fx, fy) {
+
+  if (!identical(colnames(fx), colnames(fy))) {
+    stop("fData have different column names")
+  }
+
+  # Combine common features: all NAs in fx are replaced by a value from fy
+  common_features <- intersect(fx$Feature_ID, fy$Feature_ID)
+  for (cf in common_features) {
+    na_idx <- is.na(fx[cf, ])
+    fx[cf, na_idx] <- fy[cf, na_idx]
+  }
+  new_features <- setdiff(fy$Feature_ID, fx$Feature_ID)
+
+  rbind(fx, fy[new_features, ])
+}
+
+
+merge_batch_helper <- function(x, y) {
+
+  merged_pdata <- rbind(pData(x), pData(y))
+  merged_pdata$Sample_ID[grepl("QC", merged_pdata$Sample_ID)] <- paste0("QC_", seq_len(sum(grepl("QC", merged_pdata$Sample_ID))))
+  merged_pdata$Sample_ID[grepl("Ref", merged_pdata$Sample_ID)] <- paste0("Ref_", seq_len(sum(grepl("Ref", merged_pdata$Sample_ID))))
+  rownames(merged_pdata) <- merged_pdata$Sample_ID
+  merged_pdata <- merged_pdata %>%
+    Biobase::AnnotatedDataFrame()
+
+  merged_exprs <- dplyr::bind_rows(as.data.frame(t(exprs(x))), as.data.frame(t(exprs(y)))) %>% t()
+  colnames(merged_exprs) <- rownames(merged_pdata)
+
+  merged_fdata <- fdata_batch_helper(fData(x), fData(y)) %>%
+    Biobase::AnnotatedDataFrame()
+  merged_results <- fdata_batch_helper(results(x), results(y))
+
+  merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
+  merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
+  merged_subject_col <- ifelse(!is.na(subject_col(x)), subject_col(x), subject_col(y))
+
+  merged_object <- MetaboSet(exprs = merged_exprs,
+                             phenoData = merged_pdata,
+                             featureData = merged_fdata,
+                             group_col = merged_group_col,
+                             time_col = merged_time_col,
+                             subject_col = merged_subject_col,
+                             results = merged_results)
+
+  merged_object
+}
+
+
+#' Merge MetaboSet objects of batches together
+#'
+#' @param ... MetaboSet objects or a list of Metaboset objects
+#'
+#' @return A merged MetaboSet object
+#'
+#' @export
+merge_batches <- function(...) {
+
+  # Combine the objects to a list
+  objects <- list(...)
+  # If a list is given in the first place, it should move to top level
+  if (length(objects) == 1) {
+    if (class(objects[[1]]) == "list") {
+      objects <- objects[[1]]
+    }
+  }
+  # Class check
+  if (!all(sapply(objects, class) == "MetaboSet")) {
+    stop("The arguments should only contain MetaboSet objects")
+  }
+
+  # Merge objects together one by one
+  merged <- NULL
+  for (object in objects) {
+    if (is.null(merged)) {
+      merged <- object
+    } else {
+      merged <- merge_batch_helper(merged, object)
+    }
+  }
+
+  merged
+}
+
+
+
+
+

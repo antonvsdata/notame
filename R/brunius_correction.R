@@ -25,12 +25,12 @@ align_batches_brunius <- function(object_na, object_fill, batch, mz, rt, mzdiff,
 
 
   # Extract peak mz and rt information
-  pInfo <- fData(object_na)[, c(mz, rt)]
+  pInfo <- as.matrix(fData(object_na)[, c(mz, rt)])
   colnames(pInfo) <- c("mz", "rt")
 
   # Align batches based on the QCs
-  aligned <- batchCorr::alignBatches(peakInfo = pinfo, PeakTabNoFill = t(exprs(object_na)), PeakTabFilled = t(exprs(object_fill)),
-                          batches = pData(object_na)[, batch], sampleGroups = pData(object_na)$QC, selectGroup = "QC",
+  aligned <- batchCorr::alignBatches(peakInfo = pInfo, PeakTabNoFill = t(exprs(object_na)), PeakTabFilled = t(exprs(object_fill)),
+                          batches = pData(object_na)[, batch], sampleGroups = object_na$QC, selectGroup = "QC",
                           mzdiff = mzdiff, rtdiff = rtdiff, report = report)
 
   # Reset working directory
