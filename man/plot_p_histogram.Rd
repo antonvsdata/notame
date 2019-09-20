@@ -4,13 +4,18 @@
 \alias{plot_p_histogram}
 \title{Histogram of p-values}
 \usage{
-plot_p_histogram(p_values)
+plot_p_histogram(p_values, hline = TRUE, combine = TRUE)
 }
 \arguments{
-\item{p_values}{list, each element is a vector of p-values. The list names are used as plot titles}
+\item{p_values}{list or data frame, each element/column is a vector of p-values. The list names are used as plot titles}
+
+\item{hline}{logical, whether a horizontal line representing uniform distribution should be plotted}
+
+\item{combine}{logical, whether plots of individual p-value vectors should be combined into a single object. Set to FALSE if
+you want to add other plots to the list before plotting}
 }
 \value{
-A ggplot object.
+if combine = TRUE, a ggplot object. Otherwise a list of ggplot objects
 }
 \description{
 Draws histograms of p-values with expected uniform distribution represented by a dashed red line
