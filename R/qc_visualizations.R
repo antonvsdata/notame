@@ -146,6 +146,8 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
 #' Plots distribution of each quality metric, and a distribution of the flags.
 #'
 #' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #'
 #' @return a ggplot object
 #'
@@ -153,7 +155,10 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
 #' plot_quality(example_set)
 #'
 #' @export
-plot_quality <- function(object) {
+plot_quality <- function(object, all_features = FALSE) {
+
+  # Drop flagged features
+  object <- drop_flagged(object, all_features = all_features)
 
   if (is.null(quality(object))) {
     cat("\nQuality metrics not found, computing them now\n")
