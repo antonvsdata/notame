@@ -190,6 +190,49 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
   p
 }
 
+#' PCA loadings plot
+#'
+#' Computes PCA using one of the methods provided in the Bioconductor package
+#' pcaMethods and plots the loadings of first principal components
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
+#'
+#' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param npc1,npc2 number of top feature to plot for first and second principal component
+#' @param title,subtitle the titles of the plot
+#' @param ... additional arguments passed to pcaMethods::pca
+#'
+#' @return a ggplot object.
+#'
+#' @seealso \code{\link[pcaMethods]{pca}}
+#'
+#' @export
+plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+                              npc1 = 10, npc2 = 10,
+                              title = "PCA loadings", subtitle = NULL, ...) {
+  pca_res <- pcaMethods::pca(object, center = TRUE, scale = "uv", ...)
+
+  loads <- pca_res@loadings %>%
+    as.data.frame()
+  loads$Feature_ID <- rownames(loads)
+
+  features_pc1 <- loads$Feature_ID[order(abs(loads$PC1), decreasing = TRUE)][seq_len(npc1)]
+  features_pc2 <- loads$Feature_ID[order(abs(loads$PC2), decreasing = TRUE)][seq_len(npc2)]
+
+  loads <- loads[union(features_pc1, features_pc2),]
+
+  ggplot(loads, aes(x = PC1, y = PC2, label = Feature_ID)) +
+    geom_point() +
+    ggrepel::geom_text_repel() +
+    theme_bw() +
+    labs(title = title, subtitle = subtitle)
+
+}
+
+
 # --------------- HEXBIN PLOTS --------------------
 
 

@@ -4,10 +4,13 @@
 \alias{plot_quality}
 \title{Plot quality metrics}
 \usage{
-plot_quality(object)
+plot_quality(object, all_features = FALSE)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 }
 \value{
 a ggplot object
