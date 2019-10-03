@@ -31,6 +31,7 @@ save_plot <- function(p, file, ...) {
 #' @details If \code{merge} is \code{TRUE}, then a file containing all the visualizations
 #' named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
 #' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
+#' Mac is not yet supported.
 #'
 #' @export
 visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
@@ -81,8 +82,11 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
       # Merge files
       system(paste("pdftk", file_names, "cat output", merged_file))
       log_text(paste("Merged plots to", merged_file))
+    } else if (os == "Linux"){
+      system(paste("pdfunite", file_names, merged_file))
+      log_text(paste("Merged plots to", merged_file))
     } else {
-
+      log_text("Unfortunately your operating system is not yet supported by the merging")
     }
   }
 }
