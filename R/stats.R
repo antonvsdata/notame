@@ -258,6 +258,69 @@ perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
   cor_results
 }
 
+#' Area under curve
+#'
+#' Compute area under curve (AUC) for each subject and feature.
+#' Creates a pseudo MetaboSet object, where the "samples" are subjects
+#' (or subject/group combinations in case the same subjects are submitted to different treatments)
+#' and the "abundances" are AUCs. This object can then be used to compute results of e.g. t-tests of
+#' AUCs between groups.
+#'
+#' @param object a MetaboSet object
+#' @param time,subject,group column names of pData(object), holding time, subject and group labels
+#'
+#' @return a pseudo MetaboSet object with the AUCs
+#'
+#' @examples
+#' # Drop QC samples before computing AUCs
+#' aucs <- perform_auc(drop_qcs(example_set))
+#' # t-test with the AUCs
+#' t_test_results <- perform_t_test(aucs, formula_char =  "Feature ~ Group")
+#'
+#' @seealso \code{\link[PK]{auc}}
+#'
+#' @export
+perform_auc <- function(object, time = time_col(object), subject = subject_col(object),
+                        group = group_col(object)) {
+
+  # Start log
+  log_text(paste("\nStarting AUC computation at", Sys.time()))
+
+  data <- combined_data(object)
+
+  # Create new pheno data, only one row per subject and group
+  pheno_data <- data[, c(subject, group)] %>%
+    dplyr::distinct() %>%
+    tidyr::unite("Sample_ID", subject, group, remove = FALSE)
+  rownames(pheno_data) <- pheno_data$Sample_ID
+
+  # AUCs
+  features <- featureNames(object)
+  aucs <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+    feature <- features[i]
+    result_row <- rep(NA_real_, nrow(pheno_data))
+    # Compute AUC for each subject in each group
+    tryCatch({
+      for(j in seq_len(nrow(pheno_data))){
+        subset_idx <- data[, subject] == pheno_data[j, subject] & data[, group] == pheno_data[j, group]
+        result_row[j] <- PK::auc(time = as.numeric(data[subset_idx, time]),
+                                 conc = data[subset_idx, feature], design = "complete")$est[1]
+      }
+    })
+
+    matrix(result_row, nrow = 1, dimnames = list(feature, pheno_data$Sample_ID))
+  }
+
+  # Construct new MetaboSet object (with all modes together)
+  new_object <- construct_MetaboSet(exprs = aucs, feature_data = fData(object),
+                                    pheno_data = pheno_data, group_col = group,
+                                    subject_col = subject) %>%
+    merge_metabosets()
+
+  new_object
+
+}
+
 # Helper function for FDR correction
 adjust_p_values <- function(x, flags) {
   p_cols <- colnames(x)[grepl("_P$", colnames(x))]
