@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-19" />
+<meta name="date" content="2019-10-04" />
 
 <title>Visualizations</title>
 
@@ -32,7 +32,7 @@
 
 <h1 class="title toc-ignore">Visualizations</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-07-19</em></h4>
+<h4 class="date"><em>2019-10-04</em></h4>
 
 
 
@@ -55,9 +55,11 @@
 <li><code>amp.fill_scale_div = ggplot2::scale_fill_distiller(palette = &quot;RdBu&quot;)</code></li>
 <li><code>amp.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))</code></li>
 </ul>
-<p>List of common visualizations that return a ggplot object, see individual documentation for more details:</p>
+<p>List of common visualizations that take a MetaboSet object as their first argument and return a ggplot object, see individual documentation for more details:</p>
 <ul>
 <li><code>plot_dist_density</code>: density plot of inter-sample distances in both QC and biological samples<br />
+</li>
+<li><code>plot_quality</code>: plot the distribution of quality metrics as histograms<br />
 </li>
 <li><code>plot_injection_lm</code>: histogram of p-values from linear models predicting each feature by injection order of samples<br />
 </li>
@@ -67,12 +69,24 @@
 </li>
 <li><code>plot_pca_hexbin</code>: PCA hexbin plot<br />
 </li>
+<li><code>plot_pca_loadings</code>: PCA loadings plot<br />
+</li>
+<li><code>plot_pca_arrows</code>: arrow plot in PCA space showing changes as a function of time<br />
+</li>
 <li><code>plot_tsne</code>: t-SNE scatter plot, possibly with density functions of groups at x and y axes</li>
 <li><code>plot_tsne_hexbin</code>: t-SNE hexbin plot<br />
+</li>
+<li><code>plot_tsne_arrows</code>: arrow plot in t-SNE space showing changes as a function of time<br />
 </li>
 <li><code>plot_dendrogram</code>: dendrogram of hierarchical clustering on the samples<br />
 </li>
 <li><code>plot_sample_heatmap</code>: heatmap of intersample distances</li>
+</ul>
+<p>Visualizations for results of statistical tests or correlations:</p>
+<ul>
+<li><code>volcano_plot</code>: Volcano plot<br />
+</li>
+<li><code>effect_heatmap</code>: customizable heatmap of e.g. correlation coefficients and p-values</li>
 </ul>
 <p>To save these functions to a PDF file, use <code>save_plot</code></p>
 <p>The following visualizations are applied to each feature and directly saved to a PDF file, one page per feature.</p>

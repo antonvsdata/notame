@@ -34,12 +34,12 @@ The general workflow of an analysis run with this package is shown in the diagra
 knitr::include_graphics("amp_workflow.png")
 ```
 
-For a real code example of how to run a project, see the [Project example vignette](project_example.html). We like to run a set of visualizations between all the major steps of preprocessing to ensure good data quality. For a list of all the visualizations available, read the [Visualizations vignette](visualizations.html). Finally, the [Statistics vignette](statistics.html) lists all the statistical analyses that currently have an interface for MetaboSet objects.
+For a real code example of how to run a project, see the [Project example vignette](project_example.html). We like to run a set of visualizations between all the major steps of preprocessing to ensure good data quality. For a list of all the visualizations available, read the [Visualizations vignette](visualizations.html). For information about the novel algorithm for clustering molecular features originating from the same compound see [Feature clustering vignette](feature_clustering.html). Finally, the [Statistics vignette](statistics.html) lists all the statistical analyses that currently have an interface for MetaboSet objects.
 
 
-#### Authors
+#### Authors & Acknowledgements
 
-The amp package is based on analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Mattsson at University of Eastern Finland. The package itself is written by Anton Mattsson for his master's thesis in bioinformatics. 
+The amp package is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Klåvus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University. The package itself is written by Anton Klåvus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). 
 
 If you find any bugs or other things to fix, please submit an issue on GitHub! All contributions to the package are always welcome!
 

@@ -54,7 +54,19 @@ Now that we know how the formula interface looks like, let's list the univariate
 - Kruskal-Wallis test: ```perform_kruskal_wallis```  
 - Welch's ANOVA and Classic ANOVA: ```perform_oneway_anova```  
 - two-sample t-test (Welch or Student): ```perform_t_test```  
+
+#### Functions not using the formula interface
+
+Some functions do not use the formula interface. They include
+
 - pairwise t-tests: ```perform_pairwise_t_test```
+- correlation tests between molecular features and/or phenotype variable: ```perform_correlation_tests```
+- Area under curve computation: ```perform_auc```
+
+
+#### Model diagnostics
+
+Model diagnostics visalizations are currently available for linear models and linear mixed models, see documenation of ```save_lm_diagnostic_plots```.
 
 ## Multivariate functions
 

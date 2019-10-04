@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-19" />
+<meta name="date" content="2019-10-04" />
 
 <title>MetaboSet utility</title>
 
@@ -32,7 +32,7 @@
 
 <h1 class="title toc-ignore">MetaboSet utility</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-07-19</em></h4>
+<h4 class="date"><em>2019-10-04</em></h4>
 
 
 
@@ -163,6 +163,8 @@ ALTERNATIVELY, if the file only contains one mode, specify the name of the mode,
 <p>In addition, there are many functions that modify MetaboSets:</p>
 <ul>
 <li><code>mark_nas</code> can be used to mark missing values as <code>NA</code> (peak picking software tend to report them as 0 or 1)</li>
+<li><code>mark_qcs</code> marks QC samples in pData columns where they have NA values<br />
+</li>
 <li><code>drop_qcs</code> removes the QC samples<br />
 </li>
 <li><code>drop_flagged</code> removes all features that have been flagged (low-quality features)<br />
