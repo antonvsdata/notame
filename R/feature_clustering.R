@@ -52,14 +52,23 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
   # Start log
   log_text(paste("\nStarting feature clustering at", Sys.time()))
 
-  # Find connections between features
-  conn <- find_connections(data = data,
-                           features = features,
-                           corr_thresh = corr_thresh,
-                           rt_window = rt_window,
-                           name_col = "Feature_ID",
-                           mz_col = mz_col,
-                           rt_col = rt_col)
+  # Find connections between features in each Split
+  conn <- data.frame()
+  for (s in unique(features$Split)) {
+    log_text(paste("Finding connections between features in", s))
+    features_tmp <- features[features$Split == s, ]
+    data_tmp <- data[, features_tmp$Feature_ID]
+
+    conn_tmp <- find_connections(data = data_tmp,
+                                 features = features_tmp,
+                                 corr_thresh = corr_thresh,
+                                 rt_window = rt_window,
+                                 name_col = "Feature_ID",
+                                 mz_col = mz_col,
+                                 rt_col = rt_col)
+    conn <- rbind(conn, conn_tmp)
+    log_text(paste("Found", nrow(conn_tmp), "connections in", s))
+  }
   log_text(paste("Found", nrow(conn), "connections"))
 
   # Form clusters
