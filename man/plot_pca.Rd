@@ -5,9 +5,9 @@
 \title{PCA scatter plot}
 \usage{
 plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
-  color = group_col(object), shape = NULL, density = FALSE,
-  title = "PCA", subtitle = NULL, color_scale = NULL,
-  shape_scale = NULL, fill_scale = NULL, ...)
+  color = group_col(object), shape = NULL, label = NULL,
+  density = FALSE, title = "PCA", subtitle = NULL,
+  color_scale = NULL, shape_scale = NULL, fill_scale = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -22,6 +22,8 @@ flagged features are removed before visualization.}
 \item{color}{character, name of the column used for coloring the points}
 
 \item{shape}{character, name of the column used for shape}
+
+\item{label}{character, name of the column used for point labels}
 
 \item{density}{logical, whether to include density plots to both axes}
 

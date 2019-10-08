@@ -6,7 +6,7 @@
 \usage{
 plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
   perplexity = 30, pca_method = "nipals", color = group_col(object),
-  shape = NULL, density = FALSE, title = "t-SNE",
+  shape = NULL, label = NULL, density = FALSE, title = "t-SNE",
   subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
   shape_scale = NULL, fill_scale = NULL, ...)
 }
@@ -26,6 +26,8 @@ plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
 \item{color}{character, name of the column used for coloring the points}
 
 \item{shape}{character, name of the column used for shape}
+
+\item{label}{character, name of the column used for point labels}
 
 \item{density}{logical, whether to include density plots to both axes}
 
