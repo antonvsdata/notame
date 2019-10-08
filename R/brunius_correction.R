@@ -56,10 +56,10 @@ align_batches_brunius <- function(object_na, object_fill, batch, mz, rt, mzdiff,
 #' @return list, the object with normalized features and information on which features were corrected by ref samples in each batch.
 normalize_batches_brunius <- function(object, batch, group = group_col(object), ref_label, ...) {
 
-  normData <- batchCorr::normalizeBatches(peakTable = t(exors(object)), batches = pData(object)[, batch],
+  normData <- batchCorr::normalizeBatches(peakTable = t(exprs(object)), batches = pData(object)[, batch],
                                sampleGroup = pData(object)[, group], refGroup = ref_label, ...)
 
-  exprs(object) <- normData$peakTable
+  exprs(object) <- t(normData$peakTable)
   return(list(object = object, ref_corrected = normData$refCorrected))
 }
 
