@@ -98,35 +98,87 @@ plot_injection_lm <- function(object, all_features = FALSE) {
 #'
 #' Draws histograms of p-values with expected uniform distribution represented by a dashed red line
 #'
-#' @param p_values list, each element is a vector of p-values. The list names are used as plot titles
+#' @param p_values list or data frame, each element/column is a vector of p-values. The list names are used as plot titles
+#' @param hline logical, whether a horizontal line representing uniform distribution should be plotted
+#' @param combine logical, whether plots of individual p-value vectors should be combined into a single object. Set to FALSE if
+#' you want to add other plots to the list before plotting
 #'
-#' @return A ggplot object.
+#' @return if combine = TRUE, a ggplot object. Otherwise a list of ggplot objects
 #'
 #' @export
-plot_p_histogram <- function(p_values) {
+plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
   # Custom breaks for the x-axis
   breaks <- seq(0, 1, by = 0.05)
 
   # THree separate histograms
   plots <- list()
   for (i in seq_along(p_values)) {
-    # Compute the position of the expected line
-    finite_count <- sum(is.finite(p_values[[i]]))
-    h_line <- finite_count/(length(breaks)-1)
+
 
     p <- ggplot(data.frame(P = p_values[[i]]), aes(P)) +
       geom_histogram(breaks = breaks, col = "grey50", fill = "grey80", size = 1) +
-      geom_hline(yintercept = h_line, color="red", linetype = "dashed", size = 1) +
       labs(x="p-value", y="Frequency") +
       ggtitle(names(p_values)[i]) +
       theme_minimal() +
       theme(plot.title = element_text(face="bold", hjust=0.5))
 
+    if (hline) {
+      # Compute the position of the expected line
+      finite_count <- sum(is.finite(p_values[[i]]))
+      h_line <- finite_count/(length(breaks)-1)
+      p <- p +
+        geom_hline(yintercept = h_line, color="red", linetype = "dashed", size = 1)
+    }
+
     plots <- c(plots, list(p))
   }
-  # Combine plots
-  p <- cowplot::plot_grid(plotlist = plots, ncol = 1)
 
+  if (combine) {
+    return(cowplot::plot_grid(plotlist = plots, ncol = 1))
+  } else {
+    return(plots)
+  }
+}
+
+
+#' Plot quality metrics
+#'
+#' Plots distribution of each quality metric, and a distribution of the flags.
+#'
+#' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
+#'
+#' @return a ggplot object
+#'
+#' @examples
+#' plot_quality(example_set)
+#'
+#' @export
+plot_quality <- function(object, all_features = FALSE) {
+
+  # Drop flagged features
+  object <- drop_flagged(object, all_features = all_features)
+
+  if (is.null(quality(object))) {
+    cat("\nQuality metrics not found, computing them now\n")
+    object <- assess_quality(object)
+  }
+
+  # Distribution of quality metrics
+  qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE)
+
+  # Plot bar plot of flags
+  flags[is.na(flags)] <- "NA"
+  flags <- factor(flags) %>% relevel(ref = "NA")
+
+  fp <- ggplot(data.frame(flags), aes(x = flags)) +
+    geom_bar(col = "grey50", fill = "grey80", size = 1) +
+    scale_y_continuous(sec.axis = sec_axis(~.*100/length(flags), name = "Percentage")) +
+    theme_minimal() +
+    labs(x = "Flag")
+
+  p <- cowplot::plot_grid(plotlist = c(qps, list(fp)), ncol = 1)
   p
 }
 

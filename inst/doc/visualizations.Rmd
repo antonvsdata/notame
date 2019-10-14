@@ -34,17 +34,26 @@ Color scales and other scales can be set separately for each function call, and 
 - ```amp.fill_scale_div = ggplot2::scale_fill_distiller(palette = "RdBu")```
 - ```amp.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))```
 
-List of common visualizations that return a ggplot object, see individual documentation for more details:
+List of common visualizations that take a MetaboSet object as their first argument and return a ggplot object, see individual documentation for more details:
 
 - ```plot_dist_density```: density plot of inter-sample distances in both QC and biological samples  
+- ```plot_quality```: plot the distribution of quality metrics as histograms  
 - ```plot_injection_lm```: histogram of p-values from linear models predicting each feature by injection order of samples  
 - ```plot_sample_boxplots```: plot all abundances as boxplots, separated by sample (one boxplot per sample)  
 - ```plot_pca```: PCA scatter plot, possibly with density functions of groups at x and y axes  
 - ```plot_pca_hexbin```: PCA hexbin plot  
+- ```plot_pca_loadings```: PCA loadings plot  
+- ```plot_pca_arrows```: arrow plot in PCA space showing changes as a function of time  
 - ```plot_tsne```: t-SNE scatter plot, possibly with density functions of groups at x and y axes
 - ```plot_tsne_hexbin```: t-SNE hexbin plot  
+- ```plot_tsne_arrows```: arrow plot in t-SNE space showing changes as a function of time  
 - ```plot_dendrogram```: dendrogram of hierarchical clustering on the samples  
-- ```plot_sample_heatmap```: heatmap of intersample distances  
+- ```plot_sample_heatmap```: heatmap of intersample distances
+
+Visualizations for results of statistical tests or correlations:
+
+- ```volcano_plot```: Volcano plot  
+- ```effect_heatmap```: customizable heatmap of e.g. correlation coefficients and p-values
 
 To save these functions to a PDF file, use ```save_plot```
 

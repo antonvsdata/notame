@@ -127,6 +127,7 @@ Utility functions for MetaboSet in particular:
 In addition, there are many functions that modify MetaboSets:
 
 - ```mark_nas``` can be used to mark missing values as ```NA``` (peak picking software tend to report them as 0 or 1)
+- ```mark_qcs``` marks QC samples in pData columns where they have NA values  
 - ```drop_qcs``` removes the QC samples  
 - ```drop_flagged``` removes all features that have been flagged (low-quality features)  
 - ```merge_metabosets``` is used to merge MetaboSets from multiple modes together  

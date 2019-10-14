@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-19" />
+<meta name="date" content="2019-10-04" />
 
 <title>Statistics</title>
 
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Statistics</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-07-19</em></h4>
+<h4 class="date"><em>2019-10-04</em></h4>
 
 
 
@@ -139,10 +139,21 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </li>
 <li>Welch’s ANOVA and Classic ANOVA: <code>perform_oneway_anova</code><br />
 </li>
-<li>two-sample t-test (Welch or Student): <code>perform_t_test</code><br />
-</li>
-<li>pairwise t-tests: <code>perform_pairwise_t_test</code></li>
+<li>two-sample t-test (Welch or Student): <code>perform_t_test</code></li>
 </ul>
+</div>
+<div id="functions-not-using-the-formula-interface" class="section level4">
+<h4>Functions not using the formula interface</h4>
+<p>Some functions do not use the formula interface. They include</p>
+<ul>
+<li>pairwise t-tests: <code>perform_pairwise_t_test</code></li>
+<li>correlation tests between molecular features and/or phenotype variable: <code>perform_correlation_tests</code></li>
+<li>Area under curve computation: <code>perform_auc</code></li>
+</ul>
+</div>
+<div id="model-diagnostics" class="section level4">
+<h4>Model diagnostics</h4>
+<p>Model diagnostics visalizations are currently available for linear models and linear mixed models, see documenation of <code>save_lm_diagnostic_plots</code>.</p>
 </div>
 </div>
 </div>

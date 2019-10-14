@@ -42,6 +42,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
+#' @param label character, name of the column used for point labels
 #' @param density logical, whether to include density plots to both axes
 #' @param title,subtitle the titles of the plot
 #' @param color_scale the color scale as returned by a ggplot function
@@ -56,7 +57,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #'
 #' @export
 plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
-                     color = group_col(object), shape = NULL, density = FALSE,  title = "PCA",
+                     color = group_col(object), shape = NULL, label = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NULL, shape_scale = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -67,9 +68,10 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   pca_scores <- pca_results$pca_scores
   pca_scores[color] <- pData(object)[, color]
   pca_scores[shape] <- pData(object)[, shape]
+  pca_scores[label] <- pData(object)[, label]
 
   scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = pca_results$labels[1], ylab = pca_results$labels[2],
-               color = color, shape = shape, density = density, title = title,
+               color = color, shape = shape, label = label, density = density, title = title,
                subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
                fill_scale = fill_scale)
 }
@@ -89,6 +91,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #' @param pca_method the method used in PCA if there are missing values
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
+#' @param label character, name of the column used for point labels
 #' @param density logical, whether to include density plots to both axes
 #' @param title,subtitle the titles of the plot
 #' @param color_scale the color scale as returned by a ggplot function
@@ -104,7 +107,7 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #' @export
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       pca_method = "nipals",
-                      color = group_col(object), shape = NULL, density = FALSE, title = "t-SNE",
+                      color = group_col(object), shape = NULL, label = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
                       shape_scale = NULL, fill_scale = NULL, ...) {
   # Drop flagged compounds if not told otherwise
@@ -116,14 +119,15 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   # Add columns for plotting
   tsne_scores[color] <- pData(object)[, color]
   tsne_scores[shape] <- pData(object)[, shape]
+  tsne_scores[label] <- pData(object)[, label]
 
-  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = shape,
+  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = shape, label = label,
                density = density, title = title, subtitle = subtitle,
                color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale)
 
 }
 
-scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE, color_scale = NULL,
+scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed = TRUE, color_scale = NULL,
                          shape_scale = NULL, fill_scale = NULL, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape) {
 
@@ -169,6 +173,13 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
     p <- p +
       geom_point()
   }
+
+  # Add point labels
+  if (!is.null(label)) {
+    p <- p +
+      ggrepel::geom_text_repel(aes_string(label = label))
+  }
+
   # Add density plots to top and right
   if (density) {
     xdens <- cowplot::axis_canvas(p, axis = "x")+
@@ -189,6 +200,49 @@ scatter_plot <- function(data, x, y, color, shape, density = FALSE, fixed = TRUE
 
   p
 }
+
+#' PCA loadings plot
+#'
+#' Computes PCA using one of the methods provided in the Bioconductor package
+#' pcaMethods and plots the loadings of first principal components
+#' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
+#'
+#' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param npc1,npc2 number of top feature to plot for first and second principal component
+#' @param title,subtitle the titles of the plot
+#' @param ... additional arguments passed to pcaMethods::pca
+#'
+#' @return a ggplot object.
+#'
+#' @seealso \code{\link[pcaMethods]{pca}}
+#'
+#' @export
+plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+                              npc1 = 10, npc2 = 10,
+                              title = "PCA loadings", subtitle = NULL, ...) {
+  pca_res <- pcaMethods::pca(object, center = TRUE, scale = "uv", ...)
+
+  loads <- pca_res@loadings %>%
+    as.data.frame()
+  loads$Feature_ID <- rownames(loads)
+
+  features_pc1 <- loads$Feature_ID[order(abs(loads$PC1), decreasing = TRUE)][seq_len(npc1)]
+  features_pc2 <- loads$Feature_ID[order(abs(loads$PC2), decreasing = TRUE)][seq_len(npc2)]
+
+  loads <- loads[union(features_pc1, features_pc2),]
+
+  ggplot(loads, aes(x = PC1, y = PC2, label = Feature_ID)) +
+    geom_point() +
+    ggrepel::geom_text_repel() +
+    theme_bw() +
+    labs(title = title, subtitle = subtitle)
+
+}
+
 
 # --------------- HEXBIN PLOTS --------------------
 

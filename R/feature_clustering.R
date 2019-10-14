@@ -52,14 +52,23 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
   # Start log
   log_text(paste("\nStarting feature clustering at", Sys.time()))
 
-  # Find connections between features
-  conn <- find_connections(data = data,
-                           features = features,
-                           corr_thresh = corr_thresh,
-                           rt_window = rt_window,
-                           name_col = "Feature_ID",
-                           mz_col = mz_col,
-                           rt_col = rt_col)
+  # Find connections between features in each Split
+  conn <- data.frame()
+  for (s in unique(features$Split)) {
+    log_text(paste("Finding connections between features in", s))
+    features_tmp <- features[features$Split == s, ]
+    data_tmp <- data[, features_tmp$Feature_ID]
+
+    conn_tmp <- find_connections(data = data_tmp,
+                                 features = features_tmp,
+                                 corr_thresh = corr_thresh,
+                                 rt_window = rt_window,
+                                 name_col = "Feature_ID",
+                                 mz_col = mz_col,
+                                 rt_col = rt_col)
+    conn <- rbind(conn, conn_tmp)
+    log_text(paste("Found", nrow(conn_tmp), "connections in", s))
+  }
   log_text(paste("Found", nrow(conn), "connections"))
 
   # Form clusters
@@ -95,6 +104,10 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
 #' @param clusters a list of clusters as returned by find_clusters
 #' @param features data frame with feature information, fData(object)
 #' @param name_col character, name of the column in features that contains feature names
+#'
+#' @return a data frame similar to features, with cluster ID added
+#'
+#' @export
 assign_cluster_id <- function(data, clusters, features, name_col) {
 
   if (!"MPA" %in% colnames(features)) {
@@ -136,6 +149,8 @@ assign_cluster_id <- function(data, clusters, features, name_col) {
 #' compressed <- compress_clusters(clustered)
 #'
 #' @seealso \code{\link{cluster_features}}
+#'
+#' @export
 compress_clusters <- function(object) {
 
   cluster_names <- results(object)$Cluster_ID
@@ -336,9 +351,13 @@ find_clusters <- function(connections, d_thresh = 0.8){
 # A helper function for plotting, scales the values in X
 # between new min and max
 rescale <- function(x, new_min, new_max) {
-  (new_max - new_min) * (x - min(x)) / (max(x) - min(x)) + new_min
+  y <- (new_max - new_min) * (x - min(x)) / (max(x) - min(x)) + new_min
+  # If all MPAs are equal, the sizes are NaN (possibly other reasons)
+  if (sum(is.na(y))) {
+    y <- rep(mean(c(new_min, new_max)), length(x))
+  }
+  y
 }
-
 
 # UNFINISHED!!
 plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
@@ -372,7 +391,7 @@ plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window
   p1 <- ggplot(features_tmp, aes_string(mz_col, "MPA")) +
     geom_point(size = 3, color = "steelblue4") +
     geom_segment(aes_string(x = mz_col, yend = "MPA", xend = mz_col), y = 0, color = "steelblue4") +
-    geom_label_repel(aes_string(label = mz_col), color = "steelblue4") +
+    ggrepel::geom_label_repel(aes_string(label = mz_col), color = "steelblue4") +
     theme_minimal() +
     xlim(0.9*min(features_tmp[, mz_col], na.rm = TRUE),
          1.15*max(features_tmp[, mz_col], na.rm = FALSE)) +
@@ -443,6 +462,8 @@ plot_heatmaps <- function(data, features, cluster, name_col, mz_col, rt_col) {
 #' @param mz_col character, name of the column in features that contains mass-to-charge ratios
 #' @param rt_col character, name of the column in features that contains retention times
 #' @param file_path the prefix to the files to be plotted
+#'
+#' @export
 visualize_clusters <- function(data, features, clusters, min_size, rt_window, name_col, mz_col, rt_col, file_path) {
 
   for (i in seq_along(clusters)) {
@@ -452,9 +473,9 @@ visualize_clusters <- function(data, features, clusters, min_size, rt_window, na
     cluster <- clusters[[i]]
     if (length(cluster$features) >= min_size) {
       features_tmp <- features[features[, name_col] %in% cluster$features, ]
-      cluster_id <- features_tmp[, name_col][which(features_tmp$MPA == max(features_tmp$MPA, na.rm = TRUE))[1]]
+      cluster_id <- features_tmp$Cluster_ID[1]
 
-      pdf(paste0(file_path, "Cluster_", i, "_", cluster_id, ".pdf"), width = 10, height = 10)
+      pdf(paste0(file_path, cluster_id, ".pdf"), width = 10, height = 10)
       plot_heatmaps(data, features, cluster, name_col, mz_col, rt_col)
       plot_features(features, cluster, name_col, mz_col, rt_col, rt_window)
       plot_graph(features, cluster, name_col, mz_col, rt_col)
