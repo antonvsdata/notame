@@ -185,7 +185,7 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               proportions <- found_qc_df
             }
 
-            percentage <- scales::percent(sum(flag(object) %in% c("Low_QC_detection", "Low_group_detection"), na.rm = TRUE)/nrow(results(object)))
+            percentage <- scales::percent(sum(flag(object) %in% c("Low_qc_detection", "Low_group_detection"), na.rm = TRUE)/nrow(results(object)))
             log_text(paste0("\n", percentage, " of features flagged for low detection rate"))
 
             object <- join_results(object, proportions)
