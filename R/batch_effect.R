@@ -8,9 +8,9 @@
 #' @param batch column name of pData givinh the batch labels
 #'
 #' @return matrix of Bhattacharyya distances between batches
-pca_bhattacharyya_dist <- function(object, batch, ...) {
+pca_bhattacharyya_dist <- function(object, batch, center = TRUE, scale = "uv", ...) {
   # PCA to 2 dimenstions
-  pca_res <- pcaMethods::pca(object, ...)
+  pca_res <- pcaMethods::pca(object, center = center, scale = scale, ...)
   pca_scores <- pcaMethods::scores(pca_res)
 
   # Split to batches
@@ -21,7 +21,7 @@ pca_bhattacharyya_dist <- function(object, batch, ...) {
 
   # Compute means and covariance matrices for Bhattacharyya distance
   muarray <- sapply(batches, colMeans)
-  sigmaarray <- array(sapply(batches, cov), dim = c(2, 2, 3))
+  sigmaarray <- array(sapply(batches, cov), dim = c(2, 2, length(batches)))
 
   fpc::bhattacharyya.matrix(muarray,sigmaarray,ipairs="all", misclassification.bound = FALSE)
 }

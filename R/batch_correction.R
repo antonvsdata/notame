@@ -37,28 +37,19 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 #'
 #' @param object a MetaboSet object
 #' @param batch the column name for batch labels
-#' @param ref the column name for reference sample labels
-#' @param ref_label the label for reference samples
+#' @param replicates list of numeric vectors, indexes of replicates
 #' @param k The number of factors of unwanted variation to be estimated from the data.
 #' @param ... other parameters passed to RUVSeq::RUVs
 #'
 #' @return a MetaboSet object with the normalized data
 #'
 #' @export
-ruvs_qc <- function(object, batch, ref, ref_label, k = 3, ...) {
+ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 
   # Transform data to pseudo counts for RUVs
   exprs(object)[exprs(object) == 0] <- 1
   exprs(object) <- round(exprs(object))
 
-  # Create list of the replicate samples
-  # Cross-batch reference samples and QC samples of each batch
-  replicates <- list(which(pData(object)[, ref] == ref_label))
-  bathces <- pData(object)[, batch]
-  for (b in unique(bathces)) {
-    batch_qcs <- which(object[batches == b, ]$QC == "QC")
-    replicates <- c(replicates, list(batch_qcs))
-  }
   # Pad each replicate vector with -1 and transform to matrix
   max_len <- max(sapply(replicates, length))
   scIdx <- matrix(-1, nrow = length(replicates), ncol = max_len)
