@@ -595,5 +595,20 @@ setMethod("[", "MetaboSet", function(x, i, j, ..., drop = FALSE) {
   x
 })
 
-
+# FeatureNames also changing Feature_ID columns
+#' @exportMethod
+setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY"),
+                 function(object, value) {
+                   fd <- featureData(object)
+                   featureNames(fd) <- value
+                   ad <- assayData(object)
+                   featureNames(ad) <- value
+                   object@featureData <- fd
+                   object@assayData <- ad
+                   fData(object)$Feature_ID <- value
+                   results(object)$Feature_ID <- value
+                   if (validObject(object)) {
+                     return(object)
+                   }
+                 })
 
