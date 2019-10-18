@@ -543,9 +543,10 @@ setGeneric("join_results", signature = c("object", "dframe"),
 #' @exportMethod
 setMethod("join_results", c("MetaboSet", "data.frame"),
           function(object, dframe) {
-            results(object) <- dplyr::left_join(results(object),
-                                              dframe,
-                                              by = "Feature_ID")
+            cols <- c("Feature_ID", setdiff(colnames(results(object)), colnames(dframe)))
+            results(object) <- dplyr::left_join(results(object)[cols],
+                                                dframe,
+                                                by = "Feature_ID")
             rownames(results(object)) <- results(object)$Feature_ID
             if (validObject(object)) {
               return(object)
