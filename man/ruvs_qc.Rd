@@ -4,16 +4,14 @@
 \alias{ruvs_qc}
 \title{Remove Unwanted Variation}
 \usage{
-ruvs_qc(object, batch, ref, ref_label, k = 3, ...)
+ruvs_qc(object, batch, replicates, k = 3, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
 \item{batch}{the column name for batch labels}
 
-\item{ref}{the column name for reference sample labels}
-
-\item{ref_label}{the label for reference samples}
+\item{replicates}{list of numeric vectors, indexes of replicates}
 
 \item{k}{The number of factors of unwanted variation to be estimated from the data.}
 
