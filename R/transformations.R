@@ -193,3 +193,45 @@ flag_report <- function(object) {
   report
 }
 
+
+# Logarithms
+
+#' Logarithm
+#'
+#' Log-transforms the exprs part of a MetaboSet object. Shortcust log2 and log10 also implemented.
+#' For more information, see \code{\link{log}}
+#' #'
+#' @exportMethod
+setMethod("log", "MetaboSet", function(x, base = exp(1)) {
+  exprs(x) <- log(exprs(x), base = base)
+  x
+})
+
+#' @rdname finite_helpers
+#' @exportMethod
+setMethod("log2", "MetaboSet", function(x) {
+  exprs(x) <- log2(exprs(x))
+  x
+})
+
+#' @rdname finite_helpers
+#' @exportMethod
+setMethod("log10", "MetaboSet", function(x) {
+  exprs(x) <- log10(exprs(x))
+  x
+})
+
+# scale
+setGeneric("scale")
+
+#' Scale exprs data
+#'
+#' Applies the base R function scale to transposed exprs matrix. See ?scale for details
+#' @exportMethod
+setMethod("scale", "MetaboSet", function(x, center = TRUE, scale = TRUE) {
+  exprs(x) <- t(scale(t(exprs(x)), center = center, scale = scale))
+  x
+})
+
+
+

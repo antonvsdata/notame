@@ -169,6 +169,7 @@ plot_quality <- function(object, all_features = FALSE) {
   qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE)
 
   # Plot bar plot of flags
+  flags <- flag(object)
   flags[is.na(flags)] <- "NA"
   flags <- factor(flags) %>% relevel(ref = "NA")
 
