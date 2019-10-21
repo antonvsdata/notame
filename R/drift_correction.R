@@ -66,7 +66,8 @@ dc_cubic_spline <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 
   }
 
   exprs(object) <- dc_data$corrected
-
+  # Recompute quality metrics
+  object <- assess_quality(object)
 
   log_text(paste("Drift correction performed at", Sys.time()))
 
@@ -110,35 +111,39 @@ inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
   fnames <- featureNames(orig)
   qdiff <- quality(dc)[2:5] - quality(orig)[2:5]
 
+  log_text(paste("Inspecting drift correction results", Sys.time()))
+
   inspected <- foreach::foreach(i = seq_len(nrow(orig_data)), .combine = comb,
                                 .export = c("%>%", "qdiff")) %dopar% {
 
-    data = orig_data[i, ]
-    if (all(is.na(dc_data[i, ]))) {
-      dc_note <- "Missing_QCS"
-    } else if (any(dc_data[i, ] < 0, na.rm = TRUE)){
-      dc_note <- "Negative_DC"
-    } else {
-      pass <- paste0("qdiff[i, ] %>% dplyr::filter(", condition, ") %>% nrow() %>% as.logical()") %>%
-        parse(text = .) %>% eval()
-      if (!pass) {
-        dc_note <- "Low_quality"
-      } else {
-        data <- dc_data[i, ]
-        dc_note <- "Drift_corrected"
-      }
-    }
+                                  data = orig_data[i, ]
+                                  if (all(is.na(dc_data[i, ]))) {
+                                    dc_note <- "Missing_QCS"
+                                  } else if (any(dc_data[i, ] < 0, na.rm = TRUE)){
+                                    dc_note <- "Negative_DC"
+                                  } else {
+                                    pass <- paste0("qdiff[i, ] %>% dplyr::filter(", condition, ") %>% nrow() %>% as.logical()") %>%
+                                      parse(text = .) %>% eval()
+                                    if (!pass) {
+                                      dc_note <- "Low_quality"
+                                    } else {
+                                      data <- dc_data[i, ]
+                                      dc_note <- "Drift_corrected"
+                                    }
+                                  }
 
-    list(data = matrix(data, nrow = 1, dimnames = list(fnames[i], names(data))),
-         dc_notes = data.frame(Feature_ID = fnames[i],
-                               DC_note = dc_note,
-                               stringsAsFactors = FALSE))
+                                  list(data = matrix(data, nrow = 1, dimnames = list(fnames[i], names(data))),
+                                       dc_notes = data.frame(Feature_ID = fnames[i],
+                                                             DC_note = dc_note,
+                                                             stringsAsFactors = FALSE))
 
-  }
+                                }
 
   exprs(dc) <- inspected$data
   dc <- assess_quality(dc)
   dc <- join_results(dc, inspected$dc_notes)
+
+  log_text(paste("Drift correction results inspected at", Sys.time()))
 
   # Log information
   dc_note <- inspected$dc_notes$DC_note
@@ -173,7 +178,7 @@ inspect_dc <- function(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0") {
 #'
 #' @export
 save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, color = group_col(orig),
-                    shape = NULL, color_scale = NULL) {
+                          shape = NULL, color_scale = NULL) {
   # If color column not set, use QC column
   color <- color %||% "QC"
   shape <- shape %||% color
@@ -246,13 +251,12 @@ correct_drift <- function(object, spar = NULL, spar_lower = 0.5, spar_upper = 1.
                           condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
                           file = NULL, width = 8, height = 6, color = group_col(object),
                           shape = NULL, color_scale = NULL) {
-
   # Fit cubic spline and correct
   corrected_list <- dc_cubic_spline(object, spar = spar,
-                               spar_lower = spar_lower, spar_upper = spar_upper)
+                                    spar_lower = spar_lower, spar_upper = spar_upper)
   corrected <- corrected_list$object
   # Only keep corrected versions of features where drift correction increases quality
-  inspected <- inspect_dc(object, corrected, condition = condition)
+  inspected <- inspect_dc(orig = object, dc = corrected, condition = condition)
   # Optionally save before and after plots
   if (plotting) {
     if (is.null(file)) {
