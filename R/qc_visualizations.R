@@ -157,17 +157,6 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
 #' @export
 plot_quality <- function(object, all_features = FALSE) {
 
-  # Drop flagged features
-  object <- drop_flagged(object, all_features = all_features)
-
-  if (is.null(quality(object))) {
-    cat("\nQuality metrics not found, computing them now\n")
-    object <- assess_quality(object)
-  }
-
-  # Distribution of quality metrics
-  qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE)
-
   # Plot bar plot of flags
   flags <- flag(object)
   flags[is.na(flags)] <- "NA"
@@ -178,6 +167,17 @@ plot_quality <- function(object, all_features = FALSE) {
     scale_y_continuous(sec.axis = sec_axis(~.*100/length(flags), name = "Percentage")) +
     theme_minimal() +
     labs(x = "Flag")
+
+  # Drop flagged features
+  object <- drop_flagged(object, all_features = all_features)
+
+  if (is.null(quality(object))) {
+    cat("\nQuality metrics not found, computing them now\n")
+    object <- assess_quality(object)
+  }
+
+  # Distribution of quality metrics
+  qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE)
 
   p <- cowplot::plot_grid(plotlist = c(qps, list(fp)), ncol = 1)
   p
