@@ -71,12 +71,20 @@ finite_quantile <- function(x, ...) {
   })
 }
 
-# Proportion of NA values in a vector
+#' Proportion of NA values in a vector
+#'
+#' @param x a numeric vector
+#'
+#' @export
 prop_na <- function(x) {
   sum(is.na(x)) / length(x)
 }
 
-# Proportion of non-missing values in a vector
+#' Proportion of non-missing values in a vector
+#'
+#' @param x a numeric vector
+#'
+#' @export
 prop_found <- function(x) {
   sum(!is.na(x)) / length(x)
 }
