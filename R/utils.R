@@ -30,11 +30,13 @@
 #' @name finite_helpers
 NULL
 
+#' @export
 #' @rdname finite_helpers
 finite_sd <- function(x) {
   sd(x[is.finite(x)], na.rm = TRUE)
 }
 
+#' @export
 #' @rdname finite_helpers
 finite_mean <- function(x) {
   if (all(is.na(x))) {
@@ -43,16 +45,19 @@ finite_mean <- function(x) {
   mean(x[is.finite(x)], na.rm = TRUE)
 }
 
+#' @export
 #' @rdname finite_helpers
 finite_median <- function(x) {
   median(x[is.finite(x)], na.rm = TRUE)
 }
 
+#' @export
 #' @rdname finite_helpers
 finite_mad <- function(x) {
   mad(x[is.finite(x)], center = median(x[is.finite(x)], na.rm = TRUE), na.rm = TRUE)
 }
 
+#' @export
 #' @rdname finite_helpers
 finite_quantile <- function(x, ...) {
   unname(quantile(x[is.finite(x)], na.rm = TRUE, ...))

@@ -188,34 +188,34 @@ flag_report <- function(object) {
     report_row <- data.frame(Split = split, report_row)
     report_row$Total <- nrow(tmp)
     report_row$Flagged <- report_row$Total - report_row$Kept
-    report <- rbind(report, report_row)
+    report <- dplyr::bind_rows(report, report_row)
   }
   report
 }
 
 
-# Logarithms
+# ---------- Logarithms ----------
 
 #' Logarithm
 #'
 #' Log-transforms the exprs part of a MetaboSet object. Shortcust log2 and log10 also implemented.
 #' For more information, see \code{\link{log}}
-#' #'
-#' @exportMethod
+#'
+#' @export
 setMethod("log", "MetaboSet", function(x, base = exp(1)) {
   exprs(x) <- log(exprs(x), base = base)
   x
 })
 
-#' @rdname finite_helpers
-#' @exportMethod
+#' @rdname log-MetaboSet-method
+#' @export
 setMethod("log2", "MetaboSet", function(x) {
   exprs(x) <- log2(exprs(x))
   x
 })
 
-#' @rdname finite_helpers
-#' @exportMethod
+#' @rdname log-MetaboSet-method
+#' @export
 setMethod("log10", "MetaboSet", function(x) {
   exprs(x) <- log10(exprs(x))
   x
@@ -227,11 +227,29 @@ setGeneric("scale")
 #' Scale exprs data
 #'
 #' Applies the base R function scale to transposed exprs matrix. See ?scale for details
-#' @exportMethod
+#' @export
 setMethod("scale", "MetaboSet", function(x, center = TRUE, scale = TRUE) {
   exprs(x) <- t(scale(t(exprs(x)), center = center, scale = scale))
   x
 })
 
+#' Exponential function
+#'
+#' Apply the exponential function to feature abundances (exprs)
+#'
+#' @param object a MetaboSet object
+#' @param base base of the exponential
+#'
+#' @return a MetaboSet object with altered feature abundances
+#'
+#' @export
+setGeneric("exponential", signature = "object",
+           function(object, base = exp(1)) standardGeneric("exponential"))
 
 
+#' @export
+setMethod("exponential", c(object = "MetaboSet"),
+          function(object, base = exp(1)) {
+            exprs(object) <- base^exprs(object)
+            object
+          })

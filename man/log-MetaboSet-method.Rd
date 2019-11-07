@@ -3,12 +3,17 @@
 \docType{methods}
 \name{log,MetaboSet-method}
 \alias{log,MetaboSet-method}
+\alias{log2,MetaboSet-method}
+\alias{log10,MetaboSet-method}
 \title{Logarithm}
 \usage{
 \S4method{log}{MetaboSet}(x, base = exp(1))
+
+\S4method{log2}{MetaboSet}(x)
+
+\S4method{log10}{MetaboSet}(x)
 }
 \description{
 Log-transforms the exprs part of a MetaboSet object. Shortcust log2 and log10 also implemented.
 For more information, see \code{\link{log}}
-#'
 }
