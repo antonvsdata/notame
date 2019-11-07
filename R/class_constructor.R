@@ -28,6 +28,8 @@ check_pheno_data <- function(x, id_prefix) {
     if (length(qc_found)) {
       x$QC <- ifelse(x[, qc_found[1]] == "QC", "QC", "Sample")
       log_text(paste("QC column generated from", colnames(x)[qc_found[1]]))
+    } else {
+      stop("QC column not found and can not be generated.")
     }
   }
 
@@ -274,7 +276,13 @@ setValidity("MetaboSet",
                 paste("Column", object@time_col, "not found in pheno data")
               } else if (!is.na(object@subject_col) & !object@subject_col %in% colnames(object@phenoData@data)) {
                 paste("Column", object@subject_col, "not found in pheno data")
+              } else if (!identical(rownames(object@results), featureNames(object))){
+                "Rownames of results do not match featureNames"
+              } else if (!all(c("Injection_order", "Sample_ID", "QC") %in% colnames(pData(object)))) {
+                "Pheno data should contain columns Sample_ID, QC and Injection_order"
               } else {
+                x <- check_pheno_data(pData(object), id_prefix = "")
+                x <- check_exprs(exprs(object))
                 TRUE
               }
             })
@@ -395,7 +403,7 @@ setGeneric("combined_data", signature = "object",
            function(object) standardGeneric("combined_data"))
 
 #' @describeIn MetaboSet sample information and features combined to a single data frame, one row per sample
-#' @exportMethod
+#' @export
 setMethod("combined_data", c(object = "MetaboSet"),
           function(object) {
             cbind(pData(object), t(exprs(object)))
@@ -409,7 +417,7 @@ setGeneric("group_col", signature = "object",
            function(object) standardGeneric("group_col"))
 #' @describeIn MetaboSet access and set group_col
 #'
-#' @exportMethod
+#' @export
 setMethod("group_col", "MetaboSet",
           function(object) object@group_col)
 
@@ -417,7 +425,7 @@ setMethod("group_col", "MetaboSet",
 setGeneric("group_col<-", signature = "object",
            function(object, value) standardGeneric("group_col<-"))
 
-#' @exportMethod
+#' @export
 setMethod("group_col<-", "MetaboSet",
           function(object, value) {
             object@group_col <- value
@@ -432,7 +440,7 @@ setGeneric("time_col", signature = "object",
            function(object) standardGeneric("time_col"))
 
 #' @describeIn MetaboSet access and set time_col
-#' @exportMethod
+#' @export
 setMethod("time_col", "MetaboSet",
           function(object) object@time_col)
 
@@ -440,7 +448,7 @@ setMethod("time_col", "MetaboSet",
 setGeneric("time_col<-", signature = "object",
            function(object, value) standardGeneric("time_col<-"))
 
-#' @exportMethod
+#' @export
 setMethod("time_col<-", "MetaboSet",
           function(object, value) {
             object@time_col <- value
@@ -455,7 +463,7 @@ setGeneric("subject_col", signature = "object",
            function(object) standardGeneric("subject_col"))
 
 #' @describeIn MetaboSet access and set subject_col
-#' @exportMethod
+#' @export
 setMethod("subject_col", "MetaboSet",
           function(object) object@subject_col)
 
@@ -463,7 +471,7 @@ setMethod("subject_col", "MetaboSet",
 setGeneric("subject_col<-", signature = "object",
            function(object, value) standardGeneric("subject_col<-"))
 
-#' @exportMethod
+#' @export
 setMethod("subject_col<-", "MetaboSet",
           function(object, value) {
             object@subject_col <- value
@@ -479,7 +487,7 @@ setGeneric("results", signature = "object",
            function(object) standardGeneric("results"))
 
 #' @describeIn MetaboSet access and set results
-#' @exportMethod
+#' @export
 setMethod("results", "MetaboSet",
           function(object) object@results)
 
@@ -487,7 +495,7 @@ setMethod("results", "MetaboSet",
 setGeneric("results<-", signature = "object",
            function(object, value) standardGeneric("results<-"))
 
-#' @exportMethod
+#' @export
 setMethod("results<-", "MetaboSet",
           function(object, value) {
             object@results <- value
@@ -503,7 +511,7 @@ setGeneric("flag", signature = "object",
            function(object) standardGeneric("flag"))
 
 #' @describeIn MetaboSet access and set results
-#' @exportMethod
+#' @export
 setMethod("flag", "MetaboSet",
           function(object) object@results$Flag)
 
@@ -511,7 +519,7 @@ setMethod("flag", "MetaboSet",
 setGeneric("flag<-", signature = "object",
            function(object, value) standardGeneric("flag<-"))
 
-#' @exportMethod
+#' @export
 setMethod("flag<-", "MetaboSet",
           function(object, value) {
             object@results$Flag <- value
@@ -540,17 +548,16 @@ setGeneric("join_results", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_results"))
 
 #' @describeIn MetaboSet join new information to results
-#' @exportMethod
+#' @export
 setMethod("join_results", c("MetaboSet", "data.frame"),
           function(object, dframe) {
             cols <- c("Feature_ID", setdiff(colnames(results(object)), colnames(dframe)))
-            results(object) <- dplyr::left_join(results(object)[cols],
+            res <- dplyr::left_join(results(object)[cols],
                                                 dframe,
                                                 by = "Feature_ID")
-            rownames(results(object)) <- results(object)$Feature_ID
-            if (validObject(object)) {
-              return(object)
-            }
+            rownames(res) <- res$Feature_ID
+            results(object) <- res
+            object
           })
 
 
@@ -574,7 +581,7 @@ setGeneric("join_fData", signature = c("object", "dframe"),
            function(object, dframe) standardGeneric("join_fData"))
 
 #' @describeIn MetaboSet join new information to fData
-#' @exportMethod
+#' @export
 setMethod("join_fData", c("MetaboSet", "data.frame"),
           function(object, dframe) {
             fData(object) <- dplyr::left_join(fData(object),
@@ -588,7 +595,7 @@ setMethod("join_fData", c("MetaboSet", "data.frame"),
 
 
 # Subsetting that also subsets results
-#' @exportMethod
+#' @export
 setMethod("[", "MetaboSet", function(x, i, j, ..., drop = FALSE) {
 
   x <- callNextMethod()
@@ -597,7 +604,7 @@ setMethod("[", "MetaboSet", function(x, i, j, ..., drop = FALSE) {
 })
 
 # FeatureNames also changing Feature_ID columns
-#' @exportMethod
+#' @export
 setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY"),
                  function(object, value) {
                    fd <- featureData(object)
