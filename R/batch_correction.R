@@ -22,7 +22,8 @@ dobc <- function(object, batch, ref, ref_label, ...) {
          batch.idx = batch_idx,
          seq.idx = seq_idx,
          minBsamp = 1,
-         method = "lm")
+         method = "lm",
+         correctionFormula = "X ~ B")
     matrix(tmp, nrow = 1, dimnames = list(feature, names(tmp)))
   }
 
