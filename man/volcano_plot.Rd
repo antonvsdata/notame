@@ -4,22 +4,37 @@
 \alias{volcano_plot}
 \title{Volcano plot}
 \usage{
-volcano_plot(data, effect, p, log2_effect = FALSE,
-  center_x_axis = TRUE, title = "Volcano plot", subtitle = NA, ...)
+volcano_plot(data, x, p, p_fdr = NULL, color = NULL,
+  p_breaks = c(0.05, 0.01, 0.001, 1e-04), fdr_limit = 0.05,
+  log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+  color_scale = NULL, title = "Volcano plot", subtitle = NULL, ...)
 }
 \arguments{
 \item{data}{a data frame with the effect size and p-values}
 
-\item{effect, p}{the column names of effect size and p-values}
+\item{x, p}{the column names of effect size (x-axis) and p-values}
 
-\item{log2_effect}{logical, whether effect size should be plotted on a log2 axis}
+\item{p_fdr}{column name of FDR corrected p-values, used to draw a line showing the fdr-corrected significance level}
+
+\item{color}{column name used to color the plots}
+
+\item{p_breaks}{a numerical vector of the p_values to show on the y-axis}
+
+\item{fdr_limit}{the significance level used in the experiment}
+
+\item{log2_x}{logical, whether effect size should be plotted on a log2 axis}
 
 \item{center_x_axis}{logical, whether x-axis should be centered. If \code{TRUE}, the "zero-effect" will
-be on the middle of the plot. The "zero effect" is 0 if \code{log2_effect = FALSE} and 1 if  \code{log2_effect = TRUE}}
+be on the middle of the plot. The "zero effect" is 0 if \code{log2_x = FALSE} and 1 if  \code{log2_x = TRUE}}
+
+\item{x_lim}{numerical vector of length 2 for manually setting the x-axis limits}
+
+\item{color_scale}{the color scale as returned by a ggplot function}
 
 \item{title, subtitle}{the title and subtitle of the plot}
 
-\item{...}{parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values.}
+\item{...}{parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+also be passed using \code{mapping = aes(...)}.}
 }
 \value{
 a ggplot object

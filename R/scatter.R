@@ -476,44 +476,172 @@ minus_log10 <- scales::trans_new("minus_log19",
 #' Draws a volcano plot of effect size and p-values.
 #'
 #' @param data a data frame with the effect size and p-values
-#' @param effect,p the column names of effect size and p-values
-#' @param log2_effect logical, whether effect size should be plotted on a log2 axis
+#' @param x,p the column names of effect size (x-axis) and p-values
+#' @param p_fdr column name of FDR corrected p-values, used to draw a line showing the fdr-corrected significance level
+#' @param color column name used to color the plots
+#' @param p_breaks a numerical vector of the p_values to show on the y-axis
+#' @param fdr_limit the significance level used in the experiment
+#' @param log2_x logical, whether effect size should be plotted on a log2 axis
 #' @param center_x_axis logical, whether x-axis should be centered. If \code{TRUE}, the "zero-effect" will
-#' be on the middle of the plot. The "zero effect" is 0 if \code{log2_effect = FALSE} and 1 if  \code{log2_effect = TRUE}
+#' be on the middle of the plot. The "zero effect" is 0 if \code{log2_x = FALSE} and 1 if  \code{log2_x = TRUE}
+#' @param x_lim numerical vector of length 2 for manually setting the x-axis limits
+#' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
-#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values.
+#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+#' also be passed using \code{mapping = aes(...)}.
 #'
 #' @return a ggplot object
 #'
 #' @export
-volcano_plot <- function(data, effect, p, log2_effect = FALSE, center_x_axis = TRUE,
-                         title = "Volcano plot", subtitle = NA, ...) {
+volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
+                         p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                         log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                         color_scale = NULL,
+                         title = "Volcano plot", subtitle = NULL, ...) {
 
-  p <- ggplot(data, aes_string(x = effect, y = p)) +
+  if (center_x_axis & !is.null(x_lim)) {
+    warning("Manually setting x-axis limits overrides x-axis centering")
+    center_x_axis <- FALSE
+  }
+  if (min(data[, p]) > max(p_breaks)) {
+    warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
+  }
+
+  color_scale <- color_scale %||% getOption("amp.color_scale_con")
+
+  pl <- ggplot(data, aes_string(x = x, y = p, color = color)) +
     geom_point(...) +
+    color_scale +
     theme_bw() +
-    scale_y_continuous(trans = minus_log10) +
-    labs(title = title, subtitle = subtitle)
+    labs(title = title, subtitle = subtitle) +
+    theme(panel.grid.minor.y = element_blank(), #only show the specified p-values, which might be unevenly spaced
+          axis.ticks.y = element_blank())
 
-  if (log2_effect) {
-    if (center_x_axis) {
-      x_lim <- max(abs(log2(data[, effect])))
-      x_lim <- c(2^(-x_lim), 2^x_lim)
+  if(!is.null(p_fdr)) {
+
+    if (any(data[, p_fdr] < fdr_limit)) {
+      # Add horizontal line with the FDR < 0.05 limit
+      q_limit <- max(data[data[, p_fdr] < fdr_limit, p], na.rm = TRUE)
+      # sec_axis writes e.g. "q < 0.05" on the right sifde of the plot
+      pl <- pl +
+        geom_hline(yintercept = q_limit, linetype = "dashed") +
+        scale_y_continuous(trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks),
+                           sec.axis = sec_axis(~., breaks = q_limit, labels = paste("q =", fdr_limit)))
     } else {
-      x_lim = NULL
+      warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line")
     }
-    p <- p +
+
+  } else {
+    pl <- pl +
+      scale_y_continuous(trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks))
+  }
+
+  if (log2_x) {
+    if (center_x_axis) {
+      x_lim <- max(abs(log2(data[, x])))
+      x_lim <- c(2^(-x_lim), 2^x_lim)
+    }
+    pl <- pl +
       scale_x_continuous(trans = "log2", limits = x_lim)
   } else {
     if (center_x_axis) {
-      x_lim <- max(abs(data[, effect]))
+      x_lim <- max(abs(data[, x]))
       x_lim <- c(-x_lim, x_lim)
-    } else {
-      x_lim = NULL
     }
-    p <- p +
+    pl <- pl +
       scale_x_continuous(limits = x_lim)
   }
 
-  p
+  pl
+}
+
+
+# ---------- MANHATTAN PLOT -------
+
+
+#' Manhattan plot
+#'
+#' Draws a (directed) Manhattan plot of p-values and versus e.g. retention time or mass-to-charge ratio.
+#' If effect size and direction is supplied, the -log10(p-value) on the y-axis will be multiplied
+#' by the direction (sign) of the effect, so part of the points will "drop" from the p = 1 (-log10(p) = 0) line.
+#' This results in a so-called directed Manhattan plot.
+#'
+#' @param data a data frame with the effect size and p-values
+#' @param x,p the column names of effect size (x-axis) and p-values
+#' @param effect column name of effect size (should have negative and positive values).
+#' @param p_fdr column name of FDR corrected p-values, used to draw a line showing the fdr-corrected significance level
+#' @param color column name used to color the plots
+#' @param p_breaks a numerical vector of the p_values to show on the y-axis
+#' @param fdr_limit the significance level used in the experiment
+#' @param x_lim,ylim numerical vectors of length 2 for manually setting the axis limits
+#' @param color_scale the color scale as returned by a ggplot function
+#' @param title,subtitle the title and subtitle of the plot
+#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+#' also be passed using \code{mapping = aes(...)}.
+#'
+#' @return a ggplot object
+#'
+#' @export
+manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+                           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                           x_lim = NULL, y_lim = NULL, color_scale = NULL,
+                           title = "Manhattan plot", subtitle = NULL, ...) {
+
+  if (min(data[, p]) > max(p_breaks)) {
+    warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
+  }
+  color_scale <- color_scale %||% getOption("amp.color_scale_con")
+
+  if (!is.null(effect)) {
+    data$y <- -log10(data[, p]) * sign(data[, effect])
+    p_labels <- outer(c(-1,1), p_breaks) %>% as.vector() %>% as.character()
+    p_breaks <- outer(c(-1,1), -log10(p_breaks)) %>% as.vector()
+    p_labels <- p_labels[order(p_breaks)]
+    p_breaks <- sort(p_breaks)
+  } else {
+    data$y <- -log10(data[, p])
+    p_labels <- as.character(p_breaks)
+    p_breaks <- -log10(p_breaks)
+    p_labels <- p_labels[order(p_breaks)]
+    p_breaks <- sort(p_breaks)
+  }
+
+  pl <- ggplot(data, aes_string(x = x, y = "y", color = color)) +
+    geom_point(...) +
+    color_scale +
+    theme_bw() +
+    theme(panel.grid.minor.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    geom_hline(yintercept = 0, color = "grey") +
+    labs(title = title, subtitle = subtitle)
+
+
+  if(!is.null(p_fdr)) {
+
+    if (any(data[, p_fdr] < fdr_limit)) {
+      # Add horizontal line with the FDR < 0.05 limit
+      q_limit <- max(data[data[, p_fdr] < fdr_limit, p], na.rm = TRUE)
+      # sec_axis writes e.g. "q < 0.05" on the right sifde of the plot
+      if (!is.null(effect)) {
+        pl <- pl +
+          geom_hline(yintercept = log10(q_limit), linetype = "dashed") +
+          geom_hline(yintercept = -log10(q_limit), linetype = "dashed") +
+          scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim,
+                             sec.axis = sec_axis(~., breaks = c(log10(q_limit), -log10(q_limit)), labels = rep(paste("q =", fdr_limit), 2)))
+      } else {
+        pl <- pl +
+          geom_hline(yintercept = -log10(q_limit), linetype = "dashed") +
+          scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim,
+                             sec.axis = sec_axis(~., breaks = -log10(q_limit), labels = paste("q =", fdr_limit)))
+      }
+    } else {
+      warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line")
+    }
+  } else {
+    pl <- pl +
+      scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim)
+  }
+
+  pl
+
 }
