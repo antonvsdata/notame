@@ -12,7 +12,7 @@
 #' @param plot_folder path to the location where the plots should be saved, if NULL, no plots are saved
 #'
 #' @return a MetaboSet object with the aligned features
-align_batches_brunius <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
+align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
 
   # Set working directory for plotting (the bathCorr functions saves plots in the current working directory...)
   if (!is.null(plot_folder)) {
@@ -52,15 +52,19 @@ align_batches_brunius <- function(object_na, object_fill, batch, mz, rt, mzdiff,
 #' @param object a MetaboSet object
 #' @param batch,group character, column names of pData with batch labels and group labels
 #' @param ref_label the label of the reference group i.e. the group that is constant through batches
+#' @param ... additional parameters passed to batchCorr::normalizeBatches
 #'
 #' @return list, the object with normalized features and information on which features were corrected by ref samples in each batch.
-normalize_batches_brunius <- function(object, batch, group = group_col(object), ref_label, ...) {
+normalize_batches <- function(object, batch, group = group_col(object), ref_label, ...) {
 
   normData <- batchCorr::normalizeBatches(peakTable = t(exprs(object)), batches = pData(object)[, batch],
                                sampleGroup = pData(object)[, group], refGroup = ref_label, ...)
 
   exprs(object) <- t(normData$peakTable)
-  return(list(object = object, ref_corrected = normData$refCorrected))
+  ref_corrected <- as.data.frame(t(normData$refCorrected))
+  colnames(ref_corrected) <- paste0("Ref_corrected_", seq_len(ncol(ref_corrected)))
+  ref_corrected$Feature_ID <- featureNames(object)
+  object <- join_results(object, ref_corrected)
 }
 
 
