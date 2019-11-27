@@ -32,20 +32,24 @@ save_dc_plots <- function(orig, dc, predicted, file, width = 8, height = 6, colo
       geom_point(data = data, mapping = aes_string(color = color, shape = shape))
   }
 
-  orig_data <- combined_data(log(orig))
-  dc_data <- combined_data(log(dc))
+  orig_data_log <- combined_data(log(orig))
+  dc_data_log <- combined_data(log(dc))
+  orig_data <- combined_data(orig)
+  dc_data <- combined_data(dc)
   predictions <- as.data.frame(t(predicted))
   predictions$Injection_order <- orig_data$Injection_order
 
   pdf(file, width = width, height = height)
 
   for (fname in Biobase::featureNames(dc)) {
-    p1 <- dc_plot_helper(data = orig_data, fname = fname) +
+    p1 <- dc_plot_helper(data = orig_data_log, fname = fname) +
       geom_line(data = predictions, color = "grey")
 
-    p2 <- dc_plot_helper(data = dc_data, fname = fname)
+    p2 <- dc_plot_helper(data = dc_data_log, fname = fname)
+    p3 <- dc_plot_helper(data = orig_data, fname = fname)
+    p4 <- dc_plot_helper(data = dc_data, fname = fname)
 
-    p <- cowplot::plot_grid(p1, p2, nrow = 2)
+    p <- cowplot::plot_grid(p3, p1, p4, p2, nrow = 2)
     plot(p)
   }
 
@@ -114,12 +118,13 @@ dc_cubic_spline <- function(object, log_transform = TRUE, spar = NULL, spar_lowe
          predicted = matrix(predicted, ncol = n, dimnames = dnames))
 
   }
+  corrected <- dc_data$corrected
   # Inverse the initial log transformation
   if (log_transform) {
     corrected <- exp(corrected)
   }
 
-  exprs(object) <- dc_data$corrected
+  exprs(object) <- corrected
   # Recompute quality metrics
   object <- assess_quality(object)
 
@@ -129,12 +134,13 @@ dc_cubic_spline <- function(object, log_transform = TRUE, spar = NULL, spar_lowe
 }
 
 
-ex <- mark_nas(example_set, 0)
+ex <- mark_nas(merged_sample, 0)
 exprs(ex)[exprs(ex) == 0] <- 1.1
+ex <- ex[, 1:218]
 dc <- dc_cubic_spline(ex)
 predicted <- dc$predicted
 dc <- dc$object
 
-save_dc_plots(ex[1:5], dc[1:5], predicted, file = "xd.pdf")
+save_dc_plots(ex, dc, predicted, file = "xd.pdf", width = 18, height = 8)
 
 
