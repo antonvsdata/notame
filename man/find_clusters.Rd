@@ -15,10 +15,10 @@ expressed as a percentage of the maximum degree in the cluster}
 }
 \value{
 a list of clusters, each a list of:
-\begin{itemize}
+\itemize{
 \item features: character vector of the names of the features included in the cluster
 \item graph: an igraph object of the cluster
-\end{itemize}
+}
 }
 \description{
 First forms clusters of compounds that are linked together. Then the clusters are pruned

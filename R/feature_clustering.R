@@ -179,10 +179,10 @@ compress_clusters <- function(object) {
 #' @param name_col name_col character, name of the column in features that contains feature names
 #'
 #' @return a list of two items:
-#' \begin{itemize}
+#' \itemize{
 #' \item cdata: a new data frame with the combined LC-MS data
 #' \item cfeatures: data frame, feature information per cluster
-#' \end{itemize}
+#' }
 #'
 #' @export
 pull_clusters <- function(data, features, name_col) {
@@ -224,11 +224,11 @@ pull_clusters <- function(data, features, name_col) {
 #' @param rt_col character, name of the column in features that contains retention times
 #'
 #' @return a data frame of pairs of signals that are linked together
-#' \begin{itemize}
+#' \itemize{
 #' \item x & y: indexes and names of the signals
 #' \item cor: correlation coefficient
 #' \item mz_diff & rt_diff: mass and retention time difference
-#' \end{itemize}
+#' }
 #'
 #' @export
 find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1/60,
@@ -273,10 +273,10 @@ find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1/60
 #' expressed as a percentage of the maximum degree in the cluster
 #'
 #' @return a list of clusters, each a list of:
-#' \begin{itemize}
+#' \itemize{
 #' \item features: character vector of the names of the features included in the cluster
 #' \item graph: an igraph object of the cluster
-#' \end{itemize}
+#' }
 #'
 #' @export
 find_clusters <- function(connections, d_thresh = 0.8){

@@ -15,10 +15,10 @@ pull_clusters(data, features, name_col)
 }
 \value{
 a list of two items:
-\begin{itemize}
+\itemize{
 \item cdata: a new data frame with the combined LC-MS data
 \item cfeatures: data frame, feature information per cluster
-\end{itemize}
+}
 }
 \description{
 For each cluster, the LC-MS data of the feature with largest median peak area is retained,

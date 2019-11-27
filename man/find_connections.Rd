@@ -25,11 +25,11 @@ need to use the same unit as in the retention time column}
 }
 \value{
 a data frame of pairs of signals that are linked together
-\begin{itemize}
+\itemize{
 \item x & y: indexes and names of the signals
 \item cor: correlation coefficient
 \item mz_diff & rt_diff: mass and retention time difference
-\end{itemize}
+}
 }
 \description{
 A part of the peak clustering algorithm. Iterates over all possible pairs of features
