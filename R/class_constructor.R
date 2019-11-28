@@ -29,7 +29,7 @@ check_pheno_data <- function(x, id_prefix) {
       x$QC <- ifelse(x[, qc_found[1]] == "QC", "QC", "Sample")
       log_text(paste("QC column generated from", colnames(x)[qc_found[1]]))
     } else {
-      stop("QC column not found and can not be generated.")
+      warning("QC column not found and can not be generated. Please create one before constructing a MetaboSet object.")
     }
   }
 
