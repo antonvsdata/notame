@@ -123,8 +123,6 @@ mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
   mixomics_plsda(object = object, y = y, ncomp = ncomp_opt, ...)
 }
 
-xd <- mixomics_splsda_optimize(object = merged_sample, y = "Group", ncomp_max = 3, dist = "mahalanobis.dist")
-
 
 #' sPLS-DA
 #'
