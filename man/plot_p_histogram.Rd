@@ -4,7 +4,8 @@
 \alias{plot_p_histogram}
 \title{Histogram of p-values}
 \usage{
-plot_p_histogram(p_values, hline = TRUE, combine = TRUE)
+plot_p_histogram(p_values, hline = TRUE, combine = TRUE,
+  x_label = "p-value")
 }
 \arguments{
 \item{p_values}{list or data frame, each element/column is a vector of p-values. The list names are used as plot titles}
