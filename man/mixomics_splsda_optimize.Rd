@@ -30,6 +30,7 @@ different number of features per component, then chooses the optimal number of c
 optimal number of features for each component.
 }
 \examples{
-plsda_res <- mixomics_splsda_optimize(merged_sample, dist = "max.dist", y = "Group", ncomp_max = 5)
+set.seed(38)
+plsda_res <- mixomics_splsda_optimize(merged_sample, dist = "max.dist", y = "Group", ncomp_max = 2)
 
 }

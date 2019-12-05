@@ -28,8 +28,6 @@ by the actual Feature IDs during model fitting. For example, if testing for equa
 means in study groups, use "Feature ~ Group".
 }
 \examples{
-perform_kruskal_wallis(example_set)
-# Equivalent
 perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
 
 }

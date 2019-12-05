@@ -36,7 +36,7 @@ by the actual Feature IDs during model fitting, see the example
 \examples{
 # A simple example without QC samples
 # Features predicted by Group and Time
-results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 
 }
 \seealso{

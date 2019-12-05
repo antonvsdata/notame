@@ -18,7 +18,7 @@
 #' @examples
 #' rf <- fit_rf(example_set, response = "Group")
 #' rf
-#' rf_importance(rf)
+#' importance_rf(rf)
 #'
 #' @export
 fit_rf <- function(object, response, all_features = FALSE, importance = TRUE, ...) {
@@ -49,7 +49,7 @@ fit_rf <- function(object, response, all_features = FALSE, importance = TRUE, ..
 #' @examples
 #' rf <- fit_rf(example_set, response = "Group")
 #' rf
-#' rf_importance(rf)
+#' importance_rf(rf)
 #'
 #' @export
 importance_rf <- function(rf) {
@@ -110,7 +110,7 @@ mixomics_plsda <- function(object, y, ...) {
 #' @return an object of class "plsdsa"
 #'
 #' @examples
-#' plsda_res <- mixomics_plsda_optimize(merged_sample, y = "Group", ncomp_max = 5)
+#' plsda_res <- mixomics_plsda_optimize(merged_sample, y = "Group", ncomp_max = 3)
 #'
 #' @export
 mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
@@ -154,7 +154,8 @@ mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
 #' @return an object of class "splsdsa"
 #'
 #' @examples
-#' plsda_res <- mixomics_splsda_optimize(merged_sample, dist = "max.dist", y = "Group", ncomp_max = 5)
+#' set.seed(38)
+#' plsda_res <- mixomics_splsda_optimize(merged_sample, dist = "max.dist", y = "Group", ncomp_max = 2)
 #'
 #' @export
 mixomics_splsda_optimize <- function(object, y, ncomp_max, dist,

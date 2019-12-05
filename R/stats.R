@@ -295,6 +295,9 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
   pheno_data <- data[, c(subject, group)] %>%
     dplyr::distinct() %>%
     tidyr::unite("Sample_ID", subject, group, remove = FALSE)
+  # QC and Injection_order columns to pass validObject check
+  pheno_data$QC <- "Sample"
+  pheno_data$Injection_order <- seq_len(nrow(pheno_data))
   rownames(pheno_data) <- pheno_data$Sample_ID
 
   # AUCs
@@ -410,7 +413,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @examples
 #' # A simple example without QC samples
 #' # Features predicted by Group and Time
-#' results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+#' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 #'
 #' @seealso \code{\link[stats]{lm}}
 #'
@@ -489,8 +492,8 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #'
 #' @examples
 #' # A simple example without QC samples
-#' # Features predicted by Group and Time
-#' results <- perform_logistic(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+#' # Time predicted by features
+#' logistic_results <- perform_logistic(drop_qcs(example_set), formula_char = "Time ~ Feature + Group ")
 #'
 #' @seealso \code{\link[stats]{glm}}
 #'
@@ -582,7 +585,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' @examples
 #' # A simple example without QC samples
 #' # Features predicted by Group and Time as fixed effects with Subject ID as a random effect
-#' results <- perform_lmer(drop_qcs(example_set), formula_char = "Feature ~ Group + Time + (1 | Subject_ID)")
+#' lmer_results <- perform_lmer(drop_qcs(example_set), formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
+#'                         ci_method = "Wald")
 #'
 #' @seealso \code{\link[lmerTest]{lmer}} for model specification and
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
@@ -717,8 +721,6 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 #' @return data frame with the results
 #'
 #' @examples
-#' perform_homoscedasticity_tests(example_set)
-#' # Equivalent
 #' perform_homoscedasticity_tests(example_set, formula_char = "Feature ~ Group")
 #'
 #' @seealso \code{\link{bartlett.test}}, \code{\link[car]{leveneTest}}, \code{\link{fligner.test}}
@@ -778,8 +780,6 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 #' @seealso \code{\link{kruskal.test}}
 #'
 #' @examples
-#' perform_kruskal_wallis(example_set)
-#' # Equivalent
 #' perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
@@ -831,8 +831,6 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 #' @seealso \code{\link{oneway.test}}
 #'
 #' @examples
-#' perform_oneway_anova(example_set)
-#' # Equivalent
 #' perform_oneway_anova(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
@@ -879,6 +877,9 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #' means in study groups, use "Feature ~ Group".
 #'
 #' @return data frame with the results
+#'
+#' @examples
+#' t_test_results <- perform_t_test(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 #'
 #' @seealso \code{\link{t.test}}
 #'
@@ -928,6 +929,10 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
 #' @details P-values of each comparison are corrected separately from each other.
 #'
 #' @return data frame with the results
+#'
+#' @examples
+#' #Including QCs as a study group for example
+#' t_test_results <- perform_pairwise_t_test(merged_sample, group = "Group")
 #'
 #' @seealso \code{\link{perform_t_test}}, \code{\link{t.test}}
 #'

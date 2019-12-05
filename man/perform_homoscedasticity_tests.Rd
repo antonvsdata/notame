@@ -31,8 +31,6 @@ by the actual Feature IDs during model fitting. For example, if testing for equa
 variances in study groups, use "Feature ~ Group".
 }
 \examples{
-perform_homoscedasticity_tests(example_set)
-# Equivalent
 perform_homoscedasticity_tests(example_set, formula_char = "Feature ~ Group")
 
 }

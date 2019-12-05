@@ -30,6 +30,10 @@ must be used to signal the role of the features in the formula. "Feature" will b
 by the actual Feature IDs during model fitting. For example, if testing for equality of
 means in study groups, use "Feature ~ Group".
 }
+\examples{
+t_test_results <- perform_t_test(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+
+}
 \seealso{
 \code{\link{t.test}}
 }

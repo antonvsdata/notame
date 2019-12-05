@@ -25,6 +25,11 @@ Performs pairwise t-tests between all study groups. NOTE! Does not use formula i
 \details{
 P-values of each comparison are corrected separately from each other.
 }
+\examples{
+#Including QCs as a study group for example
+t_test_results <- perform_pairwise_t_test(merged_sample, group = "Group")
+
+}
 \seealso{
 \code{\link{perform_t_test}}, \code{\link{t.test}}
 }

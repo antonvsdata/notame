@@ -32,8 +32,6 @@ by the actual Feature IDs during model fitting. For example, if testing for equa
 means in study groups, use "Feature ~ Group".
 }
 \examples{
-perform_oneway_anova(example_set)
-# Equivalent
 perform_oneway_anova(example_set, formula_char = "Feature ~ Group")
 
 }

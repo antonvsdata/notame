@@ -24,6 +24,6 @@ Automatically evaluates performance with different number of components and
 chooses the optimal number of components.
 }
 \examples{
-plsda_res <- mixomics_plsda_optimize(merged_sample, y = "Group", ncomp_max = 5)
+plsda_res <- mixomics_plsda_optimize(merged_sample, y = "Group", ncomp_max = 3)
 
 }

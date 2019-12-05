@@ -18,7 +18,7 @@ Extracts feature importance in random forest in a nice format.
 \examples{
 rf <- fit_rf(example_set, response = "Group")
 rf
-rf_importance(rf)
+importance_rf(rf)
 
 }
 \seealso{
