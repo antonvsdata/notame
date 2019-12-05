@@ -115,6 +115,11 @@ check_exprs <- function(exprs_) {
 #' @export
 read_from_excel <- function(file, sheet = 1, corner_row = NULL, corner_column = NULL, id_prefix = "ID_", split_by = NULL, name = NULL) {
 
+  if (!requireNamespace("openxlsx", quietly = TRUE)) {
+      stop("Package \"openxlsx\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+
   if (is.null(split_by) & is.null(name)) {
     stop("Etiher name or split_by needs to be defined, see documentation")
   } else if ((!is.null(split_by)) & (!is.null(name))) {
@@ -345,6 +350,11 @@ construct_MetaboSet <- function(exprs, pheno_data, feature_data,
 #'
 #' @export
 write_to_excel <- function(object, file, ...) {
+
+  if (!requireNamespace("openxlsx", quietly = TRUE)) {
+      stop("Package \"openxlsx\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
 
   # Bottom part consists of (from left to right):
   # - feature data

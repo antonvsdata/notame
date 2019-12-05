@@ -124,6 +124,10 @@ merge_exprs <- function(object, y) {
 #'
 #' @export
 impute_rf <- function(object, all_features = FALSE, ...) {
+  if (!requireNamespace("missForest", quietly = TRUE)) {
+      stop("Package \"missForest\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Start log
   log_text(paste("\nStarting random forest imputation at", Sys.time()))
   # Drop flagged features

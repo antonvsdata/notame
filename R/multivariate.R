@@ -22,7 +22,10 @@
 #'
 #' @export
 fit_rf <- function(object, response, all_features = FALSE, importance = TRUE, ...) {
-
+  if (!requireNamespace("randomForest", quietly = TRUE)) {
+      stop("Package \"randomForest\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   if (!all_features) {
     object <- drop_flagged(object)
   }
@@ -71,11 +74,15 @@ importance_rf <- function(rf) {
 #'
 #' @return an object of class "plsdsa"
 #'
-#' @example
+#' @examples
 #' plsda_res <- mixomics_plsda(merged_sample, y = "Group")
 #'
 #' @export
 mixomics_plsda <- function(object, y, ...) {
+  if (!requireNamespace("mixOmics", quietly = TRUE)) {
+    stop("Package \"mixOmics\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
   # Extract X and Y matrices
   X <- t(exprs(object))
   Y <- pData(object)[, y]
@@ -102,12 +109,15 @@ mixomics_plsda <- function(object, y, ...) {
 #'
 #' @return an object of class "plsdsa"
 #'
-#' @example
+#' @examples
 #' plsda_res <- mixomics_plsda_optimize(merged_sample, y = "Group", ncomp_max = 5)
 #'
 #' @export
 mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
-
+  if (!requireNamespace("mixOmics", quietly = TRUE)) {
+    stop("Package \"mixOmics\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
   plsda_res <- mixomics_plsda(object = object, y = y, ncomp_max, ...)
 
   log_text("Evaluating PLS-DA performance")
@@ -143,13 +153,16 @@ mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
 #'
 #' @return an object of class "splsdsa"
 #'
-#' @example
-#' plsda_res <- mixomics_splsda_optimize(merged_sample, y = "Group", ncomp_max = 5)
+#' @examples
+#' plsda_res <- mixomics_splsda_optimize(merged_sample, dist = "max.dist", y = "Group", ncomp_max = 5)
 #'
 #' @export
 mixomics_splsda_optimize <- function(object, y, ncomp_max, dist,
                                      n_features = c(1:10, seq(20, 300, 10)), ...) {
-
+  if (!requireNamespace("mixOmics", quietly = TRUE)) {
+      stop("Package \"mixOmics\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Extract X and Y matrices
   X <- t(exprs(object))
   Y <- pData(object)[, y]

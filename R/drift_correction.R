@@ -221,6 +221,11 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
 #' @export
 save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width = 8, height = 6, color = "QC",
                           shape = NULL, color_scale = NULL, shape_scale = NULL) {
+
+  if (!requireNamespace("cowplot", quietly = TRUE)) {
+      stop("Package \"cowplot\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # If color column not set, use QC column
   color <- color %||% "QC"
   shape <- shape %||% color

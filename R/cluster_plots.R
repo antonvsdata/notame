@@ -22,6 +22,15 @@
 plot_dendrogram <- function(object, all_features = FALSE, color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
                      center = TRUE, scale = "uv", title = "Dendrogram of hierarchical clustering",
                      subtitle = NULL, color_scale = NULL) {
+
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+  if (!requireNamespace("ggdendro", quietly = TRUE)) {
+      stop("Package \"ggdendro\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -87,6 +96,14 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
                          group_bar = TRUE, group = group_col(object),
                          title = "Heatmap of distances between samples",
                          subtitle = NULL, fill_scale_con = NULL, fill_scale_dis = NULL) {
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+  if (!requireNamespace("cowplot", quietly = TRUE)) {
+      stop("Package \"cowplot\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 

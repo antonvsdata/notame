@@ -1,9 +1,9 @@
 
 #' Plot model diagnostics
-#' 
+#'
 #' Plot model diagnostics for lm or lmer models fit separately for each feature.
 #' One page of plots is saved per feature. Uses autoplot function from ggfortify
-#' 
+#'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param model_type the type of model, either "lm" or "lmer"
@@ -11,39 +11,42 @@
 #' @param all_features should all features be included?
 #' @param width,height the dimension of the plot
 #' @param ... other parameters passed to lm/lmer and/or autoplot function from the ggfortify package
-#'  
-#' @examples 
+#'
+#' @examples
 #' save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group", model_type = "lm", file = "test.pdf")
-#' 
+#'
 #' # Add colouring by time point (don't mind the warnings)
 #' save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group",
 #'                          model_type = "lm", file = "test.pdf", colour = "Group")
-#'                          
+#'
 #' # Linear mixed model
 #' save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group + (1|Subject_ID)",
 #'                          model_type = "lmer", file = "test.pdf")
-#' 
-#' 
+#'
+#'
 #' @export
 save_lm_diagnostic_plots <- function(object, formula_char, model_type = c("lm", "lmer"), file, all_features = FALSE,
                                      width = 12, height = 18, ...) {
-  
-  requireNamespace("ggfortify")
+
+  require(ggfortify)
   if (model_type == "lmer") {
-    require("lme4")
+    if (!requireNamespace("lme4", quietly = TRUE)) {
+        stop("Package \"lme4\" needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
   }
-  
+
   if (missing(model_type)) model_type <- "lm"
   model_type <- match.arg(model_type)
   # Start log
   log_text(paste("\nStarting linear model diagnostics at", Sys.time()))
-  
+
   object <- drop_flagged(object, all_features = all_features)
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
-  
+
   pdf(file = file, width = width, height = height)
-  
+
   for (i in seq_along(features)) {
     if (i %% 100 == 0){
       print(paste(i, "/", length(features)))
@@ -51,7 +54,7 @@ save_lm_diagnostic_plots <- function(object, formula_char, model_type = c("lm", 
     feature <- features[i]
     # Replace "Feature" with the current feature name
     tmp_formula <- gsub("Feature", feature, formula_char)
-    
+
     fit <- NULL
     if (model_type == "lm") {
       tryCatch({
@@ -62,7 +65,7 @@ save_lm_diagnostic_plots <- function(object, formula_char, model_type = c("lm", 
         fit <- lme4::lmer(tmp_formula, data = data, ...)
       }, error = function(e) print(paste0(feature, ": ", e$message)))
     }
-    
+
     if (!is.null(fit)) {
       tryCatch({
         p <- autoplot(object = fit, which = 1:6, data = data) +
@@ -73,7 +76,7 @@ save_lm_diagnostic_plots <- function(object, formula_char, model_type = c("lm", 
   }
   dev.off()
   log_text(paste("Saved linear model diagnostic plots to:", file))
-  
+
 }
 
 
@@ -107,19 +110,19 @@ get.layout <- function(nplots, ncol, nrow) {
   } else if (ncol == 0 && nrow != 0) {
     ncol <- ceiling(nplots / nrow)
   }
-  
+
   if (nrow == 0) {
     nrow <- ceiling(nplots / ncol)
   } else {
     nrow <- nrow
   }
-  
+
   if (nrow * ncol < nplots) {
     message <- paste('nrow * ncol (', nrow, ' * ', ncol,
                      ') must be larger than number of plots', nplots)
     stop(message)
   }
-  
+
   t(matrix(1:(ncol * nrow), ncol = nrow, nrow = ncol))
 }
 
@@ -151,16 +154,16 @@ plot_label <- function(p, data, x = NULL, y = NULL, label = TRUE, label.label = 
                        label.lineheight = NULL,
                        label.hjust = NULL, label.vjust = NULL,
                        label.repel = FALSE, label.show.legend = NA) {
-  
+
   if (!is.data.frame(data)) {
     stop(paste0('Unsupported class: ', class(data)))
   }
-  
+
   if (!missing(label.colour) && !is.null(label.colour) && missing(label)) {
     # if flag is missing but colour is specified, turn flag to TRUE
     label <- TRUE
   }
-  
+
   if (label || label.repel) {
     # user wants label if they enables repel
     if (is.null(label.colour)) {
@@ -194,7 +197,7 @@ plot_label <- function(p, data, x = NULL, y = NULL, label = TRUE, label.label = 
 geom_factory <- function(geomfunc, data = NULL, ...) {
   mapping <- list()
   option <- list()
-  
+
   columns <- colnames(data)
   for (key in names(list(...))) {
     value <- list(...)[[key]]
@@ -261,7 +264,7 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
                         nrow = NULL, ncol = NULL, ...) {
   # initialization
   p1 <- p2 <- p3 <- p4 <- p5 <- p6 <- NULL
-  
+
   dropInf <- function(x, h) {
     if (any(isInf <- h >= 1)) {
       warning(gettextf("not plotting observations with leverage one:\n  %s",
@@ -271,10 +274,10 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     }
     x
   }
-  
+
   show <- rep(FALSE, 6)
   show[which] <- TRUE
-  
+
   if (is.null(data)) {
     # ggplot2::fortify can't handle NULL properly
     plot.data <- ggplot2::fortify(object)
@@ -286,10 +289,10 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
   plot.data$.stdresid <- plot.data$.resid / sd(plot.data$.resid)
   plot.data$.hat <- hatvalues(object)
   n <- nrow(plot.data)
-  
+
   plot.data$.index <- 1:n
   plot.data$.label <- rownames(plot.data)
-  
+
   is_glm <- inherits(object, "glm")
   r <- residuals(object)
   w <- weights(object)
@@ -302,17 +305,17 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
       sqrt(stats::deviance(object, REML = FALSE) / stats::df.residual(object))
     }
     hii <- hatvalues(object)
-    
+
     is_const_lev <- all(hii == 0) ||
       diff(hii) < 1e-10 * mean(hii, na.rm = TRUE)
-    
+
     fs <- dplyr::select_if(plot.data,
                            function(x) is.character(x) | is.factor(x))
     fs[[".label"]] <- NULL
     if (is_const_lev & ncol(fs) > 0){
       plot.data$.nf <- stringr::str_wrap(interaction(fs, sep = ":"), width = 10)
     }
-    
+
     if (any(show[2L:3L])) {
       plot.data$.wresid <- if (is.null(w)) {
         r
@@ -329,10 +332,10 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
       plot.data$.qqy <- qn$y
     }
   }
-  
+
   label.fitted <- ifelse(is_glm, 'Predicted values', 'Fitted values')
   label.y23 <- ifelse(is_glm, 'Std. deviance resid.', 'Standardized residuals')
-  
+
   if (is.logical(shape) && !shape) {
     if (missing(label)) {
       # if label is missing and shape=FALSE, turn label to TRUE
@@ -342,10 +345,10 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
       label.n <- nrow(plot.data)
     }
   }
-  
+
   # target or explanatory variables may be nested, e.g. binomial
   plot.data <- flatten(plot.data)
-  
+
   if (label.n > 0L) {
     if (show[1L]) {
       r.data <- dplyr::arrange_(plot.data, 'dplyr::desc(abs(.resid))')
@@ -360,11 +363,11 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
       cd.data <- utils::head(cd.data, label.n)
     }
   }
-  
+
   .smooth <- function(x, y) {
     stats::lowess(x, y, f = 2 / 3, iter = 3)
   }
-  
+
   .decorate.label <- function(p, data) {
     if (label & label.n > 0) {
       p <- plot_label(p = p, data = data,
@@ -383,16 +386,16 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     }
     p
   }
-  
+
   .decorate.plot <- function(p, xlab = NULL, ylab = NULL, title = NULL) {
     p +
       ggplot2::xlab(xlab) +
       ggplot2::ylab(ylab) +
       ggplot2::ggtitle(title)
   }
-  
+
   smoother_m <- ggplot2::aes_string(x = 'x', y = 'y')
-  
+
   if (show[1L]) {
     t1 <- 'Residuals vs Fitted'
     mapping <- ggplot2::aes_string(x = '.fitted', y = '.resid')
@@ -412,17 +415,17 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     p1 <- .decorate.label(p1, r.data)
     p1 <- .decorate.plot(p1, xlab = label.fitted, ylab = 'Residuals', title = t1)
   }
-  
+
   if (show[2L]) {
     t2 <- 'Normal Q-Q'
     qprobs <- c(0.25, 0.75)
-    
+
     qy <- stats::quantile(plot.data$.wstdresid, probs = qprobs, names = FALSE,
                           type = 7, na.rm = TRUE)
     qx <- stats::qnorm(qprobs)
     slope <- diff(qy) / diff(qx)
     int <- qy[1L] - slope * qx[1L]
-    
+
     mapping <- ggplot2::aes_string(x = '.qqx', y = '.qqy')
     p2 <- ggplot2::ggplot(data = plot.data, mapping = mapping)
     if (!is.logical(shape) || shape) {
@@ -438,7 +441,7 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     p2 <- .decorate.plot(p2, xlab = 'Theoretical Quantiles',
                          ylab = label.y23, title = t2)
   }
-  
+
   if (show[3L]) {
     t3 <- 'Scale-Location'
     mapping <- ggplot2::aes_string(x = '.fitted', y = 'sqrt(abs(.wstdresid))')
@@ -458,7 +461,7 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     p3 <- .decorate.plot(p3, xlab = label.fitted, ylab = label.y3,
                          title = t3)
   }
-  
+
   if (show[4L]) {
     t4 <- "Cook's distance"
     mapping <- ggplot2::aes_string(x = '.index', y = '.cooksd',
@@ -473,12 +476,12 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     p4 <- .decorate.plot(p4, xlab = 'Obs. Number',
                          ylab = "Cook's distance", title = t4)
   }
-  
+
   if (show[5L]) {
     if (is_const_lev & ncol(fs) > 0){
       t5 <- 'Constant Leverage:\nResiduals vs Factor Levels'
       mapping <- ggplot2::aes_string(x = '.nf', y = '.stdresid')
-      
+
       p5 <- ggplot2::ggplot(data = plot.data, mapping = mapping)
       if (!is.logical(shape) || shape) {
         p5 <- p5 + geom_factory(geom_point, plot.data,
@@ -514,7 +517,7 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
       p5 <- .decorate.plot(p5, xlab = 'Leverage', ylab = label.y5, title = t5)
     }
   }
-  
+
   if (show[6L]) {
     t6 <- "Cook's dist vs Leverage"
     mapping <- ggplot2::aes_string(x = '.hat', y = '.cooksd')
@@ -532,7 +535,7 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
     p6 <- .decorate.label(p6, cd.data)
     p6 <- .decorate.plot(p6, xlab = 'Leverage', ylab = "Cook's distance",
                          title = t6)
-    
+
     g <- dropInf(hii / (1 - hii), hii)
     p <- length(stats::coef(object))
     bval <- pretty(sqrt(p * plot.data$.cooksd / g), 5)
@@ -543,7 +546,7 @@ autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
                                       colour = ad.colour)
     }
   }
-  
+
   if (is.null(ncol)) { ncol <- 0 }
   if (is.null(nrow)) { nrow <- 0 }
   plot.list <- list(p1, p2, p3, p4, p5, p6)[which]

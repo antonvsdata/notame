@@ -282,7 +282,10 @@ perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
 #' @export
 perform_auc <- function(object, time = time_col(object), subject = subject_col(object),
                         group = group_col(object)) {
-
+  if (!requireNamespace("PK", quietly = TRUE)) {
+      stop("Package \"PK\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Start log
   log_text(paste("\nStarting AUC computation at", Sys.time()))
 
@@ -592,10 +595,12 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
   log_text(paste("\nStarting fitting linear mixed models at", Sys.time()))
 
   if (!requireNamespace("lmerTest", quietly = TRUE)) {
-    stop('package "lmerTest" required')
+      stop("Package \"lmerTest\" needed for this function to work. Please install it.",
+           call. = FALSE)
   }
   if (!requireNamespace("MuMIn", quietly = TRUE)) {
-    stop('package "MuMIn" required')
+      stop("Package \"MuMIn\" needed for this function to work. Please install it.",
+           call. = FALSE)
   }
 
   # Check that ci_method is one of the accepted choices
@@ -610,7 +615,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     # If fitting causes an error, a NULL row is returned
     result_row <- NULL
     tryCatch({
-      fit <- lmer(formula, data = data, ...)
+      fit <- lmerTest::lmer(formula, data = data, ...)
     },error = function(e) print(paste0(feature, ": ", e$message)))
     if (!is.null(fit)) {
       # Extract model coefficients
@@ -720,7 +725,10 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
 #'
 #' @export
 perform_homoscedasticity_tests <- function(object, formula_char, all_features = FALSE) {
-
+  if (!requireNamespace("car", quietly = TRUE)) {
+      stop("Package \"car\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Start log
   log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
 

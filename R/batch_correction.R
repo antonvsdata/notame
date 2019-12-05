@@ -12,6 +12,12 @@
 #'
 #' @export
 dobc <- function(object, batch, ref, ref_label, ...) {
+
+  if (!requireNamespace("BatchCorrMetabolomics", quietly = TRUE)) {
+      stop("Package \"BatchCorrMetabolomics\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+
   ref_idx <- which(pData(object)[, ref] == ref_label)
   seq_idx <- object$Injection_order
   batch_idx <- pData(object)[, batch]
@@ -47,6 +53,11 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 #' @export
 ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 
+  if (!requireNamespace("RUVSeq", quietly = TRUE)) {
+    stop("Bioconductor package RUVSeq needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   # Transform data to pseudo counts for RUVs
   exprs(object)[exprs(object) == 0] <- 1
   exprs(object) <- round(exprs(object))
@@ -79,6 +90,15 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #'
 #' @export
 pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center = TRUE, scale = "uv", nPcs = 3, ...) {
+
+  if (!requireNamespace("fpc", quietly = TRUE)) {
+    stop("Package \"fpc\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Drop flagged features if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -170,6 +190,11 @@ perform_repeatability <- function(object, group) {
 #' @return a MetaboSet object with the aligned features
 align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
 
+  if (!requireNamespace("batchCorr", quietly = TRUE)) {
+    stop("Package \"batchCorr\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   # Set working directory for plotting (the bathCorr functions saves plots in the current working directory...)
   if (!is.null(plot_folder)) {
     old_wd <- getwd()
@@ -212,6 +237,11 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #'
 #' @return list, the object with normalized features and information on which features were corrected by ref samples in each batch.
 normalize_batches <- function(object, batch, group = group_col(object), ref_label, ...) {
+
+  if (!requireNamespace("batchCorr", quietly = TRUE)) {
+      stop("Package \"batchCorr\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
 
   normData <- batchCorr::normalizeBatches(peakTable = t(exprs(object)), batches = pData(object)[, batch],
                                           sampleGroup = pData(object)[, group], refGroup = ref_label, ...)

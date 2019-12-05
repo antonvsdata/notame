@@ -280,8 +280,9 @@ find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1/60
 #'
 #' @export
 find_clusters <- function(connections, d_thresh = 0.8){
-  if(!requireNamespace("igraph", quietly = TRUE)){
-    stop("The igraph package is required for this function")
+  if (!requireNamespace("igraph", quietly = TRUE)) {
+      stop("Package \"igraph\" needed for this function to work. Please install it.",
+           call. = FALSE)
   }
 
   # Construct graph from the given edges
@@ -361,6 +362,10 @@ rescale <- function(x, new_min, new_max) {
 
 # UNFINISHED!!
 plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
+  if (!requireNamespace("igraph", quietly = TRUE)) {
+      stop("Package \"igraph\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
 
   # Ensure a correct order of the rows
   g <- cluster$graph
@@ -385,6 +390,10 @@ plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
 }
 
 plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window) {
+  if (!requireNamespace("ggrepel", quietly = TRUE)) {
+      stop("Package \"ggrepel\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
 
   features_tmp <- features[features[, name_col] %in% cluster$features, ]
 

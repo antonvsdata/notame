@@ -6,9 +6,6 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
   fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
   color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
-  # ggpubr::ggdensity(data, x, fill = fill, palette = c("#00AFBB", "#E7B800")) +
-  #   #fill_scale +
-  #   labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab)
   p <- ggplot(data, aes_string(x, fill = fill, color = fill)) +
     geom_density(alpha = 0.2) +
     fill_scale +
@@ -42,6 +39,10 @@ plot_dist_density <- function(object, all_features = FALSE, dist_method = "eucli
                               center = TRUE, scale = "uv",
                               color_scale = NULL, fill_scale = NULL,
                               title = NULL, subtitle = NULL) {
+  if (!requireNamespace("pcamethods", quietly = TRUE)) {
+      stop("Package \"pcamethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -106,7 +107,11 @@ plot_injection_lm <- function(object, all_features = FALSE) {
 #' @return if combine = TRUE, a ggplot object. Otherwise a list of ggplot objects
 #'
 #' @export
-plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
+plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE, x_label = "p-value") {
+  if (!requireNamespace("cowplot", quietly = TRUE)) {
+      stop("Package \"cowplot\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   # Custom breaks for the x-axis
   breaks <- seq(0, 1, by = 0.05)
 
@@ -117,7 +122,7 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
 
     p <- ggplot(data.frame(P = p_values[[i]]), aes(P)) +
       geom_histogram(breaks = breaks, col = "grey50", fill = "grey80", size = 1) +
-      labs(x="p-value", y="Frequency") +
+      labs(x = x_label, y = "Frequency") +
       ggtitle(names(p_values)[i]) +
       theme_minimal() +
       theme(plot.title = element_text(face="bold", hjust=0.5))
@@ -156,6 +161,10 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE) {
 #'
 #' @export
 plot_quality <- function(object, all_features = FALSE) {
+  if (!requireNamespace("cowplot", quietly = TRUE)) {
+      stop("Package \"cowplot\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
 
   # Plot bar plot of flags
   flags <- flag(object)
@@ -177,7 +186,7 @@ plot_quality <- function(object, all_features = FALSE) {
   }
 
   # Distribution of quality metrics
-  qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE)
+  qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE, x_label = "")
 
   p <- cowplot::plot_grid(plotlist = c(qps, list(fp)), ncol = 1)
   p

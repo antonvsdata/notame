@@ -3,7 +3,7 @@ Type: Package
 Title: Smoothing Metabolomics Analyses
 Version: 0.1.0
 authors@R: c(
-    person("Anton", "Mattsson", email = "antom@uef.fi", role = c("aut", "cre")),
+    person("Anton", "Klåvus", email = "anton.klavus@uef.fi", role = c("aut", "cre")),
     person("Jussi", "Paananen", role = "aut"),
     person("Oskari", "Timonen", role = "aut"))
 Description: Automates common preprocessing steps in a LC-MS metabolomics workflow
@@ -17,32 +17,34 @@ Depends:
     magrittr,
     Biobase
 Imports:
+    dplyr,
+    foreach,
+    tibble,
+    tidyr
+Suggests:
     car,
     cowplot,
     doParallel,
-    dplyr,
-    foreach,
+    fpc,
     ggdendro,
+    ggfortify,
     ggrepel,
-    grid,
     Hmisc,
     hexbin,
     igraph,
+    knitr,
     lme4,
     lmerTest,
-    mdatools,
     missForest,
+    mixOmics,
     openxlsx,
     pcaMethods,
     PK,
     randomForest,
     RColorBrewer,
+    rmarkdown,
     Rtsne,
-    testthat,
-    tibble,
-    tidyr
-Suggests:
-    knitr,
-    rmarkdown
+    RUVSeq,
+    testthat
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr

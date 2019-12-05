@@ -4,6 +4,10 @@
 
 # Helper function for computing PCA
 pca_helper <- function(object, center, scale, ...) {
+  if (!requireNamespace("pcamethods", quietly = TRUE)) {
+      stop("Package \"pcamethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
   R2 <- res_pca@R2
@@ -14,6 +18,14 @@ pca_helper <- function(object, center, scale, ...) {
 
 # Helper function for computing t-SNE
 t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+  if (!requireNamespace("Rtsne", quietly = TRUE)) {
+      stop("Package \"Rtsne\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
   if (sum(is.na(exprs(prepd))) > 0) {
@@ -176,12 +188,20 @@ scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed
 
   # Add point labels
   if (!is.null(label)) {
+    if (!requireNamespace("ggrepel", quietly = TRUE)) {
+        stop("Package \"ggrepel\" needed for this function to label the points. Please install it.",
+             call. = FALSE)
+    }
     p <- p +
       ggrepel::geom_text_repel(aes_string(label = label))
   }
 
   # Add density plots to top and right
   if (density) {
+    if (!requireNamespace("cowplot", quietly = TRUE)) {
+      stop("Package \"cowplot\" needed for this function to add density curves. Please install it.",
+           call. = FALSE)
+    }
     xdens <- cowplot::axis_canvas(p, axis = "x")+
       geom_density(data = data, aes_string(x = x, fill = color),
                    alpha = 0.7, size = 0.2) +
@@ -224,6 +244,14 @@ scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed
 plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                               npc1 = 10, npc2 = 10,
                               title = "PCA loadings", subtitle = NULL, ...) {
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+  if (!requireNamespace("ggrepel", quietly = TRUE)) {
+      stop("Package \"ggrepel\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   pca_res <- pcaMethods::pca(object, center = TRUE, scale = "uv", ...)
 
   loads <- pca_res@loadings %>%
@@ -335,7 +363,14 @@ plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale 
 hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_scale = NULL,
                          title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          fill_lab = fill) {
-
+  if (!requireNamespace("hexbin", quietly = TRUE)) {
+      stop("Package \"hexbin\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+  if (!requireNamespace("Hmisc", quietly = TRUE)) {
+      stop("Package \"Hmisc\" needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
   fill_scale <- fill_scale %||% getOption("amp.fill_scale_con")
 
   p <- ggplot(data, aes_string(x = x, y = y, z = fill)) +
