@@ -53,6 +53,18 @@ finite_median <- function(x) {
 
 #' @export
 #' @rdname finite_helpers
+finite_min <- function(x) {
+  min(x[is.finite(x)], na.rm = TRUE)
+}
+
+#' @export
+#' @rdname finite_helpers
+finite_max <- function(x) {
+  max(x[is.finite(x)], na.rm = TRUE)
+}
+
+#' @export
+#' @rdname finite_helpers
 finite_mad <- function(x) {
   mad(x[is.finite(x)], center = median(x[is.finite(x)], na.rm = TRUE), na.rm = TRUE)
 }

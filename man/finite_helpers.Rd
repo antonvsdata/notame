@@ -5,6 +5,8 @@
 \alias{finite_sd}
 \alias{finite_mean}
 \alias{finite_median}
+\alias{finite_min}
+\alias{finite_max}
 \alias{finite_mad}
 \alias{finite_quantile}
 \title{Summary statistics of finite elements}
@@ -14,6 +16,10 @@ finite_sd(x)
 finite_mean(x)
 
 finite_median(x)
+
+finite_min(x)
+
+finite_max(x)
 
 finite_mad(x)
 

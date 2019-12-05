@@ -148,6 +148,77 @@ impute_rf <- function(object, all_features = FALSE, ...) {
   object
 }
 
+#' Simple imputation
+#'
+#' Impute missing values using a simple imputation strategy. All missing values
+#' of a feature are imputed with the same value. It is possible
+#' to only impute features with a large number of missing values this way. This can be useful
+#' for using this function before random forest imputation to speed things up.
+#' The imputation strategies available are:
+#'
+#' \itemize{
+#' \item a numeric value: impute all missing values in all features with the same value, e.g. 1
+#' \item "min": impute missing values of a feature with the minimum observed value of that feature
+#' \item "half_min": impute missing values of a feature with half the minimum observed value of that feature
+#' \item "small_random": impute missing values of a feature with random numbers between 0 and the
+#' minimum of that feature (uniform distribution, remember to set the seed number!).
+#' }
+#'
+#' @param object a MetaboSet object
+#' @param value the value used for imputation, either a numeric or one of "min", "half_min", "small_random",
+#' see above
+#' @param na_limit only impute features with the proportion of NAs over this limit. For example, if
+#' \code{na_limit = 0.5}, only features with at least half of the values missing are imputed.
+#'
+#' @examples
+#' missing <- mark_nas(merged_sample, 0)
+#' imputed <- impute_simple(missing, value = "min")
+#'
+#' @export
+impute_simple <- function(object, value, na_limit = 0) {
+
+  imp <- exprs(object)
+  nas <- apply(imp, 1, prop_na)
+  imp <- imp[nas > na_limit, ]
+  if (nrow(imp) == 0) {
+    stop("none of the features satisfy the NA limit")
+  }
+
+  # Replace all missing values with the given constant
+  if (is.numeric(value)) {
+    imp[is.na(imp)] <- value
+  } else if (value == "min") {
+    imp <- t(apply(imp, 1, function(x){
+      x[is.na(x)] <- finite_min(x)
+      x
+    }))
+  } else if (value == "half_min") {
+    imp <- t(apply(imp, 1, function(x){
+      x[is.na(x)] <- finite_min(x) / 2
+      x
+    }))
+  } else if (value == "small_random") {
+    imp <- t(apply(imp, 1, function(x){
+      x[is.na(x)] <- runif(n = sum(is.na(x)), min = 0, max = finite_min(x))
+      x
+    }))
+  } else {
+    stop('value should be a numeric value or one of "min", "half_min", "small_random"')
+  }
+
+  obj <- merge_exprs(object, imp)
+  obj
+}
+
+impo <- mtcars[1:15, ]
+for (k in 1:50) {
+  i <- sample(seq_len(nrow(impo)), 1)
+  j <- sample(seq_len(ncol(impo)), 1)
+  impo[i, j] <- NA
+}
+
+
+
 #' Inverse-rank normalization
 #'
 #' Applies inverse rank normalization to all features to approximate
