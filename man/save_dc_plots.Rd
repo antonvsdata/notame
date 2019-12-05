@@ -4,8 +4,9 @@
 \alias{save_dc_plots}
 \title{Drift correction plots}
 \usage{
-save_dc_plots(orig, dc, predicted, file, width = 8, height = 6,
-  color = group_col(orig), shape = NULL, color_scale = NULL)
+save_dc_plots(orig, dc, predicted, file, log_transform = TRUE,
+  width = 8, height = 6, color = "QC", shape = NULL,
+  color_scale = NULL, shape_scale = NULL)
 }
 \arguments{
 \item{orig}{a MetaboSet object, before drift correction}
@@ -15,6 +16,8 @@ save_dc_plots(orig, dc, predicted, file, width = 8, height = 6,
 \item{predicted}{a matrix of predicted values, as returned by dc_cubic_spline}
 
 \item{file}{path to the PDF file where the plots should be saved}
+
+\item{log_transform}{logical, was the drift correction done on log-transformed data?}
 
 \item{width, height}{width and height of the plots in inches}
 
@@ -26,7 +29,9 @@ save_dc_plots(orig, dc, predicted, file, width = 8, height = 6,
 }
 \description{
 Plots the data before and after drift correction, with the regression line drawn with
-the original data.
+the original data. If the drift correction was done on log-transformed data, then
+plots of both the original and log-transformed data before and after correction are drawn.
+The plot shows 2 standard deviation spread for both QC samples and regular samples.
 }
 \details{
 If \code{shape} is set to \code{NULL} (the default), the column used for color

@@ -4,9 +4,9 @@
 \alias{save_batch_plots}
 \title{Save batch correction plots}
 \usage{
-save_batch_plots(orig, corrected, file, batch = "Batch",
-  color = "Batch", shape = "QC", color_scale = NULL,
-  shape_scale = NULL)
+save_batch_plots(orig, corrected, file, width = 14, height = 10,
+  batch = "Batch", color = "Batch", shape = "QC",
+  color_scale = NULL, shape_scale = NULL)
 }
 \arguments{
 \item{orig, corrected}{MetaboSet objects before and after batch effect correction}

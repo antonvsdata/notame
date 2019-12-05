@@ -177,6 +177,7 @@ merge_batch_helper <- function(x, y) {
   merged_fdata <- fdata_batch_helper(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
   merged_results <- dplyr::left_join(results(x), results(y))
+  rownames(merged_results) <- merged_results$Feature_ID
 
   merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))

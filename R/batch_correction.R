@@ -236,7 +236,8 @@ normalize_batches <- function(object, batch, group = group_col(object), ref_labe
 #' @param batch,color,shape column names of pData for batch labels,
 #' and column used for coloring and shaping points (by default batch and QC)
 #' @param color_scale,shape_scale scales for color and scale as returned by ggplot functions.
-save_batch_plots <- function(orig, corrected, file, batch = "Batch", color = "Batch", shape = "QC",
+save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
+                             batch = "Batch", color = "Batch", shape = "QC",
                              color_scale = NULL, shape_scale = NULL) {
 
   color_scale <- color_scale %||% getOption("amp.color_scale_dis")
@@ -258,11 +259,11 @@ save_batch_plots <- function(orig, corrected, file, batch = "Batch", color = "Ba
 
   get_batch_means <- function(data) {
     batch_means <- batch_mean_helper(data) %>%
-      dplyr::mutate(QC = FALSE)
+      dplyr::mutate(QC = "Sample")
     batch_means_qc <- data %>%
       dplyr::filter(QC == "QC") %>%
       batch_mean_helper() %>%
-      dplyr::mutate(QC = TRUE)
+      dplyr::mutate(QC = "QC")
 
     rbind(batch_means, batch_means_qc)
   }
@@ -285,11 +286,13 @@ save_batch_plots <- function(orig, corrected, file, batch = "Batch", color = "Ba
     p <- p +
       geom_segment(data = batch_means, mapping = aes_string(x = "start", xend = "end",
                                                             y = fname, yend = fname,
-                                                            color = color, linetype = "QC"))
+                                                            color = color, linetype = "QC"),
+                   size = 1) +
+      scale_linetype(guide = FALSE)
     p
   }
 
-  pdf(file)
+  pdf(file, width = width, height = height)
 
   for (feature in featureNames(orig)) {
     p1 <- batch_plot_helper(data_orig, feature, batch_means_orig)

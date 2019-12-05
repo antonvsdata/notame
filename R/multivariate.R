@@ -74,6 +74,7 @@ importance_rf <- function(rf) {
 #' @example
 #' plsda_res <- mixomics_plsda(merged_sample, y = "Group")
 #'
+#' @export
 mixomics_plsda <- function(object, y, ...) {
   # Extract X and Y matrices
   X <- t(exprs(object))
@@ -103,6 +104,8 @@ mixomics_plsda <- function(object, y, ...) {
 #'
 #' @example
 #' plsda_res <- mixomics_plsda_optimize(merged_sample, y = "Group", ncomp_max = 5)
+#'
+#' @export
 mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
 
   plsda_res <- mixomics_plsda(object = object, y = y, ncomp_max, ...)
@@ -142,6 +145,8 @@ mixomics_plsda_optimize <- function(object, y, ncomp_max, ...) {
 #'
 #' @example
 #' plsda_res <- mixomics_splsda_optimize(merged_sample, y = "Group", ncomp_max = 5)
+#'
+#' @export
 mixomics_splsda_optimize <- function(object, y, ncomp_max, dist,
                                      n_features = c(1:10, seq(20, 300, 10)), ...) {
 

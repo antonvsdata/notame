@@ -4,12 +4,15 @@
 \alias{inspect_dc}
 \title{Flag the results of drift correction}
 \usage{
-inspect_dc(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0")
+inspect_dc(orig, dc, check_quality,
+  condition = "RSD_r < 0 & D_ratio_r < 0")
 }
 \arguments{
 \item{orig}{a MetaboSet object, before drift correction}
 
 \item{dc}{a MetaboSet object, after drift correction}
+
+\item{check_quality}{logical, whether quality should be monitored.}
 
 \item{condition}{a character specifying the condition, see Details}
 }
@@ -17,11 +20,15 @@ inspect_dc(orig, dc, condition = "RSD_r < 0 & D_ratio_r < 0")
 MeatboSet object
 }
 \description{
-Chooses whether the drift correction worked well enough by applying
-the specified condition for each feature.
-If the condition is fulfilled, the drift corrected feature is retained,
+Determines whether the drift correction worked.
+The primary reason is to search for features where there were too many missing values in the QCs,
+so it was not possible to run drift correction. If the drift correction is run on the original
+values (not log-transformed), then there is also a need to check that the correction did not result
+in any negative values. This can sometimes happen if the prediction curve takes an extreme shape.
+If quality is monitored,
+a quality condition is checked for each feature. If the condition is fulfilled, the drift corrected feature is retained,
 otherwise the original feature is retained and the drift corrected feature is discarded.
-The result of this operation is recorded in the feature data
+The result of this operation is recorded in the feature data.
 }
 \details{
 The \code{condition} parameter should be a character giving a condition compatible
