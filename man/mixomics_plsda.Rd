@@ -22,3 +22,7 @@ The object can then be passed to many of the mixOmics functions for prediction,
 performance evaluation etc. To run initial optimization for a PLS-DA model,
 try \code{\link{mixomics_plsda_optimize}}.
 }
+\examples{
+plsda_res <- mixomics_plsda(merged_sample, y = "Group")
+
+}

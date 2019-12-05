@@ -29,3 +29,7 @@ Automatically evaluates performance with different number of components and
 different number of features per component, then chooses the optimal number of components and
 optimal number of features for each component.
 }
+\examples{
+plsda_res <- mixomics_splsda_optimize(merged_sample, dist = "max.dist", y = "Group", ncomp_max = 5)
+
+}
