@@ -181,7 +181,8 @@ impute_simple <- function(object, value, na_limit = 0) {
   nas <- apply(imp, 1, prop_na)
   imp <- imp[nas > na_limit, ]
   if (nrow(imp) == 0) {
-    stop("none of the features satisfy the NA limit")
+    warning("none of the features satisfy the NA limit, returning the original object")
+    return(object)
   }
 
   # Replace all missing values with the given constant
