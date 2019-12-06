@@ -27,7 +27,7 @@ flagged as "Low_qc_detection", while low detection rate in the study groups is f
 recorded in \code{results(object)}
 }
 \examples{
-ex_set <- flag_detection(example_set)
+ex_set <- flag_detection(merged_sample)
 results(ex_set)
 
 }

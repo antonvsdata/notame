@@ -49,6 +49,10 @@ meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, 
 drift corrected feature is discarded and the original is retained. If \code{shape} is set to \code{NULL} (the default), the column used for color
 is also used for shape
 }
+\examples{
+corrected <- correct_drift(merged_sample)
+
+}
 \seealso{
 \code{\link{dc_cubic_spline}}, \code{\link[stats]{smooth.spline}} for details about the regression,
 \code{\link{inspect_dc}} for analysing the drift correction results,

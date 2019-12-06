@@ -26,6 +26,12 @@ Use parallelize = "variables" to run in parallel for faster testing.
 NOTE: running in parallel prevents user from setting a seed number.
 \strong{CITATION:} When using this function, cite the \code{missForest} package
 }
+\examples{
+missing <- mark_nas(example_set, 0)
+set.seed(38)
+imputed <- impute_rf(missing)
+
+}
 \seealso{
 \code{\link[missForest]{missForest}} for detail about the algorithm and the parameters
 }

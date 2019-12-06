@@ -18,6 +18,10 @@ A ggplot object
 Plots histograms of p-values from linear regression model, where each feature is predicted
 by injection order alone. The expected uniform distribution is represented by a dashed red line.
 }
+\examples{
+plot_injection_lm(merged_sample)
+
+}
 \seealso{
 \code{\link{plot_p_histogram}}
 }

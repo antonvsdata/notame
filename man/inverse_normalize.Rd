@@ -16,3 +16,7 @@ MetaboSet object as the one supplied, with normalized features
 Applies inverse rank normalization to all features to approximate
 a normal distribution.
 }
+\examples{
+normalized <- inverse_normalize(merged_sample)
+
+}

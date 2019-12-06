@@ -32,3 +32,7 @@ Plots a boxplot of the distribution of the metabolite values for each sample. Th
 be ordered and filled by any combination of columns in the pheno data. By default, order and
 fill are both determined by the combination of group and time columns.
 }
+\examples{
+plot_sample_boxplots(merged_sample, order_by = "Group", fill_by = "Group")
+
+}

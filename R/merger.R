@@ -114,6 +114,10 @@ merge_helper <- function(x, y) {
 #'
 #' @return A merged MetaboSet object
 #'
+#' @examples
+#' merged <- merge_metabosets(hilic_neg_sample, hilic_pos_sample,
+#'                            rp_neg_sample, rp_pos_sample)
+#'
 #' @export
 merge_metabosets <- function(...) {
 
@@ -200,6 +204,11 @@ merge_batch_helper <- function(x, y) {
 #' @param ... MetaboSet objects or a list of Metaboset objects
 #'
 #' @return A merged MetaboSet object
+#'
+#' @examples
+#' batch1 <- merged_sample[, merged_sample$Batch == 1]
+#' batch2 <- merged_sample[, merged_sample$Batch == 2]
+#' merged <- merge_batches(batch1, batch2)
 #'
 #' @export
 merge_batches <- function(...) {

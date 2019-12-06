@@ -90,10 +90,10 @@ setMethod("assess_quality", c(object = "MetaboSet"),
 #' Metabolomics : Official journal of the Metabolomic Society vol. 14,6 (2018): 72. doi:10.1007/s11306-018-1367-3
 #'
 #' @examples
-#' ex_set <- flag_quality(example_set)
+#' ex_set <- flag_quality(merged_sample)
 #' results(ex_set)
 #' # Custom condition
-#' ex_set <- flag_quality(example_set, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
+#' ex_set <- flag_quality(merged_sample, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
 #' results(ex_set)
 #'
 #' @export
@@ -140,7 +140,7 @@ setMethod("flag_quality", c(object = "MetaboSet"),
 #' @return a MetaboSet object with the features flagged
 #'
 #' @examples
-#' ex_set <- flag_detection(example_set)
+#' ex_set <- flag_detection(merged_sample)
 #' results(ex_set)
 #'
 #' @export

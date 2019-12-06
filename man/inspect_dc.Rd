@@ -37,6 +37,13 @@ RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_
 meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the
 drift corrected feature is discarded and the original is retained.
 }
+\examples{
+dc <- dc_cubic_spline(merged_sample)
+corrected <- dc$object
+inspected <- inspect_dc(orig = merged_sample, dc = corrected,
+                        check_quality = TRUE)
+
+}
 \seealso{
 \code{\link{correct_drift}}, \code{\link{save_dc_plots}}
 }

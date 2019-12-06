@@ -16,6 +16,9 @@
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
 #'
+#' @examples
+#' \dontrun{save_subject_line_plots(drop_qcs(example_set), file = "subject_lines.pdf")}
+#'
 #' @export
 save_subject_line_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                     x = time_col(object), id = subject_col(object),
@@ -87,6 +90,15 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
 #'
+#' @examples
+#' \dontrun{
+#' # Default boxplots by group
+#' save_group_boxplots(drop_qcs(merged_sample), file = "boxplots.pdf")
+#' # x and color can be a different variable
+#' save_group_boxplots(drop_qcs(merged_sample), file = "boxplots_time.pdf",
+#'                     x = "Time", color = "Group")
+#' }
+#'
 #' @export
 save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                 x = group_col(object), color = group_col(object),
@@ -144,6 +156,9 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
 #' @param color_scale the color scale as returned by a ggplot function
 #'
 #' @seealso \code{\link[ggplot2]{stat_summary}}
+#'
+#' @examples
+#' \dontrun{save_group_lineplots(drop_qcs(merged_sample), file = "group_lineplots.pdf")}
 #'
 #' @export
 save_group_lineplots <- function(object, all_features = FALSE, file, width = 8, height = 6,

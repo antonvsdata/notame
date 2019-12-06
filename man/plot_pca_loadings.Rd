@@ -32,6 +32,10 @@ Computes PCA using one of the methods provided in the Bioconductor package
 pcaMethods and plots the loadings of first principal components
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
+\examples{
+plot_pca_loadings(merged_sample, npc1 = 5, npc2 = 5)
+
+}
 \seealso{
 \code{\link[pcaMethods]{pca}}
 }

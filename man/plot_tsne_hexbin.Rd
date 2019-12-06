@@ -47,6 +47,10 @@ the  method can be changed to "ppca" if niipals fails.
 \details{
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
+\examples{
+plot_tsne_hexbin(merged_sample)
+
+}
 \seealso{
 \code{\link[Rtsne]{Rtsne}}
 }

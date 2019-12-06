@@ -15,3 +15,8 @@ A merged MetaboSet object
 \description{
 Merge MetaboSet objects together
 }
+\examples{
+merged <- merge_metabosets(hilic_neg_sample, hilic_pos_sample,
+                           rp_neg_sample, rp_pos_sample)
+
+}

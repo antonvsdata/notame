@@ -46,6 +46,10 @@ Computes PCA using one of the methods provided in the Bioconductor package
 pcaMethods and plots the two first principal components
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
+\examples{
+plot_pca(merged_sample, color = "Injection_order", shape = "Group")
+
+}
 \seealso{
 \code{\link[pcaMethods]{pca}}
 }

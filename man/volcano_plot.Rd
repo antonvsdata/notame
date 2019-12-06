@@ -42,3 +42,11 @@ a ggplot object
 \description{
 Draws a volcano plot of effect size and p-values.
 }
+\examples{
+# naturally, this looks messy as there are not enough p-values
+lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+volcano_plot(data = lm_results, x = "GroupB_Estimate",
+             p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+             fdr_limit = 0.1)
+
+}

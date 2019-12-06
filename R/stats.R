@@ -75,6 +75,9 @@ summary_statistics <- function(object, grouping_cols = group_col(object)) {
 #'
 #' @return data frame with Cohen's d for each feature
 #'
+#' @examples
+#' d_results <- cohens_d(drop_qcs(example_set))
+#'
 #' @export
 cohens_d <- function(object, id = subject_col(object), group = group_col(object),
                      time = time_col(object)) {

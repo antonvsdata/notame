@@ -51,6 +51,10 @@ In case there are missing values, PCA is performed using the nipals method of \c
 the  method can be changed to "ppca" if nipals fails.
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
+\examples{
+plot_tsne(merged_sample, color = "Time", shape = "Group")
+
+}
 \seealso{
 \code{\link[Rtsne]{Rtsne}}
 }

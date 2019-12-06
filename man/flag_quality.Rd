@@ -35,10 +35,10 @@ The default condition keeps features that pass either of the two following condi
 \deqn{RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1}
 }
 \examples{
-ex_set <- flag_quality(example_set)
+ex_set <- flag_quality(merged_sample)
 results(ex_set)
 # Custom condition
-ex_set <- flag_quality(example_set, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
+ex_set <- flag_quality(merged_sample, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
 results(ex_set)
 
 }

@@ -56,7 +56,7 @@ coalesce<-function(...) {
 #' \code{\link{hclust}} for hierarchical clustering.
 #'
 #' @examples
-#' # COmpute correlations between variables
+#' # Compute correlations between variables
 #' correlations <- perform_correlation_tests(example_set, x = featureNames(example_set), duplicates = TRUE)
 #'
 #' # Minimal example

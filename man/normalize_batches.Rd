@@ -4,8 +4,7 @@
 \alias{normalize_batches}
 \title{Normalize batches}
 \usage{
-normalize_batches(object, batch, group = group_col(object), ref_label,
-  ...)
+normalize_batches(object, batch, group, ref_label, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -17,9 +16,17 @@ normalize_batches(object, batch, group = group_col(object), ref_label,
 \item{...}{additional parameters passed to batchCorr::normalizeBatches}
 }
 \value{
-list, the object with normalized features and information on which features were corrected by ref samples in each batch.
+list, the object with normalized features and information on which
+features were corrected by ref samples in each batch.
 }
 \description{
 Normalize bathces by either reference samples of population median.
 Uses normalizeBatches function from the batchCorr package
+}
+\examples{
+# Batch correction
+batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+# Evaluate batch correction
+pca_bhattacharyya_dist(merged_sample, batch = "Batch")
+pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 }

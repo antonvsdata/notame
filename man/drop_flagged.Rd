@@ -15,3 +15,10 @@ drop_flagged(object, all_features = FALSE)
 Removes all features that have been flagged by quality control functions.
 Only features that do not have a flag (Flag == NA) are retained.
 }
+\examples{
+dim(merged_sample)
+flagged <- flag_quality(merged_sample)
+noflags <- drop_flagged(flagged)
+dim(noflags)
+
+}

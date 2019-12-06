@@ -27,6 +27,7 @@ Plot model diagnostics for lm or lmer models fit separately for each feature.
 One page of plots is saved per feature. Uses autoplot function from ggfortify
 }
 \examples{
+\dontrun{
 save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group", model_type = "lm", file = "test.pdf")
 
 # Add colouring by time point (don't mind the warnings)
@@ -36,6 +37,6 @@ save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group",
 # Linear mixed model
 save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group + (1|Subject_ID)",
                          model_type = "lmer", file = "test.pdf")
-
+}
 
 }

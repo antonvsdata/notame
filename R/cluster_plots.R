@@ -16,6 +16,9 @@
 #'
 #' @return A ggplot object.
 #'
+#' @examples
+#' plot_dendrogram(merged_sample)
+#'
 #' @seealso \code{\link{dist}} \code{\link{hclust}}
 #'
 #' @export
@@ -87,6 +90,9 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
 #'
 #' @return a ggplot object. If \code{group_bar} is \code{TRUE}, the plot will consist of multiple
 #' parts and is harder to modify.
+#'
+#' @examples
+#' plot_sample_heatmap(merged_sample)
 #'
 #' @seealso \code{\link{dist}} \code{\link{hclust}}
 #'

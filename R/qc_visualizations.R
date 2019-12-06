@@ -31,6 +31,12 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' @param title the plot title
 #' @param subtitle the plot subtitle
 #'
+#' @return a ggplot object
+#'
+#' @examples
+#' plot_dist_density(merged_sample)
+#' # Drift correction tightens QCs together
+#' plot_dist_density(correct_drift(merged_sample))
 #'
 #' @seealso \code{\link[stats]{dist}}
 #'
@@ -39,8 +45,8 @@ plot_dist_density <- function(object, all_features = FALSE, dist_method = "eucli
                               center = TRUE, scale = "uv",
                               color_scale = NULL, fill_scale = NULL,
                               title = NULL, subtitle = NULL) {
-  if (!requireNamespace("pcamethods", quietly = TRUE)) {
-      stop("Package \"pcamethods\" needed for this function to work. Please install it.",
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   # Drop flagged compounds if not told otherwise
@@ -76,6 +82,9 @@ plot_dist_density <- function(object, all_features = FALSE, dist_method = "eucli
 #' @return A ggplot object
 #'
 #' @seealso \code{\link{plot_p_histogram}}
+#'
+#' @examples
+#' plot_injection_lm(merged_sample)
 #'
 #' @export
 plot_injection_lm <- function(object, all_features = FALSE) {
@@ -209,6 +218,9 @@ plot_quality <- function(object, all_features = FALSE) {
 #' the boxplots shown. Defaults to TRUE.
 #'
 #' @return a ggplot object
+#'
+#' @examples
+#' plot_sample_boxplots(merged_sample, order_by = "Group", fill_by = "Group")
 #'
 #' @export
 plot_sample_boxplots <- function(object, all_features = FALSE, order_by = NULL, fill_by = NULL,

@@ -27,3 +27,13 @@ save_group_boxplots(object, all_features = FALSE, file, width = 8,
 Draws a boxplot of feature abundances in each group.
 A separate plot is drawn for each feature.
 }
+\examples{
+\dontrun{
+# Default boxplots by group
+save_group_boxplots(drop_qcs(merged_sample), file = "boxplots.pdf")
+# x and color can be a different variable
+save_group_boxplots(drop_qcs(merged_sample), file = "boxplots_time.pdf",
+                    x = "Time", color = "Group")
+}
+
+}

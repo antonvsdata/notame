@@ -42,6 +42,13 @@ a ggplot object.
 Plots changes in PCA space according to time. All the observations of a single subject are connected
 by an arrow ending at the last observation.
 }
+\examples{
+plot_pca_arrows(drop_qcs(example_set))
+# If the sample size is large, plot groups separately
+plot_pca_arrows(drop_qcs(example_set)) +
+facet_wrap(~ Group)
+
+}
 \seealso{
 \code{\link[pcaMethods]{pca}}
 }

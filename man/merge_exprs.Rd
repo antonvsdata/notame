@@ -11,9 +11,24 @@ merge_exprs(object, y)
 
 \item{y}{matrix containing new values to be merged into exprs}
 }
+\value{
+a MetaboSet object with the new exprs values
+}
 \description{
 Replaces a subset of data in exprs of an object by new values.
 Used after an operation such as imputation is computed only for a subset of features or samples
 such as only good-quality features that have not been flagged.
 This function is mainly used internally, but can be useful.
+}
+\examples{
+ex_set <- merged_sample[1:5, 1:5]
+exprs(ex_set)
+# Create a matrix of replacment values for rows 1, 3, 5 and columns 1, 3, 4
+replacement <- matrix(1:9, ncol = 3,
+                      dimnames = list(featureNames(ex_set)[c(1, 3, 5)],
+                                      sampleNames(ex_set)[c(1, 3, 4)]))
+replacement
+merged <- merge_exprs(ex_set, replacement)
+exprs(merged)
+
 }

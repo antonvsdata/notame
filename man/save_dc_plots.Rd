@@ -5,7 +5,7 @@
 \title{Drift correction plots}
 \usage{
 save_dc_plots(orig, dc, predicted, file, log_transform = TRUE,
-  width = 8, height = 6, color = "QC", shape = NULL,
+  width = 16, height = 8, color = "QC", shape = NULL,
   color_scale = NULL, shape_scale = NULL)
 }
 \arguments{
@@ -39,4 +39,14 @@ is also used for shape
 }
 \seealso{
 \code{\link{correct_drift}}, \code{\link{inspect_dc}}
+
+ @examples
+\dontrun{
+dc <- dc_cubic_spline(merged_sample)
+corrected <- dc$object
+inspected <- inspect_dc(orig = merged_sample, dc = corrected,
+                        check_quality = TRUE)
+save_dc_plots(orig = merged_sample, dc = corrected, predicted = dc$predicted,
+              file = "drift_plots.pdf")
+}
 }

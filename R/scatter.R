@@ -4,8 +4,8 @@
 
 # Helper function for computing PCA
 pca_helper <- function(object, center, scale, ...) {
-  if (!requireNamespace("pcamethods", quietly = TRUE)) {
-      stop("Package \"pcamethods\" needed for this function to work. Please install it.",
+  if (!requireNamespace("pcaMethods", quietly = TRUE)) {
+      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
@@ -65,6 +65,9 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
 #' parts and is harder to modify.
 #'
+#' @examples
+#' plot_pca(merged_sample, color = "Injection_order", shape = "Group")
+#'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
@@ -113,6 +116,9 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
 #' parts and is harder to modify.
+#'
+#' @examples
+#' plot_tsne(merged_sample, color = "Time", shape = "Group")
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
@@ -166,6 +172,13 @@ scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed
          color = color_lab)
   if (fixed) {
     p <- p + coord_fixed() + theme(aspect.ratio=1)
+  }
+
+  if (class(data[, shape]) == "character") {
+    data[shape] <- as.factor(data[, shape])
+    warning(paste("Shape variable not given as a factor, converted to factor with levels",
+                  paste(levels(data[, shape]), collapse = ", ")),
+            call. = FALSE)
   }
 
   if (class(data[, shape]) == "factor") {
@@ -238,6 +251,9 @@ scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed
 #'
 #' @return a ggplot object.
 #'
+#' @examples
+#' plot_pca_loadings(merged_sample, npc1 = 5, npc2 = 5)
+#'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
@@ -295,6 +311,9 @@ plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale
 #'
 #' @return A ggplot object.
 #'
+#' @examples
+#' plot_pca_hexbin(merged_sample)
+#'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
@@ -337,6 +356,9 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #'
 #' @return
 #' A ggplot object.
+#'
+#' @examples
+#' plot_tsne_hexbin(merged_sample)
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
@@ -425,6 +447,12 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 #'
 #' @return a ggplot object.
 #'
+#' @examples
+#' plot_pca_arrows(drop_qcs(example_set))
+#' # If the sample size is large, plot groups separately
+#' plot_pca_arrows(drop_qcs(example_set)) +
+#' facet_wrap(~ Group)
+#'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
@@ -475,6 +503,12 @@ plot_pca_arrows <- function(object, all_features = FALSE, center = TRUE, scale =
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
 #' parts and is harder to modify.
+#'
+#' @examples
+#' plot_tsne_arrows(drop_qcs(example_set))
+#' # If the sample size is large, plot groups separately
+#' plot_tsne_arrows(drop_qcs(example_set)) +
+#' facet_wrap(~ Group)
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
@@ -527,6 +561,13 @@ minus_log10 <- scales::trans_new("minus_log19",
 #'
 #' @return a ggplot object
 #'
+#' @examples
+#' # naturally, this looks messy as there are not enough p-values
+#' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+#' volcano_plot(data = lm_results, x = "GroupB_Estimate",
+#'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'              fdr_limit = 0.1)
+#'
 #' @export
 volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
                          p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
@@ -563,12 +604,17 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
         scale_y_continuous(trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks),
                            sec.axis = sec_axis(~., breaks = q_limit, labels = paste("q =", fdr_limit)))
     } else {
-      warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line")
+      warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line",
+              call. = FALSE)
+      pl <- pl +
+        scale_y_continuous(trans = minus_log10, breaks = p_breaks,
+                           labels = as.character(p_breaks))
     }
 
   } else {
     pl <- pl +
-      scale_y_continuous(trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks))
+      scale_y_continuous(trans = minus_log10, breaks = p_breaks,
+                         labels = as.character(p_breaks))
   }
 
   if (log2_x) {
@@ -616,6 +662,19 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
 #'
 #' @return a ggplot object
 #'
+#' @examples
+#' # naturally, this looks messy as there are not enough p-values
+#' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+#' lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
+#' # Traditional Manhattan plot
+#' manhattan_plot(data = lm_data, x = "Average.Mz",
+#'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'              fdr_limit = 0.1)
+#' # Directed Manhattan plot
+#' manhattan_plot(data = lm_data, x = "Average.Mz", effect = "GroupB_Estimate",
+#'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'              fdr_limit = 0.1)
+#'
 #' @export
 manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL,
                            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
@@ -648,7 +707,7 @@ manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL
     theme(panel.grid.minor.y = element_blank(),
           axis.ticks.y = element_blank()) +
     geom_hline(yintercept = 0, color = "grey") +
-    labs(title = title, subtitle = subtitle)
+    labs(title = title, subtitle = subtitle, y = "p-value")
 
 
   if(!is.null(p_fdr)) {
@@ -670,7 +729,10 @@ manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL
                              sec.axis = sec_axis(~., breaks = -log10(q_limit), labels = paste("q =", fdr_limit)))
       }
     } else {
-      warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line")
+      warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line",
+              call. = FALSE)
+      pl <- pl +
+        scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim)
     }
   } else {
     pl <- pl +

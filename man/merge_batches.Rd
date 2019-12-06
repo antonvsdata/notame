@@ -15,3 +15,9 @@ A merged MetaboSet object
 \description{
 Merge MetaboSet objects of batches together
 }
+\examples{
+batch1 <- merged_sample[, merged_sample$Batch == 1]
+batch2 <- merged_sample[, merged_sample$Batch == 2]
+merged <- merge_batches(batch1, batch2)
+
+}

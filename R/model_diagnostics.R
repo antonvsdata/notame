@@ -13,6 +13,7 @@
 #' @param ... other parameters passed to lm/lmer and/or autoplot function from the ggfortify package
 #'
 #' @examples
+#' \dontrun{
 #' save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group", model_type = "lm", file = "test.pdf")
 #'
 #' # Add colouring by time point (don't mind the warnings)
@@ -22,7 +23,7 @@
 #' # Linear mixed model
 #' save_lm_diagnostic_plots(example_set, formula_char = "Feature ~ Group + (1|Subject_ID)",
 #'                          model_type = "lmer", file = "test.pdf")
-#'
+#' }
 #'
 #' @export
 save_lm_diagnostic_plots <- function(object, formula_char, model_type = c("lm", "lmer"), file, all_features = FALSE,

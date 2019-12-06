@@ -21,7 +21,18 @@ and column used for coloring and shaping points (by default batch and QC)}
 \description{
 Saves plots of each feature showing the effect of batch correction.
 Plots show QC samples and regular samples inside each batch, plus the
-batch mean for all samples and QC samples as a horizontal line.
+batch mean for biological samples and QC samples as a horizontal line.
+The dashed line represents QC mean, the filled line represents biological
+sample mean.
 NOTE: if you change the shape variable, be sure to set a shape scale as well,
 the default scale only has 2 values, so it can only accomodate 2 shapes.
+}
+\examples{
+\dontrun{
+# Batch correction
+batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+# Plots of each features
+save_batch_plots(orig = merged_sample, corrected = batch_corrected,
+                 file = "batch_plots.pdf")
+}
 }

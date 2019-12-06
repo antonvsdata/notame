@@ -17,5 +17,16 @@ data frame with one row per feature with the repeatability measure
 \description{
 Computes repeatability for each feature with the following formula:
 \deqn{\frac{\sigma^2_{between}}{\sigma^2_{between} + \sigma^2_{within}}}
-The repeatability ranges from 0 to 1.
+The repeatability ranges from 0 to 1. Higher repeatability depicts less
+variation between batches.
+}
+\examples{
+# Batch correction
+batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+# Evaluate batch correction
+rep_orig <- perform_repeatability(merged_sample, group = "Group")
+mean(rep_orig$Repeatability)
+rep_corr <- perform_repeatability(batch_corrected, group = "Group")
+mean(rep_corr$Repeatability)
+
 }

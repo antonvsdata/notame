@@ -22,3 +22,7 @@ data frame with Cohen's d for each feature
 \description{
 Computes Cohen's D for each feature
 }
+\examples{
+d_results <- cohens_d(drop_qcs(example_set))
+
+}

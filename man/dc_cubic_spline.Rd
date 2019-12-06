@@ -27,8 +27,8 @@ to each feature separately.
 \details{
 If \code{log_transform = TRUE}, the correction will be done on log-transformed values.
 The correction formula depends on whether the correction is run on original values or log-transformed values.
-In log-space: \eq{corrected = original + mean of QCs - prediction by cubic spline}.
-In original space: \eq{corrected = original * prediction for first QC / prediction for current point}.
+In log-space: \eqn{corrected = original + mean of QCs - prediction by cubic spline}.
+In original space: \eqn{corrected = original * prediction for first QC / prediction for current point}.
 We recommend doing the correction in the log-space since the log-transfomred data better follows the
 assumptions of cubic spline regression. The drift correction in the original space also sometimes results
 in negative values, and results in rejection of the drift corrrection procedure.
@@ -36,6 +36,11 @@ in negative values, and results in rejection of the drift corrrection procedure.
 If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
 be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
 using cross validation.
+}
+\examples{
+dc <- dc_cubic_spline(merged_sample)
+corrected <- dc$object
+
 }
 \seealso{
 \code{\link[stats]{smooth.spline}} for details about the regression,

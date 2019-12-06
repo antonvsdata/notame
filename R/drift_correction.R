@@ -18,8 +18,8 @@ comb <- function(x, ...) {
 #'
 #' @details If \code{log_transform = TRUE}, the correction will be done on log-transformed values.
 #' The correction formula depends on whether the correction is run on original values or log-transformed values.
-#' In log-space: \eq{corrected = original + mean of QCs - prediction by cubic spline}.
-#' In original space: \eq{corrected = original * prediction for first QC / prediction for current point}.
+#' In log-space: \eqn{corrected = original + mean of QCs - prediction by cubic spline}.
+#' In original space: \eqn{corrected = original * prediction for first QC / prediction for current point}.
 #' We recommend doing the correction in the log-space since the log-transfomred data better follows the
 #' assumptions of cubic spline regression. The drift correction in the original space also sometimes results
 #' in negative values, and results in rejection of the drift corrrection procedure.
@@ -27,6 +27,10 @@ comb <- function(x, ...) {
 #' If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
 #' be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
 #' using cross validation.
+#'
+#' @examples
+#' dc <- dc_cubic_spline(merged_sample)
+#' corrected <- dc$object
 #'
 #' @seealso  \code{\link[stats]{smooth.spline}} for details about the regression,
 #' \code{\link{inspect_dc}} for analysing the drift correction results,
@@ -135,6 +139,12 @@ dc_cubic_spline <- function(object, log_transform = TRUE, spar = NULL, spar_lowe
 #'
 #' @seealso \code{\link{correct_drift}}, \code{\link{save_dc_plots}}
 #'
+#' @examples
+#' dc <- dc_cubic_spline(merged_sample)
+#' corrected <- dc$object
+#' inspected <- inspect_dc(orig = merged_sample, dc = corrected,
+#'                         check_quality = TRUE)
+#'
 #' @export
 inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio_r < 0") {
 
@@ -155,7 +165,7 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
   inspected <- foreach::foreach(i = seq_len(nrow(orig_data)), .combine = comb,
                                 .export = c("%>%", "qdiff")) %dopar% {
 
-                                  data = orig_data[i, ]
+                                  data <- orig_data[i, ]
                                   if (all(is.na(dc_data[i, ]))) {
                                     dc_note <- "Missing_QCS"
                                   } else if (any(dc_data[i, ] < 0, na.rm = TRUE)){
@@ -165,6 +175,9 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
                                       parse(text = .) %>% eval()
                                     if (!pass) {
                                       dc_note <- "Low_quality"
+                                    } else {
+                                      data <- dc_data[i, ]
+                                      dc_note <- "Drift_corrected"
                                     }
                                   } else {
                                     data <- dc_data[i, ]
@@ -218,8 +231,17 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
 #'
 #' @seealso \code{\link{correct_drift}}, \code{\link{inspect_dc}}
 #'
+#'  @examples
+#' \dontrun{
+#' dc <- dc_cubic_spline(merged_sample)
+#' corrected <- dc$object
+#' inspected <- inspect_dc(orig = merged_sample, dc = corrected,
+#'                         check_quality = TRUE)
+#' save_dc_plots(orig = merged_sample, dc = corrected, predicted = dc$predicted,
+#'               file = "drift_plots.pdf")
+#' }
 #' @export
-save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width = 8, height = 6, color = "QC",
+save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width = 16, height = 8, color = "QC",
                           shape = NULL, color_scale = NULL, shape_scale = NULL) {
 
   if (!requireNamespace("cowplot", quietly = TRUE)) {
@@ -326,6 +348,9 @@ save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width
 #' meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the
 #' drift corrected feature is discarded and the original is retained. If \code{shape} is set to \code{NULL} (the default), the column used for color
 #' is also used for shape
+#'
+#' @examples
+#' corrected <- correct_drift(merged_sample)
 #'
 #' @seealso  \code{\link{dc_cubic_spline}}, \code{\link[stats]{smooth.spline}} for details about the regression,
 #' \code{\link{inspect_dc}} for analysing the drift correction results,

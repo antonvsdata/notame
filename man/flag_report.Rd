@@ -15,3 +15,11 @@ data frame with the number of features at each stage of flagging
 \description{
 Computes the number of features at each stage of flagging for each mode.
 }
+\examples{
+flagged <- merged_sample \%>\%
+ mark_nas(0) \%>\%
+ flag_detection() \%>\%
+ flag_quality()
+flag_report(flagged)
+
+}

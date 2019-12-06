@@ -39,6 +39,10 @@ pcaMethods and plots the two first principal components as hexagonal bins, where
 variable is summarised for each bin, by default as the mean of the values inside the bin.
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
+\examples{
+plot_pca_hexbin(merged_sample)
+
+}
 \seealso{
 \code{\link[pcaMethods]{pca}}
 }

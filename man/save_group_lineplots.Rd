@@ -37,6 +37,10 @@ Plots the change in the feature abundances as a function of e.g. time.
 A line is drawn for each group and error bars are added.
 A separate plot is drawn for each feature.
 }
+\examples{
+\dontrun{save_group_lineplots(drop_qcs(merged_sample), file = "group_lineplots.pdf")}
+
+}
 \seealso{
 \code{\link[ggplot2]{stat_summary}}
 }

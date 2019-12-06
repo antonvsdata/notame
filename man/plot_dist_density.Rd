@@ -28,8 +28,17 @@ plot_dist_density(object, all_features = FALSE,
 
 \item{subtitle}{the plot subtitle}
 }
+\value{
+a ggplot object
+}
 \description{
 Plot density of distances between samples in QC samples and actual samples
+}
+\examples{
+plot_dist_density(merged_sample)
+# Drift correction tightens QCs together
+plot_dist_density(correct_drift(merged_sample))
+
 }
 \seealso{
 \code{\link[stats]{dist}}

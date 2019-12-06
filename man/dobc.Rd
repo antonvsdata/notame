@@ -18,8 +18,14 @@ dobc(object, batch, ref, ref_label, ...)
 \item{...}{other parameters pased to doBC}
 }
 \value{
-a MaetaboSet object with the corrected abundances
+a MetaboSet object with the corrected abundances
 }
 \description{
 "Basic" batch correction by median? from BatchCorrMetabolomics::doBC
+}
+\examples{
+batch_corrected <- dobc(merged_sample, batch = "Batch", ref = "QC", ref_label = "QC")
+# Evaluate batch correction
+pca_bhattacharyya_dist(merged_sample, batch = "Batch")
+pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 }

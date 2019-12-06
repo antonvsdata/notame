@@ -19,3 +19,7 @@ Replaces all values in the exprs part that equal the specified value with NA.
 For example, vendor software might use 0 or 1 to signal a missing value,
 which is not understood by R.
 }
+\examples{
+nas_marked <- mark_nas(merged_sample, value = 0)
+
+}

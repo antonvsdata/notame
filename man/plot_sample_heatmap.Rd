@@ -43,6 +43,10 @@ parts and is harder to modify.
 Draws a heatmap of the distances between the samples of an experiment,
 the samples are ordered by hierarchical clustering.
 }
+\examples{
+plot_sample_heatmap(merged_sample)
+
+}
 \seealso{
 \code{\link{dist}} \code{\link{hclust}}
 }

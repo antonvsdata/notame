@@ -8,8 +8,13 @@
 #' @param ref_label the label for reference samples
 #' @param ... other parameters pased to doBC
 #'
-#' @return a MaetaboSet object with the corrected abundances
+#' @return a MetaboSet object with the corrected abundances
 #'
+#' @examples
+#' batch_corrected <- dobc(merged_sample, batch = "Batch", ref = "QC", ref_label = "QC")
+#' # Evaluate batch correction
+#' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
+#' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 #' @export
 dobc <- function(object, batch, ref, ref_label, ...) {
 
@@ -50,6 +55,12 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 #'
 #' @return a MetaboSet object with the normalized data
 #'
+#' @examples
+#' # Batch correction
+#' batch_corrected <- ruvs_qc(merged_sample, batch = "Batch", replicates = replicates)
+#' # Evaluate batch correction
+#' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
+#' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 #' @export
 ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 
@@ -87,6 +98,13 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #' @param batch column name of pData givinh the batch labels
 #'
 #' @return matrix of Bhattacharyya distances between batches
+#'
+#' @examples
+#' # Batch correction
+#' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+#' # Evaluate batch correction
+#' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
+#' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 #'
 #' @export
 pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center = TRUE, scale = "uv", nPcs = 3, ...) {
@@ -155,13 +173,23 @@ repeatability <- function(x, group) {
 #'
 #' Computes repeatability for each feature with the following formula:
 #' \deqn{\frac{\sigma^2_{between}}{\sigma^2_{between} + \sigma^2_{within}}}
-#' The repeatability ranges from 0 to 1.
+#' The repeatability ranges from 0 to 1. Higher repeatability depicts less
+#' variation between batches.
 #'
 #'
 #' @param object a MetaboSet object
 #' @param group column name of pData givinh the group labels
 #'
 #' @return data frame with one row per feature with the repeatability measure
+#'
+#' @examples
+#' # Batch correction
+#' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+#' # Evaluate batch correction
+#' rep_orig <- perform_repeatability(merged_sample, group = "Group")
+#' mean(rep_orig$Repeatability)
+#' rep_corr <- perform_repeatability(batch_corrected, group = "Group")
+#' mean(rep_corr$Repeatability)
 #'
 #' @export
 perform_repeatability <- function(object, group) {
@@ -235,8 +263,17 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #' @param ref_label the label of the reference group i.e. the group that is constant through batches
 #' @param ... additional parameters passed to batchCorr::normalizeBatches
 #'
-#' @return list, the object with normalized features and information on which features were corrected by ref samples in each batch.
-normalize_batches <- function(object, batch, group = group_col(object), ref_label, ...) {
+#' @return list, the object with normalized features and information on which
+#' features were corrected by ref samples in each batch.
+#'
+#' @examples
+#' # Batch correction
+#' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+#' # Evaluate batch correction
+#' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
+#' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
+#' @export
+normalize_batches <- function(object, batch, group, ref_label, ...) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
       stop("Package \"batchCorr\" needed for this function to work. Please install it.",
@@ -257,7 +294,9 @@ normalize_batches <- function(object, batch, group = group_col(object), ref_labe
 #'
 #' Saves plots of each feature showing the effect of batch correction.
 #' Plots show QC samples and regular samples inside each batch, plus the
-#' batch mean for all samples and QC samples as a horizontal line.
+#' batch mean for biological samples and QC samples as a horizontal line.
+#' The dashed line represents QC mean, the filled line represents biological
+#' sample mean.
 #' NOTE: if you change the shape variable, be sure to set a shape scale as well,
 #' the default scale only has 2 values, so it can only accomodate 2 shapes.
 #'
@@ -266,6 +305,16 @@ normalize_batches <- function(object, batch, group = group_col(object), ref_labe
 #' @param batch,color,shape column names of pData for batch labels,
 #' and column used for coloring and shaping points (by default batch and QC)
 #' @param color_scale,shape_scale scales for color and scale as returned by ggplot functions.
+#'
+#' @examples
+#' \dontrun{
+#' # Batch correction
+#' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
+#' # Plots of each features
+#' save_batch_plots(orig = merged_sample, corrected = batch_corrected,
+#'                  file = "batch_plots.pdf")
+#' }
+#' @export
 save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
                              batch = "Batch", color = "Batch", shape = "QC",
                              color_scale = NULL, shape_scale = NULL) {

@@ -42,3 +42,17 @@ If effect size and direction is supplied, the -log10(p-value) on the y-axis will
 by the direction (sign) of the effect, so part of the points will "drop" from the p = 1 (-log10(p) = 0) line.
 This results in a so-called directed Manhattan plot.
 }
+\examples{
+# naturally, this looks messy as there are not enough p-values
+lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
+# Traditional Manhattan plot
+manhattan_plot(data = lm_data, x = "Average.Mz",
+             p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+             fdr_limit = 0.1)
+# Directed Manhattan plot
+manhattan_plot(data = lm_data, x = "Average.Mz", effect = "GroupB_Estimate",
+             p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+             fdr_limit = 0.1)
+
+}

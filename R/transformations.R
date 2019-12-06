@@ -10,6 +10,9 @@
 #'
 #' @return MetaboSet object as the one supplied, with missing values correctly set to NA
 #'
+#' @examples
+#' nas_marked <- mark_nas(merged_sample, value = 0)
+#'
 #' @export
 mark_nas <- function(object, value) {
   ex <- exprs(object)
@@ -29,6 +32,14 @@ mark_nas <- function(object, value) {
 #' @param cols the columns to fix
 #'
 #' @return a data frame with the column modified
+#'
+#' @example
+#' # Remove QC labels first
+#' pheno_data <- pData(merged_sample)
+#' pheno_data$Group[pheno_data$Group == "QC"] <- NA
+#' head(pheno_data$Group, 20)
+#' pheno_data <- mark_qcs(pheno_data, cols = "Group")
+#' head(pheno_data$Group, 20)
 #'
 #' @export
 mark_qcs <- function(data, cols) {
@@ -51,6 +62,11 @@ mark_qcs <- function(data, cols) {
 #'
 #' @return MetaboSet object as the one supplied, without QC samples
 #'
+#' @examples
+#' dim(merged_sample)
+#' noqc <- drop_qcs(merged_sample)
+#' dim(noqc)
+#'
 #' @importFrom Biobase pData "pData<-"
 #'
 #' @export
@@ -69,6 +85,12 @@ drop_qcs <- function(object) {
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be retained? Mainly used by internal functions
 #'
+#' @examples
+#' dim(merged_sample)
+#' flagged <- flag_quality(merged_sample)
+#' noflags <- drop_flagged(flagged)
+#' dim(noflags)
+#'
 #' @export
 drop_flagged <- function(object, all_features = FALSE) {
   if (!all_features) {
@@ -86,6 +108,19 @@ drop_flagged <- function(object, all_features = FALSE) {
 #'
 #' @param object a MetaboSet object
 #' @param y matrix containing new values to be merged into exprs
+#'
+#' @return a MetaboSet object with the new exprs values
+#'
+#' @examples
+#' ex_set <- merged_sample[1:5, 1:5]
+#' exprs(ex_set)
+#' # Create a matrix of replacment values for rows 1, 3, 5 and columns 1, 3, 4
+#' replacement <- matrix(1:9, ncol = 3,
+#'                       dimnames = list(featureNames(ex_set)[c(1, 3, 5)],
+#'                                       sampleNames(ex_set)[c(1, 3, 4)]))
+#' replacement
+#' merged <- merge_exprs(ex_set, replacement)
+#' exprs(merged)
 #'
 #' @export
 merge_exprs <- function(object, y) {
@@ -119,6 +154,11 @@ merge_exprs <- function(object, y) {
 #' @param ... passed to MissForest function
 #'
 #' @return MetaboSet object as the one supplied, with missing values imputed.
+#'
+#' @examples
+#' missing <- mark_nas(example_set, 0)
+#' set.seed(38)
+#' imputed <- impute_rf(missing)
 #'
 #' @seealso \code{\link[missForest]{missForest}} for detail about the algorithm and the parameters
 #'
@@ -215,15 +255,6 @@ impute_simple <- function(object, value, na_limit = 0) {
   obj
 }
 
-impo <- mtcars[1:15, ]
-for (k in 1:50) {
-  i <- sample(seq_len(nrow(impo)), 1)
-  j <- sample(seq_len(ncol(impo)), 1)
-  impo[i, j] <- NA
-}
-
-
-
 #' Inverse-rank normalization
 #'
 #' Applies inverse rank normalization to all features to approximate
@@ -232,6 +263,9 @@ for (k in 1:50) {
 #' @param object a MetaboSet object
 #'
 #' @return MetaboSet object as the one supplied, with normalized features
+#'
+#' @examples
+#' normalized <- inverse_normalize(merged_sample)
 #'
 #' @export
 inverse_normalize <- function(object) {
@@ -252,6 +286,13 @@ inverse_normalize <- function(object) {
 #'
 #' @return data frame with the number of features at each stage of flagging
 #'
+#' @examples
+#' flagged <- merged_sample %>%
+#'  mark_nas(0) %>%
+#'  flag_detection() %>%
+#'  flag_quality()
+#' flag_report(flagged)
+#'
 #' @export
 flag_report <- function(object) {
 
@@ -262,9 +303,12 @@ flag_report <- function(object) {
     tmp <- object[fData(object)$Split == split, ]
     report_row <- flag(tmp) %>% table %>% as.matrix() %>% t()
     report_row <- data.frame(Split = split, report_row)
+    if (is.null(report_row$Kept)) {
+      report_row$Kept <- 0
+    }
     report_row$Total <- nrow(tmp)
     report_row$Flagged <- report_row$Total - report_row$Kept
-    report <- dplyr::bind_rows(report, report_row)
+    report <- suppressWarnings(dplyr::bind_rows(report, report_row))
   }
   report
 }

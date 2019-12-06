@@ -32,3 +32,7 @@ Plots the change in the feature abundances as a function of e.g. time.
 A line is drawn for each subject and a mean line is added.
 A separate plot is drawn for each feature.
 }
+\examples{
+\dontrun{save_subject_line_plots(drop_qcs(example_set), file = "subject_lines.pdf")}
+
+}

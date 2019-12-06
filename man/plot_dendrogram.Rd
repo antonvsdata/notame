@@ -37,6 +37,10 @@ A ggplot object.
 \description{
 Draws a dendrogram of a hierarchical clustering applied to the samples of an experiment
 }
+\examples{
+plot_dendrogram(merged_sample)
+
+}
 \seealso{
 \code{\link{dist}} \code{\link{hclust}}
 }
