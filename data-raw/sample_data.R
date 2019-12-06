@@ -14,7 +14,11 @@ for (mode in modes) {
 
   object <- construct_MetaboSet(exprs= dada$exprs, pheno_data = pd, feature_data = dada$feature_data,
                                 group_col = "Group", time_col = "Time")
-  objects[[mode]] <- object[[1]]
+  obj <- object[[1]]
+  obj <- obj[, obj$Injection_order < 221]
+  obj$Batch <- as.factor(rep(1:2, times = c(73, ncol(obj) - 73)))
+  # Remove extra QCs from the end
+  objects[[mode]] <- obj
 }
 
 merged_sample <- merge_metabosets(objects)
@@ -28,4 +32,4 @@ usethis::use_data(rp_neg_sample, overwrite = TRUE)
 rp_pos_sample <- objects[[4]]
 usethis::use_data(rp_pos_sample, overwrite = TRUE)
 
-usethis::use_data(merged_sample)
+usethis::use_data(merged_sample, overwrite = TRUE)
