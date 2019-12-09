@@ -6,17 +6,17 @@
 #
 # @param x,y MetaboSet objects
 # @param fun the function to apply, usually one of group_col, time_col or subject_col
-check_column_match <- function(x, y, fun) {
+check_column_match <- function(x, y, fun, name) {
   check <- fun(x) == fun(y)
   if (is.na(check)) {
     check <- is.na(fun(x)) & is.na(fun(y))
   }
   if (!check) {
-    stop(paste(as.character(substitute(fun)), "returns different column names"))
+    stop(paste(name, "returns different column names"))
   }
   if (!is.na(fun(x))) {
     if(!identical(pData(x)[, fun(x)], pData(y)[, fun(y)])) {
-      stop(paste(as.character(substitute(fun)), "columns contain different elements"))
+      stop(paste(name, "columns contain different elements"))
     }
   }
 }
@@ -41,9 +41,9 @@ check_match <- function(x, y) {
     stop("Merge would result in duplicated feature ID")
   }
   # group_col, time_col, subject_col need to match
-  funs <- list(group_col, time_col, subject_col)
+  funs <- list("group_col" = group_col, "time_col" = time_col, "subject_col" = subject_col)
   for (i in seq_along(funs)) {
-    check_column_match(x, y, funs[[i]])
+    check_column_match(x, y, funs[[i]], names(funs)[i])
   }
 
   if (!identical(pData(x)$Injection_order, pData(y)$Injection_order)) {
