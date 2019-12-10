@@ -18,3 +18,12 @@ a data frame with the column modified
 Loops through specified columns in pheno data and replaces all NA values with "QC". Also transforms
 the column to factor and sets "QC" as the last level.
 }
+\examples{
+# Remove QC labels first
+pheno_data <- pData(merged_sample)
+pheno_data$Group[pheno_data$Group == "QC"] <- NA
+head(pheno_data$Group, 20)
+pheno_data <- mark_qcs(pheno_data, cols = "Group")
+head(pheno_data$Group, 20)
+
+}

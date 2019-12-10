@@ -57,6 +57,7 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 #'
 #' @examples
 #' # Batch correction
+#' replicates <- list(which(merged_sample$QC == "QC"))
 #' batch_corrected <- ruvs_qc(merged_sample, batch = "Batch", replicates = replicates)
 #' # Evaluate batch correction
 #' pca_bhattacharyya_dist(merged_sample, batch = "Batch")

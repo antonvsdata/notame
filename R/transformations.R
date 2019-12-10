@@ -33,7 +33,7 @@ mark_nas <- function(object, value) {
 #'
 #' @return a data frame with the column modified
 #'
-#' @example
+#' @examples
 #' # Remove QC labels first
 #' pheno_data <- pData(merged_sample)
 #' pheno_data$Group[pheno_data$Group == "QC"] <- NA

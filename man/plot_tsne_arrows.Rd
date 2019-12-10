@@ -52,9 +52,9 @@ the  method can be changed to "ppca" if nipals fails.
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 }
 \examples{
-plot_tsne_arrows(drop_qcs(example_set))
+plot_tsne_arrows(drop_qcs(example_set), perplexity = 5)
 # If the sample size is large, plot groups separately
-plot_tsne_arrows(drop_qcs(example_set)) +
+plot_tsne_arrows(drop_qcs(example_set), perplexity = 5) +
 facet_wrap(~ Group)
 
 }

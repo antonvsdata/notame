@@ -505,9 +505,9 @@ plot_pca_arrows <- function(object, all_features = FALSE, center = TRUE, scale =
 #' parts and is harder to modify.
 #'
 #' @examples
-#' plot_tsne_arrows(drop_qcs(example_set))
+#' plot_tsne_arrows(drop_qcs(example_set), perplexity = 5)
 #' # If the sample size is large, plot groups separately
-#' plot_tsne_arrows(drop_qcs(example_set)) +
+#' plot_tsne_arrows(drop_qcs(example_set), perplexity = 5) +
 #' facet_wrap(~ Group)
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}

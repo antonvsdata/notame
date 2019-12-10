@@ -243,12 +243,6 @@ geom_factory <- function(geomfunc, data = NULL, ...) {
 #' @param ncol Number of facet/subplot columns
 #' @param ... other arguments passed to methods
 #' @return ggplot
-#' @examples
-#' \dontrun{
-#' autoplot(lm(Petal.Width ~ Petal.Length, data = iris))
-#' autoplot(glm(Petal.Width ~ Petal.Length, data = iris), which = 1:6)
-#' autoplot(lm(Petal.Width~Petal.Length, data = iris), data = iris, colour = 'Species')
-#' }
 #' @export
 autoplot.lmerMod <- function(object, which = c(1:3, 5), data = NULL,
                         colour = '#444444', size = NULL, linetype = NULL,
