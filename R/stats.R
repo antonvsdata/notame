@@ -363,6 +363,12 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     }
     result_row
   }
+  # Check that results actually contain something
+  # If the tests are run on parallel, the error messages from failing tests are not visible
+  if (nrow(results_df) == 0) {
+    stop("All the test failed, to see the individual error messages run the tests withot parallelization.",
+         call. = FALSE)
+  }
 
   # Add NA rows for features where the test failed
   results_df <- results_df %>% dplyr::select(Feature_ID, dplyr::everything())
@@ -431,7 +437,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     fit <- NULL
     tryCatch({
       fit <- lm(formula, data = data, ...)
-    }, error = function(e) print(paste0(feature, ": ", e$message)))
+    }, error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
     if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
       result_row <- NULL
     } else {
@@ -511,7 +517,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     fit <- NULL
     tryCatch({
       fit <- glm(formula, data = data, family = binomial(), ...)
-    }, error = function(e) print(paste0(feature, ": ", e$message)))
+    }, error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
     if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
       result_row <- NULL
     } else {
@@ -623,7 +629,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     result_row <- NULL
     tryCatch({
       fit <- lmerTest::lmer(formula, data = data, ...)
-    },error = function(e) print(paste0(feature, ": ", e$message)))
+    },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
     if (!is.null(fit)) {
       # Extract model coefficients
       coefs <- summary(fit)$coefficients
@@ -634,7 +640,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       tryCatch({
         confints <- confint(fit, nsim = 1000, method = ci_method, oldNames = FALSE)
         confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
-      },error = function(e) print(paste0(feature, ": ", e$message)))
+      },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
 
       # Gather coefficients and CIs to one data frame row
       result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
@@ -650,7 +656,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
         R2s <- suppressWarnings(MuMIn::r.squaredGLMM(fit))
         result_row$Marginal_R2 <- R2s[1]
         result_row$Conditional_R2 <- R2s[2]
-      },error = function(e) print(paste0(feature, ": ", e$message)))
+      },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
       # Add Feature ID
       result_row$Feature_ID <- feature
       rownames(result_row) <- feature
@@ -675,7 +681,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
           tidyr::unite("Column", grp, Metric, sep="_") %>%
           tidyr::spread(Column, Value)
         result_row <- cbind(result_row, r_result_row)
-      },error = function(e) print(paste0(feature, ": ", e$message)))
+      },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
     }
 
     result_row
@@ -749,7 +755,7 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
                                Levene_P = levene$`Pr(>F)`[1],
                                Fligner_P = fligner$p.value,
                                stringsAsFactors = FALSE)
-    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
 
@@ -798,7 +804,7 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
       result_row <- data.frame(Feature_ID = feature,
                                Kruskal_P = kruskal$p.value,
                                stringsAsFactors = FALSE)
-    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
   }
@@ -849,7 +855,7 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
       result_row <- data.frame(Feature_ID = feature,
                                ANOVA_P = anova_res$p.value,
                                stringsAsFactors = FALSE)
-    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
 
@@ -908,7 +914,7 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
                                stringsAsFactors = FALSE)
       colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
       rownames(result_row) <- feature
-    }, error = function(e) {print(paste0(feature, ": ", e$message))})
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
   }
