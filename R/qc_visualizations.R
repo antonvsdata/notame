@@ -177,8 +177,8 @@ plot_quality <- function(object, all_features = FALSE) {
 
   # Plot bar plot of flags
   flags <- flag(object)
-  flags[is.na(flags)] <- "NA"
-  flags <- factor(flags) %>% relevel(ref = "NA")
+  flags[is.na(flags)] <- "Good"
+  flags <- factor(flags) %>% relevel(ref = "Good")
 
   fp <- ggplot(data.frame(flags), aes(x = flags)) +
     geom_bar(col = "grey50", fill = "grey80", size = 1) +
