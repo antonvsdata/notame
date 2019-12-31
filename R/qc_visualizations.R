@@ -169,22 +169,24 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE, x_label = "
 #' plot_quality(example_set)
 #'
 #' @export
-plot_quality <- function(object, all_features = FALSE) {
+plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
   if (!requireNamespace("cowplot", quietly = TRUE)) {
       stop("Package \"cowplot\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  if (plot_flags) {
+    # Plot bar plot of flags
+    flags <- flag(object)
+    flags[is.na(flags)] <- "Good"
+    flags <- factor(flags) %>% relevel(ref = "Good")
 
-  # Plot bar plot of flags
-  flags <- flag(object)
-  flags[is.na(flags)] <- "Good"
-  flags <- factor(flags) %>% relevel(ref = "Good")
+    fp <- ggplot(data.frame(flags), aes(x = flags)) +
+      geom_bar(col = "grey50", fill = "grey80", size = 1) +
+      scale_y_continuous(sec.axis = sec_axis(~.*100/length(flags), name = "Percentage")) +
+      theme_minimal() +
+      labs(x = "Flag")
+  }
 
-  fp <- ggplot(data.frame(flags), aes(x = flags)) +
-    geom_bar(col = "grey50", fill = "grey80", size = 1) +
-    scale_y_continuous(sec.axis = sec_axis(~.*100/length(flags), name = "Percentage")) +
-    theme_minimal() +
-    labs(x = "Flag")
 
   # Drop flagged features
   object <- drop_flagged(object, all_features = all_features)
@@ -197,7 +199,12 @@ plot_quality <- function(object, all_features = FALSE) {
   # Distribution of quality metrics
   qps <- plot_p_histogram(quality(object)[, -1], hline = FALSE, combine = FALSE, x_label = "")
 
-  p <- cowplot::plot_grid(plotlist = c(qps, list(fp)), ncol = 1)
+  if (plot_flags) {
+    p <- cowplot::plot_grid(plotlist = c(qps, list(fp)), ncol = 1)
+  } else {
+    p <- cowplot::plot_grid(plotlist = qps, ncol = 1)
+  }
+
   p
 }
 
