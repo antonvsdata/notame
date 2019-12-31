@@ -4,7 +4,7 @@
 \alias{plot_quality}
 \title{Plot quality metrics}
 \usage{
-plot_quality(object, all_features = FALSE)
+plot_quality(object, all_features = FALSE, plot_flags = TRUE)
 }
 \arguments{
 \item{object}{a MetaboSet object}

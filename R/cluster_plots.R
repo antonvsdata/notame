@@ -12,7 +12,7 @@
 #' @param scale scaling used, as in \code{pcaMethods::prep}. Default is "uv" for unit variance
 #' @param title The plot title
 #' @param subtitle The plot subtitle
-#' @param color_scale the color scale as returned by a ggplot function
+#' @param color_scale the color scale as returned by a ggplot function.
 #'
 #' @return A ggplot object.
 #'
@@ -24,7 +24,7 @@
 #' @export
 plot_dendrogram <- function(object, all_features = FALSE, color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
                      center = TRUE, scale = "uv", title = "Dendrogram of hierarchical clustering",
-                     subtitle = NULL, color_scale = NULL) {
+                     subtitle = NULL, color_scale = getOption("amp.color_scale_dis")) {
 
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
@@ -38,14 +38,6 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
   object <- drop_flagged(object, all_features)
 
   subtitle <- subtitle %||% paste("Distance method:", dist_method, "Clustering method:", clust_method)
-
-  if (is.null(color_scale)) {
-    if (class(pData(object)[, color]) == "numeric") {
-      color_scale <- getOption("amp.color_scale_con")
-    } else {
-      color_scale <- getOption("amp.color_scale_dis")
-    }
-  }
 
   object <- pcaMethods::prep(object, center = center, scale = scale)
 
@@ -101,7 +93,8 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
                          center = TRUE, scale = "uv",
                          group_bar = TRUE, group = group_col(object),
                          title = "Heatmap of distances between samples",
-                         subtitle = NULL, fill_scale_con = NULL, fill_scale_dis = NULL) {
+                         subtitle = NULL, fill_scale_con = getOption("amp.fill_scale_con"),
+                         fill_scale_dis = getOption("amp.fill_scale_dis")) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
@@ -115,8 +108,6 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
 
   # Default settings
   subtitle <- subtitle %||% paste("Distance method:", dist_method, "Clustering method:", clust_method)
-  fill_scale_con <- fill_scale_con %||% getOption("amp.fill_scale_con")
-  fill_scale_dis <- fill_scale_dis %||% getOption("amp.fill_scale_dis")
 
   object <- pcaMethods::prep(object, center = center, scale = scale)
 

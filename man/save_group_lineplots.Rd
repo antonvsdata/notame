@@ -7,7 +7,8 @@
 save_group_lineplots(object, all_features = FALSE, file, width = 8,
   height = 6, x = time_col(object), group = group_col(object),
   fun.data = "mean_cl_boot", fun.y = NULL, fun.ymin = NULL,
-  fun.ymax = NULL, position_dodge_amount = 0.2, color_scale = NULL)
+  fun.ymax = NULL, position_dodge_amount = 0.2,
+  color_scale = getOption("amp.color_scale_dis"))
 }
 \arguments{
 \item{object}{a MetaboSet object}

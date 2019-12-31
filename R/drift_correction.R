@@ -242,17 +242,13 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
 #' }
 #' @export
 save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width = 16, height = 8, color = "QC",
-                          shape = NULL, color_scale = NULL, shape_scale = NULL) {
+                          shape = color, color_scale = getOption("amp.color_scale_dis"),
+                          shape_scale = scale_shape_manual(values = c(15, 16))) {
 
   if (!requireNamespace("cowplot", quietly = TRUE)) {
       stop("Package \"cowplot\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
-  # If color column not set, use QC column
-  color <- color %||% "QC"
-  shape <- shape %||% color
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
-  shape_scale <- shape_scale %||% scale_shape_manual(values = c(15, 16))
 
   # Create a helper function for plotting
   dc_plot_helper <- function(data, fname, title = NULL) {
@@ -336,7 +332,7 @@ save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width
 #' @param width,height width and height of the plots in inches
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
-#' @param color_scale the color scale as returned by a ggplot function
+#' @param color_scale,shape_scale the color and shape scales as returned by a ggplot function
 #'
 #' @return MetaboSet object as the one supplied, with drift corrected features
 #'
@@ -361,7 +357,8 @@ save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width
 correct_drift <- function(object, log_transform = TRUE, spar = NULL, spar_lower = 0.5, spar_upper = 1.5,
                           check_quality = FALSE, condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
                           file = NULL, width = 16, height = 8, color = "QC",
-                          shape = NULL, color_scale = NULL, shape_scale = NULL) {
+                          shape = NULL, color_scale = getOption("amp.color_scale_dis"),
+                          shape_scale = scale_shape_manual(values = c(15, 16))) {
   # Fit cubic spline and correct
   corrected_list <- dc_cubic_spline(object, log_transform = log_transform, spar = spar,
                                     spar_lower = spar_lower, spar_upper = spar_upper)

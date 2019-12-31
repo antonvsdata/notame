@@ -318,10 +318,8 @@ normalize_batches <- function(object, batch, group, ref_label, ...) {
 #' @export
 save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
                              batch = "Batch", color = "Batch", shape = "QC",
-                             color_scale = NULL, shape_scale = NULL) {
-
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
-  shape_scale <- shape_scale %||% scale_shape_manual(values = c(15, 21))
+                             color_scale = getOption("amp.color_scale_dis"),
+                             shape_scale = scale_shape_manual(values = c(15, 21))) {
 
   data_orig <- combined_data(orig)
   data_corr <- combined_data(corrected)

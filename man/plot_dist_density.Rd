@@ -6,8 +6,10 @@
 \usage{
 plot_dist_density(object, all_features = FALSE,
   dist_method = "euclidean", center = TRUE, scale = "uv",
-  color_scale = NULL, fill_scale = NULL, title = NULL,
-  subtitle = NULL)
+  color_scale = getOption("amp.color_scale_dis"),
+  fill_scale = getOption("amp.fill_scale_dis"),
+  title = paste("Density plot of", dist_method,
+  "distances between samples"), subtitle = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}

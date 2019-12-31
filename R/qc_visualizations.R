@@ -3,9 +3,6 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
                          title = NULL, subtitle = NULL,
                          xlab = x, fill_lab = fill) {
 
-  fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
-
   p <- ggplot(data, aes_string(x, fill = fill, color = fill)) +
     geom_density(alpha = 0.2) +
     fill_scale +
@@ -43,16 +40,16 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' @export
 plot_dist_density <- function(object, all_features = FALSE, dist_method = "euclidean",
                               center = TRUE, scale = "uv",
-                              color_scale = NULL, fill_scale = NULL,
-                              title = NULL, subtitle = NULL) {
+                              color_scale = getOption("amp.color_scale_dis"),
+                              fill_scale = getOption("amp.fill_scale_dis"),
+                              title = paste("Density plot of", dist_method, "distances between samples"),
+                              subtitle = NULL) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
-
-  title <- title %||% paste("Density plot of", dist_method, "distances between samples")
 
   object <- pcaMethods::prep(object, center = center, scale = scale)
 
@@ -230,15 +227,12 @@ plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
 #' plot_sample_boxplots(merged_sample, order_by = "Group", fill_by = "Group")
 #'
 #' @export
-plot_sample_boxplots <- function(object, all_features = FALSE, order_by = NULL, fill_by = NULL,
-                             title = "Boxplot of samples", subtitle = NULL,
-                             fill_scale = NULL, zoom_boxplot = TRUE) {
+plot_sample_boxplots <- function(object, all_features = FALSE, order_by = as.character(na.omit(c(group_col(object), time_col(object)))),
+                                 fill_by = as.character(na.omit(c(group_col(object), time_col(object)))),
+                                 title = "Boxplot of samples", subtitle = NULL,
+                                 fill_scale = getOption("amp.fill_scale_dis"), zoom_boxplot = TRUE) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
-
-  order_by <- order_by %||% as.character(na.omit(c(group_col(object), time_col(object))))
-  fill_by <- fill_by %||% as.character(na.omit(c(group_col(object), time_col(object))))
-  fill_scale <- fill_scale %||% getOption("amp.fill_scale_dis")
 
   data <- combined_data(object)
 

@@ -7,7 +7,8 @@
 plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
   color = group_col(object), shape = NULL, label = NULL,
   density = FALSE, title = "PCA", subtitle = NULL,
-  color_scale = NULL, shape_scale = NULL, fill_scale = NULL, ...)
+  color_scale = NA, shape_scale = getOption("amp.shape_scale"),
+  fill_scale = getOption("amp.fill_scale_dis"), ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -25,15 +26,15 @@ flagged features are removed before visualization.}
 
 \item{label}{character, name of the column used for point labels}
 
-\item{density}{logical, whether to include density plots to both axes}
+\item{density}{logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.}
 
 \item{title, subtitle}{the titles of the plot}
 
-\item{color_scale}{the color scale as returned by a ggplot function}
+\item{color_scale}{the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
-\item{fill_scale}{the fill scale used for density curves}
+\item{fill_scale}{the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.}
 
 \item{...}{additional arguments passed to pcaMethods::pca}
 }

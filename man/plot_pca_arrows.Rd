@@ -7,7 +7,8 @@
 plot_pca_arrows(object, all_features = FALSE, center = TRUE,
   scale = "uv", color = group_col(object), time = time_col(object),
   subject = subject_col(object), alpha = 0.6, arrow_style = arrow(),
-  title = "PCA changes", subtitle = NULL, color_scale = NULL, ...)
+  title = "PCA changes", subtitle = NULL,
+  color_scale = getOption("amp.color_scale_dis"), ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}

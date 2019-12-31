@@ -9,7 +9,7 @@ plot_effect_heatmap(data, x, y, effect, p = NULL, p_limit = 0.1,
   discretize_effect = FALSE, breaks = 5, clustering = TRUE,
   dist_method = "euclidean", clust_method = "ward.D2",
   lower_tri = FALSE, reverse_y = TRUE, title = NULL,
-  subtitle = NULL, fill_scale = NULL)
+  subtitle = NULL, fill_scale = NA)
 }
 \arguments{
 \item{data}{a data frame with x and y variables and the effect (used to fill the tiles)}
@@ -47,7 +47,7 @@ be reversed so that the diagonal is from top left to bottom right?}
 
 \item{title, subtitle}{the title and subtitle of the plot}
 
-\item{fill_scale}{fill scale for the heatmap as returned by a ggplot function}
+\item{fill_scale}{fill scale for the heatmap as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the effect variable.}
 }
 \value{
 a ggplot object

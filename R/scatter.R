@@ -55,11 +55,11 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param label character, name of the column used for point labels
-#' @param density logical, whether to include density plots to both axes
+#' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
-#' @param color_scale the color scale as returned by a ggplot function
+#' @param color_scale the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape_scale the shape scale as returned by a ggplot function
-#' @param fill_scale the fill scale used for density curves
+#' @param fill_scale the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -73,7 +73,8 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @export
 plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                      color = group_col(object), shape = NULL, label = NULL, density = FALSE,  title = "PCA",
-                     subtitle = NULL, color_scale = NULL, shape_scale = NULL, fill_scale = NULL, ...) {
+                     subtitle = NULL, color_scale = NA,
+                     shape_scale = getOption("amp.shape_scale"), fill_scale = getOption("amp.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -107,11 +108,11 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 #' @param color character, name of the column used for coloring the points
 #' @param shape character, name of the column used for shape
 #' @param label character, name of the column used for point labels
-#' @param density logical, whether to include density plots to both axes
+#' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
-#' @param color_scale the color scale as returned by a ggplot function
+#' @param color_scale the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape_scale the shape scale as returned by a ggplot function
-#' @param fill_scale the fill scale used for density curves
+#' @param fill_scale the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.
 #' @param ... additional arguments passed to \code{Rtsne::Rtsne}
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -126,8 +127,8 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       pca_method = "nipals",
                       color = group_col(object), shape = NULL, label = NULL, density = FALSE, title = "t-SNE",
-                      subtitle = paste("Perplexity:", perplexity), color_scale = NULL,
-                      shape_scale = NULL, fill_scale = NULL, ...) {
+                      subtitle = paste("Perplexity:", perplexity), color_scale = NA,
+                      shape_scale = getOption("amp.shape_scale"), fill_scale = getOption("amp.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
   shape <- shape %||% color
@@ -145,25 +146,20 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 }
 
-scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed = TRUE, color_scale = NULL,
-                         shape_scale = NULL, fill_scale = NULL, title = NULL, subtitle = NULL, xlab = x, ylab = y,
+scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed = TRUE, color_scale = NA,
+                         shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape) {
 
-  if (is.null(color_scale)) {
-    if (class(data[, color]) %in% c("numeric", "integer")) {
-      color_scale <- getOption("amp.color_scale_con")
-    } else {
-      color_scale <- getOption("amp.color_scale_dis")
+  if (!is.null(color_scale)) {
+    if (is.na(color_scale)) {
+      if (class(data[, color]) %in% c("numeric", "integer")) {
+        color_scale <- getOption("amp.color_scale_con")
+      } else {
+        color_scale <- getOption("amp.color_scale_dis")
+      }
     }
   }
 
-  if (is.null(fill_scale)) {
-    if (class(data[, color]) %in% c("numeric", "integer")) {
-      fill_scale <- getOption("amp.fill_scale_con")
-    } else {
-      fill_scale <- getOption("amp.fill_scale_dis")
-    }
-  }
 
   p <- ggplot(data, aes_string(x = x, y = y, color = color)) +
     theme_bw() +
@@ -183,7 +179,6 @@ scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed
 
   if (class(data[, shape]) == "factor") {
     if (length(levels(data[, shape])) <= 8){
-      shape_scale <- shape_scale %||% getOption("amp.shape_scale")
       p <- p +
         geom_point(aes_string(shape = shape)) +
         shape_scale +
@@ -319,7 +314,7 @@ plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale
 #' @export
 plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
-                     subtitle = NULL, fill_scale = NULL, ...) {
+                     subtitle = NULL, fill_scale = getOption("amp.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -365,7 +360,7 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #' @export
 plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", pca_method = "nipals", perplexity = 30,
                       fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
-                      subtitle = paste("Perplexity:", perplexity), fill_scale = NULL, ...) {
+                      subtitle = paste("Perplexity:", perplexity), fill_scale = getOption("amp.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -393,7 +388,6 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
       stop("Package \"Hmisc\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
-  fill_scale <- fill_scale %||% getOption("amp.fill_scale_con")
 
   p <- ggplot(data, aes_string(x = x, y = y, z = fill)) +
     stat_summary_hex(bins = bins, fun = summary_fun) +
@@ -411,8 +405,6 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
 
 arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
                        color_scale, title, subtitle, xlab, ylab) {
-
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   data <- data[order(data[, subject], data[, time]), ]
 
@@ -459,7 +451,7 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 plot_pca_arrows <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                             color = group_col(object), time = time_col(object), subject = subject_col(object),
                             alpha = 0.6, arrow_style = arrow(), title = "PCA changes",
-                            subtitle = NULL, color_scale = NULL, ...) {
+                            subtitle = NULL, color_scale = getOption("amp.color_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -517,7 +509,7 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
                              perplexity = 30, pca_method = "nipals",
                              color = group_col(object), time = time_col(object), subject = subject_col(object),
                              alpha = 0.6, arrow_style = arrow(), title = "t-SNE changes",
-                             subtitle = paste("Perplexity:", perplexity), color_scale = NULL, ...) {
+                             subtitle = paste("Perplexity:", perplexity), color_scale = getOption("amp.color_scale_dis"), ...) {
 
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -572,7 +564,7 @@ minus_log10 <- scales::trans_new("minus_log19",
 volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
                          p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
                          log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
-                         color_scale = NULL,
+                         color_scale = getOption("amp.color_scale_con"),
                          title = "Volcano plot", subtitle = NULL, ...) {
 
   if (center_x_axis & !is.null(x_lim)) {
@@ -582,8 +574,6 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
   if (min(data[, p]) > max(p_breaks)) {
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
   }
-
-  color_scale <- color_scale %||% getOption("amp.color_scale_con")
 
   pl <- ggplot(data, aes_string(x = x, y = p, color = color)) +
     geom_point(...) +
@@ -678,13 +668,13 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
 #' @export
 manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL,
                            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                           x_lim = NULL, y_lim = NULL, color_scale = NULL,
+                           x_lim = NULL, y_lim = NULL,
+                           color_scale = getOption("amp.color_scale_con"),
                            title = "Manhattan plot", subtitle = NULL, ...) {
 
   if (min(data[, p]) > max(p_breaks)) {
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
   }
-  color_scale <- color_scale %||% getOption("amp.color_scale_con")
 
   if (!is.null(effect)) {
     data$y <- -log10(data[, p]) * sign(data[, effect])

@@ -6,8 +6,8 @@
 \usage{
 plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
   scale = "uv", fill = "Injection_order", summary_fun = "mean",
-  bins = 10, title = "PCA", subtitle = NULL, fill_scale = NULL,
-  ...)
+  bins = 10, title = "PCA", subtitle = NULL,
+  fill_scale = getOption("amp.fill_scale_con"), ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}

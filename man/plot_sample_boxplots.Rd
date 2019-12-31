@@ -4,9 +4,12 @@
 \alias{plot_sample_boxplots}
 \title{Plot a boxplot for each sample}
 \usage{
-plot_sample_boxplots(object, all_features = FALSE, order_by = NULL,
-  fill_by = NULL, title = "Boxplot of samples", subtitle = NULL,
-  fill_scale = NULL, zoom_boxplot = TRUE)
+plot_sample_boxplots(object, all_features = FALSE,
+  order_by = as.character(na.omit(c(group_col(object),
+  time_col(object)))),
+  fill_by = as.character(na.omit(c(group_col(object),
+  time_col(object)))), title = "Boxplot of samples", subtitle = NULL,
+  fill_scale = getOption("amp.fill_scale_dis"), zoom_boxplot = TRUE)
 }
 \arguments{
 \item{object}{a MetaboSet object}

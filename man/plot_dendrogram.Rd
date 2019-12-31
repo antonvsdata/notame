@@ -8,7 +8,7 @@ plot_dendrogram(object, all_features = FALSE,
   color = group_col(object), dist_method = "euclidean",
   clust_method = "ward.D2", center = TRUE, scale = "uv",
   title = "Dendrogram of hierarchical clustering", subtitle = NULL,
-  color_scale = NULL)
+  color_scale = getOption("amp.color_scale_dis"))
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -29,7 +29,7 @@ plot_dendrogram(object, all_features = FALSE,
 
 \item{subtitle}{The plot subtitle}
 
-\item{color_scale}{the color scale as returned by a ggplot function}
+\item{color_scale}{the color scale as returned by a ggplot function.}
 }
 \value{
 A ggplot object.

@@ -8,7 +8,8 @@ correct_drift(object, log_transform = TRUE, spar = NULL,
   spar_lower = 0.5, spar_upper = 1.5, check_quality = FALSE,
   condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
   file = NULL, width = 16, height = 8, color = "QC",
-  shape = NULL, color_scale = NULL, shape_scale = NULL)
+  shape = NULL, color_scale = getOption("amp.color_scale_dis"),
+  shape_scale = scale_shape_manual(values = c(15, 16)))
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -30,7 +31,7 @@ works adequately, see Details}
 
 \item{shape}{character, name of the column used for shape}
 
-\item{color_scale}{the color scale as returned by a ggplot function}
+\item{color_scale, shape_scale}{the color and shape scales as returned by a ggplot function}
 }
 \value{
 MetaboSet object as the one supplied, with drift corrected features

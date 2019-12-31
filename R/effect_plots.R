@@ -22,11 +22,10 @@
 #' @export
 save_subject_line_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                     x = time_col(object), id = subject_col(object),
-                                    color = NA, color_scale = NULL, facet = NULL) {
+                                    color = NA, color_scale = getOption("amp.color_scale_dis"), facet = NULL) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
   if (is.na(x)) {
     stop("The time column is missing")
   }
@@ -102,11 +101,9 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
 #' @export
 save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                 x = group_col(object), color = group_col(object),
-                                color_scale =  NULL) {
+                                color_scale =  getOption("amp.color_scale_dis")) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
-
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
 
   pdf(file, width = width, height = height)
 
@@ -165,7 +162,7 @@ save_group_lineplots <- function(object, all_features = FALSE, file, width = 8, 
                                  x = time_col(object), group = group_col(object),
                                  fun.data = "mean_cl_boot", fun.y = NULL,
                                  fun.ymin = NULL, fun.ymax = NULL, position_dodge_amount = 0.2,
-                                 color_scale =  NULL) {
+                                 color_scale =  getOption("amp.color_scale_dis")) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -175,8 +172,6 @@ save_group_lineplots <- function(object, all_features = FALSE, file, width = 8, 
   if (is.na(x)) {
     stop("The time column is missing")
   }
-  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
-
   pdf(file, width = width, height = height)
 
   data <- combined_data(object)

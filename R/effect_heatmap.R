@@ -45,7 +45,7 @@ coalesce<-function(...) {
 #' @param reverse_y logical, if \code{clustering = FALSE, lower_tri = FALSE}, should the order of the y-axis
 #' be reversed so that the diagonal is from top left to bottom right?
 #' @param title,subtitle the title and subtitle of the plot
-#' @param fill_scale fill scale for the heatmap as returned by a ggplot function
+#' @param fill_scale fill scale for the heatmap as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the effect variable.
 #'
 #' @return a ggplot object
 #'
@@ -72,13 +72,15 @@ plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, poi
                            log2_effect = FALSE, discretize_effect = FALSE, breaks = 5,
                            clustering = TRUE, dist_method = "euclidean", clust_method = "ward.D2",
                            lower_tri = FALSE, reverse_y = TRUE,
-                           title = NULL, subtitle = NULL, fill_scale = NULL) {
+                           title = NULL, subtitle = NULL, fill_scale = NA) {
   # Get default fill scales
-  if (is.null(fill_scale)) {
-    if (discretize_effect | class(data[, effect]) == "factor") {
-      fill_scale <- getOption("amp.fill_scale_div_dis")
-    } else {
-      fill_scale <- getOption("amp.fill_scale_div_con")
+  if (!is.null(fill_scale)) {
+    if (is.na(fill_scale)) {
+      if (discretize_effect | class(data[, effect]) %in% c("factor", "character")) {
+        fill_scale <- getOption("amp.fill_scale_div_dis")
+      } else {
+        fill_scale <- getOption("amp.fill_scale_div_con")
+      }
     }
   }
 

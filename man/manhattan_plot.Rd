@@ -6,7 +6,8 @@
 \usage{
 manhattan_plot(data, x, p, effect = NULL, p_fdr = NULL, color = NULL,
   p_breaks = c(0.05, 0.01, 0.001, 1e-04), fdr_limit = 0.05,
-  x_lim = NULL, y_lim = NULL, color_scale = NULL,
+  x_lim = NULL, y_lim = NULL,
+  color_scale = getOption("amp.color_scale_con"),
   title = "Manhattan plot", subtitle = NULL, ...)
 }
 \arguments{

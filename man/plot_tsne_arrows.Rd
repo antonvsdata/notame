@@ -9,7 +9,7 @@ plot_tsne_arrows(object, all_features = FALSE, center = TRUE,
   color = group_col(object), time = time_col(object),
   subject = subject_col(object), alpha = 0.6, arrow_style = arrow(),
   title = "t-SNE changes", subtitle = paste("Perplexity:", perplexity),
-  color_scale = NULL, ...)
+  color_scale = getOption("amp.color_scale_dis"), ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
