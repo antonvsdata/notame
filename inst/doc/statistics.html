@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-10-04" />
+<meta name="date" content="2020-01-02" />
 
 <title>Statistics</title>
 
@@ -92,14 +92,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Statistics</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-10-04</em></h4>
+<h4 class="date"><em>2020-01-02</em></h4>
 
 
 
 <div id="statistics" class="section level1">
 <h1>Statistics</h1>
 <p>This vignette provides an overview of the different statistical tests provided in the package. The first section discusses univariate tests, which are repeated for each feature.</p>
-<p>Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object results using <code>join_results(object, results)</code></p>
+<p>Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object feature data using <code>join_fData(object, results)</code></p>
 <div id="univariate-functions" class="section level2">
 <h2>Univariate functions</h2>
 <div id="summary-statistics-and-effect-sizes" class="section level3">
@@ -132,6 +132,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul>
 <li>linear models: <code>perform_lm</code><br />
 </li>
+<li>logistic regression: <code>perform_logistic</code><br />
+</li>
 <li>linear mixed models: <code>perform_lmer</code> (uses lmer function from the lme4 package, with lmerTest package for p-values)<br />
 </li>
 <li>tests of equality of variance: <code>perform_homoscedasticity_tests</code></li>
@@ -141,6 +143,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </li>
 <li>two-sample t-test (Welch or Student): <code>perform_t_test</code></li>
 </ul>
+<p>Most of the functions allow you to pass extra arguments to the underlying functions performing the actual tests, so you can set custom contrasts etc.</p>
 </div>
 <div id="functions-not-using-the-formula-interface" class="section level4">
 <h4>Functions not using the formula interface</h4>
@@ -169,7 +172,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="pls-da" class="section level3">
 <h3>PLS-DA</h3>
-<p>Not yet implemented, but coming soon!</p>
+<p>The package currently has wrappers for PLS-DA functions from the mixOmics package:</p>
+<ul>
+<li><code>mixomics_plsda</code> fits classic PLS-DA<br />
+</li>
+<li><code>mixomics_plsda_optimize</code> finds the optimal number of components for PLS-DA<br />
+</li>
+<li><code>mixomics_splsda_optimize</code> fits sPLS-DA, which uses a clever variable selection scheme to select the optimal number of components AND the optimal number of features for each component. Try it out!</li>
+</ul>
 </div>
 </div>
 </div>

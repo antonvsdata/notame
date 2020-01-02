@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-07-19" />
+<meta name="date" content="2020-01-02" />
 
 <title>Feature clustering</title>
 
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Feature clustering</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-07-19</em></h4>
+<h4 class="date"><em>2020-01-02</em></h4>
 
 
 
@@ -122,9 +122,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>For MetaboSet object, performing feature clustering is quite simple. All you have to do is call <code>cluster_features</code>. The below example illustrates this on the toy dataset included in the package. Note that the values of the parameters are non-sensible! For real datasets, please use values close to the defaults. In addition, when performing the clustering on real life datasets, it is probably a good idea to use parallel processing to speed things up (to find the connections between features, the algorithm needs to go through all possible pairs of features).</p>
 <p>To get visualizations of the clusters, set <code>plotting = TRUE</code> and specify a <code>prefix</code> for the file path. The function will create one file per cluster, with visualizations of the clusters.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">clustered &lt;-<span class="st"> </span><span class="kw">cluster_features</span>(example_set, <span class="dt">rt_window =</span> <span class="dv">2</span>, <span class="dt">corr_thresh =</span> <span class="fl">0.4</span>, <span class="dt">d_thresh =</span> <span class="fl">0.6</span>)
+<span class="co">#&gt; [1] &quot;Feature_ID&quot;    &quot;Split&quot;         &quot;Alignment&quot;     &quot;Mass&quot;         </span>
+<span class="co">#&gt; [5] &quot;RetentionTime&quot; &quot;Column&quot;        &quot;Mode&quot;          &quot;Flag&quot;         </span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting feature clustering at 2019-07-19 10:58:09</span>
+<span class="co">#&gt; Starting feature clustering at 2020-01-02 16:11:25</span>
+<span class="co">#&gt; Finding connections between features in HILIC_pos</span>
 <span class="co">#&gt; Warning: executing %dopar% sequentially: no parallel backend registered</span>
+<span class="co">#&gt; Found 35 connections in HILIC_pos</span>
 <span class="co">#&gt; Found 35 connections</span>
 <span class="co">#&gt; 2 components found</span>
 <span class="co">#&gt; </span>
@@ -132,15 +136,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 1 components found</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Found 3 clusters of 2 or more features, clustering finished at 2019-07-19 10:58:09</span></code></pre></div>
-<p>This will add new columns to the <code>results</code> part of the object:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(<span class="kw">results</span>(clustered))
-<span class="co">#&gt; [1] &quot;Feature_ID&quot;       &quot;Flag&quot;             &quot;MPA&quot;             </span>
-<span class="co">#&gt; [4] &quot;Cluster_ID&quot;       &quot;Cluster_size&quot;     &quot;Cluster_features&quot;</span>
-<span class="kw">head</span>(<span class="kw">results</span>(clustered)<span class="op">$</span>Cluster_ID)
-<span class="co">#&gt; [1] &quot;Cluster_HILIC_neg_118_9111a4_1865&quot; &quot;Cluster_HILIC_neg_108_1065a2_6121&quot;</span>
-<span class="co">#&gt; [3] &quot;HILIC_neg_158_23a1_4128&quot;           &quot;Cluster_HILIC_neg_303_2144a1_2372&quot;</span>
-<span class="co">#&gt; [5] &quot;Cluster_HILIC_neg_118_9111a4_1865&quot; &quot;Cluster_HILIC_neg_118_9111a4_1865&quot;</span></code></pre></div>
+<span class="co">#&gt; Found 3 clusters of 2 or more features, clustering finished at 2020-01-02 16:11:25</span></code></pre></div>
+<p>This will add new columns to the <code>fData</code> part of the object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(<span class="kw">fData</span>(clustered))
+<span class="co">#&gt;  [1] &quot;Feature_ID&quot;       &quot;Split&quot;            &quot;Alignment&quot;       </span>
+<span class="co">#&gt;  [4] &quot;Mass&quot;             &quot;RetentionTime&quot;    &quot;Column&quot;          </span>
+<span class="co">#&gt;  [7] &quot;Mode&quot;             &quot;Flag&quot;             &quot;MPA&quot;             </span>
+<span class="co">#&gt; [10] &quot;Cluster_ID&quot;       &quot;Cluster_size&quot;     &quot;Cluster_features&quot;</span>
+<span class="kw">head</span>(<span class="kw">fData</span>(clustered)<span class="op">$</span>Cluster_ID)
+<span class="co">#&gt; [1] &quot;Cluster_HILIC_pos_118_9111a4_1865&quot; &quot;Cluster_HILIC_pos_108_1065a2_6121&quot;</span>
+<span class="co">#&gt; [3] &quot;HILIC_pos_158_23a1_4128&quot;           &quot;Cluster_HILIC_pos_303_2144a1_2372&quot;</span>
+<span class="co">#&gt; [5] &quot;Cluster_HILIC_pos_118_9111a4_1865&quot; &quot;Cluster_HILIC_pos_118_9111a4_1865&quot;</span></code></pre></div>
 <p>The <code>Cluster_ID</code> column shows the result of the clustering: the features in a cluster receive an ID “Cluster_x”, where “x” is the name of the feature with the largest median peak area (MPA) in that cluster. If you only want to run the clustering to help you with identification of metabolites, this is enough. But if you want to compress the clusters, i.e. only keep one “feature” per cluster, you can do that by running:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">compressed &lt;-<span class="st"> </span><span class="kw">compress_clusters</span>(clustered)
 <span class="co">#&gt; Clusters compressed, left with 10 features</span></code></pre></div>
@@ -163,12 +169,12 @@ features &lt;-<span class="st"> </span><span class="kw">fData</span>(example_set
                  <span class="dt">name_col =</span> <span class="st">&quot;Feature_ID&quot;</span>, <span class="dt">mz_col =</span> <span class="st">&quot;Mass&quot;</span>, <span class="dt">rt_col =</span> <span class="st">&quot;RetentionTime&quot;</span>)
 <span class="kw">head</span>(conn)
 <span class="co">#&gt;                           x                         y       cor    rt_diff</span>
-<span class="co">#&gt; 1 HILIC_neg_259_9623a4_4322    HILIC_neg_401_52a4_211 0.5633503 -0.2212712</span>
-<span class="co">#&gt; 2 HILIC_neg_259_9623a4_4322 HILIC_neg_400_7045a5_3842 0.6692574  0.9519367</span>
-<span class="co">#&gt; 3 HILIC_neg_259_9623a4_4322 HILIC_neg_276_6328a2_7734 0.4904797 -1.6588669</span>
-<span class="co">#&gt; 4 HILIC_neg_259_9623a4_4322 HILIC_neg_118_9111a4_1865 0.5656323 -0.2457621</span>
-<span class="co">#&gt; 5 HILIC_neg_259_9623a4_4322 HILIC_neg_366_6203a6_1825 0.5468624  1.7502438</span>
-<span class="co">#&gt; 6 HILIC_neg_259_9623a4_4322 HILIC_neg_131_2034a6_1385 0.4008848  1.7062897</span>
+<span class="co">#&gt; 1 HILIC_pos_259_9623a4_4322    HILIC_pos_401_52a4_211 0.5633503 -0.2212712</span>
+<span class="co">#&gt; 2 HILIC_pos_259_9623a4_4322 HILIC_pos_400_7045a5_3842 0.6692574  0.9519367</span>
+<span class="co">#&gt; 3 HILIC_pos_259_9623a4_4322 HILIC_pos_276_6328a2_7734 0.4904797 -1.6588669</span>
+<span class="co">#&gt; 4 HILIC_pos_259_9623a4_4322 HILIC_pos_118_9111a4_1865 0.5656323 -0.2457621</span>
+<span class="co">#&gt; 5 HILIC_pos_259_9623a4_4322 HILIC_pos_366_6203a6_1825 0.5468624  1.7502438</span>
+<span class="co">#&gt; 6 HILIC_pos_259_9623a4_4322 HILIC_pos_131_2034a6_1385 0.4008848  1.7062897</span>
 <span class="co">#&gt;      mz_diff</span>
 <span class="co">#&gt; 1  141.55769</span>
 <span class="co">#&gt; 2  140.74223</span>

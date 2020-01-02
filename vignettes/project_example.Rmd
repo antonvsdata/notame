@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 Load the libraries (doParallel is used for parallel processing):
 
 ```{r, message=FALSE, warning=FALSE}
-library(amp)
+library(notame)
 library(doParallel)
 ```
 
@@ -45,10 +45,10 @@ log_state()
 
 ##### Read data
 
-Now we can read in the actual data! The file given here includes some example data and can be accessed at [the GitHub page](https://github.com/antonvsdata/amp/blob/master/inst/extdata/sample_data_whole.xlsx). The data is from a project with samples from three different groups. The data is scrambled, though (the feature information does not correspond to the abundances given).
+Now we can read in the actual data! The file given here includes some example data and can be accessed at [the GitHub page](https://github.com/antonvsdata/notame/blob/master/inst/extdata/sample_data_whole.xlsx). The data is from a project with samples from three different groups. The data is scrambled, though (the feature information does not correspond to the abundances given).
 
 ```{r}
-data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "amp"), sheet = 1,
+data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "notame"), sheet = 1,
                         corner_row = 4, corner_column = "X",
                         split_by = c("Column", "Ion mode"))
 ```
@@ -89,7 +89,7 @@ sapply(data, dim)
 
 ##### Construct MetaboSet objects
 
-These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in amp. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
+These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in notame. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
 
 MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
 
@@ -173,7 +173,7 @@ Information about the drift correction procedure is recorded in the DC_note colu
 - Drift_corrected = everything worked as expected, and the feature was corrected for the drift.
 
 ```{r}
-results(corrected)$DC_note
+fData(corrected)$DC_note
 ```
 
 ##### Flag low-quality features
@@ -304,7 +304,7 @@ And there are our final results! The next step is then to combine the results, a
 
 ```{r, eval = FALSE}
 combined_results <- dplyr::left_join(anova_results, pairwise_results)
-imputed <- join_results(imputed, combined_results)
+imputed <- join_fData(imputed, combined_results)
 
 write_to_excel(imputed, file = paste0(path, "results.xlsx"))
 ```

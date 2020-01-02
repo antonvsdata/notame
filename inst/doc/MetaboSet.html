@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-10-04" />
+<meta name="date" content="2020-01-02" />
 
 <title>MetaboSet utility</title>
 
@@ -32,7 +32,7 @@
 
 <h1 class="title toc-ignore">MetaboSet utility</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-10-04</em></h4>
+<h4 class="date"><em>2020-01-02</em></h4>
 
 
 
@@ -41,12 +41,11 @@
 <p>This vignette provides an introduction to the <code>MetaboSet</code> class, along with a summary of many of the functions for accessing elements of <code>MetaboSet</code> objects and other utility functions.</p>
 <div id="introduction-to-metabosets" class="section level4">
 <h4>Introduction to MetaboSets</h4>
-<p><code>MetaboSet</code> objects are the primary data structure of this package. <code>MetaboSet</code> is built upon the <code>ExpressionSet</code> class from the Biobase package by Bioconductor. <code>ExpressionSet</code> is used to record gene expression data, but the structure of the class is easily adaptable to LC-MS. For more information, read the <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf">ExpressionSet documentation</a>. <code>MetaboSet</code> objects consist of four main parts, each a matrix or a data frame:</p>
+<p><code>MetaboSet</code> objects are the primary data structure of this package. <code>MetaboSet</code> is built upon the <code>ExpressionSet</code> class from the Biobase package by Bioconductor. <code>ExpressionSet</code> is used to record gene expression data, but the structure of the class is easily adaptable to LC-MS. For more information, read the <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf">ExpressionSet documentation</a>. <code>MetaboSet</code> objects consist of three main parts, each a matrix or a data frame:</p>
 <ul>
 <li>Information about the samples (phenotype) such as injection order, group label, time point etc. Accessible with <code>pData(object)</code></li>
-<li>Feature data: information about the features such as retention time and mass. Accessible with <code>fData(object)</code></li>
+<li>Feature data: information about the features such as retention time and mass. Results from preprocessing and statistical tests will also be recoreded here. Accessible with <code>fData(object)</code></li>
 <li>Abundances of features in each sample. Accessible with <code>exprs(object)</code></li>
-<li>Results from statistical analyses. Accessible with <code>results(object)</code></li>
 </ul>
 <p>In addition to these, a <code>MetaboSet</code> can store the names of special columns in <code>pData</code> that store group labels, time points or subject identifiers. These columns are used as defaults in many of the functions of the package.</p>
 <ul>
@@ -56,7 +55,7 @@
 </li>
 <li><code>subject_col</code> holds the subject ID column name</li>
 </ul>
-<p>Let’s look at the four main parts in more detail:</p>
+<p>Let’s look at the three main parts in more detail:</p>
 <div id="pheno-data-sample-information" class="section level5">
 <h5>Pheno data / Sample information</h5>
 <p>The sample information data frame, or <code>pData</code> has many special column names that are created when data is read from the Excel spreadsheet.</p>
@@ -69,24 +68,24 @@
 </div>
 <div id="feature-data" class="section level5">
 <h5>Feature data</h5>
-<p>The feature data part usually has many columns that are created by the peak picking software, but for the sake of this package, the most important are:</p>
+<p>All the information about individual molecular features is stored here. This includes information given by the peak picking software, and information added by functions in this package, such as quality metrics and results from statistical tests. The feature data part usually has many columns that are created by the peak picking software, but for the sake of this package, the most important are:</p>
 <ul>
 <li>Mass and retention time columns<br />
 </li>
-<li>Columns to identify the column and ionization mode to be used<br />
-</li>
+<li>Columns to identify the column and ionization mode to be used</li>
+</ul>
+<p>In addition, this package will automatically create new columns:</p>
+<ul>
 <li><code>Split</code>, which is used to separate different parts of the dataset, usually made by combining column and ionization mode<br />
 </li>
 <li><code>Feature_ID</code>, a unique identifier for each feature, made by combining Split, mass and retention time. <code>Feature_ID</code> is used as the row names of <code>exprs</code> and also present in <code>results</code></li>
+<li><code>Flag</code>, used to, well, flag low-quality features. Read more below:</li>
 </ul>
+<p><code>Flag</code> column is used to flag features that are deemed low-quality for some reason (see <code>?flag_detection</code> and <code>?flag_quality</code>). Many functions have an <code>all_features</code> that controls whether all features or only the good quality features should be used for the function. By default, <code>all_features</code> is always set to <code>FALSE</code>, which means that all flagged features (features with a non-NA value in the <code>Flag</code> column) are ignored.</p>
 </div>
 <div id="abundances" class="section level5">
 <h5>Abundances</h5>
 <p>Naturally, the abundance part, <code>exprs</code>, is used by almost all the functions as it actually holds the data. Not much more to say here.</p>
-</div>
-<div id="results" class="section level5">
-<h5>Results</h5>
-<p>Many functions use <code>results</code> data frame to record information such as quality metrics and results from statistical tests. One column of <code>results</code> is especially important: <code>Flag</code> column is used to flag features that are deemed low-quality for some reason (see <code>?flag_detection</code> and <code>?flag_quality</code>). Many functions have an <code>all_features</code> that controls whether all features or only the good quality features should be used for the function. By default, <code>all_features</code> is always set to <code>FALSE</code>, which means that all flagged features (features with a non-NA value in the <code>Flag</code> column) are ignored.</p>
 </div>
 </div>
 <div id="how-to-make-metabosets" class="section level4">
@@ -171,9 +170,7 @@ ALTERNATIVELY, if the file only contains one mode, specify the name of the mode,
 </li>
 <li><code>merge_metabosets</code> is used to merge MetaboSets from multiple modes together<br />
 </li>
-<li><code>join_fData</code> can be used to merge a data frame to the <code>fData</code> part of an object<br />
-</li>
-<li><code>join_results</code> merges data frames to the <code>results</code> part of an object. Useful for adding results from any statistical tests to the object.</li>
+<li><code>join_fData</code> can be used to merge a data frame to the <code>fData</code> part of an object. This is mainly used to add results from statistical tests.</li>
 </ul>
 </div>
 </div>

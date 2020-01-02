@@ -5,7 +5,7 @@ knitr::opts_chunk$set(
 )
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------
-library(amp)
+library(notame)
 library(doParallel)
 
 ## ------------------------------------------------------------------------
@@ -17,7 +17,7 @@ init_log(log_file = paste0(path, "log.txt"))
 log_state()
 
 ## ------------------------------------------------------------------------
-data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "amp"), sheet = 1,
+data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "notame"), sheet = 1,
                         corner_row = 4, corner_column = "X",
                         split_by = c("Column", "Ion mode"))
 
@@ -68,7 +68,7 @@ corrected <- correct_drift(mode)
 #  visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
 
 ## ------------------------------------------------------------------------
-results(corrected)$DC_note
+fData(corrected)$DC_note
 
 ## ---- include = FALSE----------------------------------------------------
 corrected <- flag_quality(corrected)
@@ -142,7 +142,7 @@ pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Group
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  combined_results <- dplyr::left_join(anova_results, pairwise_results)
-#  imputed <- join_results(imputed, combined_results)
+#  imputed <- join_fData(imputed, combined_results)
 #  
 #  write_to_excel(imputed, file = paste0(path, "results.xlsx"))
 

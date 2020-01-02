@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 This vignette provides an overview of the different statistical tests provided in the package. The first section discusses univariate tests, which are repeated for each feature.
 
-Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object results using ```join_results(object, results)```
+Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object feature data using ```join_fData(object, results)```
 
 ## Univariate functions
 
@@ -49,11 +49,14 @@ For many of the univariate statistical test functions in this package use the fo
 Now that we know how the formula interface looks like, let's list the univariate statistical functions available:
 
 - linear models: ```perform_lm```  
+- logistic regression: ```perform_logistic```  
 - linear mixed models: ```perform_lmer``` (uses lmer function from the lme4 package, with lmerTest package for p-values)  
 - tests of equality of variance: ```perform_homoscedasticity_tests```
 - Kruskal-Wallis test: ```perform_kruskal_wallis```  
 - Welch's ANOVA and Classic ANOVA: ```perform_oneway_anova```  
-- two-sample t-test (Welch or Student): ```perform_t_test```  
+- two-sample t-test (Welch or Student): ```perform_t_test``` 
+
+Most of the functions allow you to pass extra arguments to the underlying functions performing the actual tests, so you can set custom contrasts etc.
 
 #### Functions not using the formula interface
 
@@ -78,4 +81,13 @@ Model diagnostics visalizations are currently available for linear models and li
 
 ### PLS-DA
 
-Not yet implemented, but coming soon!
+The package currently has wrappers for PLS-DA functions from the mixOmics package:
+
+- ```mixomics_plsda``` fits classic PLS-DA  
+- ```mixomics_plsda_optimize``` finds the optimal number of components for PLS-DA  
+- ```mixomics_splsda_optimize``` fits sPLS-DA, which uses a clever variable selection scheme to select the optimal number of components AND the optimal number of features for each component. Try it out!
+
+
+
+
+

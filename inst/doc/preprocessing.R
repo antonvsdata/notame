@@ -4,6 +4,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ---- out.heigth = "900px", echo=FALSE-----------------------------------
-knitr::include_graphics("notame_workflow.png")
+## ---- out.width = "800px", echo=FALSE------------------------------------
+knitr::include_graphics("drift_corr.png")
 

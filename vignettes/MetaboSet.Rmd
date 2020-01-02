@@ -22,12 +22,11 @@ This vignette provides an introduction to the ```MetaboSet``` class, along with 
 
 #### Introduction to MetaboSets
 
-```MetaboSet``` objects are the primary data structure of this package. ```MetaboSet``` is built upon the ```ExpressionSet``` class from the Biobase package by Bioconductor. ```ExpressionSet``` is used to record gene expression data, but the structure of the class is easily adaptable to LC-MS. For more information, read the [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf). ```MetaboSet``` objects consist of four main parts, each a matrix or a data frame:
+```MetaboSet``` objects are the primary data structure of this package. ```MetaboSet``` is built upon the ```ExpressionSet``` class from the Biobase package by Bioconductor. ```ExpressionSet``` is used to record gene expression data, but the structure of the class is easily adaptable to LC-MS. For more information, read the [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf). ```MetaboSet``` objects consist of three main parts, each a matrix or a data frame:
 
 - Information about the samples (phenotype) such as injection order, group label, time point etc. Accessible with ```pData(object)```
-- Feature data: information about the features such as retention time and mass. Accessible with ```fData(object)```
+- Feature data: information about the features such as retention time and mass. Results from preprocessing and statistical tests will also be recoreded here. Accessible with ```fData(object)```
 - Abundances of features in each sample. Accessible with ```exprs(object)```
-- Results from statistical analyses. Accessible with ```results(object)```
 
 In addition to these, a ```MetaboSet``` can store the names of special columns in ```pData``` that store group labels, time points or subject identifiers. These columns are used as defaults in many of the functions of the package.  
 
@@ -35,7 +34,7 @@ In addition to these, a ```MetaboSet``` can store the names of special columns i
 - ```time_col``` holds the time point column name  
 - ```subject_col``` holds the subject ID column name
 
-Let's look at the four main parts in more detail:
+Let's look at the three main parts in more detail:
 
 ##### Pheno data / Sample information
 
@@ -49,21 +48,23 @@ In addition to these three columns, pheno data often holds at least one of the g
 
 ##### Feature data
 
-The feature data part usually has many columns that are created by the peak picking software, but for the sake of this package, the most important are:  
+All the information about individual molecular features is stored here. This includes information given by the peak picking software, and information added by functions in this package, such as quality metrics and results from statistical tests. The feature data part usually has many columns that are created by the peak picking software, but for the sake of this package, the most important are:  
 
 - Mass and retention time columns  
 - Columns to identify the column and ionization mode to be used  
+
+In addition, this package will automatically create new columns:
+
 - ```Split```, which is used to separate different parts of the dataset, usually made by combining column and ionization mode  
 - ```Feature_ID```, a unique identifier for each feature, made by combining Split, mass and retention time. ```Feature_ID``` is used as the row names of ```exprs``` and also present in ```results```
+- ```Flag```, used to, well, flag low-quality features. Read more below:
 
+```Flag``` column is used to flag features that are deemed low-quality for some reason (see ```?flag_detection``` and ```?flag_quality```). Many functions have an ```all_features``` that controls whether all features or only the good quality features should be used for the function. By default, ```all_features``` is always set to ```FALSE```, which means that all flagged features (features with a non-NA value in the ```Flag``` column) are ignored.
 
 ##### Abundances
 
 Naturally, the abundance part, ```exprs```, is used by almost all the functions as it actually holds the data. Not much more to say here.
 
-##### Results
-
-Many functions use ```results``` data frame to record information such as quality metrics and results from statistical tests. One column of ```results``` is especially important: ```Flag``` column is used to flag features that are deemed low-quality for some reason (see ```?flag_detection``` and ```?flag_quality```). Many functions have an ```all_features``` that controls whether all features or only the good quality features should be used for the function. By default, ```all_features``` is always set to ```FALSE```, which means that all flagged features (features with a non-NA value in the ```Flag``` column) are ignored.
 
 #### How to make MetaboSets?
 
@@ -131,7 +132,6 @@ In addition, there are many functions that modify MetaboSets:
 - ```drop_qcs``` removes the QC samples  
 - ```drop_flagged``` removes all features that have been flagged (low-quality features)  
 - ```merge_metabosets``` is used to merge MetaboSets from multiple modes together  
-- ```join_fData``` can be used to merge a data frame to the ```fData``` part of an object  
-- ```join_results``` merges data frames to the ```results``` part of an object. Useful for adding results from any statistical tests to the object.
+- ```join_fData``` can be used to merge a data frame to the ```fData``` part of an object. This is mainly used to add results from statistical tests.
 
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2019-10-04" />
+<meta name="date" content="2020-01-02" />
 
 <title>Visualizations</title>
 
@@ -32,7 +32,7 @@
 
 <h1 class="title toc-ignore">Visualizations</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2019-10-04</em></h4>
+<h4 class="date"><em>2020-01-02</em></h4>
 
 
 
@@ -46,14 +46,14 @@
 </li>
 <li>column names of pheno data (pData(object)) can be given to be used as ggplot aesthetics, such as color, shape or fill. Often these default to either <code>group_col</code> or other special columns.</li>
 </ul>
-<p>Color scales and other scales can be set separately for each function call, and the defaults are set as options in the package. The scales are ggplot scales, returned by e.g. <code>scale_color_x</code>. It is also possible to change the scales globally for the complete project. To do this, use e.g. <code>options(&quot;amp.color_scale&quot;) &lt;- scale_color_brewer(palette = &quot;Dark2&quot;)</code>. Below is a list of all the scales used in the package and their default values (con = continuous, dis = discrete, div = diverging):</p>
+<p>Color scales and other scales can be set separately for each function call, and the defaults are set as options in the package. The scales are ggplot scales, returned by e.g. <code>scale_color_x</code>. It is also possible to change the scales globally for the complete project. To do this, use e.g. <code>options(&quot;notame.color_scale&quot;) &lt;- scale_color_brewer(palette = &quot;Dark2&quot;)</code>. Below is a list of all the scales used in the package and their default values (con = continuous, dis = discrete, div = diverging):</p>
 <ul>
-<li><code>amp.color_scale_con = ggplot2::scale_color_viridis_c()</code></li>
-<li><code>amp.color_scale_dis = ggplot2::scale_color_brewer(palette = &quot;Set1&quot;)</code></li>
-<li><code>amp.fill_scale_con = ggplot2::scale_fill_viridis_c()</code></li>
-<li><code>amp.fill_scale_dis = ggplot2::scale_fill_brewer(palette = &quot;Set1&quot;)</code></li>
-<li><code>amp.fill_scale_div = ggplot2::scale_fill_distiller(palette = &quot;RdBu&quot;)</code></li>
-<li><code>amp.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))</code></li>
+<li><code>notame.color_scale_con = ggplot2::scale_color_viridis_c()</code></li>
+<li><code>notame.color_scale_dis = ggplot2::scale_color_brewer(palette = &quot;Set1&quot;)</code></li>
+<li><code>notame.fill_scale_con = ggplot2::scale_fill_viridis_c()</code></li>
+<li><code>notame.fill_scale_dis = ggplot2::scale_fill_brewer(palette = &quot;Set1&quot;)</code></li>
+<li><code>notame.fill_scale_div = ggplot2::scale_fill_distiller(palette = &quot;RdBu&quot;)</code></li>
+<li><code>notame.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))</code></li>
 </ul>
 <p>List of common visualizations that take a MetaboSet object as their first argument and return a ggplot object, see individual documentation for more details:</p>
 <ul>
@@ -81,17 +81,21 @@
 <li><code>plot_dendrogram</code>: dendrogram of hierarchical clustering on the samples<br />
 </li>
 <li><code>plot_sample_heatmap</code>: heatmap of intersample distances</li>
+<li><code>plot_injection_lm</code>: histogram of p-values from a linear regression model Feature ~ Injection_order</li>
 </ul>
 <p>Visualizations for results of statistical tests or correlations:</p>
 <ul>
 <li><code>volcano_plot</code>: Volcano plot<br />
 </li>
 <li><code>effect_heatmap</code>: customizable heatmap of e.g. correlation coefficients and p-values</li>
+<li><code>manhattan_plot</code>: Manhattan plot, usually with retention time or m/z as the x-axis</li>
 </ul>
 <p>To save these functions to a PDF file, use <code>save_plot</code></p>
 <p>The following visualizations are applied to each feature and directly saved to a PDF file, one page per feature.</p>
 <ul>
 <li><code>save_subject_line_plots</code>: line plots of changes in each subject<br />
+</li>
+<li><code>save_beeswarm_plots</code>: beeswarm plots of feature levels in each group<br />
 </li>
 <li><code>save_group_boxplost</code>: boxplots of metabolite levels in each study group<br />
 </li>

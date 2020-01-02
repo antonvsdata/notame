@@ -39,8 +39,8 @@ clustered <- cluster_features(example_set, rt_window = 2, corr_thresh = 0.4, d_t
 
 
 ## ------------------------------------------------------------------------
-colnames(results(clustered))
-head(results(clustered)$Cluster_ID)
+colnames(fData(clustered))
+head(fData(clustered)$Cluster_ID)
 
 ## ------------------------------------------------------------------------
 compressed <- compress_clusters(clustered)
