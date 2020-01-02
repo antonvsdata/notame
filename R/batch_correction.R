@@ -288,7 +288,7 @@ normalize_batches <- function(object, batch, group, ref_label, ...) {
   ref_corrected <- as.data.frame(t(normData$refCorrected))
   colnames(ref_corrected) <- paste0("Ref_corrected_", seq_len(ncol(ref_corrected)))
   ref_corrected$Feature_ID <- featureNames(object)
-  object <- join_results(object, ref_corrected)
+  object <- join_fData(object, ref_corrected)
 }
 
 #' Save batch correction plots

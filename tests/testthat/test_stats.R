@@ -175,7 +175,7 @@ test_that("P-value correction works", {
 test_that("Linear model works", {
 
   cd <- combined_data(drop_qcs(example_set))
-  lm_fit <- lm(HILIC_neg_259_9623a4_4322 ~ Time,
+  lm_fit <- lm(HILIC_pos_259_9623a4_4322 ~ Time,
                data = cd)
   smry <- summary(lm_fit)
 
@@ -211,7 +211,7 @@ test_that("Linear model works", {
 test_that("Logistic regression works", {
 
   cd <- combined_data(drop_qcs(example_set))
-  glm_fit <- glm(Group ~ HILIC_neg_259_9623a4_4322,
+  glm_fit <- glm(Group ~ HILIC_pos_259_9623a4_4322,
                data = cd,
                family = binomial())
   smry <- summary(glm_fit)

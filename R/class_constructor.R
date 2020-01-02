@@ -253,15 +253,13 @@ name_features <- function(feature_data) {
 #' It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
 #' package. For more information, read the MetaboSet utility vignette.
 #' In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},
-#' \code{MetaboSet} has four slots of its own. The first three slots hold special
+#' \code{MetaboSet} has four slots of its own. The extra three slots hold special
 #' column names that are stored purely for convenience, as many functions use these as
-#' defaults. The fourth slot is a data frame with one row per feature that holds all
-#' relevant results from the analyses.
+#' defaults.
 #'
 #' @slot group_col character, name of the column holding group information
 #' @slot time_col character, name of the column holding time points
 #' @slot subject_col character, name of the column holding subject identifiers
-#' @slot results data frame, holds results of analyses
 #'
 #'
 #' @import methods
@@ -269,8 +267,7 @@ name_features <- function(feature_data) {
 MetaboSet <- setClass("MetaboSet",
                       slots = c(group_col = "character",
                                 time_col = "character",
-                                subject_col = "character",
-                                results = "data.frame"),
+                                subject_col = "character"),
                       contains = "ExpressionSet")
 
 setValidity("MetaboSet",
@@ -281,10 +278,10 @@ setValidity("MetaboSet",
                 paste("Column", object@time_col, "not found in pheno data")
               } else if (!is.na(object@subject_col) & !object@subject_col %in% colnames(object@phenoData@data)) {
                 paste("Column", object@subject_col, "not found in pheno data")
-              } else if (!identical(rownames(object@results), featureNames(object))){
-                "Rownames of results do not match featureNames"
               } else if (!all(c("Injection_order", "Sample_ID", "QC") %in% colnames(pData(object)))) {
                 "Pheno data should contain columns Sample_ID, QC and Injection_order"
+              } else if (!"Flag" %in% colnames(fData(object))) {
+                "Flag column not found in fData"
               } else {
                 x <- check_pheno_data(pData(object), id_prefix = "")
                 x <- check_exprs(exprs(object))
@@ -315,6 +312,7 @@ construct_MetaboSet <- function(exprs, pheno_data, feature_data,
                                 subject_col = NA_character_) {
 
   pheno_data <- Biobase::AnnotatedDataFrame(data=pheno_data)
+  feature_data$Flag <- NA
 
   # Split the data by the Split column of feature data
   parts <- unique(feature_data$Split)
@@ -327,11 +325,7 @@ construct_MetaboSet <- function(exprs, pheno_data, feature_data,
                         featureData = fd_tmp,
                         group_col = group_col,
                         time_col = time_col,
-                        subject_col = subject_col,
-                        results = data.frame(Feature_ID = fd_tmp$Feature_ID,
-                                             Flag = NA_character_,
-                                             row.names = rownames(fd_tmp),
-                                             stringsAsFactors = FALSE))
+                        subject_col = subject_col)
   }
 
   obj_list
@@ -341,8 +335,7 @@ construct_MetaboSet <- function(exprs, pheno_data, feature_data,
 #' Write results to Excel file
 #'
 #' Writes all the data in a MetaboSet object to an Excel spreadsheet.
-#' The format is similar to the one used to read data in, except that
-#' the results from statistics are added to the right.
+#' The format is similar to the one used to read data in.
 #'
 #' @param object a MetaboSet object
 #' @param file path to the file to write
@@ -357,16 +350,14 @@ write_to_excel <- function(object, file, ...) {
   }
 
   # Bottom part consists of (from left to right):
-  # - feature data
+  # - feature data with results
   # - abundance values
-  # - results from statistics
   bottom <- cbind(fData(object),
-                  exprs(object),
-                  dplyr::select(results(object), -Feature_ID),
-                  results(object)["Feature_ID"])
+                  fData(object)["Feature_ID"],
+                  exprs(object))
 
   # Feature ID column is duplicated on the right for convenience
-  colnames(bottom)[ncol(bottom)] <- "Feature_ID2"
+  colnames(bottom)[ncol(fData(object)) + 1] <- "Feature_ID2"
 
   # All columns must be characters to allow combination with the top block
   bottom <- bottom %>%
@@ -377,14 +368,12 @@ write_to_excel <- function(object, file, ...) {
 
   # NA blocks to fill the empty space
   empty1 <- matrix(NA_character_, nrow = nrow(top),
-                   ncol = ncol(fData(object)) - 1)
-  empty2 <- matrix(NA_character_, nrow = nrow(top),
-                   ncol = ncol(results(object)))
-  top <- cbind(empty1, top, empty2)
+                   ncol = ncol(fData(object)))
+  top <- cbind(empty1, top)
   colnames(top) <- colnames(bottom)
 
-
-  replace_idx <- (ncol(fData(object))+1):(ncol(fData(object)) + ncol(exprs(object)))
+  # Replace the column names of the epxrs part with the last column (now row) of sample info
+  replace_idx <- (ncol(fData(object))+1):ncol(bottom)
   bottom[1, replace_idx] <- top[nrow(top), replace_idx]
 
   # All combined
@@ -491,29 +480,6 @@ setMethod("subject_col<-", "MetaboSet",
           })
 
 
-# results from statistical tests
-#' @export
-setGeneric("results", signature = "object",
-           function(object) standardGeneric("results"))
-
-#' @describeIn MetaboSet access and set results
-#' @export
-setMethod("results", "MetaboSet",
-          function(object) object@results)
-
-#' @export
-setGeneric("results<-", signature = "object",
-           function(object, value) standardGeneric("results<-"))
-
-#' @export
-setMethod("results<-", "MetaboSet",
-          function(object, value) {
-            object@results <- value
-            if (validObject(object)) {
-              return(object)
-            }
-          })
-
 #' Extract flags of features
 #'
 #' @export
@@ -523,7 +489,7 @@ setGeneric("flag", signature = "object",
 #' @describeIn MetaboSet access and set results
 #' @export
 setMethod("flag", "MetaboSet",
-          function(object) object@results$Flag)
+          function(object) fData(object)$Flag)
 
 #' @export
 setGeneric("flag<-", signature = "object",
@@ -532,14 +498,15 @@ setGeneric("flag<-", signature = "object",
 #' @export
 setMethod("flag<-", "MetaboSet",
           function(object, value) {
-            object@results$Flag <- value
+            fData(object)$Flag <- value
             if (validObject(object)) {
               return(object)
             }
           })
 
-#' Join results to a MetaboSet object
+#' Join results to a MetaboSet object (Deprecated)
 #'
+#' NOTE: this function is deprecated as the results part of a MetaboSet object does not exist anymore. Use \code{\link{join_fData}} instead!
 #' Join a new data frame of results to a MetaboSet object. The data frame needs to have a column "Feature_ID".
 #' This function is usually called on the results of one of the statistics functions.
 #'
@@ -549,7 +516,7 @@ setMethod("flag<-", "MetaboSet",
 #' @examples
 #' lm_results <- perform_lm(example_set, formula_char = "Feature ~ Group")
 #' with_results <- join_results(example_set, lm_results)
-#' colnames(results(with_results))
+#' colnames(fData(with_results))
 #'
 #' @return a MetaboSet object with the new information added to results(object)
 #'
@@ -561,13 +528,8 @@ setGeneric("join_results", signature = c("object", "dframe"),
 #' @export
 setMethod("join_results", c("MetaboSet", "data.frame"),
           function(object, dframe) {
-            cols <- c("Feature_ID", setdiff(colnames(results(object)), colnames(dframe)))
-            res <- dplyr::left_join(results(object)[cols],
-                                                dframe,
-                                                by = "Feature_ID")
-            rownames(res) <- res$Feature_ID
-            results(object) <- res
-            object
+            warning("join_results is deprecated, use join_fData instead. (The results part of the MetaboSet is removed and the results are now stored in featureData)")
+            join_fData(object, dframe)
           })
 
 
@@ -603,17 +565,7 @@ setMethod("join_fData", c("MetaboSet", "data.frame"),
             }
           })
 
-
-# Subsetting that also subsets results
-#' @export
-setMethod("[", "MetaboSet", function(x, i, j, ..., drop = FALSE) {
-
-  x <- callNextMethod()
-  results(x) <- results(x)[i,]
-  x
-})
-
-# FeatureNames also changing Feature_ID columns
+# FeatureNames also changing Feature_ID column in featureData
 #' @export
 setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY"),
                  function(object, value) {
@@ -624,7 +576,6 @@ setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY")
                    object@featureData <- fd
                    object@assayData <- ad
                    fData(object)$Feature_ID <- value
-                   results(object)$Feature_ID <- value
                    if (validObject(object)) {
                      return(object)
                    }

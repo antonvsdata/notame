@@ -17,7 +17,7 @@ round_mz <- as.numeric(feature_data$Mass) %>% round(digits = 4) %>%
   as.character() %>% gsub("[.]", "_", .)
 round_rt <- as.numeric(feature_data$RetentionTime) %>% round(digits = 4) %>%
   as.character() %>% gsub("[.]", "_", .)
-feature_data$Feature_ID <- paste0("HILIC_neg_", round_mz, "a", round_rt)
+feature_data$Feature_ID <- paste0("HILIC_pos_", round_mz, "a", round_rt)
 feature_data <- select(feature_data, "Feature_ID", everything())
 
 rownames(feature_data) <- feature_data$Feature_ID

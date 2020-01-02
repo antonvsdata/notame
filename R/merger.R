@@ -24,7 +24,7 @@ check_column_match <- function(x, y, fun, name) {
 # Check that two MetaboSet object can be combined
 #
 # Checks many matching criteria, basically pheno data needs to have similar special columns,
-# the number of samples needs to be the same and feature data and results need to have the
+# the number of samples needs to be the same and feature data need to have the
 # same columns names. Throws an error if any of the criteria is not fulfilled.
 #
 # @param x,y MetaboSet objects
@@ -73,10 +73,6 @@ check_match <- function(x, y) {
     stop("exprs have different column names")
   }
 
-  if (!identical(colnames(results(x)), colnames(results(y)))) {
-    stop("results have different column names")
-  }
-
 }
 
 # Merge two MetaboSet objects together
@@ -91,7 +87,6 @@ merge_helper <- function(x, y) {
   merged_exprs <- rbind(exprs(x), exprs(y))
   merged_fdata <- rbind(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
-  merged_results <- rbind(results(x), results(y))
 
   merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
@@ -102,8 +97,7 @@ merge_helper <- function(x, y) {
                              featureData = merged_fdata,
                              group_col = merged_group_col,
                              time_col = merged_time_col,
-                             subject_col = merged_subject_col,
-                             results = merged_results)
+                             subject_col = merged_subject_col)
 
   merged_object
 }
@@ -180,9 +174,6 @@ merge_batch_helper <- function(x, y) {
 
   merged_fdata <- fdata_batch_helper(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
-  merged_results <- dplyr::left_join(results(x), results(y))
-  rownames(merged_results) <- merged_results$Feature_ID
-
   merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
   merged_subject_col <- ifelse(!is.na(subject_col(x)), subject_col(x), subject_col(y))
@@ -192,8 +183,7 @@ merge_batch_helper <- function(x, y) {
                              featureData = merged_fdata,
                              group_col = merged_group_col,
                              time_col = merged_time_col,
-                             subject_col = merged_subject_col,
-                             results = merged_results)
+                             subject_col = merged_subject_col)
 
   merged_object
 }

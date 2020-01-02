@@ -32,7 +32,7 @@ test_that("Imputation works as expected", {
 test_that("Flagging works as expected", {
 
   single_change <- matrix(1111, nrow = 1, ncol = 1,
-                          dimnames = list("HILIC_neg_108_1065a2_6121",
+                          dimnames = list("HILIC_pos_108_1065a2_6121",
                                           "Demo_1"))
   mrg <- merge_exprs(example_set, single_change)
   expect_equal(exprs(mrg)[2, 1], 1111)
@@ -63,7 +63,7 @@ test_that("Flagging works as expected", {
 test_that("Flagged compounds are not imputed", {
 
   marked <- mark_nas(example_set, 0)
-  results(marked)$Flag[c(1,4,6)] <- "Flagged"
+  flag(marked)[c(1,4,6)] <- "Flagged"
 
   imputed <- impute_rf(marked)
   nas <- apply(exprs(imputed), 1, prop_na)

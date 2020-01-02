@@ -14,7 +14,7 @@ a MetaboSet object with only one feature per cluster
 }
 \description{
 This function compresses clusters found by cluster_features, keeping only the feature with the highest
-median peak area. The features that were discarded are recorded in the results part, under Cluster_features.
+median peak area. The features that were discarded are recorded in the fData part, under Cluster_features.
 }
 \examples{
 clustered <- cluster_features(example_set, rt_window = 1, corr_thresh = 0.5, d_thresh = 0.6)

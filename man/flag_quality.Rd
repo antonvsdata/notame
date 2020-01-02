@@ -36,10 +36,10 @@ The default condition keeps features that pass either of the two following condi
 }
 \examples{
 ex_set <- flag_quality(merged_sample)
-results(ex_set)
+fData(ex_set)
 # Custom condition
 ex_set <- flag_quality(merged_sample, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
-results(ex_set)
+fData(ex_set)
 
 }
 \references{

@@ -22,7 +22,7 @@
 #' @param prefix the prefix to the files to be plotted
 #'
 #' @return a MetaboSet object, with median peak area (MPA), the cluster ID, the features in the cluster,
-#' and cluster size added to results.
+#' and cluster size added to fData.
 #'
 #' @examples
 #' # The parameters are really weird because example data is imaginary
@@ -49,6 +49,7 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
 
   data <- as.data.frame(t(exprs(object)))
   features <- fData(object)
+  print(colnames(features))
   # Start log
   log_text(paste("\nStarting feature clustering at", Sys.time()))
 
@@ -71,6 +72,7 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
   }
   log_text(paste("Found", nrow(conn), "connections"))
 
+
   # Form clusters
   clusters <- find_clusters(conn, d_thresh)
   lens <- sapply(clusters, function(x){length(x$features)})
@@ -90,7 +92,7 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
     log_text(paste("Saved cluster plots to:", prefix))
   }
   # Add cluster IDs to the ORIGINAL object (flagged features still there)
-  clustered <- join_results(orig, features[c("Feature_ID", "MPA",
+  clustered <- join_fData(orig, features[c("Feature_ID", "MPA",
                                              "Cluster_ID", "Cluster_size",
                                              "Cluster_features")])
   clustered
@@ -138,7 +140,7 @@ assign_cluster_id <- function(data, clusters, features, name_col) {
 #' Compress clusters of features to a single feature
 #'
 #' This function compresses clusters found by cluster_features, keeping only the feature with the highest
-#' median peak area. The features that were discarded are recorded in the results part, under Cluster_features.
+#' median peak area. The features that were discarded are recorded in the fData part, under Cluster_features.
 #'
 #' @param object a MetaboSet object
 #'
@@ -153,9 +155,9 @@ assign_cluster_id <- function(data, clusters, features, name_col) {
 #' @export
 compress_clusters <- function(object) {
 
-  cluster_names <- results(object)$Cluster_ID
+  cluster_names <- fData(object)$Cluster_ID
   if (is.null(cluster_names)) {
-    stop('No "Cluster_ID" found in results(object), please run cluster_features first!')
+    stop('No "Cluster_ID" found in fData(object), please run cluster_features first!')
   }
   # Get only "real" clusters
   clusters <- cluster_names[grepl("^Cluster_", cluster_names)] %>%

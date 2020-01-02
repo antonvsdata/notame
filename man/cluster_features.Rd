@@ -33,7 +33,7 @@ NOTE: use the same unit as the retention time}
 }
 \value{
 a MetaboSet object, with median peak area (MPA), the cluster ID, the features in the cluster,
-and cluster size added to results.
+and cluster size added to fData.
 }
 \description{
 Clusters features potentially originating from the same compound. Features with high

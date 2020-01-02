@@ -8,7 +8,6 @@
 \alias{group_col,MetaboSet-method}
 \alias{time_col,MetaboSet-method}
 \alias{subject_col,MetaboSet-method}
-\alias{results,MetaboSet-method}
 \alias{flag,MetaboSet-method}
 \alias{join_results,MetaboSet,data.frame-method}
 \alias{join_fData,MetaboSet,data.frame-method}
@@ -25,8 +24,6 @@
 \S4method{time_col}{MetaboSet}(object)
 
 \S4method{subject_col}{MetaboSet}(object)
-
-\S4method{results}{MetaboSet}(object)
 
 \S4method{flag}{MetaboSet}(object)
 
@@ -49,10 +46,9 @@ MetaboSet is the main class used to represent data in the amp package.
 It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
 package. For more information, read the MetaboSet utility vignette.
 In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},
-\code{MetaboSet} has four slots of its own. The first three slots hold special
+\code{MetaboSet} has four slots of its own. The extra three slots hold special
 column names that are stored purely for convenience, as many functions use these as
-defaults. The fourth slot is a data frame with one row per feature that holds all
-relevant results from the analyses.
+defaults.
 }
 \section{Methods (by generic)}{
 \itemize{
@@ -63,8 +59,6 @@ relevant results from the analyses.
 \item \code{time_col}: access and set time_col
 
 \item \code{subject_col}: access and set subject_col
-
-\item \code{results}: access and set results
 
 \item \code{flag}: access and set results
 
@@ -89,7 +83,5 @@ relevant results from the analyses.
 \item{\code{time_col}}{character, name of the column holding time points}
 
 \item{\code{subject_col}}{character, name of the column holding subject identifiers}
-
-\item{\code{results}}{data frame, holds results of analyses}
 }}
 

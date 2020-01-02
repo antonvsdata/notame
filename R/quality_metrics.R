@@ -6,10 +6,10 @@ setGeneric("quality", signature = "object",
 #' @export
 setMethod("quality", c(object = "MetaboSet"),
           function(object) {
-            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(results(object)))) {
+            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
               return(NULL)
             }
-            results(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
+            fData(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
                             "D_ratio_r")]
           })
 
@@ -20,10 +20,10 @@ setGeneric("erase_quality", signature = "object",
 #' @export
 setMethod("erase_quality", c(object = "MetaboSet"),
           function(object) {
-            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(results(object)))) {
+            if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
               return(NULL)
             }
-            results(object)[c("RSD", "RSD_r", "D_ratio", "D_ratio_r")] <- NULL
+            fData(object)[c("RSD", "RSD_r", "D_ratio", "D_ratio_r")] <- NULL
             object
           })
 
@@ -55,7 +55,7 @@ setMethod("assess_quality", c(object = "MetaboSet"),
                          row.names = rownames(sample_data)[i], stringsAsFactors = FALSE)
             }
 
-            object <- join_results(object, quality_metrics)
+            object <- join_fData(object, quality_metrics)
 
             object
           })
@@ -91,10 +91,10 @@ setMethod("assess_quality", c(object = "MetaboSet"),
 #'
 #' @examples
 #' ex_set <- flag_quality(merged_sample)
-#' results(ex_set)
+#' fData(ex_set)
 #' # Custom condition
 #' ex_set <- flag_quality(merged_sample, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
-#' results(ex_set)
+#' fData(ex_set)
 #'
 #' @export
 setGeneric("flag_quality", signature = "object",
@@ -111,14 +111,14 @@ setMethod("flag_quality", c(object = "MetaboSet"),
               object <- assess_quality(object)
             }
 
-            good <- paste0("results(object) %>% dplyr::filter(", condition, ")") %>%
+            good <- paste0("fData(object) %>% dplyr::filter(", condition, ")") %>%
               parse(text = .) %>% eval()
             good <- good$Feature_ID
 
-            idx <- is.na(flag(object)) & !results(object)$Feature_ID %in% good
+            idx <- is.na(flag(object)) & !fData(object)$Feature_ID %in% good
             flag(object)[idx] <- "Low_quality"
 
-            percentage <- scales::percent(sum(flag(object) == "Low_quality", na.rm = TRUE)/nrow(results(object)))
+            percentage <- scales::percent(sum(flag(object) == "Low_quality", na.rm = TRUE)/nrow(fData(object)))
             log_text(paste0("\n", percentage, " of features flagged for low quality"))
 
             object
@@ -130,7 +130,7 @@ setMethod("flag_quality", c(object = "MetaboSet"),
 #' have a value (not NA) for the feature to be kept. \code{qc_limit} is the detection rate limit for QC samples, \code{group_limit} is the detection rate limit
 #' for the actual study groups. If the group limit is passed for AT LEAST ONE GROUP, then the feature is kept. Features with low detection rate in QCs are
 #' flagged as "Low_qc_detection", while low detection rate in the study groups is flagged as "Low_group_detection". The detection rates for all the groups are
-#' recorded in \code{results(object)}
+#' recorded in \code{fData(object)}
 #'
 #' @param object a MetaboSet object
 #' @param qc_limit the detection rate limit for QC samples
@@ -141,7 +141,7 @@ setMethod("flag_quality", c(object = "MetaboSet"),
 #'
 #' @examples
 #' ex_set <- flag_detection(merged_sample)
-#' results(ex_set)
+#' fData(ex_set)
 #'
 #' @export
 setGeneric("flag_detection", signature = "object",
@@ -160,7 +160,7 @@ setMethod("flag_detection", c(object = "MetaboSet"),
                                       Detection_rate_QC = found_qc,
                                       stringsAsFactors = FALSE)
 
-            idx <- is.na(flag(object)) & results(object)$Feature_ID %in% bad_qc
+            idx <- is.na(flag(object)) & fData(object)$Feature_ID %in% bad_qc
             flag(object)[idx] <- "Low_qc_detection"
 
             # Compute proportions found in each study group
@@ -176,7 +176,7 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               # Check if any group has enough non-missing entries
               proportions$good <- apply(proportions[-1], 1, function(x){any(x >= group_limit)})
 
-              idx <- is.na(flag(object)) & (!results(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
+              idx <- is.na(flag(object)) & (!fData(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
               flag(object)[idx] <- "Low_group_detection"
               # Add detection rates to feature data
               proportions <- dplyr::left_join(proportions, found_qc_df, by = "Feature_ID")
@@ -185,10 +185,10 @@ setMethod("flag_detection", c(object = "MetaboSet"),
               proportions <- found_qc_df
             }
 
-            percentage <- scales::percent(sum(flag(object) %in% c("Low_qc_detection", "Low_group_detection"), na.rm = TRUE)/nrow(results(object)))
+            percentage <- scales::percent(sum(flag(object) %in% c("Low_qc_detection", "Low_group_detection"), na.rm = TRUE)/nrow(fData(object)))
             log_text(paste0("\n", percentage, " of features flagged for low detection rate"))
 
-            object <- join_results(object, proportions)
+            object <- join_fData(object, proportions)
 
             object
           })

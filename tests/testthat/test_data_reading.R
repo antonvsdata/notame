@@ -4,6 +4,7 @@ library(amp)
 
 test_that("Column conversion works", {
 
+  set.seed(38)
   df <- data.frame(Injection = 1:100,
                    Group = letters[1:4],
                    Time = 1:2,
@@ -30,12 +31,18 @@ test_that("Pheno data checking works", {
                    Sample_ID = c(letters[1:5], letters[1:5]))
   expect_error(check_pheno_data(df), "Sample_ID is not unique")
 
+  df <- data.frame(Injection_order = seq_len(5),
+                   Sample_ID = c(letters[1:5]))
+  expect_warning(check_pheno_data(df), "QC column not found")
+
   df <- data.frame(Injection_order = seq_len(10),
-                   Sample_ID = c(letters[1:5], rep("QC", 5)))
+                   Sample_ID = c(letters[1:5], rep("QC", 5)),
+                   QC = as.factor(rep(c("Sample", "QC"), each = 5)))
   checked <- check_pheno_data(df)
   expected <- data.frame(Sample_ID = c(letters[1:5], paste0("QC_", 1:5)),
                          Injection_order = seq_len(10),
-                         stringsAsFactors = FALSE)
+                         stringsAsFactors = FALSE,
+                         QC = as.factor(rep(c("Sample", "QC"), each = 5)))
   rownames(expected) <- expected$Sample_ID
   expect_equal(checked, expected)
 
@@ -47,6 +54,7 @@ test_that("Easy example data is read correctly", {
   pd <- data.frame(Sample_ID = paste0("TEST_", seq_len(12)),
                    Injection_order = seq_len(12),
                    Group = factor(rep(LETTERS[1:2], times = c(5,7))),
+                   QC = as.factor("Sample"),
                    easy_Datafile = paste0("190102SR_RP_pos_0", 10:21),
                    stringsAsFactors = FALSE)
   rownames(pd) <- pd$Sample_ID
@@ -72,7 +80,7 @@ test_that("Easy example data is read correctly", {
   # Read the file
   read <- read_from_excel(system.file("extdata", "easy_data.xlsx", package = "amp"),
                           sheet = 1,
-                          corner_row = 3, corner_column = "D",
+                          corner_row = 4, corner_column = "D",
                           name = "easy", id_prefix = "TEST_")
 
   # Test that the parts are read as expected

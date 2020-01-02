@@ -15,6 +15,5 @@ write_to_excel(object, file, ...)
 }
 \description{
 Writes all the data in a MetaboSet object to an Excel spreadsheet.
-The format is similar to the one used to read data in, except that
-the results from statistics are added to the right.
+The format is similar to the one used to read data in.
 }

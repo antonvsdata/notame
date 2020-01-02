@@ -193,7 +193,7 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
 
   exprs(dc) <- inspected$data
   dc <- assess_quality(dc)
-  dc <- join_results(dc, inspected$dc_notes)
+  dc <- join_fData(dc, inspected$dc_notes)
 
   log_text(paste("Drift correction results inspected at", Sys.time()))
 
