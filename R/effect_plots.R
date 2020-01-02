@@ -133,6 +133,47 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
 
 }
 
+save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
+                                x = group_col(object), color = group_col(object),
+                                add_boxplots = FALSE,
+                                color_scale =  NULL){
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
+  color_scale <- color_scale %||% getOption("amp.color_scale_dis")
+
+  pdf(file, width = width, height = height)
+
+  data <- combined_data(object)
+
+  for (i in seq_len(nrow(object))) {
+    if (i %% 500 == 0) {
+      cat(paste0("Iteration ", i, "/", nrow(object), "\n"))
+    }
+    fname <- Biobase::featureNames(object)[i]
+
+    p <- ggplot(data, aes_string(x = x, y = fname, color = color))
+
+    if (add_boxplots) {
+      p <- p +
+        geom_boxplot(position = position_dodge(0.6), width = 0.5, lwd = .3) +
+        stat_boxplot(geom ='errorbar', width = 0.5, lwd = .3)
+    }
+    p <- p +
+      ggbeeswarm::geom_beeswarm() +
+      color_scale +
+      labs(title = fname, y = "Abundance") +
+      theme_bw()
+
+
+    plot(p)
+
+  }
+  dev.off()
+
+  log_text(paste("Saved beeswarm plots to:", file))
+}
+
 #' Save line plots with errorbars by group
 #'
 #' Plots the change in the feature abundances as a function of e.g. time.
