@@ -19,8 +19,8 @@
 dobc <- function(object, batch, ref, ref_label, ...) {
 
   if (!requireNamespace("BatchCorrMetabolomics", quietly = TRUE)) {
-      stop("Package \"BatchCorrMetabolomics\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"BatchCorrMetabolomics\" needed for this function to work. Please install it from https://github.com/rwehrens/BatchCorrMetabolomics.",
+         call. = FALSE)
   }
 
   ref_idx <- which(pData(object)[, ref] == ref_label)
@@ -29,12 +29,12 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 
   batch_corrected <- foreach::foreach(feature = featureNames(object), .combine = rbind) %dopar% {
     tmp <- BatchCorrMetabolomics::doBC(Xvec = exprs(object)[feature, ],
-         ref.idx = ref_idx,
-         batch.idx = batch_idx,
-         seq.idx = seq_idx,
-         minBsamp = 1,
-         method = "lm",
-         correctionFormula = "X ~ B")
+                                       ref.idx = ref_idx,
+                                       batch.idx = batch_idx,
+                                       seq.idx = seq_idx,
+                                       minBsamp = 1,
+                                       method = "lm",
+                                       correctionFormula = "X ~ B")
     matrix(tmp, nrow = 1, dimnames = list(feature, names(tmp)))
   }
 
@@ -115,8 +115,8 @@ pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center =
          call. = FALSE)
   }
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+         call. = FALSE)
   }
   # Drop flagged features if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -220,7 +220,7 @@ perform_repeatability <- function(object, group) {
 align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
-    stop("Package \"batchCorr\" needed for this function to work. Please install it.",
+    stop("Package \"batchCorr\" needed for this function to work. Please install it from https://gitlab.com/CarlBrunius/batchCorr.",
          call. = FALSE)
   }
 
@@ -277,8 +277,8 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 normalize_batches <- function(object, batch, group, ref_label, ...) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
-      stop("Package \"batchCorr\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"batchCorr\" needed for this function to work. Please install it from https://gitlab.com/CarlBrunius/batchCorr.",
+         call. = FALSE)
   }
 
   normData <- batchCorr::normalizeBatches(peakTable = t(exprs(object)), batches = pData(object)[, batch],
