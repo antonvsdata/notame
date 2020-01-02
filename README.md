@@ -1,6 +1,6 @@
-## amp - Automated Metabolomics Pipeline
+## notame - Workflow for non-targeted LC-MS metabolic profiling 
 
-This package can be used to analyze preprocessed LC-MS data. The starting point of the analyses conducted by this package is a peak table file, output from e.g. MS-DIAL.
+This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics (notame, see?). The starting point of the analyses conducted by this package is a peak table file, output from e.g. MS-DIAL.
 
 The package contains functions for visualizing and further preprocessing LC-MS data, as well as handy ways of conducting simple statistical analyses.
 
@@ -17,7 +17,7 @@ To install the package along with all the possible dependencies, run:
 if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
-devtools::install_github("antonvsdata/amp", dependencies = c("Depends", "Imports", "Suggests"))
+devtools::install_github("antonvsdata/notame", dependencies = c("Depends", "Imports", "Suggests"))
 ```
 If you are having trouble installing some packages, you can install the bare minimum requirements by running the following code. Note that if you choose this type of installation, many of the functions in the package will not work as expected, as the pacakge has many dependencies.
 
@@ -26,12 +26,12 @@ If you are having trouble installing some packages, you can install the bare min
 if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
-devtools::install_github("antonvsdata/amp")
+devtools::install_github("antonvsdata/notame")
 ```
 
 ### Documentation
 
-For instructions on how to use the package, run browseVignettes("amp"). The Introduction vignette should get you started pretty well!
+For instructions on how to use the package, run browseVignettes("notame"). The Introduction vignette should get you started pretty well!
 
 ##### Troubleshooting installation
 
