@@ -1,6 +1,6 @@
 context("Testing reading data")
 
-library(amp)
+library(notame)
 
 test_that("Column conversion works", {
 
@@ -78,7 +78,7 @@ test_that("Easy example data is read correctly", {
   dimnames(ad) <- list(rownames(fd), rownames(pd))
 
   # Read the file
-  read <- read_from_excel(system.file("extdata", "easy_data.xlsx", package = "amp"),
+  read <- read_from_excel(system.file("extdata", "easy_data.xlsx", package = "notame"),
                           sheet = 1,
                           corner_row = 4, corner_column = "D",
                           name = "easy", id_prefix = "TEST_")
@@ -133,7 +133,7 @@ test_that("Data is split correctly", {
 
 
   # Read the file
-  read <- read_from_excel(system.file("extdata", "split_data.xlsx", package = "amp"),
+  read <- read_from_excel(system.file("extdata", "split_data.xlsx", package = "notame"),
                           sheet = 1,
                           corner_row = 4, corner_column = "F",
                           split_by = c("Column", "Mode"), id_prefix = "TEST_")

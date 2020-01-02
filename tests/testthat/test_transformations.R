@@ -1,6 +1,6 @@
 context("Testing transformations")
 
-library(amp)
+library(notame)
 
 data("example_set")
 

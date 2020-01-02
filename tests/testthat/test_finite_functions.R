@@ -1,6 +1,6 @@
 context("Finite helper functions")
 
-library(amp)
+library(notame)
 
 test_that("Work correctly for full vectors", {
   x <- 13:20

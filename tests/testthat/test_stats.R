@@ -1,6 +1,6 @@
 context("Testing statistics")
 
-library(amp)
+library(notame)
 
 test_that("summary statistics work without grouping", {
 
