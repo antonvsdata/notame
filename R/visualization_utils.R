@@ -57,18 +57,47 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
                                  fill_by = "QC"), "boxplots_injection", width = 15)
   # PCA
   set.seed(38)
-  save_name(plot_pca(object), "PCA_group")
-  set.seed(38)
   save_name(plot_pca(object, color = "Injection_order"), "PCA_injection")
   set.seed(38)
   save_name(plot_pca_hexbin(object), "PCA_hexbin")
   # t-SNE
   set.seed(38)
-  save_name(plot_tsne(object, perplexity = perplexity), "tSNE_group")
-  set.seed(38)
   save_name(plot_tsne(object, perplexity = perplexity, color = "Injection_order"), "tSNE_injection")
   set.seed(38)
   save_name(plot_tsne_hexbin(object, perplexity = perplexity), "tSNE_hexbin")
+
+  # If grouped
+  if (!is.na(group_col(object))) {
+    set.seed(38)
+    save_name(plot_pca(object), "PCA_group")
+
+    set.seed(38)
+    save_name(plot_tsne(object, perplexity = perplexity), "tSNE_group")
+  }
+  if (!is.na(time_col(object))) {
+    set.seed(38)
+    save_name(plot_pca(object, color = time_col(object)), "PCA_time")
+
+    set.seed(38)
+    save_name(plot_tsne(object, color = time_col(object), perplexity = perplexity), "tSNE_time")
+
+    save_name(plot_dendrogram(object, color = time_col(object)), "dendrogram_time", width = 15)
+  }
+  if (!is.na(group_col(object)) & !is.na(time_col(object))) {
+    set.seed(38)
+    save_name(plot_pca(object, color = time_col(object), shape = group_col(object)), "PCA_group_time")
+
+    set.seed(38)
+    save_name(plot_tsne(object, color = time_col(object), shape = group_col(object), perplexity = perplexity), "tSNE_group_time")
+  }
+  if (!is.na(time_col(object)) & !is.na(subject_col(object))) {
+    set.seed(38)
+    save_name(plot_pca_arrows(drop_qcs(object)), "PCA_arrows")
+
+    set.seed(38)
+    save_name(plot_tsne_arrows(drop_qcs(object), perplexity = perplexity), "tSNE_arrows")
+  }
+
   # Clustering
   save_name(plot_dendrogram(object), "dendrogram", width = 15)
   save_name(plot_sample_heatmap(object), "heatmap_samples", width = 15, height = 16)
