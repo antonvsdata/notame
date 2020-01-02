@@ -6,8 +6,8 @@
 \usage{
 plot_dist_density(object, all_features = FALSE,
   dist_method = "euclidean", center = TRUE, scale = "uv",
-  color_scale = getOption("amp.color_scale_dis"),
-  fill_scale = getOption("amp.fill_scale_dis"),
+  color_scale = getOption("notame.color_scale_dis"),
+  fill_scale = getOption("notame.fill_scale_dis"),
   title = paste("Density plot of", dist_method,
   "distances between samples"), subtitle = NULL)
 }

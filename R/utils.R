@@ -3,19 +3,19 @@
 # Set default color scales on load
 .onLoad <- function(libname, pkgname) {
   op <- options()
-  op.amp <- list(
-    amp.logging = FALSE,
-    amp.log_file = NULL,
-    amp.color_scale_con = ggplot2::scale_color_viridis_c(),
-    amp.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
-    amp.fill_scale_con = ggplot2::scale_fill_viridis_c(),
-    amp.fill_scale_dis = ggplot2::scale_fill_brewer(palette = "Set1"),
-    amp.fill_scale_div_con = ggplot2::scale_fill_distiller(palette = "RdBu"),
-    amp.fill_scale_div_dis = ggplot2::scale_fill_brewer(palette = "RdBu"),
-    amp.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))
+  op.notame <- list(
+    notame.logging = FALSE,
+    notame.log_file = NULL,
+    notame.color_scale_con = ggplot2::scale_color_viridis_c(),
+    notame.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
+    notame.fill_scale_con = ggplot2::scale_fill_viridis_c(),
+    notame.fill_scale_dis = ggplot2::scale_fill_brewer(palette = "Set1"),
+    notame.fill_scale_div_con = ggplot2::scale_fill_distiller(palette = "RdBu"),
+    notame.fill_scale_div_dis = ggplot2::scale_fill_brewer(palette = "RdBu"),
+    notame.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))
   )
-  toset <- !(names(op.amp) %in% names(op))
-  if(any(toset)) options(op.amp[toset])
+  toset <- !(names(op.notame) %in% names(op))
+  if(any(toset)) options(op.notame[toset])
 
   invisible()
 }

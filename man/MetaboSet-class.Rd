@@ -42,7 +42,7 @@
   group_limit = 0.8, group = group_col(object))
 }
 \description{
-MetaboSet is the main class used to represent data in the amp package.
+MetaboSet is the main class used to represent data in the notame package.
 It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
 package. For more information, read the MetaboSet utility vignette.
 In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},

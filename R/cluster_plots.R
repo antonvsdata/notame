@@ -24,7 +24,7 @@
 #' @export
 plot_dendrogram <- function(object, all_features = FALSE, color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
                      center = TRUE, scale = "uv", title = "Dendrogram of hierarchical clustering",
-                     subtitle = NULL, color_scale = getOption("amp.color_scale_dis")) {
+                     subtitle = NULL, color_scale = getOption("notame.color_scale_dis")) {
 
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
@@ -93,8 +93,8 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
                          center = TRUE, scale = "uv",
                          group_bar = TRUE, group = group_col(object),
                          title = "Heatmap of distances between samples",
-                         subtitle = NULL, fill_scale_con = getOption("amp.fill_scale_con"),
-                         fill_scale_dis = getOption("amp.fill_scale_dis")) {
+                         subtitle = NULL, fill_scale_con = getOption("notame.fill_scale_con"),
+                         fill_scale_dis = getOption("notame.fill_scale_dis")) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)

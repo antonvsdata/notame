@@ -8,7 +8,7 @@ plot_dendrogram(object, all_features = FALSE,
   color = group_col(object), dist_method = "euclidean",
   clust_method = "ward.D2", center = TRUE, scale = "uv",
   title = "Dendrogram of hierarchical clustering", subtitle = NULL,
-  color_scale = getOption("amp.color_scale_dis"))
+  color_scale = getOption("notame.color_scale_dis"))
 }
 \arguments{
 \item{object}{a MetaboSet object}

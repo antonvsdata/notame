@@ -249,7 +249,7 @@ name_features <- function(feature_data) {
 
 #' An S4 class used to represent LC-MS datasets
 #'
-#' MetaboSet is the main class used to represent data in the amp package.
+#' MetaboSet is the main class used to represent data in the notame package.
 #' It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
 #' package. For more information, read the MetaboSet utility vignette.
 #' In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},

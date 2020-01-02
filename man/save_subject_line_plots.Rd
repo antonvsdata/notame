@@ -6,7 +6,7 @@
 \usage{
 save_subject_line_plots(object, all_features = FALSE, file, width = 8,
   height = 6, x = time_col(object), id = subject_col(object),
-  color = NA, color_scale = getOption("amp.color_scale_dis"),
+  color = NA, color_scale = getOption("notame.color_scale_dis"),
   facet = NULL)
 }
 \arguments{

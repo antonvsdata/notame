@@ -77,9 +77,9 @@ plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, poi
   if (!is.null(fill_scale)) {
     if (is.na(fill_scale)) {
       if (discretize_effect | class(data[, effect]) %in% c("factor", "character")) {
-        fill_scale <- getOption("amp.fill_scale_div_dis")
+        fill_scale <- getOption("notame.fill_scale_div_dis")
       } else {
-        fill_scale <- getOption("amp.fill_scale_div_con")
+        fill_scale <- getOption("notame.fill_scale_div_con")
       }
     }
   }

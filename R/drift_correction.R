@@ -242,7 +242,7 @@ inspect_dc <- function(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio
 #' }
 #' @export
 save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width = 16, height = 8, color = "QC",
-                          shape = color, color_scale = getOption("amp.color_scale_dis"),
+                          shape = color, color_scale = getOption("notame.color_scale_dis"),
                           shape_scale = scale_shape_manual(values = c(15, 16))) {
 
   if (!requireNamespace("cowplot", quietly = TRUE)) {
@@ -357,7 +357,7 @@ save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width
 correct_drift <- function(object, log_transform = TRUE, spar = NULL, spar_lower = 0.5, spar_upper = 1.5,
                           check_quality = FALSE, condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
                           file = NULL, width = 16, height = 8, color = "QC",
-                          shape = NULL, color_scale = getOption("amp.color_scale_dis"),
+                          shape = NULL, color_scale = getOption("notame.color_scale_dis"),
                           shape_scale = scale_shape_manual(values = c(15, 16))) {
   # Fit cubic spline and correct
   corrected_list <- dc_cubic_spline(object, log_transform = log_transform, spar = spar,

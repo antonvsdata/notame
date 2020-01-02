@@ -6,7 +6,7 @@
 \usage{
 save_batch_plots(orig, corrected, file, width = 14, height = 10,
   batch = "Batch", color = "Batch", shape = "QC",
-  color_scale = getOption("amp.color_scale_dis"),
+  color_scale = getOption("notame.color_scale_dis"),
   shape_scale = scale_shape_manual(values = c(15, 21)))
 }
 \arguments{

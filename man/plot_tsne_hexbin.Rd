@@ -8,7 +8,7 @@ plot_tsne_hexbin(object, all_features = FALSE, center = TRUE,
   scale = "uv", pca_method = "nipals", perplexity = 30,
   fill = "Injection_order", summary_fun = "mean", bins = 10,
   title = "t-SNE", subtitle = paste("Perplexity:", perplexity),
-  fill_scale = getOption("amp.fill_scale_con"), ...)
+  fill_scale = getOption("notame.fill_scale_con"), ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}

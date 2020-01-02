@@ -6,7 +6,7 @@
 \usage{
 save_group_boxplots(object, all_features = FALSE, file, width = 8,
   height = 6, x = group_col(object), color = group_col(object),
-  color_scale = getOption("amp.color_scale_dis"))
+  color_scale = getOption("notame.color_scale_dis"))
 }
 \arguments{
 \item{object}{a MetaboSet object}

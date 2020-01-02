@@ -40,8 +40,8 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' @export
 plot_dist_density <- function(object, all_features = FALSE, dist_method = "euclidean",
                               center = TRUE, scale = "uv",
-                              color_scale = getOption("amp.color_scale_dis"),
-                              fill_scale = getOption("amp.fill_scale_dis"),
+                              color_scale = getOption("notame.color_scale_dis"),
+                              fill_scale = getOption("notame.fill_scale_dis"),
                               title = paste("Density plot of", dist_method, "distances between samples"),
                               subtitle = NULL) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
@@ -230,7 +230,7 @@ plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
 plot_sample_boxplots <- function(object, all_features = FALSE, order_by = as.character(na.omit(c(group_col(object), time_col(object)))),
                                  fill_by = as.character(na.omit(c(group_col(object), time_col(object)))),
                                  title = "Boxplot of samples", subtitle = NULL,
-                                 fill_scale = getOption("amp.fill_scale_dis"), zoom_boxplot = TRUE) {
+                                 fill_scale = getOption("notame.fill_scale_dis"), zoom_boxplot = TRUE) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 

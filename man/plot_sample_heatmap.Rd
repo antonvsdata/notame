@@ -8,8 +8,8 @@ plot_sample_heatmap(object, all_features = FALSE,
   dist_method = "euclidean", clust_method = "ward.D2", center = TRUE,
   scale = "uv", group_bar = TRUE, group = group_col(object),
   title = "Heatmap of distances between samples", subtitle = NULL,
-  fill_scale_con = getOption("amp.fill_scale_con"),
-  fill_scale_dis = getOption("amp.fill_scale_dis"))
+  fill_scale_con = getOption("notame.fill_scale_con"),
+  fill_scale_dis = getOption("notame.fill_scale_dis"))
 }
 \arguments{
 \item{object}{a MetaboSet object}

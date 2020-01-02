@@ -74,7 +74,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                      color = group_col(object), shape = NULL, label = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NA,
-                     shape_scale = getOption("amp.shape_scale"), fill_scale = getOption("amp.fill_scale_dis"), ...) {
+                     shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -128,7 +128,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                       pca_method = "nipals",
                       color = group_col(object), shape = NULL, label = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NA,
-                      shape_scale = getOption("amp.shape_scale"), fill_scale = getOption("amp.fill_scale_dis"), ...) {
+                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
   shape <- shape %||% color
@@ -153,9 +153,9 @@ scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed
   if (!is.null(color_scale)) {
     if (is.na(color_scale)) {
       if (class(data[, color]) %in% c("numeric", "integer")) {
-        color_scale <- getOption("amp.color_scale_con")
+        color_scale <- getOption("notame.color_scale_con")
       } else {
-        color_scale <- getOption("amp.color_scale_dis")
+        color_scale <- getOption("notame.color_scale_dis")
       }
     }
   }
@@ -314,7 +314,7 @@ plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale
 #' @export
 plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
-                     subtitle = NULL, fill_scale = getOption("amp.fill_scale_con"), ...) {
+                     subtitle = NULL, fill_scale = getOption("notame.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -360,7 +360,7 @@ plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale =
 #' @export
 plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", pca_method = "nipals", perplexity = 30,
                       fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
-                      subtitle = paste("Perplexity:", perplexity), fill_scale = getOption("amp.fill_scale_con"), ...) {
+                      subtitle = paste("Perplexity:", perplexity), fill_scale = getOption("notame.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -451,7 +451,7 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 plot_pca_arrows <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                             color = group_col(object), time = time_col(object), subject = subject_col(object),
                             alpha = 0.6, arrow_style = arrow(), title = "PCA changes",
-                            subtitle = NULL, color_scale = getOption("amp.color_scale_dis"), ...) {
+                            subtitle = NULL, color_scale = getOption("notame.color_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -509,7 +509,7 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
                              perplexity = 30, pca_method = "nipals",
                              color = group_col(object), time = time_col(object), subject = subject_col(object),
                              alpha = 0.6, arrow_style = arrow(), title = "t-SNE changes",
-                             subtitle = paste("Perplexity:", perplexity), color_scale = getOption("amp.color_scale_dis"), ...) {
+                             subtitle = paste("Perplexity:", perplexity), color_scale = getOption("notame.color_scale_dis"), ...) {
 
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -564,7 +564,7 @@ minus_log10 <- scales::trans_new("minus_log19",
 volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
                          p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
                          log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
-                         color_scale = getOption("amp.color_scale_con"),
+                         color_scale = getOption("notame.color_scale_con"),
                          title = "Volcano plot", subtitle = NULL, ...) {
 
   if (center_x_axis & !is.null(x_lim)) {
@@ -669,7 +669,7 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
 manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL,
                            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
                            x_lim = NULL, y_lim = NULL,
-                           color_scale = getOption("amp.color_scale_con"),
+                           color_scale = getOption("notame.color_scale_con"),
                            title = "Manhattan plot", subtitle = NULL, ...) {
 
   if (min(data[, p]) > max(p_breaks)) {

@@ -7,7 +7,7 @@
 volcano_plot(data, x, p, p_fdr = NULL, color = NULL,
   p_breaks = c(0.05, 0.01, 0.001, 1e-04), fdr_limit = 0.05,
   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
-  color_scale = getOption("amp.color_scale_con"),
+  color_scale = getOption("notame.color_scale_con"),
   title = "Volcano plot", subtitle = NULL, ...)
 }
 \arguments{
