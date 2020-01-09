@@ -96,4 +96,33 @@ The distribution of the quality metrics across signals can be used as a good qua
 #### Code
 
 ```flag_detection``` is used to flag features based on detection
+```flag_quality``` is used to flag features based on the other quality metrics
+
+
+## Imputation of missing values
+
+LC-MS data often contain missing values. Since many of the common statistical analysis methods require complete data matrices, we need to impute the missing values. Imputing means "filling" the missing values with a good estimate. Note that even if some statistical methods state that they "can deal with missing values", they sometimes just ignore samples or variables with at least one missing value, or actually impute the missing values before applying the actual method. 
+
+#### Random forest imputation
+
+Note that there are many different imputation strategies out there. We have tested a bunch of them on our data (the paper on that will be published soon) and we concluded that random forest imputation works best for our data. To be brief, the method predicts the missing part of the data by fitting a random forest on the observed part of the data (read more in the [original paper](https://doi.org/10.1093/bioinformatics/btr597) and the [missForest package introduction](https://stat.ethz.ch/education/semesters/ss2012/ams/paper/missForest_1.2.pdf).
+
+It is important to set the seed number before using random forest imputation, to guarantee reproducibility of the results. The downside of random forest imputation is that it is rather slow. Thus, we recommend to run the imputation separately for each analysis mode if the dataset has more than 100 samples, or if there are lots of missing values. Note that the implementation we use (from the missForest package) can be parallelized, but be aware: running the imputation in parallel prevents you from setting the seed number, as currently there seems to be no way of setting the seed number for the child processes.
+
+#### Simple imputation strategies
+
+If you don't want to use random forest imputation, there are other more simple alternatives implemented in this package, where every missing value in a feature is imputed using a similar value, independent of the values of other features for the sample. Most of these strategies rely on the assumption that missingness is mostly due to the fact that the metabolite concentration is below the detection limit. These imputation strategies include:
+
+- constant imputation: each missing value in all features is imputed with e.g. 0 or 1  
+- imputation by mean/median/min/half min: impute missing values of a feature with the mean/median/minimum/half the minimum of the observed values of that feature  
+- imputation by a small random value: impute missing values of a feature with random numbers between zero and the minimum of the observed values (sampling from a uniform distribution).
+
+#### Code
+
+- ```impute_rf``` for random forest imputation  
+- ```impute_simple``` for the simple imputation strategies
+
+
+
+
 
