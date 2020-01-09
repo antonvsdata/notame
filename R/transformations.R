@@ -199,9 +199,10 @@ impute_rf <- function(object, all_features = FALSE, ...) {
 #' to only impute features with a large number of missing values this way. This can be useful
 #' for using this function before random forest imputation to speed things up.
 #' The imputation strategies available are:
-#'
 #' \itemize{
 #' \item a numeric value: impute all missing values in all features with the same value, e.g. 1
+#' \item "mean": impute missing values of a feature with the mean of observed values of that feature
+#' \item "median": impute missing values of a feature with the median of observed values of that feature
 #' \item "min": impute missing values of a feature with the minimum observed value of that feature
 #' \item "half_min": impute missing values of a feature with half the minimum observed value of that feature
 #' \item "small_random": impute missing values of a feature with random numbers between 0 and the
@@ -232,6 +233,16 @@ impute_simple <- function(object, value, na_limit = 0) {
   # Replace all missing values with the given constant
   if (is.numeric(value)) {
     imp[is.na(imp)] <- value
+  } else if (value == "mean") {
+    imp <- t(apply(imp, 1, function(x){
+      x[is.na(x)] <- finite_mean(x)
+      x
+    }))
+  } else if (value == "median") {
+    imp <- t(apply(imp, 1, function(x){
+      x[is.na(x)] <- finite_median(x)
+      x
+    }))
   } else if (value == "min") {
     imp <- t(apply(imp, 1, function(x){
       x[is.na(x)] <- finite_min(x)

@@ -21,10 +21,10 @@ of a feature are imputed with the same value. It is possible
 to only impute features with a large number of missing values this way. This can be useful
 for using this function before random forest imputation to speed things up.
 The imputation strategies available are:
-}
-\details{
 \itemize{
 \item a numeric value: impute all missing values in all features with the same value, e.g. 1
+\item "mean": impute missing values of a feature with the mean of observed values of that feature
+\item "median": impute missing values of a feature with the median of observed values of that feature
 \item "min": impute missing values of a feature with the minimum observed value of that feature
 \item "half_min": impute missing values of a feature with half the minimum observed value of that feature
 \item "small_random": impute missing values of a feature with random numbers between 0 and the
