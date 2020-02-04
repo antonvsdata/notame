@@ -27,6 +27,8 @@ save_dc_plots(orig, dc, predicted, file, log_transform = TRUE,
 \item{shape}{character, name of the column used for shape}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{shape_scale}{the shape scale as returned by a ggplot function}
 }
 \description{
 Plots the data before and after drift correction, with the regression line drawn with
