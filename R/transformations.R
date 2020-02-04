@@ -182,13 +182,13 @@ impute_rf <- function(object, all_features = FALSE, ...) {
   imputed <- t(mf$ximp)
   # Log imputation error
   log_text(paste0("Out-of-bag error in random forest imputation: ",
-                 round(mf$OOBerror, digits = 3), "\n"))
+                 round(mf$OOBerror, digits = 3)))
   # Assign imputed data to the droppped
   rownames(imputed) <- rownames(exprs(dropped))
   colnames(imputed) <- colnames(exprs(dropped))
   # Attach imputed abundances to object
   object <- merge_exprs(object, imputed)
-  log_text(paste("Random forest imputation finished at", Sys.time()))
+  log_text(paste("Random forest imputation finished at", Sys.time(), "\n"))
   object
 }
 
