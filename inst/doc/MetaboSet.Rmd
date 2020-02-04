@@ -99,7 +99,7 @@ The function returns a list holding the three parts of the data:
 
 ##### Construction of MetaboSet objects
 
-```MetaboSet``` objects are constructed with the ```construct_MetaboSet``` function. The functions parameters include all the main parts of a ```MetaboSet``` object except ```results```, since a fresh object is initialized with a ```results``` data frame with only ```Feature_ID``` column and ```NA``` flag for each feature. The special column names can also be set for this function. Note that the function returns a named list of ```MetaboSet``` objects, where the feature data and abundances are split by the ```Split``` column in feature data (most commonly this means the four modes are returned separately). The sample information and special column names are identical for each object.
+```MetaboSet``` objects are constructed with the ```construct_metabosets``` function. The functions parameters include all the main parts of a ```MetaboSet``` object. The special column names can also be set for this function. Note that the function returns a named list of ```MetaboSet``` objects, where the feature data and abundances are split by the ```Split``` column in feature data (most commonly this means the four modes are returned separately). The sample information and special column names are identical for each object.
 
 #### Inherited from ExpressionSet
 
@@ -121,8 +121,7 @@ Utility functions for MetaboSet in particular:
 
 - ```group_col```, ```time_col``` and ```subject_col``` for the special column names  
 - ```quality``` for the quality metrics of signals  
-- ```combined_data``` for a data frame with sample information and feature abundances as columns (one row per smaple).  
-- ```results``` access and set results  
+- ```combined_data``` for a data frame with sample information and feature abundances as columns (one row per smaple).
 - ```write_to_excel``` writes the whole object to an Excel spreadsheet
 
 In addition, there are many functions that modify MetaboSets:

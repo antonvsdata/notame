@@ -91,10 +91,10 @@ sapply(data, dim)
 
 These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in notame. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
 
-MetaboSet objects are constructed using ```construct_MetaboSet``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
+MetaboSet objects are constructed using ```construct_metabosets``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
 
 ```{r}
-modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,
+modes <- construct_metabosets(exprs = data$exprs, pheno_data = data$pheno_data,
                              feature_data = data$feature_data,
                              group_col = "Group")
 ```

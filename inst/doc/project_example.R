@@ -30,7 +30,7 @@ sapply(data, class)
 sapply(data, dim)
 
 ## ------------------------------------------------------------------------
-modes <- construct_MetaboSet(exprs = data$exprs, pheno_data = data$pheno_data,
+modes <- construct_metabosets(exprs = data$exprs, pheno_data = data$pheno_data,
                              feature_data = data$feature_data,
                              group_col = "Group")
 

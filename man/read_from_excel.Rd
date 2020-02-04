@@ -6,7 +6,7 @@
 \usage{
 read_from_excel(file, sheet = 1, corner_row = NULL,
   corner_column = NULL, id_prefix = "ID_", split_by = NULL,
-  name = NULL)
+  name = NULL, skip_checks = FALSE)
 }
 \arguments{
 \item{file}{path to the Excel file}
@@ -22,6 +22,10 @@ read_from_excel(file, sheet = 1, corner_row = NULL,
 \item{split_by}{character vector, in the case where all the modes are in the same Excel file, the column names of feature data used to separate the modes (usually Mode and Column)}
 
 \item{name}{in the case where the Excel file only contains one mode, the name of the mode, such as "Hilic_neg"}
+
+\item{skip_checks}{logical: skip checking data integrity. Not recommended, but sometimes useful when you
+just want to read the data in as is and fix errors later. NOTE: Sample_ID and QC columns will not be constructed.
+The data integrity checks need to be passed when contstructing MetaboSet objects.}
 }
 \value{
 list of three data frames:
