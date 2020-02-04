@@ -1,0 +1,73 @@
+## ----setup, include = FALSE----------------------------------------------
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+## ---- eval=FALSE---------------------------------------------------------
+#  library(notame)
+#  
+#  # Define the project path
+#  ppath <- ""
+#  
+#  # Read data from Excel file
+#  data <- read_from_excel(file = paste0(ppath, "data/"),
+#                          split_by = c("RP_HILIC", "POS_NEG"))
+#  
+#  # Modify pheno_data if necessary (set factor levels etc.)
+#  
+#  # Create MetaboSet objects for each analytical mode
+#  objects <- construct_metabosets(exprs = data$exprs, pheno_data = data$pheno_data, feature_data = data$feature_data,
+#                                  group_col = "status")
+#  
+#  # Start logging
+#  init_log(log_file = paste0(ppath, "results/log_preprocessing.txt"))
+#  
+#  
+#  # Preprocessing by mode
+#  processed <- list()
+#  for (name in names(objects)) {
+#    log_text(paste("Processing", name))
+#    object <- objects[[name]]
+#    log_text(paste(nrow(object), "features,", ncol(object), "samples\n"))
+#  
+#    # Mark NAs correctly and flag features with low detection
+#    object <- mark_nas(object, 0)
+#    detected <- flag_detection(object, qc_limit = 0.3, group_limit = 0.4)
+#  
+#    # Visualizations with original data
+#    visualizations(detected, prefix = paste0(ppath, "results/figures/", name, "_ORIG"))
+#  
+#    # Drift correction with cubic spline in log space
+#    corrected <- correct_drift(detected)
+#  
+#    # Flag low-quality features
+#    flagged <- flag_quality(corrected)
+#  
+#    # Visualizations after quality control
+#    visualizations(corrected, prefix = paste0(ppath, "results/figures/", name, "_CLEANED"))
+#  
+#    # Renmove QC samples before imputation
+#    noqc <- drop_qcs(flagged)
+#  
+#    # Random forest imputation
+#    # First impute qood quality features
+#    set.seed(38)
+#    imputed <- impute_rf(noqc)
+#    # Then impute the rest of the features
+#    imputed <- impute_rf(imputed, all_features = TRUE)
+#  
+#    # Save the processed object to list
+#    processed[[name]] <- imputed
+#  }
+#  
+#  # Merge analytical modes
+#  merged <- merge_metabosets(processed)
+#  
+#  # Visualize complete dataset
+#  visualizations(merged, prefix = paste0(ppath, "results/figures/FULL"))
+#  
+#  
+#  # Finish logging and save session information
+#  finish_log()
+
