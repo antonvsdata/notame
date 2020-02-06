@@ -13,7 +13,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2020-02-04" />
+<meta name="date" content="2020-02-06" />
 
 <title>Preprocessing template</title>
 
@@ -96,7 +96,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Preprocessing template</h1>
 <h4 class="author">Anton Mattsson</h4>
-<h4 class="date">2020-02-04</h4>
+<h4 class="date">2020-02-06</h4>
 
 
 
@@ -159,10 +159,13 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 
 <span class="co"># Merge analytical modes</span>
 merged &lt;-<span class="st"> </span><span class="kw">merge_metabosets</span>(processed)
+<span class="kw">log_text</span>(<span class="kw">paste</span>(<span class="st">&quot;Merged analytical modes together, the merged object has&quot;</span>, <span class="kw">nrow</span>(merged), <span class="st">&quot;features and&quot;</span>, <span class="kw">ncol</span>(merged), <span class="st">&quot;samples.&quot;</span>))
 
 <span class="co"># Visualize complete dataset</span>
 <span class="kw">visualizations</span>(merged, <span class="dt">prefix =</span> <span class="kw">paste0</span>(ppath, <span class="st">&quot;results/figures/FULL&quot;</span>))
 
+<span class="kw">save</span>(merged, <span class="dt">file =</span> <span class="kw">paste0</span>(ppath, <span class="st">&quot;results/merged_object.RData&quot;</span>))
+<span class="kw">log_text</span>(<span class="st">&quot;Saved merged object to results subfolder&quot;</span>)
 
 <span class="co"># Finish logging and save session information</span>
 <span class="kw">finish_log</span>()</code></pre></div>

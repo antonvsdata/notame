@@ -63,10 +63,13 @@ knitr::opts_chunk$set(
 #  
 #  # Merge analytical modes
 #  merged <- merge_metabosets(processed)
+#  log_text(paste("Merged analytical modes together, the merged object has", nrow(merged), "features and", ncol(merged), "samples."))
 #  
 #  # Visualize complete dataset
 #  visualizations(merged, prefix = paste0(ppath, "results/figures/FULL"))
 #  
+#  save(merged, file = paste0(ppath, "results/merged_object.RData"))
+#  log_text("Saved merged object to results subfolder")
 #  
 #  # Finish logging and save session information
 #  finish_log()
