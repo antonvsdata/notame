@@ -9,14 +9,14 @@
 #' This is a wrapper around numerous functions that are based on the MATLAB code by David Broadhurst.
 #'
 #' @param object a MetaboSet object
+#' @param mz_col the column name in fData(object) that holds mass-to-charge ratios
+#' @param rt_col the column name in fData(object) that holds retention times
 #' @param all_features logical, should all features be included in the clustering? If FALSE
 #' as the default, flagged features are not included in clustering
 #' @param rt_window the retention time window for potential links
 #' NOTE: use the same unit as the retention time
 #' @param corr_thresh the correlation threshold required for potential links between features
 #' @param d_thresh the threshold for the relative degree required by each node
-#' @param mz_col the column name in fData(object) that holds mass-to-charge ratios
-#' @param rt_col the column name in fData(object) that holds retention times
 #' @param plotting should plots be drawn for each cluster?
 #' @param min_size_plotting the minimum number of features a cluster needs to have to be plotted
 #' @param prefix the prefix to the files to be plotted
@@ -33,9 +33,9 @@
 #' \code{\link{compress_clusters}}
 #'
 #' @export
-cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
-                             corr_thresh = 0.9, d_thresh = 0.8, mz_col= NULL,
-                             rt_col = NULL,
+cluster_features <- function(object, mz_col = NULL, rt_col = NULL,
+                             all_features = FALSE, rt_window = 1/60,
+                             corr_thresh = 0.9, d_thresh = 0.8, 
                              plotting = FALSE, min_size_plotting = 3, prefix = NULL) {
   # Drop flagged compounds before clustering
   orig <- object
@@ -49,7 +49,6 @@ cluster_features <- function(object, all_features = FALSE, rt_window = 1/60,
 
   data <- as.data.frame(t(exprs(object)))
   features <- fData(object)
-  print(colnames(features))
   # Start log
   log_text(paste("\nStarting feature clustering at", Sys.time()))
 

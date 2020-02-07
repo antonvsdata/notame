@@ -4,12 +4,17 @@
 \alias{cluster_features}
 \title{Cluster correlated features}
 \usage{
-cluster_features(object, all_features = FALSE, rt_window = 1/60,
-  corr_thresh = 0.9, d_thresh = 0.8, mz_col = NULL, rt_col = NULL,
-  plotting = FALSE, min_size_plotting = 3, prefix = NULL)
+cluster_features(object, mz_col = NULL, rt_col = NULL,
+  all_features = FALSE, rt_window = 1/60, corr_thresh = 0.9,
+  d_thresh = 0.8, plotting = FALSE, min_size_plotting = 3,
+  prefix = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{mz_col}{the column name in fData(object) that holds mass-to-charge ratios}
+
+\item{rt_col}{the column name in fData(object) that holds retention times}
 
 \item{all_features}{logical, should all features be included in the clustering? If FALSE
 as the default, flagged features are not included in clustering}
@@ -20,10 +25,6 @@ NOTE: use the same unit as the retention time}
 \item{corr_thresh}{the correlation threshold required for potential links between features}
 
 \item{d_thresh}{the threshold for the relative degree required by each node}
-
-\item{mz_col}{the column name in fData(object) that holds mass-to-charge ratios}
-
-\item{rt_col}{the column name in fData(object) that holds retention times}
 
 \item{plotting}{should plots be drawn for each cluster?}
 
