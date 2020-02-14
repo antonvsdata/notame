@@ -79,13 +79,13 @@ Model diagnostics visalizations are currently available for linear models and li
 - ```importance_rf``` extracts the feature importance in random forest prediction in a nice format
 
 
-### PLS-DA
+### PLS(-DA)
 
-The package currently has wrappers for PLS-DA functions from the mixOmics package:
+The package currently has wrappers for PLS(-DA) functions from the mixOmics package:
 
-- ```mixomics_plsda``` fits classic PLS-DA  
-- ```mixomics_plsda_optimize``` finds the optimal number of components for PLS-DA  
-- ```mixomics_splsda_optimize``` fits sPLS-DA, which uses a clever variable selection scheme to select the optimal number of components AND the optimal number of features for each component. Try it out!
+- ```mixomics_pls and mixomics_plsda``` fits classic PLS(-DA)  
+- ```mixomics_pls and mixomics_plsda_optimize``` finds the optimal number of components for PLS(-DA)  
+- ```mixomics_spls and mixomics_splsda_optimize``` fits sPLS(-DA), which uses a clever variable selection scheme to select the optimal number of components AND the optimal number of features for each component. Try it out!
 
 
 

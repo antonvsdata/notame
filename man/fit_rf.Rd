@@ -32,5 +32,5 @@ importance_rf(rf)
 
 }
 \seealso{
-\code{\link[randomForest]{randomForest}}, \code{\link{rf_importance}}
+\code{\link[randomForest]{randomForest}}, \code{\link{importance_rf}}
 }
