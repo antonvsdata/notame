@@ -50,6 +50,7 @@ List of common visualizations that take a MetaboSet object as their first argume
 - ```plot_dendrogram```: dendrogram of hierarchical clustering on the samples  
 - ```plot_sample_heatmap```: heatmap of intersample distances
 - ```plot_injection_lm```: histogram of p-values from a linear regression model Feature ~ Injection_order
+- ```plot_sample_suprahex```: SupraHex map of samples
 
 Visualizations for results of statistical tests or correlations:
 
