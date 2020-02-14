@@ -362,7 +362,7 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
   plot(tuned_splsda)
   title("Performance of sPLS-DA models")
   # Choose optimal numbers of components and features
-  ncomp_opt <- 2#tuned_splsda$choice.ncomp$ncomp
+  ncomp_opt <- tuned_splsda$choice.ncomp$ncomp
   keep_x <- tuned_splsda$choice.keepX[1:ncomp_opt]
   log_text(paste("Final model has", ncomp_opt, "components with the numbers of features:",
                  paste(keep_x, collapse = ", ")))
