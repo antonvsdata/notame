@@ -12,7 +12,8 @@ mixomics_plsda(object, y, ncomp, plot_scores = TRUE, ...)
 mixomics_plsda_optimize(object, y, ncomp, plot_scores = TRUE, ...)
 
 mixomics_splsda_optimize(object, y, ncomp, dist, n_features = c(1:10,
-  seq(20, 300, 10)), plot_scores = TRUE, ...)
+  seq(20, 300, 10)), folds = 5, nrepeat = 50, plot_scores = TRUE,
+  ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -30,6 +31,10 @@ be drawn, with both prediction surface and ellipses}
 use \code{\link{mixomics_plsda_optimize}} to find the best distance metric}
 
 \item{n_features}{the number of features to try for each component}
+
+\item{folds}{the number of folds to use in k-fold cross validation}
+
+\item{nrepeat}{the number of times to repeat the cross validation. Lower this for faster testing.}
 }
 \value{
 an object of class "mixo_plsda"

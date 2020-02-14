@@ -102,6 +102,8 @@ plot_pls <- function(model, Y, y, title) {
 #' @param object a MetaboSet object
 #' @param y character vector, column names of the grouping variable to predict
 #' @param ncomp number of X components
+#' @param folds the number of folds to use in k-fold cross validation
+#' @param nrepeat the number of times to repeat the cross validation. Lower this for faster testing.
 #' @param plot_scores logical, if TRUE, a scatter plot with the first two PLS-components as x and y-axis will
 #' be drawn, colored by the Y-variable. Only really makes sense if y is a single variable
 #' @param n_features the number of features to try for each component
@@ -142,7 +144,7 @@ mixomics_pls <- function(object, y, ncomp, plot_scores = TRUE, ...) {
 #' @rdname pls
 #'
 #' @export
-mixomics_pls_optimize <- function(object, y, ncomp, plot_scores = TRUE, ...) {
+mixomics_pls_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plot_scores = TRUE, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
@@ -150,7 +152,7 @@ mixomics_pls_optimize <- function(object, y, ncomp, plot_scores = TRUE, ...) {
   pls_res <- mixomics_pls(object = object, y = y, ncomp = ncomp, plot_scores = FALSE, ...)
 
   log_text("Evaluating PLS performance")
-  perf_pls <- mixOmics::perf(pls_res, validation = "Mfold", folds = 5, nrepeat = 50)
+  perf_pls <- mixOmics::perf(pls_res, validation = "Mfold", folds = folds, nrepeat = nrepeat)
 
   # Plot Mean Square Error
   p1 <- ggplot(data.frame(ncomp = seq_len(ncomp),
@@ -195,7 +197,7 @@ mixomics_pls_optimize <- function(object, y, ncomp, plot_scores = TRUE, ...) {
 #'
 #' @export
 mixomics_spls_optimize <- function(object, y, ncomp,
-                                   n_features = c(1:10, seq(20, 300, 10)),
+                                   n_features = c(1:10, seq(20, 300, 10)), folds = 5, nrepeat = 50,
                                    plot_scores = TRUE, ...) {
 
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
@@ -210,8 +212,8 @@ mixomics_spls_optimize <- function(object, y, ncomp,
   log_text("Tuning sPLS")
   tuned_spls <- mixOmics::tune.spls(X, Y, ncomp = ncomp,
                             test.keepX = n_features,
-                            validation = "Mfold", folds = 5,
-                            nrepeat = 50,
+                            validation = "Mfold", folds = folds,
+                            nrepeat =  nrepeat,
                             measure = 'MAE')
   # Plot error for each component with different number of features
   plot(tuned_spls)
@@ -255,6 +257,8 @@ plot_plsda <- function(model, Y, title, dist = "max.dist") {
 #' @param object a MetaboSet object
 #' @param y character, column name of the grouping variable to predict
 #' @param ncomp the number of X components
+#' @param folds the number of folds to use in k-fold cross validation
+#' @param nrepeat the number of times to repeat the cross validation. Lower this for faster testing.
 #' @param n_features the number of features to try for each component
 #' @param dist the distance metric to use, one of "max.dist", "mahalanobis.dist", "centroids.dist".
 #' use \code{\link{mixomics_plsda_optimize}} to find the best distance metric
@@ -310,10 +314,10 @@ mixomics_plsda_optimize <- function(object, y, ncomp, plot_scores = TRUE, ...) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  plsda_res <- mixomics_plsda(object = object, y = y, ncomp = ncomp, plot_scores = FALSE, ...)
+  plsda_res <- mixomics_plsda(object = object, y = y, ncomp = ncomp, folds = 5, nrepeat = 50, plot_scores = FALSE, ...)
 
   log_text("Evaluating PLS-DA performance")
-  perf_plsda <- mixOmics::perf(plsda_res, validation = "Mfold", folds = 5, auc = TRUE, nrepeat = 50)
+  perf_plsda <- mixOmics::perf(plsda_res, validation = "Mfold", folds = folds, auc = TRUE, nrepeat = nrepeat)
 
   plot(perf_plsda, col = mixOmics::color.mixo(1:3), sd = TRUE, legend.position = "horizontal")
   title("Performance of PLS-DA models")
@@ -333,6 +337,7 @@ mixomics_plsda_optimize <- function(object, y, ncomp, plot_scores = TRUE, ...) {
 #' @export
 mixomics_splsda_optimize <- function(object, y, ncomp, dist,
                                      n_features = c(1:10, seq(20, 300, 10)),
+                                     folds = 5, nrepeat = 50,
                                      plot_scores = TRUE, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
       stop("Package \"mixOmics\" needed for this function to work. Please install it.",
@@ -349,9 +354,9 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
   # Test different components and numbers of features with cross validation
   log_text("Tuning sPLS-DA")
   tuned_splsda <- mixOmics::tune.splsda(X, Y, ncomp = ncomp,
-                                        validation = "Mfold", folds = 5,
+                                        validation = "Mfold", folds = folds,
                                         dist = dist,
-                                        measure = "BER", nrepeat = 50,
+                                        measure = "BER", nrepeat = nrepeat,
                                         test.keepX = n_features)
   # Plot error rate of different components as a function of number of features
   plot(tuned_splsda)

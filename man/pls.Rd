@@ -9,10 +9,11 @@
 \usage{
 mixomics_pls(object, y, ncomp, plot_scores = TRUE, ...)
 
-mixomics_pls_optimize(object, y, ncomp, plot_scores = TRUE, ...)
+mixomics_pls_optimize(object, y, ncomp, folds = 5, nrepeat = 50,
+  plot_scores = TRUE, ...)
 
 mixomics_spls_optimize(object, y, ncomp, n_features = c(1:10, seq(20,
-  300, 10)), plot_scores = TRUE, ...)
+  300, 10)), folds = 5, nrepeat = 50, plot_scores = TRUE, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -25,6 +26,10 @@ mixomics_spls_optimize(object, y, ncomp, n_features = c(1:10, seq(20,
 be drawn, colored by the Y-variable. Only really makes sense if y is a single variable}
 
 \item{...}{any parameters passed to \code{mixOmics::pls} or \code{mixOmics::spls}}
+
+\item{folds}{the number of folds to use in k-fold cross validation}
+
+\item{nrepeat}{the number of times to repeat the cross validation. Lower this for faster testing.}
 
 \item{n_features}{the number of features to try for each component}
 }
