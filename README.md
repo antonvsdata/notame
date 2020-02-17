@@ -8,7 +8,7 @@ The package contains functions for visualizing and further preprocessing LC-MS d
 
 Here is a short description of the functionality in the notame package.
 
-![alt text] (vignettes/notame_workflow.png "workflow")
+![alt text](https://github.com/antonvsdata/notame/blob/master/vignettes/notame_workflow.png "workflow")
 
 
 ### Installation and getting started
