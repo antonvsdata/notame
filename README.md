@@ -1,14 +1,22 @@
 ## notame - Workflow for non-targeted LC-MS metabolic profiling 
 
-This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics (notame, see?). The starting point of the analyses conducted by this package is a peak table file, output from e.g. MS-DIAL.
-
-The package contains functions for visualizing and further preprocessing LC-MS data, as well as handy ways of conducting simple statistical analyses.
+This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics (notame, see?). Notame was developed at the research group of nutritional metabolomics at University of Eastern Finland. We use notame as a way to bundle together all the preprocessing methods we use for our non-targeted LC-MS metabolomics data, so it mainly consists of methods found in other packages, and a bunch of visualizations we have found useful.
 
 ### What does notame do acutallly?
 
-Here is a short description of the functionality in the notame package.
+Before we go into the list of features, it is good for you to know hot the workflow in our lab works. The first step is to take raw data files created by the LC-MS instrument and create a peak table using a peak picking software (we use [MS-DIAL](http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/)). After peak picking with the dedicated software, we use R for data preprocessing, quality control, statistical analysis and visualization. We then use the obtained results in identification of the actual metabolites. During the years, we ended up with various scripts that were hard to handle and update, so we decided to make this package to keep things under control. For more information about our workflow, read the associated protocol paper ["NoTaMe": Workflow for Non-Targeted LC-MS Metabolic Profiling](https://www.preprints.org/manuscript/202002.0019/v1)
 
-![alt text](https://github.com/antonvsdata/notame/blob/master/vignettes/notame_workflow.png "workflow")
+Here is a list of the current main functionalities of the package:
+
+- Reading data from Excel spreadsheets created with MS-DIAL
+- Data is stored in a custom object that holds all the information about the features and samples along with the feature abundance matrix. This allows for a simple interface for all of the functions in the package, as there is no need to juggle with different matrices/data frames.
+- Drift correction: correcting for systematic drift in the intensity of molecular features using cubic spline correction (see [Kirwan & Broadhurst et al.](https://doi.org/10.1007/s00216-013-6856-7))
+- Identifying and flagging (or removing) low-quality molecular features using quality metrics defined by [Broadhurst et al.](https://doi.org/10.1007/s11306-018-1367-3)
+- Imputing missing values, multiple strategies available. Random forest imputation recommended, see [Kokla et al.](https://doi.org/10.1186/s12859-019-3110-0)
+- Batch effect correction: correcting for systematic variation between batches. Multiple strategies available.
+- A novel method for clustering similar molecular features
+- A bunch of statistical analyses, both feature-wise tests and multivariate models
+- A rather nice set of visualizations for use in quality control, explorative analysis and interpretation of results from statistical tests
 
 
 ### Installation and getting started
@@ -53,4 +61,14 @@ Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = TRUE)
 ```
 
 Read more [on the issue of remotes package](https://github.com/r-lib/remotes/issues/403) and [the environment variables tutorial](https://github.com/r-lib/remotes#environment-variables)
+
+
+### Credits and license
+
+The notame package is written by Anton Klåvus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). Notame is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Klåvus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University.
+
+If you find any bugs or other things to fix, please submit an issue on GitHub! All contributions to the package are always welcome!
+
+notame is published under an MIT license (tl;dr: it's really permissive!)
+
 
