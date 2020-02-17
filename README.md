@@ -4,6 +4,12 @@ This package can be used to analyze preprocessed LC-MS data in non-targeted meta
 
 The package contains functions for visualizing and further preprocessing LC-MS data, as well as handy ways of conducting simple statistical analyses.
 
+### What does notame do acutallly?
+
+Here is a short description of the functionality in the notame package.
+
+![alt text] (vignettes/notame_workflow.png)
+
 
 ### Installation and getting started
 
