@@ -1,4 +1,6 @@
 
+# ----------- Random Forest ----------------
+
 #' Fit Random Forest
 #'
 #' Fits a random forest, where given response column in pheno data is predicted using the features. Can be used
@@ -60,6 +62,8 @@ importance_rf <- function(rf) {
   df
 }
 
+
+# ------------------ mixOmics PLS ---------------------------
 
 #' Plot points in PLS space
 #'
@@ -375,5 +379,123 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 
   splsda_final
 }
+
+
+
+# ------------------- MUVR --------------------------------
+
+#' MUVR
+#'
+#' A wrapper around the MUVR algorithm from the MUVR package. For more information
+#' about the algorithm, visit https://gitlab.com/CarlBrunius/MUVR.
+#'
+#' @param object a MetaboSet object
+#' @param y the target variable to predict
+#' @param id subject ID variable in case of repeated measurements
+#' @param multi_level whether multi-level modeling should be applied, see Details
+#' @param multi_level_var the variable for splitting the data in multi-level modeling
+#' @param nRep Number of repetitions of double CV, parameter of MUVR
+#' @param nOuter Number of outer CV loop segments, parameter of MUVR
+#' @param nInner Number of inner CV loop segments, parameter of MUVR
+#' @param varRatio Ratio of variables to include in subsequent inner loop iteration,
+#'  parameter of MUVR
+#' @param method Multivariate method. Supports 'PLS' and 'RF', parameter of MUVR
+#' @param ... other parameters to \code{MUVR::MUVR}
+#'
+#' @examples
+#' # Simple model, only 1 repetition for a quick example
+#' rf_model <- muvr_analysis(drop_qcs(merged_sample), y = "Group", nRep = 1, method = "RF")
+#'
+#' # PLS on multilevel variable
+#' pls_model <- muvr_analysis(drop_qcs(example_set), multi_level = TRUE,
+#' id = "Subject_ID", multi_level_var = "Time")
+#'
+#'
+#' @seealso \code{\link[MUVR]{MUVR}}
+#'
+#' @export
+muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, multi_level_var = NULL,
+                          nRep = 5, nOuter = 6, nInner = nOuter - 1,
+                          varRatio = 0.75, method = c("PLS", "RF"), ...) {
+
+  if (!requireNamespace("MUVR", quietly = TRUE)) {
+    stop("Package \"MUVR\" needed for this function to work. Please install it from
+         https://gitlab.com/CarlBrunius/MUVR",
+         call. = FALSE)
+  }
+
+  # Classic MUVR
+  if (!multi_level) {
+    if (is.null(y)) {
+      stop("y variable needs to be defined unless doing multi-level modeling")
+    }
+    X <- t(exprs(object))
+    Y <- pData(object)[, y]
+
+    # Independent samples
+    if (is.null(id)) {
+      muvr_model <- MUVR::MUVR(X = X, Y = Y, nRep = nRep, nOuter = nOuter, nInner = nInner,
+                               varRatio = varRatio, method = method)
+    } else {
+      # Multiple measurements
+      ID <- pData(object)[, id]
+      muvr_model <- MUVR::MUVR(X = X, Y = Y, ID = ID, nRep = nRep, nOuter = nOuter, nInner = nInner,
+                               varRatio = varRatio, method = method)
+
+    }
+  } else { # Multi-level analysis
+    if (is.null(id) | is.null(multi_level_var)) {
+      stop("id and multi_level_var needed for multi-level modeling")
+    }
+    # Check that multi_level_var has only 2 unique values
+    ml_var <- pData(object)[, multi_level_var] <- as.factor(pData(object)[, multi_level_var])
+    if (length(levels(ml_var)) != 2) {
+      stop("The multilevel variable should have exactly 2 unique values")
+    } else {
+      cat(paste("Computing effect matrix according to", multi_level_var, ":",
+          levels(ml_var)[2], "-", levels(ml_var)[1]))
+    }
+
+    # Compute effect matrix
+    cd <- combined_data(object)
+    cd <- cd[order(cd[, id]), ]
+    X1 <- cd[cd[, multi_level_var] == levels(ml_var)[1], featureNames(object)]
+    X2 <- cd[cd[, multi_level_var] == levels(ml_var)[2], featureNames(object)]
+    X <- X2 - X1
+    rownames(X) <- unique(cd[, id])
+
+    # Modeling
+    if (!is.null(y)) { # Compare change of multi_level_var between levels of y
+      Y <- cd[cd[, multi_level_var] == levels(ml_var)[1], y]
+      muvr_model <- MUVR::MUVR(X = X, Y = Y, nRep = nRep, nOuter = nOuter, nInner = nInner,
+                               varRatio = varRatio, method = method)
+    } else { # Compare levels of multi_level_var
+      muvr_model <- MUVR::MUVR(X = X, ML = TRUE, nRep = nRep, nOuter = nOuter, nInner = nInner,
+                               varRatio = varRatio, method = method)
+    }
+
+  }
+
+  MUVR::plotVAL(muvr_model)
+
+  muvr_model
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
