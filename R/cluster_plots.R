@@ -34,6 +34,8 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
       stop("Package \"ggdendro\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  color <- color %||% NULL
+
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -135,7 +137,7 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = -0.05)) +
     coord_fixed()
   # Group bar
-  if (group_bar) {
+  if (group_bar & !is.na(group)) {
     pheno_data <- pData(object)
     pheno_data$Sample_ID <- factor(pheno_data$Sample_ID, levels = hc_order, ordered = TRUE)
 
