@@ -24,4 +24,35 @@ If \code{merge} is \code{TRUE}, then a file containing all the visualizations
 named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
 (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
 Mac is not yet supported.
+The type of visualizations to be saved depends on the type of object.
+Here is a comprehensive list of the visualizations:
+\itemize{
+\item Distribution of quality metrics and flags
+\item Boxplots of each sample in injection order
+\item PCA scores plot of samples colored by injection order
+\item t-SNE plot of samples colored by injection order
+\item If the object has over 60 samples, hexbin versions of the PCA and t-SNE plots above
+\item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by group if present
+\item heat map of intersample distances, ordered by hierarchical clustering
+\item If the object has QC samples: \itemize{
+\item Density function of the intersample distances in both QCs and biological samples
+\item Histograms of p-values from linear regression of features against injection order
+in both QCs and biological samples}
+\item If the object has a group column: \itemize {
+\item PCA and tSNE plots with points shaped and colored by group
+}
+\item If the object has a time column: \itemize {
+\item PCA and tSNE plots with points shaped and colored by time
+\item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by time point
+}
+\item If the object has a group column OR a time column: \itemize {
+\item Boxplots of samples ordered and colored by group and/or time
+}
+\item If the object has a group column AND a time column: \itemize {
+\item PCA and tSNE plots with points shaped by group and colored by time
+}
+\item If the object has a time column AND a subject column: \itemize {
+\item PCA and tSNE plots with arrows connecting the samples of each subject in time point order
+}
+}
 }

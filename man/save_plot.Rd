@@ -14,7 +14,7 @@ save_plot(p, file, ...)
 \item{...}{other arguments to pdf, like width and height}
 }
 \description{
-Saves the given plot to a PDF file
+Saves the given plot to a PDF file. If an error occurs with the plot, an empty file is created.
 }
 \seealso{
 \code{\link[grDevices]{pdf}}
