@@ -80,6 +80,17 @@ check_exprs <- function(exprs_) {
   exprs_
 }
 
+check_feature_data <- function(feature_data) {
+  fid <- feature_data$Feature_ID
+  if (any(is.na(fid))) {
+    stop("Missing values in Feature IDs")
+  }
+  fid_num <- suppressWarnings(as.numeric(fid))
+  if (any(!is.na(fid_num))) {
+    stop("Numbers are not allowed as feature IDs")
+  }
+}
+
 #' Read formatted Excel files
 #'
 #'
@@ -190,11 +201,12 @@ read_from_excel <- function(file, sheet = 1, corner_row = NULL, corner_column = 
 
   # Extract LC-MS measurements as matrix
   exprs_ <- dada[(cr+1):nrow(dada), (cc+1):ncol(dada)]
-  
+
   # Skip checks
   if (!skip_checks) {
     pheno_data <- check_pheno_data(x = pheno_data, id_prefix = id_prefix)
     exprs_ <- check_exprs(exprs_)
+    feature_data <- check_feature_data(feature_data)
   }
 
   rownames(exprs_) <- rownames(feature_data)
@@ -300,6 +312,7 @@ setValidity("MetaboSet",
               } else {
                 x <- check_pheno_data(pData(object), id_prefix = "")
                 x <- check_exprs(exprs(object))
+                x <- check_feature_data(fData(object))
                 TRUE
               }
             })
@@ -336,8 +349,8 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
   parts <- unique(feature_data$Split)
   obj_list <- list()
   for (part in parts) {
-    fd_tmp <- Biobase::AnnotatedDataFrame(data= feature_data[feature_data$Split == part, ])
-    ad_tmp <- exprs[fd_tmp$Feature_ID,]
+    fd_tmp <- Biobase::AnnotatedDataFrame(data = feature_data[feature_data$Split == part, ])
+    ad_tmp <- exprs[rownames(exprs) == fd_tmp$Feature_ID,]
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
                         phenoData = pheno_data,
                         featureData = fd_tmp,
