@@ -5,7 +5,7 @@
 \title{Flag low-quality features}
 \usage{
 flag_quality(object,
-  condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) | (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)")
+  condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |\\n                    (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)")
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -25,14 +25,14 @@ The quality metrics measure two things: internal spread of the QCs, and spread o
   \deqn{RSD = \frac{s_{QC}}{\bar{x}_{QC}}}
   Where\eqn{s_{QC}} is the standard deviation of the QC samples and \eqn{\bar{x}_{QC}} is the sample mean of the signal in the QC samples.
   RSD can also be replaced by a non-parametric, robust version based on the median and median absolute deviation (MAD):
-  \deqn{RSD\_r = \frac{1.4826 \cdot MAD_{QC}}{\text{median}(x_{QC}}}
+  \deqn{RSD\_r = \frac{1.4826 \cdot MAD_{QC}}{median(x_{QC})}}
   The spread of the QC samples compared to the biological samples is measured using a metric called D-ratio:
   \deqn{D\_ratio = \frac{s_{QC}}{s_{biological}}}
   Or, as before, a non-parametric, robust alternative:
   \deqn{D\_ratio\_r = \frac{MAD_{QC}}{MAD_{biological}}}
 The default condition keeps features that pass either of the two following conditions:
-\deqn{RSD_r < 0.2 & D_ratio_r < 0.4}
-\deqn{RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1}
+\deqn{RSD_r < 0.2 \& D_ratio_r < 0.4}
+\deqn{RSD < 0.1 \& RSD_r < 0.1 \& D_ratio < 0.1}
 }
 \examples{
 ex_set <- flag_quality(merged_sample)

@@ -5,7 +5,7 @@ knitr::opts_chunk$set(
 )
 
 ## ---- echo=FALSE, include=FALSE------------------------------------------
-devtools::load_all()
+library(notame)
 
 ## ---- out.width = "400px", echo=FALSE, fig.align='center'----------------
 knitr::include_graphics("algo_1.jpg")

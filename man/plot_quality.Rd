@@ -11,6 +11,8 @@ plot_quality(object, all_features = FALSE, plot_flags = TRUE)
 
 \item{all_features}{logical, should all features be used? If FALSE (the default),
 flagged features are removed before visualization.}
+
+\item{plot_flags}{logical, should the distribution of flags be added as a barplot?}
 }
 \value{
 a ggplot object

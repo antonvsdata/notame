@@ -36,7 +36,7 @@
 \S4method{assess_quality}{MetaboSet}(object)
 
 \S4method{flag_quality}{MetaboSet}(object,
-  condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |\\n                                (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)")
+  condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |\\n                   (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)")
 
 \S4method{flag_detection}{MetaboSet}(object, qc_limit = 0.7,
   group_limit = 0.8, group = group_col(object))
@@ -46,7 +46,7 @@ MetaboSet is the main class used to represent data in the notame package.
 It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
 package. For more information, read the MetaboSet utility vignette.
 In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},
-\code{MetaboSet} has four slots of its own. The extra three slots hold special
+\code{MetaboSet} has three slots of its own. The extra three slots hold special
 column names that are stored purely for convenience, as many functions use these as
 defaults.
 }

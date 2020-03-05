@@ -29,9 +29,9 @@ save_group_lineplots(object, all_features = FALSE, file, width = 8,
 \item{fun.ymin, fun.y, fun.ymax}{Alternative to fun.data, passed to ggplot2::stat_summary,
 "supply three individual functions that are each passed a vector of x's and should return a single number"}
 
-\item{color_scale}{the color scale as returned by a ggplot function}
+\item{position_dodge_amount}{numeric: how much the group mean points should dodge away from each other}
 
-\item{position_dodge_amout}{numeric: how much the group mean points should dodge away from each other}
+\item{color_scale}{the color scale as returned by a ggplot function}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.

@@ -14,7 +14,7 @@ Defaults to "Feature ~ group_col(object)}
 
 \item{all_features}{should all features be included in FDR correction?}
 
-\item{...}{}
+\item{...}{other parameters to \code{\link{oneway.test}}}
 }
 \value{
 data frame with the results

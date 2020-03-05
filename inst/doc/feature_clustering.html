@@ -12,7 +12,7 @@
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2020-01-02" />
+<meta name="date" content="2020-03-05" />
 
 <title>Feature clustering</title>
 
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Feature clustering</h1>
 <h4 class="author"><em>Anton Mattsson</em></h4>
-<h4 class="date"><em>2020-01-02</em></h4>
+<h4 class="date"><em>2020-03-05</em></h4>
 
 
 
@@ -122,10 +122,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>For MetaboSet object, performing feature clustering is quite simple. All you have to do is call <code>cluster_features</code>. The below example illustrates this on the toy dataset included in the package. Note that the values of the parameters are non-sensible! For real datasets, please use values close to the defaults. In addition, when performing the clustering on real life datasets, it is probably a good idea to use parallel processing to speed things up (to find the connections between features, the algorithm needs to go through all possible pairs of features).</p>
 <p>To get visualizations of the clusters, set <code>plotting = TRUE</code> and specify a <code>prefix</code> for the file path. The function will create one file per cluster, with visualizations of the clusters.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">clustered &lt;-<span class="st"> </span><span class="kw">cluster_features</span>(example_set, <span class="dt">rt_window =</span> <span class="dv">2</span>, <span class="dt">corr_thresh =</span> <span class="fl">0.4</span>, <span class="dt">d_thresh =</span> <span class="fl">0.6</span>)
-<span class="co">#&gt; [1] &quot;Feature_ID&quot;    &quot;Split&quot;         &quot;Alignment&quot;     &quot;Mass&quot;         </span>
-<span class="co">#&gt; [5] &quot;RetentionTime&quot; &quot;Column&quot;        &quot;Mode&quot;          &quot;Flag&quot;         </span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting feature clustering at 2020-01-02 16:11:25</span>
+<span class="co">#&gt; Starting feature clustering at 2020-03-05 11:48:50</span>
 <span class="co">#&gt; Finding connections between features in HILIC_pos</span>
 <span class="co">#&gt; Warning: executing %dopar% sequentially: no parallel backend registered</span>
 <span class="co">#&gt; Found 35 connections in HILIC_pos</span>
@@ -136,7 +134,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 1 components found</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Found 3 clusters of 2 or more features, clustering finished at 2020-01-02 16:11:25</span></code></pre></div>
+<span class="co">#&gt; Found 3 clusters of 2 or more features, clustering finished at 2020-03-05 11:48:50</span></code></pre></div>
 <p>This will add new columns to the <code>fData</code> part of the object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(<span class="kw">fData</span>(clustered))
 <span class="co">#&gt;  [1] &quot;Feature_ID&quot;       &quot;Split&quot;            &quot;Alignment&quot;       </span>

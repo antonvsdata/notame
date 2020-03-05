@@ -181,7 +181,7 @@ fold_change <- function(object, group = group_col(object)) {
 #' @param y character vector, either identical to x (the default) or a distinct set of variables
 #' to be correlated agains x
 #' @param fdr logical, whether p-values from the correlation test should be adjusted with FDR correction
-#' @param duplicated logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
+#' @param duplicates logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
 #' will be included in the results twice, where the order of the variables (which is x and which is y)
 #' is changed. Can be useful for e.g. plotting a heatmap of the results, see examples of
 #' \code{\link{plot_effect_heatmap}}
@@ -502,7 +502,8 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @examples
 #' # A simple example without QC samples
 #' # Time predicted by features
-#' logistic_results <- perform_logistic(drop_qcs(example_set), formula_char = "Time ~ Feature + Group ")
+#' logistic_results <- perform_logistic(drop_qcs(example_set),
+#'                                      formula_char = "Time ~ Feature + Group ")
 #'
 #' @seealso \code{\link[stats]{glm}}
 #'
@@ -594,7 +595,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' @examples
 #' # A simple example without QC samples
 #' # Features predicted by Group and Time as fixed effects with Subject ID as a random effect
-#' lmer_results <- perform_lmer(drop_qcs(example_set), formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
+#' lmer_results <- perform_lmer(drop_qcs(example_set),
+#'                              formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
 #'                         ci_method = "Wald")
 #'
 #' @seealso \code{\link[lmerTest]{lmer}} for model specification and
@@ -827,7 +829,7 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
 #' @param all_features should all features be included in FDR correction?
-#' @param ...
+#' @param ... other parameters to \code{\link{oneway.test}}
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
 #' in pData(object) can be specified. To make the formulas flexible, the word "Feature"

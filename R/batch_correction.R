@@ -97,6 +97,11 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #'
 #' @param object a MetaboSet object
 #' @param batch column name of pData givinh the batch labels
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.
+#' @param center logical, should the data be centered prior to PCA? (usually yes)
+#' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
+#' @param nPcs the number of principal components to use
+#' @param ... other parameters to pcaMethods::pca
 #'
 #' @return matrix of Bhattacharyya distances between batches
 #'
@@ -108,7 +113,8 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 #'
 #' @export
-pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center = TRUE, scale = "uv", nPcs = 3, ...) {
+pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center = TRUE,
+                                   scale = "uv", nPcs = 3, ...) {
 
   if (!requireNamespace("fpc", quietly = TRUE)) {
     stop("Package \"fpc\" needed for this function to work. Please install it.",
@@ -303,6 +309,7 @@ normalize_batches <- function(object, batch, group, ref_label, ...) {
 #'
 #' @param orig,corrected MetaboSet objects before and after batch effect correction
 #' @param file path to the PDF file where the plots will be saved
+#' @param width,height width and height of the plots in inches
 #' @param batch,color,shape column names of pData for batch labels,
 #' and column used for coloring and shaping points (by default batch and QC)
 #' @param color_scale,shape_scale scales for color and scale as returned by ggplot functions.

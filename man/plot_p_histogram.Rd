@@ -14,6 +14,8 @@ plot_p_histogram(p_values, hline = TRUE, combine = TRUE,
 
 \item{combine}{logical, whether plots of individual p-value vectors should be combined into a single object. Set to FALSE if
 you want to add other plots to the list before plotting}
+
+\item{x_label}{the x-axis label}
 }
 \value{
 if combine = TRUE, a ggplot object. Otherwise a list of ggplot objects

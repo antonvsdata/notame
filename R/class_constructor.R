@@ -281,7 +281,7 @@ name_features <- function(feature_data) {
 #' It is built upon the \code{\link[Biobase]{ExpressionSet}} class from the Biobase
 #' package. For more information, read the MetaboSet utility vignette.
 #' In addition to the slots inherited from \code{\link[Biobase]{ExpressionSet}},
-#' \code{MetaboSet} has four slots of its own. The extra three slots hold special
+#' \code{MetaboSet} has three slots of its own. The extra three slots hold special
 #' column names that are stored purely for convenience, as many functions use these as
 #' defaults.
 #'
@@ -575,7 +575,8 @@ setMethod("join_results", c("MetaboSet", "data.frame"),
 #' @param dframe a data frame with the new information
 #'
 #' @examples
-#' new_info <- data.frame(Feature_ID = featureNames(example_set), Feature_number = seq_len(nrow(example_set)))
+#' new_info <- data.frame(Feature_ID = featureNames(example_set),
+#'                        Feature_number = seq_len(nrow(example_set)))
 #' with_new_info <- join_fData(example_set, new_info)
 #' colnames(fData(with_new_info))
 #'

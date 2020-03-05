@@ -17,12 +17,12 @@ to be correlated agains x}
 
 \item{fdr}{logical, whether p-values from the correlation test should be adjusted with FDR correction}
 
-\item{...}{other parameters passed to \code{\link{cor.test}}, such as method}
-
-\item{duplicated}{logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
+\item{duplicates}{logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
 will be included in the results twice, where the order of the variables (which is x and which is y)
 is changed. Can be useful for e.g. plotting a heatmap of the results, see examples of
 \code{\link{plot_effect_heatmap}}}
+
+\item{...}{other parameters passed to \code{\link{cor.test}}, such as method}
 }
 \value{
 a data frame with the results of correlation tests: the pair of variables, correlation coefficient

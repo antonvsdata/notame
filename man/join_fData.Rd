@@ -19,7 +19,8 @@ Join a new data frame of information to feature data of a MetaboSet object. The 
 This function is usually used internally by some of the functions in the package, but can be useful.
 }
 \examples{
-new_info <- data.frame(Feature_ID = featureNames(example_set), Feature_number = seq_len(nrow(example_set)))
+new_info <- data.frame(Feature_ID = featureNames(example_set),
+                       Feature_number = seq_len(nrow(example_set)))
 with_new_info <- join_fData(example_set, new_info)
 colnames(fData(with_new_info))
 

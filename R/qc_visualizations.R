@@ -109,6 +109,7 @@ plot_injection_lm <- function(object, all_features = FALSE) {
 #' @param hline logical, whether a horizontal line representing uniform distribution should be plotted
 #' @param combine logical, whether plots of individual p-value vectors should be combined into a single object. Set to FALSE if
 #' you want to add other plots to the list before plotting
+#' @param x_label the x-axis label
 #'
 #' @return if combine = TRUE, a ggplot object. Otherwise a list of ggplot objects
 #'
@@ -159,6 +160,7 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE, x_label = "
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default),
 #' flagged features are removed before visualization.
+#' @param plot_flags logical, should the distribution of flags be added as a barplot?
 #'
 #' @return a ggplot object
 #'

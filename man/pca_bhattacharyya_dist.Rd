@@ -11,6 +11,16 @@ pca_bhattacharyya_dist(object, batch, all_features = FALSE,
 \item{object}{a MetaboSet object}
 
 \item{batch}{column name of pData givinh the batch labels}
+
+\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.}
+
+\item{center}{logical, should the data be centered prior to PCA? (usually yes)}
+
+\item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
+
+\item{nPcs}{the number of principal components to use}
+
+\item{...}{other parameters to pcaMethods::pca}
 }
 \value{
 matrix of Bhattacharyya distances between batches

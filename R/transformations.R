@@ -332,6 +332,9 @@ flag_report <- function(object) {
 #' Log-transforms the exprs part of a MetaboSet object. Shortcust log2 and log10 also implemented.
 #' For more information, see \code{\link{log}}
 #'
+#' @param x a MetaboSet object
+#' @param base the base of the logarithm
+#'
 #' @export
 setMethod("log", "MetaboSet", function(x, base = exp(1)) {
   exprs(x) <- log(exprs(x), base = base)

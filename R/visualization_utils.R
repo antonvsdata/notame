@@ -50,20 +50,20 @@ save_plot <- function(p, file, ...) {
 #' \item Density function of the intersample distances in both QCs and biological samples
 #' \item Histograms of p-values from linear regression of features against injection order
 #' in both QCs and biological samples}
-#' \item If the object has a group column: \itemize {
+#' \item If the object has a group column: \itemize{
 #' \item PCA and tSNE plots with points shaped and colored by group
 #' }
-#' \item If the object has a time column: \itemize {
+#' \item If the object has a time column: \itemize{
 #' \item PCA and tSNE plots with points shaped and colored by time
 #' \item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by time point
 #' }
-#' \item If the object has a group column OR a time column: \itemize {
+#' \item If the object has a group column OR a time column: \itemize{
 #' \item Boxplots of samples ordered and colored by group and/or time
 #' }
-#' \item If the object has a group column AND a time column: \itemize {
+#' \item If the object has a group column AND a time column: \itemize{
 #' \item PCA and tSNE plots with points shaped by group and colored by time
 #' }
-#' \item If the object has a time column AND a subject column: \itemize {
+#' \item If the object has a time column AND a subject column: \itemize{
 #' \item PCA and tSNE plots with arrows connecting the samples of each subject in time point order
 #' }
 #' }

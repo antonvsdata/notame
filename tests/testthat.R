@@ -1,4 +1,4 @@
 library(testthat)
-library(amp)
+library(notame)
 
-test_check("amp")
+test_check("notame")

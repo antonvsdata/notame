@@ -213,7 +213,7 @@ save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, h
 #' "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."
 #' @param fun.ymin,fun.y,fun.ymax Alternative to fun.data, passed to ggplot2::stat_summary,
 #' "supply three individual functions that are each passed a vector of x's and should return a single number"
-#' @param position_dodge_amout numeric: how much the group mean points should dodge away from each other
+#' @param position_dodge_amount numeric: how much the group mean points should dodge away from each other
 #' @param color_scale the color scale as returned by a ggplot function
 #'
 #' @seealso \code{\link[ggplot2]{stat_summary}}

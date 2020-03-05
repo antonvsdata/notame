@@ -14,6 +14,8 @@ save_batch_plots(orig, corrected, file, width = 14, height = 10,
 
 \item{file}{path to the PDF file where the plots will be saved}
 
+\item{width, height}{width and height of the plots in inches}
+
 \item{batch, color, shape}{column names of pData for batch labels,
 and column used for coloring and shaping points (by default batch and QC)}
 

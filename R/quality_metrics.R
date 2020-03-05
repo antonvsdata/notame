@@ -74,14 +74,14 @@ setMethod("assess_quality", c(object = "MetaboSet"),
 #'   \deqn{RSD = \frac{s_{QC}}{\bar{x}_{QC}}}
 #'   Where\eqn{s_{QC}} is the standard deviation of the QC samples and \eqn{\bar{x}_{QC}} is the sample mean of the signal in the QC samples.
 #'   RSD can also be replaced by a non-parametric, robust version based on the median and median absolute deviation (MAD):
-#'   \deqn{RSD\_r = \frac{1.4826 \cdot MAD_{QC}}{\text{median}(x_{QC}}}
+#'   \deqn{RSD\_r = \frac{1.4826 \cdot MAD_{QC}}{median(x_{QC})}}
 #'   The spread of the QC samples compared to the biological samples is measured using a metric called D-ratio:
 #'   \deqn{D\_ratio = \frac{s_{QC}}{s_{biological}}}
 #'   Or, as before, a non-parametric, robust alternative:
 #'   \deqn{D\_ratio\_r = \frac{MAD_{QC}}{MAD_{biological}}}
 #' The default condition keeps features that pass either of the two following conditions:
-#' \deqn{RSD_r < 0.2 & D_ratio_r < 0.4}
-#' \deqn{RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1}
+#' \deqn{RSD_r < 0.2 \& D_ratio_r < 0.4}
+#' \deqn{RSD < 0.1 \& RSD_r < 0.1 \& D_ratio < 0.1}
 #'
 #' @return a MetaboSet object with the features flagged
 #'
@@ -99,14 +99,15 @@ setMethod("assess_quality", c(object = "MetaboSet"),
 #' @export
 setGeneric("flag_quality", signature = "object",
            function(object,
-                    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) | (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") standardGeneric("flag_quality"))
+                    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
+                    (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") standardGeneric("flag_quality"))
 
 #' @describeIn MetaboSet flag low-quality features
 #' @export
 setMethod("flag_quality", c(object = "MetaboSet"),
           function(object,
                    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |
-                                (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") {
+                   (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)") {
             if (is.null(quality(object))) {
               object <- assess_quality(object)
             }

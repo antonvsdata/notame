@@ -2,7 +2,7 @@ Package: notame
 Type: Package
 Title: Workflow for non-targeted LC-MS metabolic profiling
 Version: 0.0.0.9000
-authors@R: c(
+Authors@R: c(
     person("Anton", "Klåvus", email = "anton.klavus@iki.fi", role = c("aut", "cre")),
     person("Jussi", "Paananen", role = "aut"),
     person("Oskari", "Timonen", role = "aut"))
@@ -15,10 +15,12 @@ biocViews:
 Depends:
     ggplot2,
     magrittr,
-    Biobase
+    Biobase,
+    BiocGenerics
 Imports:
     dplyr,
     foreach,
+    methods,
     tibble,
     tidyr
 Suggests:

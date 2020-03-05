@@ -40,10 +40,7 @@ The plot shows 2 standard deviation spread for both QC samples and regular sampl
 If \code{shape} is set to \code{NULL} (the default), the column used for color
 is also used for shape
 }
-\seealso{
-\code{\link{correct_drift}}, \code{\link{inspect_dc}}
-
- @examples
+\examples{
 \dontrun{
 dc <- dc_cubic_spline(merged_sample)
 corrected <- dc$object
@@ -52,4 +49,7 @@ inspected <- inspect_dc(orig = merged_sample, dc = corrected,
 save_dc_plots(orig = merged_sample, dc = corrected, predicted = dc$predicted,
               file = "drift_plots.pdf")
 }
+}
+\seealso{
+\code{\link{correct_drift}}, \code{\link{inspect_dc}}
 }

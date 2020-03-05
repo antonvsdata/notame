@@ -57,15 +57,17 @@ coalesce<-function(...) {
 #'
 #' @examples
 #' # Compute correlations between variables
-#' correlations <- perform_correlation_tests(example_set, x = featureNames(example_set), duplicates = TRUE)
+#' correlations <- perform_correlation_tests(example_set,
+#'                                           x = featureNames(example_set),
+#'                                           duplicates = TRUE)
 #'
 #' # Minimal example
 #' plot_effect_heatmap(correlations, x = "X", y = "Y", effect = "Correlation_coefficient")
 #'
 #' # Lower triangular with discrete effect and p-value dots
-#' plot_effect_heatmap(correlations, x = "X", y = "Y", effect = "Correlation_coefficient", p = "Correlation_P",
-#'                point_size_range = c(2,8),
-#'                discretize_effect = TRUE, breaks = 7, lower_tri = TRUE)
+#' plot_effect_heatmap(correlations, x = "X", y = "Y", effect = "Correlation_coefficient",
+#'                     p = "Correlation_P", point_size_range = c(2,8),
+#'                     discretize_effect = TRUE, breaks = 7, lower_tri = TRUE)
 #'
 #' @export
 plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, point_size_range = c(1, 6),

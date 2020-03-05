@@ -7,13 +7,12 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
-<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Anton Mattsson" />
 
-<meta name="date" content="2020-02-04" />
+<meta name="date" content="2020-03-05" />
 
 <title>Project example</title>
 
@@ -71,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -84,9 +83,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
-
-
-
 </head>
 
 <body>
@@ -95,8 +91,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Project example</h1>
-<h4 class="author">Anton Mattsson</h4>
-<h4 class="date">2020-02-04</h4>
+<h4 class="author"><em>Anton Mattsson</em></h4>
+<h4 class="date"><em>2020-03-05</em></h4>
 
 
 
@@ -254,10 +250,10 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2020-02-04 11:14:13</span>
-<span class="co">#&gt; Drift correction performed at 2020-02-04 11:14:13</span>
-<span class="co">#&gt; Inspecting drift correction results 2020-02-04 11:14:13</span>
-<span class="co">#&gt; Drift correction results inspected at 2020-02-04 11:14:13</span>
+<span class="co">#&gt; Starting drift correction at 2020-03-05 11:48:53</span>
+<span class="co">#&gt; Drift correction performed at 2020-03-05 11:48:53</span>
+<span class="co">#&gt; Inspecting drift correction results 2020-03-05 11:48:53</span>
+<span class="co">#&gt; Drift correction results inspected at 2020-03-05 11:48:53</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 100%</span>
@@ -266,10 +262,10 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2020-02-04 11:14:13</span>
-<span class="co">#&gt; Drift correction performed at 2020-02-04 11:14:13</span>
-<span class="co">#&gt; Inspecting drift correction results 2020-02-04 11:14:14</span>
-<span class="co">#&gt; Drift correction results inspected at 2020-02-04 11:14:14</span>
+<span class="co">#&gt; Starting drift correction at 2020-03-05 11:48:54</span>
+<span class="co">#&gt; Drift correction performed at 2020-03-05 11:48:54</span>
+<span class="co">#&gt; Inspecting drift correction results 2020-03-05 11:48:54</span>
+<span class="co">#&gt; Drift correction results inspected at 2020-03-05 11:48:54</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 100%</span>
@@ -278,10 +274,10 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2020-02-04 11:14:14</span>
-<span class="co">#&gt; Drift correction performed at 2020-02-04 11:14:14</span>
-<span class="co">#&gt; Inspecting drift correction results 2020-02-04 11:14:14</span>
-<span class="co">#&gt; Drift correction results inspected at 2020-02-04 11:14:15</span>
+<span class="co">#&gt; Starting drift correction at 2020-03-05 11:48:55</span>
+<span class="co">#&gt; Drift correction performed at 2020-03-05 11:48:55</span>
+<span class="co">#&gt; Inspecting drift correction results 2020-03-05 11:48:55</span>
+<span class="co">#&gt; Drift correction results inspected at 2020-03-05 11:48:55</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 100%</span>
@@ -290,10 +286,10 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 0% of features flagged for low detection rate</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting drift correction at 2020-02-04 11:14:15</span>
-<span class="co">#&gt; Drift correction performed at 2020-02-04 11:14:15</span>
-<span class="co">#&gt; Inspecting drift correction results 2020-02-04 11:14:15</span>
-<span class="co">#&gt; Drift correction results inspected at 2020-02-04 11:14:15</span>
+<span class="co">#&gt; Starting drift correction at 2020-03-05 11:48:55</span>
+<span class="co">#&gt; Drift correction performed at 2020-03-05 11:48:55</span>
+<span class="co">#&gt; Inspecting drift correction results 2020-03-05 11:48:56</span>
+<span class="co">#&gt; Drift correction results inspected at 2020-03-05 11:48:56</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Drift correction results inspected, report:</span>
 <span class="co">#&gt; Drift_corrected: 100%</span>
@@ -325,24 +321,22 @@ processed &lt;-<span class="st"> </span><span class="kw">list</span>()
 <span class="kw">set.seed</span>(<span class="dv">38</span>)
 imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(merged_no_qc)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting random forest imputation at 2020-02-04 11:14:16</span>
+<span class="co">#&gt; Starting random forest imputation at 2020-03-05 11:48:56</span>
 <span class="co">#&gt;   missForest iteration 1 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 2 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 3 in progress...done!</span>
 <span class="co">#&gt; Out-of-bag error in random forest imputation: 0.011</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Random forest imputation finished at 2020-02-04 11:14:16</span></code></pre></div>
+<span class="co">#&gt; Random forest imputation finished at 2020-03-05 11:48:56</span></code></pre></div>
 <p>By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, thay should be imputed as well. This can be achieved through a second round of imputation, now with all features included:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(imputed, <span class="dt">all_features =</span> <span class="ot">TRUE</span>)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting random forest imputation at 2020-02-04 11:14:16</span>
+<span class="co">#&gt; Starting random forest imputation at 2020-03-05 11:48:56</span>
 <span class="co">#&gt;   missForest iteration 1 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 2 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 3 in progress...done!</span>
 <span class="co">#&gt;   missForest iteration 4 in progress...done!</span>
 <span class="co">#&gt; Out-of-bag error in random forest imputation: 0.127</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Random forest imputation finished at 2020-02-04 11:14:23</span></code></pre></div>
+<span class="co">#&gt; Random forest imputation finished at 2020-03-05 11:49:02</span></code></pre></div>
 <p><strong>NOTE:</strong> It is NOT recommended to impute all features in the first round, as low quality features would affect imputation of good quality features.</p>
 <p><strong>NOTE</strong> If the dataset consists of a very large number of features (tens of thousands) it might be a good idea to run the imputation inside each mode, since in that case each mode has enough features to guarantee good imputation results, and running the algorithm on the complete dataset would take too long to be practical.</p>
 <p>After imputation, a final round of visualizations is in place.</p>
@@ -358,8 +352,8 @@ imputed &lt;-<span class="st"> </span><span class="kw">impute_rf</span>(merged_n
 <p>Let’s try to find features that separate the different groups. First, we’ll Welch’s analysis of variance to find features that have different levels in any of the varieties:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">anova_results &lt;-<span class="st"> </span><span class="kw">perform_oneway_anova</span>(imputed, <span class="dt">formula_char =</span> <span class="st">&quot;Feature ~ Group&quot;</span>)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting ANOVA tests at 2020-02-04 11:14:23</span>
-<span class="co">#&gt; ANOVA performed at 2020-02-04 11:14:23</span></code></pre></div>
+<span class="co">#&gt; Starting ANOVA tests at 2020-03-05 11:49:02</span>
+<span class="co">#&gt; ANOVA performed at 2020-03-05 11:49:02</span></code></pre></div>
 <p>Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pairwise Welch’s t-tests on them:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">top_features &lt;-<span class="st"> </span>anova_results<span class="op">$</span>Feature_ID[<span class="kw">which</span>(anova_results<span class="op">$</span>ANOVA_P_FDR <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.2</span>)]
 
@@ -367,14 +361,14 @@ top_index &lt;-<span class="st"> </span><span class="kw">fData</span>(imputed)<s
 
 pairwise_results &lt;-<span class="st"> </span><span class="kw">perform_pairwise_t_test</span>(imputed[top_index, ], <span class="dt">group =</span> <span class="st">&quot;Group&quot;</span>)
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2020-02-04 11:14:23</span>
-<span class="co">#&gt; t-tests performed at 2020-02-04 11:14:23</span>
+<span class="co">#&gt; Starting t-tests at 2020-03-05 11:49:02</span>
+<span class="co">#&gt; t-tests performed at 2020-03-05 11:49:02</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2020-02-04 11:14:23</span>
-<span class="co">#&gt; t-tests performed at 2020-02-04 11:14:23</span>
+<span class="co">#&gt; Starting t-tests at 2020-03-05 11:49:02</span>
+<span class="co">#&gt; t-tests performed at 2020-03-05 11:49:02</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Starting t-tests at 2020-02-04 11:14:23</span>
-<span class="co">#&gt; t-tests performed at 2020-02-04 11:14:23</span></code></pre></div>
+<span class="co">#&gt; Starting t-tests at 2020-03-05 11:49:02</span>
+<span class="co">#&gt; t-tests performed at 2020-03-05 11:49:02</span></code></pre></div>
 <p>And there are our final results! The next step is then to combine the results, add them to the object and save the object to an output Excel file:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">combined_results &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">left_join</span>(anova_results, pairwise_results)
 imputed &lt;-<span class="st"> </span><span class="kw">join_fData</span>(imputed, combined_results)
@@ -382,56 +376,53 @@ imputed &lt;-<span class="st"> </span><span class="kw">join_fData</span>(imputed
 <span class="kw">write_to_excel</span>(imputed, <span class="dt">file =</span> <span class="kw">paste0</span>(path, <span class="st">&quot;results.xlsx&quot;</span>))</code></pre></div>
 <p>And that concludes our project example! The last thing to do is finish the log we started. This will record the time and date when the project finished, as well as the output of <code>sessionInfo()</code>, which contains information about the system, and most importantly version numbers of R and all the packages used.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">finish_log</span>()
-<span class="co">#&gt; Finished analysis. Tue Feb 04 11:14:23 2020</span>
+<span class="co">#&gt; Finished analysis. Thu Mar 05 11:49:02 2020</span>
 <span class="co">#&gt; Session info:</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; R version 3.5.3 (2019-03-11)</span>
+<span class="co">#&gt; R version 3.5.0 (2018-04-23)</span>
 <span class="co">#&gt;  Platform: x86_64-w64-mingw32/x64 (64-bit)</span>
-<span class="co">#&gt;  Running under: Windows 10 x64 (build 18362)</span>
+<span class="co">#&gt;  Running under: Windows 10 x64 (build 18363)</span>
 <span class="co">#&gt;  </span>
 <span class="co">#&gt;  Matrix products: default</span>
 <span class="co">#&gt;  </span>
 <span class="co">#&gt;  locale:</span>
-<span class="co">#&gt;  [1] LC_COLLATE=Finnish_Finland.1252  LC_CTYPE=Finnish_Finland.1252   </span>
-<span class="co">#&gt;  [3] LC_MONETARY=Finnish_Finland.1252 LC_NUMERIC=C                    </span>
-<span class="co">#&gt;  [5] LC_TIME=Finnish_Finland.1252    </span>
+<span class="co">#&gt;  [1] LC_COLLATE=English_Finland.1252  LC_CTYPE=English_Finland.1252   </span>
+<span class="co">#&gt;  [3] LC_MONETARY=English_Finland.1252 LC_NUMERIC=C                    </span>
+<span class="co">#&gt;  [5] LC_TIME=English_Finland.1252    </span>
 <span class="co">#&gt;  </span>
 <span class="co">#&gt;  attached base packages:</span>
 <span class="co">#&gt;  [1] parallel  stats     graphics  grDevices utils     datasets  methods  </span>
 <span class="co">#&gt;  [8] base     </span>
 <span class="co">#&gt;  </span>
 <span class="co">#&gt;  other attached packages:</span>
-<span class="co">#&gt;  [1] doParallel_1.0.15   iterators_1.0.12    foreach_1.4.7      </span>
-<span class="co">#&gt;  [4] notame_0.0.0.9000   testthat_2.2.1      Biobase_2.42.0     </span>
-<span class="co">#&gt;  [7] BiocGenerics_0.28.0 magrittr_1.5        ggplot2_3.2.1      </span>
+<span class="co">#&gt;  [1] doParallel_1.0.14   iterators_1.0.10    foreach_1.4.4      </span>
+<span class="co">#&gt;  [4] notame_0.0.0.9000   Biobase_2.42.0      BiocGenerics_0.28.0</span>
+<span class="co">#&gt;  [7] magrittr_1.5        ggplot2_3.1.0      </span>
 <span class="co">#&gt;  </span>
 <span class="co">#&gt;  loaded via a namespace (and not attached):</span>
-<span class="co">#&gt;   [1] tidyselect_0.2.5    xfun_0.10           remotes_2.1.0      </span>
-<span class="co">#&gt;   [4] purrr_0.3.2         colorspace_1.4-1    vctrs_0.2.0        </span>
-<span class="co">#&gt;   [7] viridisLite_0.3.0   usethis_1.5.1       htmltools_0.4.0    </span>
-<span class="co">#&gt;  [10] yaml_2.2.0          rlang_0.4.0         pkgbuild_1.0.5     </span>
-<span class="co">#&gt;  [13] pillar_1.4.2        glue_1.3.1          withr_2.1.2        </span>
-<span class="co">#&gt;  [16] RColorBrewer_1.1-2  sessioninfo_1.1.1   lifecycle_0.1.0    </span>
-<span class="co">#&gt;  [19] stringr_1.4.0       munsell_0.5.0       gtable_0.3.0       </span>
-<span class="co">#&gt;  [22] zip_2.0.4           devtools_2.2.1      codetools_0.2-16   </span>
-<span class="co">#&gt;  [25] evaluate_0.14       memoise_1.1.0       knitr_1.25         </span>
-<span class="co">#&gt;  [28] callr_3.3.2         ps_1.3.0            itertools_0.1-3    </span>
-<span class="co">#&gt;  [31] Rcpp_1.0.2          scales_1.0.0        backports_1.1.5    </span>
-<span class="co">#&gt;  [34] desc_1.2.0          pkgload_1.0.2       fs_1.3.1           </span>
-<span class="co">#&gt;  [37] png_0.1-7           digest_0.6.21       openxlsx_4.1.0.1   </span>
-<span class="co">#&gt;  [40] stringi_1.4.3       processx_3.4.1      dplyr_0.8.3        </span>
-<span class="co">#&gt;  [43] grid_3.5.3          rprojroot_1.3-2     cli_1.1.0          </span>
-<span class="co">#&gt;  [46] tools_3.5.3         missForest_1.4      lazyeval_0.2.2     </span>
-<span class="co">#&gt;  [49] tibble_2.1.3        randomForest_4.6-14 crayon_1.3.4       </span>
-<span class="co">#&gt;  [52] tidyr_1.0.0         pkgconfig_2.0.3     zeallot_0.1.0      </span>
-<span class="co">#&gt;  [55] ellipsis_0.3.0      prettyunits_1.0.2   assertthat_0.2.1   </span>
-<span class="co">#&gt;  [58] rmarkdown_1.16      rstudioapi_0.10     R6_2.4.0           </span>
-<span class="co">#&gt;  [61] igraph_1.2.4.1      compiler_3.5.3</span></code></pre></div>
+<span class="co">#&gt;   [1] tidyselect_0.2.5    xfun_0.4            remotes_2.1.0      </span>
+<span class="co">#&gt;   [4] purrr_0.3.2         colorspace_1.4-0    testthat_2.3.1     </span>
+<span class="co">#&gt;   [7] viridisLite_0.3.0   usethis_1.5.1       htmltools_0.3.6    </span>
+<span class="co">#&gt;  [10] yaml_2.2.0          rlang_0.4.2         pkgbuild_1.0.6     </span>
+<span class="co">#&gt;  [13] pillar_1.3.1        glue_1.3.0          withr_2.1.2        </span>
+<span class="co">#&gt;  [16] RColorBrewer_1.1-2  sessioninfo_1.1.1   plyr_1.8.4         </span>
+<span class="co">#&gt;  [19] stringr_1.4.0       munsell_0.5.0       gtable_0.2.0       </span>
+<span class="co">#&gt;  [22] zip_1.0.0           devtools_2.2.1      codetools_0.2-15   </span>
+<span class="co">#&gt;  [25] evaluate_0.13       memoise_1.1.0       knitr_1.21         </span>
+<span class="co">#&gt;  [28] callr_3.4.0         ps_1.3.0            fansi_0.4.0        </span>
+<span class="co">#&gt;  [31] itertools_0.1-3     Rcpp_1.0.0          backports_1.1.3    </span>
+<span class="co">#&gt;  [34] scales_1.0.0        desc_1.2.0          pkgload_1.0.2      </span>
+<span class="co">#&gt;  [37] fs_1.3.1            digest_0.6.18       openxlsx_4.1.0     </span>
+<span class="co">#&gt;  [40] stringi_1.3.1       processx_3.4.1      dplyr_0.8.0.1      </span>
+<span class="co">#&gt;  [43] grid_3.5.0          rprojroot_1.3-2     cli_2.0.0          </span>
+<span class="co">#&gt;  [46] tools_3.5.0         missForest_1.4      lazyeval_0.2.1     </span>
+<span class="co">#&gt;  [49] tibble_2.0.1        randomForest_4.6-14 tidyr_0.8.2        </span>
+<span class="co">#&gt;  [52] crayon_1.3.4        pkgconfig_2.0.2     ellipsis_0.3.0     </span>
+<span class="co">#&gt;  [55] prettyunits_1.0.2   assertthat_0.2.0    rmarkdown_1.11     </span>
+<span class="co">#&gt;  [58] rstudioapi_0.9.0    R6_2.4.0            igraph_1.2.4       </span>
+<span class="co">#&gt;  [61] compiler_3.5.0</span></code></pre></div>
 </div>
 
-
-
-<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
