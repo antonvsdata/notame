@@ -133,10 +133,33 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
 
 }
 
+#' Save beeswarm plots of each feature by group
+#'
+#' Draws a beeswarm plot of feature abundances in each group.
+#' A separate plot is drawn for each feature.
+#'
+#' @param object a MetaboSet object
+#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param file path to the PDF file where the plots should be saved
+#' @param width,height width and height of the plots in inches
+#' @param x character, name of the column to be used as x-axis
+#' @param add_boxplots logical, should boxplots be added to the figure?
+#' @param color character, name of the column to be used for coloring
+#' @param color_scale the color scale as returned by a ggplot function
+#'
+#' @examples
+#' \dontrun{
+#' # Default beeswarms by group
+#' save_beeswarm_plots(drop_qcs(merged_sample), file = "beeswarms.pdf")
+#' # x and color can be a different variable
+#' save_beeswarm_plots(drop_qcs(merged_sample), file = "beeswarms_time.pdf",
+#'                     x = "Time", color = "Group")
+#' }
+#'
+#' @export
 save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
-                                x = group_col(object), color = group_col(object),
-                                add_boxplots = FALSE,
-                                color_scale =  NULL){
+                                x = group_col(object),add_boxplots = FALSE,
+                                color = group_col(object), color_scale =  NULL){
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
