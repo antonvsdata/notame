@@ -89,6 +89,7 @@ check_feature_data <- function(feature_data) {
   if (any(!is.na(fid_num))) {
     stop("Numbers are not allowed as feature IDs")
   }
+  feature_data
 }
 
 #' Read formatted Excel files
