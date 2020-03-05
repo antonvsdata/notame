@@ -345,13 +345,14 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
     cat("Initializing the object with unflagged features")
     feature_data$Flag <- NA
   }
+  feature_data <- check_feature_data(feature_data)
 
   # Split the data by the Split column of feature data
   parts <- unique(feature_data$Split)
   obj_list <- list()
   for (part in parts) {
     fd_tmp <- Biobase::AnnotatedDataFrame(data = feature_data[feature_data$Split == part, ])
-    ad_tmp <- exprs[rownames(exprs) == fd_tmp$Feature_ID,]
+    ad_tmp <- exprs[fd_tmp$Feature_ID, ]
     obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
                         phenoData = pheno_data,
                         featureData = fd_tmp,
