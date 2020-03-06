@@ -19,7 +19,8 @@
 dobc <- function(object, batch, ref, ref_label, ...) {
 
   if (!requireNamespace("BatchCorrMetabolomics", quietly = TRUE)) {
-    stop("Package \"BatchCorrMetabolomics\" needed for this function to work. Please install it from https://github.com/rwehrens/BatchCorrMetabolomics.",
+    stop("Package \"BatchCorrMetabolomics\" needed for this function to work. Please install it from
+         https://github.com/rwehrens/BatchCorrMetabolomics.",
          call. = FALSE)
   }
 
@@ -226,7 +227,8 @@ perform_repeatability <- function(object, group) {
 align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
-    stop("Package \"batchCorr\" needed for this function to work. Please install it from https://gitlab.com/CarlBrunius/batchCorr.",
+    stop("Package \"batchCorr\" needed for this function to work. Please install it from
+         https://gitlab.com/CarlBrunius/batchCorr.",
          call. = FALSE)
   }
 
@@ -283,7 +285,8 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 normalize_batches <- function(object, batch, group, ref_label, ...) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
-    stop("Package \"batchCorr\" needed for this function to work. Please install it from https://gitlab.com/CarlBrunius/batchCorr.",
+    stop("Package \"batchCorr\" needed for this function to work. Please install it from
+         https://gitlab.com/CarlBrunius/batchCorr.",
          call. = FALSE)
   }
 
