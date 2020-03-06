@@ -29,7 +29,6 @@ Suggests:
     doParallel,
     fpc,
     ggdendro,
-    ggfortify,
     ggrepel,
     Hmisc,
     hexbin,
