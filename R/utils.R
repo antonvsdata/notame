@@ -20,7 +20,7 @@
   invisible()
 }
 
-install_helper <- function(cran, bioconductor, github, gitlab) {
+install_helper <- function(cran, bioconductor, github, gitlab, ...) {
   if (!missing(cran)) {
     for (pckg in cran) {
       print(pckg)
@@ -49,7 +49,7 @@ install_helper <- function(cran, bioconductor, github, gitlab) {
       if (!requireNamespace(pckg, quietly = TRUE)) {
         cat(paste("Package", pckg, "missing, attempting to install from GitHub"))
         tryCatch({
-          devtools::install_github(pckg)
+          devtools::install_github(pckg, ...)
         }, error = function(e) {cat(e$message)})
       }
     }
@@ -60,7 +60,7 @@ install_helper <- function(cran, bioconductor, github, gitlab) {
       if (!requireNamespace(pckg, quietly = TRUE)) {
         cat(paste("Package", pckg, "missing, attempting to install from GitLab"))
         tryCatch({
-          devtools::install_gitlab(pckg)
+          devtools::install_gitlab(pckg, ...)
         }, error = function(e) {cat(e$message)})
       }
     }
@@ -77,6 +77,7 @@ install_helper <- function(cran, bioconductor, github, gitlab) {
 #' @param extra logical, install extra packages needed for special visualizations and stats?
 #' @param batch_corr logical, install packages needed for batch effect correction methods?
 #' @param misc logicl, install miscallenous packages needed for running tests, modifying vignettes etc.?
+#' @param ... other parameters passed to installing functions, like lib
 #'
 #' @export
 install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr = FALSE, misc = FALSE, ...) {
@@ -112,19 +113,19 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                  "testthat")
 
   if (preprocessing){
-    install_helper(cran = core_cran, bioconductor = core_bioconductor)
+    install_helper(cran = core_cran, bioconductor = core_bioconductor, ...)
   }
 
   if (extra) {
     install_helper(cran = extra_cran, bioconductor = extra_bioconductor,
-                   gitlab = extra_gitlab)
+                   gitlab = extra_gitlab, ...)
   }
   if (batch_corr) {
     install_helper(cran = batch_cran, bioconductor = batch_bioconductor,
-                   github = batch_github, gitlab = batch_gitlab)
+                   github = batch_github, gitlab = batch_gitlab, ...)
   }
   if (misc) {
-    install_helper(cran = misc_cran)
+    install_helper(cran = misc_cran, ...)
   }
 
 }

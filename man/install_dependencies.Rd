@@ -15,6 +15,8 @@ install_dependencies(preprocessing = TRUE, extra = FALSE,
 \item{batch_corr}{logical, install packages needed for batch effect correction methods?}
 
 \item{misc}{logicl, install miscallenous packages needed for running tests, modifying vignettes etc.?}
+
+\item{...}{other parameters passed to installing functions, like lib}
 }
 \description{
 Attempt to install dependencies package by package, skipping packages with errors
