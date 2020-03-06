@@ -20,6 +20,115 @@
   invisible()
 }
 
+install_helper <- function(cran, bioconductor, github, gitlab) {
+  if (!missing(cran)) {
+    for (pckg in cran) {
+      print(pckg)
+      if (!requireNamespace(pckg, quietly = TRUE)) {
+        cat(paste("Package", pckg, "missing, attempting to install from CRAN"))
+        tryCatch({
+          install.packages(pckg, ...)
+        }, error = function(e) {cat(e$message)})
+      }
+    }
+  }
+
+  if (!missing(bioconductor)) {
+    for (pckg in bioconductor) {
+      if (!requireNamespace(pckg, quietly = TRUE)) {
+        cat(paste("Bioconductor package", pckg, "missing, attempting to install"))
+        tryCatch({
+          BiocManager::install(pckg, ...)
+        }, error = function(e) {cat(e$message)})
+      }
+    }
+  }
+
+  if (!missing(github)) {
+    for (pckg in github) {
+      if (!requireNamespace(pckg, quietly = TRUE)) {
+        cat(paste("Package", pckg, "missing, attempting to install from GitHub"))
+        tryCatch({
+          devtools::install_github(pckg)
+        }, error = function(e) {cat(e$message)})
+      }
+    }
+  }
+
+  if (!missing(gitlab)) {
+    for (pckg in gitlab) {
+      if (!requireNamespace(pckg, quietly = TRUE)) {
+        cat(paste("Package", pckg, "missing, attempting to install from GitLab"))
+        tryCatch({
+          devtools::install_gitlab(pckg)
+        }, error = function(e) {cat(e$message)})
+      }
+    }
+  }
+}
+
+#' Install dependencies
+#'
+#' Attempt to install dependencies package by package, skipping packages with errors
+#' By default, only installs core packages needed for preprocessing. Other packages can
+#' be installed if needed (and the preprocessing packages can be ignored)
+#'
+#' @param preprocessing logical, install core preprocessing and visualization packages?
+#' @param extra logical, install extra packages needed for special visualizations and stats?
+#' @param batch_corr logical, install packages needed for batch effect correction methods?
+#' @param misc logicl, install miscallenous packages needed for running tests, modifying vignettes etc.?
+#'
+#' @export
+install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr = FALSE, misc = FALSE, ...) {
+  # Core dependencies
+  core_cran <- c("BiocManager",
+                 "cowplot",
+                 "missForest",
+                 "openxlsx",
+                 "randomForest",
+                 "RColorBrewer",
+                 "Rtsne")
+  core_bioconductor <- "pcaMethods"
+  # Extra parts for certain visualizations and statistics
+  extra_cran <- c("doParallel",
+                  "ggdendro",
+                  "ggrepel",
+                  "Hmisc",
+                  "hexbin",
+                  "igraph",
+                  "lme4",
+                  "lmerTest",
+                  "PK")
+  extra_bioconductor <- "mixOmics"
+  extra_gitlab <- "CarlBrunius/MUVR"
+
+  batch_cran <- "fpc"
+  batch_bioconductor <- "RUVSeq"
+  batch_github <- "rwehrens/BatchCorrMetabolomics"
+  batch_gitlab <- "CarlBrunius/batchCorr"
+
+  misc_cran <- c("knitr",
+                 "rmarkdown",
+                 "testthat")
+
+  if (preprocessing){
+    install_helper(cran = core_cran, bioconductor = core_bioconductor)
+  }
+
+  if (extra) {
+    install_helper(cran = extra_cran, bioconductor = extra_bioconductor,
+                   gitlab = extra_gitlab)
+  }
+  if (batch_corr) {
+    install_helper(cran = batch_cran, bioconductor = batch_bioconductor,
+                   github = batch_github, gitlab = batch_gitlab)
+  }
+  if (misc) {
+    install_helper(cran = misc_cran)
+  }
+
+}
+
 
 #' Summary statistics of finite elements
 #'
