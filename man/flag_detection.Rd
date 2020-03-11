@@ -7,7 +7,7 @@
 flag_detection(
   object,
   qc_limit = 0.7,
-  group_limit = 0.8,
+  group_limit = 0.5,
   group = group_col(object)
 )
 }
