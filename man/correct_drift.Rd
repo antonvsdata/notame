@@ -4,12 +4,23 @@
 \alias{correct_drift}
 \title{Correct drift using cubic spline}
 \usage{
-correct_drift(object, log_transform = TRUE, spar = NULL,
-  spar_lower = 0.5, spar_upper = 1.5, check_quality = FALSE,
-  condition = "RSD_r < 0 & D_ratio_r < 0", plotting = FALSE,
-  file = NULL, width = 16, height = 8, color = "QC",
-  shape = NULL, color_scale = getOption("notame.color_scale_dis"),
-  shape_scale = scale_shape_manual(values = c(15, 16)))
+correct_drift(
+  object,
+  log_transform = TRUE,
+  spar = NULL,
+  spar_lower = 0.5,
+  spar_upper = 1.5,
+  check_quality = FALSE,
+  condition = "RSD_r < 0 & D_ratio_r < 0",
+  plotting = FALSE,
+  file = NULL,
+  width = 16,
+  height = 8,
+  color = "QC",
+  shape = NULL,
+  color_scale = getOption("notame.color_scale_dis"),
+  shape_scale = scale_shape_manual(values = c(15, 16))
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

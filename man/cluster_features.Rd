@@ -4,10 +4,18 @@
 \alias{cluster_features}
 \title{Cluster correlated features}
 \usage{
-cluster_features(object, mz_col = NULL, rt_col = NULL,
-  all_features = FALSE, rt_window = 1/60, corr_thresh = 0.9,
-  d_thresh = 0.8, plotting = FALSE, min_size_plotting = 3,
-  prefix = NULL)
+cluster_features(
+  object,
+  mz_col = NULL,
+  rt_col = NULL,
+  all_features = FALSE,
+  rt_window = 1/60,
+  corr_thresh = 0.9,
+  d_thresh = 0.8,
+  plotting = FALSE,
+  min_size_plotting = 3,
+  prefix = NULL
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

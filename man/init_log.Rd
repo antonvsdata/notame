@@ -22,7 +22,7 @@ This overwrites the current contents of the file
 file_name <- "~/log.txt"
 init_log(file_name)
 # Print the contents of the file
-scan(file_name, sep="\\n", what = "chracter")
+scan(file_name, sep="\n", what = "chracter")
 
 }
 \seealso{

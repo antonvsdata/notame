@@ -4,8 +4,12 @@
 \alias{perform_auc}
 \title{Area under curve}
 \usage{
-perform_auc(object, time = time_col(object),
-  subject = subject_col(object), group = group_col(object))
+perform_auc(
+  object,
+  time = time_col(object),
+  subject = subject_col(object),
+  group = group_col(object)
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

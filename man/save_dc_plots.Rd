@@ -4,10 +4,19 @@
 \alias{save_dc_plots}
 \title{Drift correction plots}
 \usage{
-save_dc_plots(orig, dc, predicted, file, log_transform = TRUE,
-  width = 16, height = 8, color = "QC", shape = color,
+save_dc_plots(
+  orig,
+  dc,
+  predicted,
+  file,
+  log_transform = TRUE,
+  width = 16,
+  height = 8,
+  color = "QC",
+  shape = color,
   color_scale = getOption("notame.color_scale_dis"),
-  shape_scale = scale_shape_manual(values = c(15, 16)))
+  shape_scale = scale_shape_manual(values = c(15, 16))
+)
 }
 \arguments{
 \item{orig}{a MetaboSet object, before drift correction}

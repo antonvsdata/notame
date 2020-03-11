@@ -4,9 +4,17 @@
 \alias{plot_pca_loadings}
 \title{PCA loadings plot}
 \usage{
-plot_pca_loadings(object, all_features = FALSE, center = TRUE,
-  scale = "uv", npc1 = 10, npc2 = 10, title = "PCA loadings",
-  subtitle = NULL, ...)
+plot_pca_loadings(
+  object,
+  all_features = FALSE,
+  center = TRUE,
+  scale = "uv",
+  npc1 = 10,
+  npc2 = 10,
+  title = "PCA loadings",
+  subtitle = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

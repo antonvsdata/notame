@@ -4,9 +4,14 @@
 \alias{construct_metabosets}
 \title{Construct MetaboSet objects}
 \usage{
-construct_metabosets(exprs, pheno_data, feature_data,
-  group_col = NA_character_, time_col = NA_character_,
-  subject_col = NA_character_)
+construct_metabosets(
+  exprs,
+  pheno_data,
+  feature_data,
+  group_col = NA_character_,
+  time_col = NA_character_,
+  subject_col = NA_character_
+)
 }
 \arguments{
 \item{exprs}{matrix, the feature abundances, size features x samples}

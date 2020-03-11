@@ -4,8 +4,12 @@
 \alias{perform_pairwise_t_test}
 \title{Perform pairwise t-tests}
 \usage{
-perform_pairwise_t_test(object, group = group_col(object),
-  all_features = FALSE, ...)
+perform_pairwise_t_test(
+  object,
+  group = group_col(object),
+  all_features = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

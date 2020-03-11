@@ -4,9 +4,17 @@
 \alias{save_beeswarm_plots}
 \title{Save beeswarm plots of each feature by group}
 \usage{
-save_beeswarm_plots(object, all_features = FALSE, file, width = 8,
-  height = 6, x = group_col(object), add_boxplots = FALSE,
-  color = group_col(object), color_scale = NULL)
+save_beeswarm_plots(
+  object,
+  all_features = FALSE,
+  file,
+  width = 8,
+  height = 6,
+  x = group_col(object),
+  add_boxplots = FALSE,
+  color = group_col(object),
+  color_scale = NULL
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

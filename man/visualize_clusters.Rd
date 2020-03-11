@@ -4,8 +4,17 @@
 \alias{visualize_clusters}
 \title{Visualize clusters of features}
 \usage{
-visualize_clusters(data, features, clusters, min_size, rt_window, name_col,
-  mz_col, rt_col, file_path)
+visualize_clusters(
+  data,
+  features,
+  clusters,
+  min_size,
+  rt_window,
+  name_col,
+  mz_col,
+  rt_col,
+  file_path
+)
 }
 \arguments{
 \item{data}{data frame with the abundances of features, with features as columns}

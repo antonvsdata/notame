@@ -11,9 +11,17 @@ mixomics_plsda(object, y, ncomp, plot_scores = TRUE, ...)
 
 mixomics_plsda_optimize(object, y, ncomp, plot_scores = TRUE, ...)
 
-mixomics_splsda_optimize(object, y, ncomp, dist, n_features = c(1:10,
-  seq(20, 300, 10)), folds = 5, nrepeat = 50, plot_scores = TRUE,
-  ...)
+mixomics_splsda_optimize(
+  object,
+  y,
+  ncomp,
+  dist,
+  n_features = c(1:10, seq(20, 300, 10)),
+  folds = 5,
+  nrepeat = 50,
+  plot_scores = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

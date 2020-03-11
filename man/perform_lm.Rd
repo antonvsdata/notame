@@ -4,8 +4,7 @@
 \alias{perform_lm}
 \title{Linear models}
 \usage{
-perform_lm(object, formula_char, all_features = FALSE, ci_level = 0.95,
-  ...)
+perform_lm(object, formula_char, all_features = FALSE, ci_level = 0.95, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}

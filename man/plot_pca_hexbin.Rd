@@ -4,10 +4,19 @@
 \alias{plot_pca_hexbin}
 \title{PCA hexbin plot}
 \usage{
-plot_pca_hexbin(object, all_features = FALSE, center = TRUE,
-  scale = "uv", fill = "Injection_order", summary_fun = "mean",
-  bins = 10, title = "PCA", subtitle = NULL,
-  fill_scale = getOption("notame.fill_scale_con"), ...)
+plot_pca_hexbin(
+  object,
+  all_features = FALSE,
+  center = TRUE,
+  scale = "uv",
+  fill = "Injection_order",
+  summary_fun = "mean",
+  bins = 10,
+  title = "PCA",
+  subtitle = NULL,
+  fill_scale = getOption("notame.fill_scale_con"),
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

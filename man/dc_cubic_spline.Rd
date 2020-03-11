@@ -4,8 +4,13 @@
 \alias{dc_cubic_spline}
 \title{Fit a cubic spline to correct drift}
 \usage{
-dc_cubic_spline(object, log_transform = TRUE, spar = NULL,
-  spar_lower = 0.5, spar_upper = 1.5)
+dc_cubic_spline(
+  object,
+  log_transform = TRUE,
+  spar = NULL,
+  spar_lower = 0.5,
+  spar_upper = 1.5
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

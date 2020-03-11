@@ -4,8 +4,15 @@
 \alias{find_connections}
 \title{Find out which features are correlated within a specified retention time window}
 \usage{
-find_connections(data, features, corr_thresh = 0.9, rt_window = 1/60,
-  name_col, mz_col, rt_col)
+find_connections(
+  data,
+  features,
+  corr_thresh = 0.9,
+  rt_window = 1/60,
+  name_col,
+  mz_col,
+  rt_col
+)
 }
 \arguments{
 \item{data}{data frame with the abundances of features, with features as columns}

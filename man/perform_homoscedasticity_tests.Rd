@@ -4,8 +4,7 @@
 \alias{perform_homoscedasticity_tests}
 \title{Test homoscedasticity}
 \usage{
-perform_homoscedasticity_tests(object, formula_char,
-  all_features = FALSE)
+perform_homoscedasticity_tests(object, formula_char, all_features = FALSE)
 }
 \arguments{
 \item{object}{a MetaboSet object}

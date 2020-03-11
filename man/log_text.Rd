@@ -18,7 +18,7 @@ file_name <- "~/log.txt"
 init_log(file_name)
 log_text("Hello World!")
 # Print the contents of the file
-scan(file_name, sep="\\n", what = "chracter")
+scan(file_name, sep="\n", what = "chracter")
 
 }
 \seealso{

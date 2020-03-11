@@ -4,8 +4,12 @@
 \alias{flag_detection}
 \title{Flag features with low detection rate}
 \usage{
-flag_detection(object, qc_limit = 0.7, group_limit = 0.8,
-  group = group_col(object))
+flag_detection(
+  object,
+  qc_limit = 0.7,
+  group_limit = 0.8,
+  group = group_col(object)
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

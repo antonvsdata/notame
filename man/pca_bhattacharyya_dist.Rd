@@ -4,8 +4,15 @@
 \alias{pca_bhattacharyya_dist}
 \title{Bhattacharyya distance between bathces in PCA space}
 \usage{
-pca_bhattacharyya_dist(object, batch, all_features = FALSE,
-  center = TRUE, scale = "uv", nPcs = 3, ...)
+pca_bhattacharyya_dist(
+  object,
+  batch,
+  all_features = FALSE,
+  center = TRUE,
+  scale = "uv",
+  nPcs = 3,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

@@ -4,12 +4,26 @@
 \alias{plot_effect_heatmap}
 \title{Draw a heatmap of effects between variables, such as correlations}
 \usage{
-plot_effect_heatmap(data, x, y, effect, p = NULL, p_limit = 0.1,
-  point_size_range = c(1, 6), log2_effect = FALSE,
-  discretize_effect = FALSE, breaks = 5, clustering = TRUE,
-  dist_method = "euclidean", clust_method = "ward.D2",
-  lower_tri = FALSE, reverse_y = TRUE, title = NULL,
-  subtitle = NULL, fill_scale = NA)
+plot_effect_heatmap(
+  data,
+  x,
+  y,
+  effect,
+  p = NULL,
+  p_limit = 0.1,
+  point_size_range = c(1, 6),
+  log2_effect = FALSE,
+  discretize_effect = FALSE,
+  breaks = 5,
+  clustering = TRUE,
+  dist_method = "euclidean",
+  clust_method = "ward.D2",
+  lower_tri = FALSE,
+  reverse_y = TRUE,
+  title = NULL,
+  subtitle = NULL,
+  fill_scale = NA
+)
 }
 \arguments{
 \item{data}{a data frame with x and y variables and the effect (used to fill the tiles)}

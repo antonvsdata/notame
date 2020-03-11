@@ -4,11 +4,22 @@
 \alias{plot_pca}
 \title{PCA scatter plot}
 \usage{
-plot_pca(object, all_features = FALSE, center = TRUE, scale = "uv",
-  color = group_col(object), shape = NULL, label = NULL,
-  density = FALSE, title = "PCA", subtitle = NULL,
-  color_scale = NA, shape_scale = getOption("notame.shape_scale"),
-  fill_scale = getOption("notame.fill_scale_dis"), ...)
+plot_pca(
+  object,
+  all_features = FALSE,
+  center = TRUE,
+  scale = "uv",
+  color = group_col(object),
+  shape = NULL,
+  label = NULL,
+  density = FALSE,
+  title = "PCA",
+  subtitle = NULL,
+  color_scale = NA,
+  shape_scale = getOption("notame.shape_scale"),
+  fill_scale = getOption("notame.fill_scale_dis"),
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
