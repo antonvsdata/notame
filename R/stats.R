@@ -180,6 +180,8 @@ fold_change <- function(object, group = group_col(object)) {
 #' @param x character vector, names of variables to be correlated
 #' @param y character vector, either identical to x (the default) or a distinct set of variables
 #' to be correlated agains x
+#' @param object2 optional second MeatboSet object. If provided, x variables will be taken from object and
+#' y variables will be taken from object2. Both objects should have the same number of samples.
 #' @param fdr logical, whether p-values from the correlation test should be adjusted with FDR correction
 #' @param duplicates logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
 #' will be included in the results twice, where the order of the variables (which is x and which is y)
@@ -201,18 +203,31 @@ fold_change <- function(object, group = group_col(object)) {
 #' correlations <- perform_correlation_tests(no_qc, x = featureNames(example_set),
 #'                                          y = c("Time", "Injection_order"), method = "spearman")
 #'
+#' # Correlations between variables from two distinct MetaboSets
+#' cross_object_cor <- perform_correlation_tests(hilic_neg_sample, x = featureNames(hilic_neg_sample),
+#'                                               object2 = hilic_pos_sample, y = featureNames(hilic_pos_sample))
 #' @seealso \code{\link{cor.test}}
 #'
 #' @importFrom foreach %do%
 #' @export
-perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
+perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TRUE,
                                       duplicates = FALSE, ...) {
 
-  data <- combined_data(object)
+  data1 <- combined_data(object)
+
+  if (!is.null(object2)) {
+    if (ncol(object) != ncol(object2)) {
+      stop("The objects have different numbers of samples")
+    }
+    data2 <- combined_data(object2)
+  } else {
+    data2 <- data1
+  }
   # All x and y should be columns names of combined data
-  not_found <- setdiff(c(x,y), colnames(data))
+  not_found <- setdiff(x, colnames(data1))
+  not_found <- c(not_found, setdiff(y, colnames(data2)))
   if (length(not_found)) {
-    stop(paste("Following variables do not match to know variables in the object:",
+    stop(paste("Following variables do not match to know variables in the object(s):",
                paste(not_found, collapse = ", ")))
   }
 
@@ -223,8 +238,8 @@ perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
     colnames(var_pairs) <- c("x", "y")
     # Add correlations of all variables with themselves (useful for plotting)
     var_pairs <- rbind(var_pairs, data.frame(x = x, y = x, stringsAsFactors = FALSE))
-  } else if (length(intersect(x, y))) {
-    stop("Currently only identical x & y or completely separate x & y are supported")
+  } else if (is.null(object2) & length(intersect(x, y))) {
+    stop("Currently only identical x & y or completely separate x & y are supported for one object")
   } else {
     var_pairs <- expand.grid(x, y, stringsAsFactors = FALSE)
     colnames(var_pairs) <- c("x", "y")
@@ -234,7 +249,7 @@ perform_correlation_tests <- function(object, x, y = x, fdr = TRUE,
   cor_results <- foreach::foreach(i = seq_len(nrow(var_pairs)), .combine = rbind) %dopar% {
     x_tmp = var_pairs$x[i]
     y_tmp = var_pairs$y[i]
-    cor_tmp <- cor.test(data[, x_tmp], data[, y_tmp], ...)
+    cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp], ...)
     data.frame(X = x_tmp, Y = y_tmp,
                Correlation_coefficient = cor_tmp$estimate,
                Correlation_P = cor_tmp$p.value,
