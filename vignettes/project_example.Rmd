@@ -32,13 +32,13 @@ library(doParallel)
 Let's set up a path for our project. This is safer than using ```setwd()```
 
 ```{r}
-path <- "~/test_project/"
+ppath <- "~/test_project/"
 ```
 
 Then we will set up a log file. many functions of the package will log information when they have finished. This helps monitoring the analysis process in case something goes wrong AND to review the results later.
 
 ```{r}
-init_log(log_file = paste0(path, "log.txt"))
+init_log(log_file = paste0(ppath, "log.txt"))
 # Check logging state
 log_state()
 ```
@@ -149,7 +149,7 @@ mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
 Next, we draw visualizations of many kind. The function ```visualizations``` is handy for saving all the relevant plots as PDF files. Note that this a very high-level function so you might need to modify it to a project specific version! For more information, read [the visualizations vignette](visualizations.html). From now on, the visualizations are repeated after each step to observe the effect of preprocessing procedures. The argument ```prefix``` is a prefix for the file paths the figures will be saved to.
 
 ```{r, eval=FALSE}
-visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
+visualizations(mode, prefix = paste0(ppath, "figures/", name, "_ORIG"))
 ```
 
 ##### Drift correction
@@ -162,7 +162,7 @@ corrected <- correct_drift(mode)
 
 ```{r eval = FALSE}
 corrected <- correct_drift(mode)
-visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
+visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_DRIFT"))
 ```
 
 
@@ -188,7 +188,7 @@ processed[[i]] <- corrected
 corrected <- flag_quality(corrected)
 processed[[i]] <- corrected
 
-visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
+visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_CLEANED"))
 ```
 
 ###### Preprocessing for each mode
@@ -204,14 +204,14 @@ for (i in seq_along(modes)) {
   # Set all zero abundances to NA
   mode <- mark_nas(mode, value = 0)
   mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
-  # visualizations(mode, prefix = paste0(path, "figures/", name, "_ORIG"))
+  # visualizations(mode, prefix = paste0(ppath, "figures/", name, "_ORIG"))
   corrected <- correct_drift(mode)
-  # visualizations(corrected, prefix = paste0(path, "figures/", name, "_DRIFT"))
+  # visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_DRIFT"))
   
   corrected <- corrected %>% assess_quality() %>% flag_quality()
   processed[[i]] <- corrected
 
-  # visualizations(corrected, prefix = paste0(path, "figures/", name, "_CLEANED"))
+  # visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_CLEANED"))
 }
 ```
 
@@ -228,7 +228,7 @@ merged <- merge_metabosets(processed)
 ```{r, eval = FALSE}
 merged <- merge_metabosets(processed)
 
-visualizations(merged, prefix = paste0(path, "figures/_FULL"))
+visualizations(merged, prefix = paste0(ppath, "figures/_FULL"))
 ```
 
 ##### Remove QCs
@@ -242,7 +242,7 @@ merged_no_qc <- drop_qcs(merged)
 ```{r, eval = FALSE}
 merged_no_qc <- drop_qcs(merged)
 
-visualizations(merged_no_qc, prefix = paste0(path, "figures/FULL_NO_QC"))
+visualizations(merged_no_qc, prefix = paste0(ppath, "figures/FULL_NO_QC"))
 ```
 
 ##### Imputation of missing values
@@ -255,7 +255,7 @@ set.seed(38)
 imputed <- impute_rf(merged_no_qc)
 ```
 
-By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, thay should be imputed as well. This can be achieved through a second round of imputation, now with all features included:
+By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, they should be imputed as well. This can be achieved through a second round of imputation, now with all features included:
 
 ```{r}
 imputed <- impute_rf(imputed, all_features = TRUE)
@@ -268,13 +268,13 @@ imputed <- impute_rf(imputed, all_features = TRUE)
 After imputation, a final round of visualizations is in place.
 
 ```{r, eval = FALSE}
-visualizations(imputed, prefix = paste0(path, "figures/FULL_IMPUTED"))
+visualizations(imputed, prefix = paste0(ppath, "figures/FULL_IMPUTED"))
 ```
 
 It is a good idea to save the merged and processed data, so experimenting with different statistical analyses becomes easier:
 
 ```{r, eval = FALSE}
-save(imputed, file = paste0(path, "full_data.RData"))
+save(imputed, file = paste0(ppath, "full_data.RData"))
 ```
 
 
@@ -306,7 +306,7 @@ And there are our final results! The next step is then to combine the results, a
 combined_results <- dplyr::left_join(anova_results, pairwise_results)
 imputed <- join_fData(imputed, combined_results)
 
-write_to_excel(imputed, file = paste0(path, "results.xlsx"))
+write_to_excel(imputed, file = paste0(ppath, "results.xlsx"))
 ```
 
 And that concludes our project example! The last thing to do is finish the log we started. This will record the time and date when the project finished, as well as the output of ```sessionInfo()```, which contains information about the system, and most importantly version numbers of R and all the packages used.

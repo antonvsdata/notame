@@ -1,10 +1,10 @@
 ---
-title: "Preprocessing template"
+title: "Project template"
 author: "Anton Mattsson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Preprocessing template}
+  %\VignetteIndexEntry{Project template}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,7 +16,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette provides a template for a standard projet, feel free to copy and paste.
+This vignette provides a template for a standard project, feel free to copy and paste.
+
+**NOTE:** I usually use the following folder structure for my projects:
+- **data** All the original data
+- **results** Results from statistics, preprocessed objects and figures
+  - **figures** A separate folder for the figures
+- **src** R scripts
 
 ```{r, eval=FALSE}
 library(notame)
@@ -39,6 +45,7 @@ init_log(log_file = paste0(ppath, "results/log_preprocessing.txt"))
 
 
 # Preprocessing by mode
+pre_drift_correction <- list()
 processed <- list()
 for (name in names(objects)) {
   log_text(paste("Processing", name))
@@ -52,6 +59,9 @@ for (name in names(objects)) {
   # Visualizations with original data
   visualizations(detected, prefix = paste0(ppath, "results/figures/", name, "_ORIG"))
   
+  # Save current state for drift correction plots later
+  pre_drift_correction[[name]] <- detected
+  
   # Drift correction with cubic spline in log space
   corrected <- correct_drift(detected)
   
@@ -59,9 +69,9 @@ for (name in names(objects)) {
   flagged <- flag_quality(corrected)
   
   # Visualizations after quality control
-  visualizations(corrected, prefix = paste0(ppath, "results/figures/", name, "_CLEANED"))
+  visualizations(flagged, prefix = paste0(ppath, "results/figures/", name, "_CLEANED"))
   
-  # Renmove QC samples before imputation
+  # Remove QC samples before imputation
   noqc <- drop_qcs(flagged)
   
   # Random forest imputation
@@ -76,14 +86,39 @@ for (name in names(objects)) {
 }
 
 # Merge analytical modes
+pre_drfit_merged <- merge_metabosets(pre_drift_correction)
 merged <- merge_metabosets(processed)
 log_text(paste("Merged analytical modes together, the merged object has", nrow(merged), "features and", ncol(merged), "samples."))
 
 # Visualize complete dataset
 visualizations(merged, prefix = paste0(ppath, "results/figures/FULL"))
 
-save(merged, file = paste0(ppath, "results/merged_object.RData"))
-log_text("Saved merged object to results subfolder")
+# Save processed objects, useful if you want to run statistics later
+save(pre_drift_correction, processed, merged, file = paste0(ppath, "results/preprocessed.RData"))
+log_text("Saved preprocessed objects to results subfolder")
+
+# Statistics, naturally depends a lot on the project, but this is a general workflow
+lm_results <- perform_lm(merged, formula_char = "Feature ~ Group")
+
+# Add results to object
+# Remove intercept columns
+lm_results <- dplyr::select(lm_results, -contains("Intercept"))
+with_results <- join_fData(merged, lm_results)
+
+# Write results to Excel
+write_to_excel(with_results, file = paste0(ppath, "results/results.xlsx"))
+
+# Draw plots of the most interesting features
+# Select interesting features based on statistical relevance
+interesting <- lm_results$Feature_ID[lm_results$GroupB_P_FDR < 0.05] # NOTE: just an example
+
+# Save relevant visualizations of all the interesting features
+
+# Group box plots as an example
+save_group_boxplots(merged[interesting, ], color = "Group",
+                    file = paste0(ppath, "results/figures/group_boxplots.pdf"))
+# Drift correction plots
+drift_corr <- correct_drift(pre_drift_merged, plotting = TRUE, file = paste0(ppath, "results/figures/drift_plots.pdf"))
 
 # Finish logging and save session information
 finish_log()
