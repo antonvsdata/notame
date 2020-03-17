@@ -4,9 +4,16 @@
 \alias{read_from_excel}
 \title{Read formatted Excel files}
 \usage{
-read_from_excel(file, sheet = 1, corner_row = NULL,
-  corner_column = NULL, id_prefix = "ID_", split_by = NULL,
-  name = NULL, skip_checks = FALSE)
+read_from_excel(
+  file,
+  sheet = 1,
+  corner_row = NULL,
+  corner_column = NULL,
+  id_prefix = "ID_",
+  split_by = NULL,
+  name = NULL,
+  skip_checks = FALSE
+)
 }
 \arguments{
 \item{file}{path to the Excel file}

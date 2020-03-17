@@ -1,10 +1,10 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  library(notame)
 #  
 #  # Define the project path
@@ -25,6 +25,7 @@ knitr::opts_chunk$set(
 #  
 #  
 #  # Preprocessing by mode
+#  pre_drift_correction <- list()
 #  processed <- list()
 #  for (name in names(objects)) {
 #    log_text(paste("Processing", name))
@@ -38,6 +39,9 @@ knitr::opts_chunk$set(
 #    # Visualizations with original data
 #    visualizations(detected, prefix = paste0(ppath, "results/figures/", name, "_ORIG"))
 #  
+#    # Save current state for drift correction plots later
+#    pre_drift_correction[[name]] <- detected
+#  
 #    # Drift correction with cubic spline in log space
 #    corrected <- correct_drift(detected)
 #  
@@ -45,9 +49,9 @@ knitr::opts_chunk$set(
 #    flagged <- flag_quality(corrected)
 #  
 #    # Visualizations after quality control
-#    visualizations(corrected, prefix = paste0(ppath, "results/figures/", name, "_CLEANED"))
+#    visualizations(flagged, prefix = paste0(ppath, "results/figures/", name, "_CLEANED"))
 #  
-#    # Renmove QC samples before imputation
+#    # Remove QC samples before imputation
 #    noqc <- drop_qcs(flagged)
 #  
 #    # Random forest imputation
@@ -62,14 +66,39 @@ knitr::opts_chunk$set(
 #  }
 #  
 #  # Merge analytical modes
+#  pre_drfit_merged <- merge_metabosets(pre_drift_correction)
 #  merged <- merge_metabosets(processed)
 #  log_text(paste("Merged analytical modes together, the merged object has", nrow(merged), "features and", ncol(merged), "samples."))
 #  
 #  # Visualize complete dataset
 #  visualizations(merged, prefix = paste0(ppath, "results/figures/FULL"))
 #  
-#  save(merged, file = paste0(ppath, "results/merged_object.RData"))
-#  log_text("Saved merged object to results subfolder")
+#  # Save processed objects, useful if you want to run statistics later
+#  save(pre_drift_correction, processed, merged, file = paste0(ppath, "results/preprocessed.RData"))
+#  log_text("Saved preprocessed objects to results subfolder")
+#  
+#  # Statistics, naturally depends a lot on the project, but this is a general workflow
+#  lm_results <- perform_lm(merged, formula_char = "Feature ~ Group")
+#  
+#  # Add results to object
+#  # Remove intercept columns
+#  lm_results <- dplyr::select(lm_results, -contains("Intercept"))
+#  with_results <- join_fData(merged, lm_results)
+#  
+#  # Write results to Excel
+#  write_to_excel(with_results, file = paste0(ppath, "results/results.xlsx"))
+#  
+#  # Draw plots of the most interesting features
+#  # Select interesting features based on statistical relevance
+#  interesting <- lm_results$Feature_ID[lm_results$GroupB_P_FDR < 0.05] # NOTE: just an example
+#  
+#  # Save relevant visualizations of all the interesting features
+#  
+#  # Group box plots as an example
+#  save_group_boxplots(merged[interesting, ], color = "Group",
+#                      file = paste0(ppath, "results/figures/group_boxplots.pdf"))
+#  # Drift correction plots
+#  drift_corr <- correct_drift(pre_drift_merged, plotting = TRUE, file = paste0(ppath, "results/figures/drift_plots.pdf"))
 #  
 #  # Finish logging and save session information
 #  finish_log()

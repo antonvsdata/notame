@@ -4,8 +4,11 @@
 \alias{flag_quality}
 \title{Flag low-quality features}
 \usage{
-flag_quality(object,
-  condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |\\n                    (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)")
+flag_quality(
+  object,
+ 
+    condition = "(RSD_r < 0.2 & D_ratio_r < 0.4) |\\n                   (RSD < 0.1 & RSD_r < 0.1 & D_ratio < 0.1)"
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

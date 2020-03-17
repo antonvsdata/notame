@@ -4,12 +4,24 @@
 \alias{plot_tsne}
 \title{t-SNE scatter plot}
 \usage{
-plot_tsne(object, all_features = FALSE, center = TRUE, scale = "uv",
-  perplexity = 30, pca_method = "nipals", color = group_col(object),
-  shape = NULL, label = NULL, density = FALSE, title = "t-SNE",
-  subtitle = paste("Perplexity:", perplexity), color_scale = NA,
+plot_tsne(
+  object,
+  all_features = FALSE,
+  center = TRUE,
+  scale = "uv",
+  perplexity = 30,
+  pca_method = "nipals",
+  color = group_col(object),
+  shape = NULL,
+  label = NULL,
+  density = FALSE,
+  title = "t-SNE",
+  subtitle = paste("Perplexity:", perplexity),
+  color_scale = NA,
   shape_scale = getOption("notame.shape_scale"),
-  fill_scale = getOption("notame.fill_scale_dis"), ...)
+  fill_scale = getOption("notame.fill_scale_dis"),
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

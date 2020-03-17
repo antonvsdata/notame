@@ -23,7 +23,6 @@
 install_helper <- function(cran, bioconductor, github, gitlab, ...) {
   if (!missing(cran)) {
     for (pckg in cran) {
-      print(pckg)
       if (!requireNamespace(pckg, quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from CRAN\n"))
         tryCatch({

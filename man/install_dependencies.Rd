@@ -4,8 +4,13 @@
 \alias{install_dependencies}
 \title{Install dependencies}
 \usage{
-install_dependencies(preprocessing = TRUE, extra = FALSE,
-  batch_corr = FALSE, misc = FALSE, ...)
+install_dependencies(
+  preprocessing = TRUE,
+  extra = FALSE,
+  batch_corr = FALSE,
+  misc = FALSE,
+  ...
+)
 }
 \arguments{
 \item{preprocessing}{logical, install core preprocessing and visualization packages?}

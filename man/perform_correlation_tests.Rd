@@ -4,8 +4,15 @@
 \alias{perform_correlation_tests}
 \title{Perform correlation tests}
 \usage{
-perform_correlation_tests(object, x, y = x, fdr = TRUE,
-  duplicates = FALSE, ...)
+perform_correlation_tests(
+  object,
+  x,
+  y = x,
+  object2 = NULL,
+  fdr = TRUE,
+  duplicates = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -14,6 +21,9 @@ perform_correlation_tests(object, x, y = x, fdr = TRUE,
 
 \item{y}{character vector, either identical to x (the default) or a distinct set of variables
 to be correlated agains x}
+
+\item{object2}{optional second MeatboSet object. If provided, x variables will be taken from object and
+y variables will be taken from object2. Both objects should have the same number of samples.}
 
 \item{fdr}{logical, whether p-values from the correlation test should be adjusted with FDR correction}
 
@@ -46,6 +56,9 @@ no_qc$Time <- as.numeric(no_qc$Time)
 correlations <- perform_correlation_tests(no_qc, x = featureNames(example_set),
                                          y = c("Time", "Injection_order"), method = "spearman")
 
+# Correlations between variables from two distinct MetaboSets
+cross_object_cor <- perform_correlation_tests(hilic_neg_sample, x = featureNames(hilic_neg_sample),
+                                              object2 = hilic_pos_sample, y = featureNames(hilic_pos_sample))
 }
 \seealso{
 \code{\link{cor.test}}

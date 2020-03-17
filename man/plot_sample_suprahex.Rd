@@ -4,10 +4,21 @@
 \alias{plot_sample_suprahex}
 \title{Suprahex plots}
 \usage{
-plot_sample_suprahex(object, file, width = 16, height = 16,
-  all_features = FALSE, sample_labels = "Sample_ID",
-  grid_xdim = NULL, grid_ydim = NULL, title.xy = c(0.35, 1),
-  title.rotate = 0, fontsize = 10, colormap = "jet", ...)
+plot_sample_suprahex(
+  object,
+  file,
+  width = 16,
+  height = 16,
+  all_features = FALSE,
+  sample_labels = "Sample_ID",
+  grid_xdim = NULL,
+  grid_ydim = NULL,
+  title.xy = c(0.35, 1),
+  title.rotate = 0,
+  fontsize = 10,
+  colormap = "jet",
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

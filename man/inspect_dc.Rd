@@ -4,8 +4,7 @@
 \alias{inspect_dc}
 \title{Flag the results of drift correction}
 \usage{
-inspect_dc(orig, dc, check_quality,
-  condition = "RSD_r < 0 & D_ratio_r < 0")
+inspect_dc(orig, dc, check_quality, condition = "RSD_r < 0 & D_ratio_r < 0")
 }
 \arguments{
 \item{orig}{a MetaboSet object, before drift correction}

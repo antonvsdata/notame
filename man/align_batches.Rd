@@ -4,8 +4,16 @@
 \alias{align_batches}
 \title{Align features between batches}
 \usage{
-align_batches(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
-  plot_folder = NULL)
+align_batches(
+  object_na,
+  object_fill,
+  batch,
+  mz,
+  rt,
+  mzdiff,
+  rtdiff,
+  plot_folder = NULL
+)
 }
 \arguments{
 \item{object_na}{a MetaboSet object with missing values as NA}

@@ -48,13 +48,14 @@ check_pheno_data <- function(x, id_prefix) {
 
 # Check that the position of the corner row and column is OK
 check_position <- function(x, cc, cr) {
-  condition <- (is.na(x[cr - 1, cc - 1])) &
-    (is.numeric(type.convert(x[cr + 1, cc + 1]))) &
-    (!is.na(x[cr, cc]))
+  condition <- is.na(x[cr - 1, cc - 1]) &
+    (is.numeric(type.convert(x[cr + 1, cc + 1])) | is.na(x[cr + 1, cc + 1])) &
+    !is.na(x[cr, cc]) &
+    !is.na(x[cr - 1, cc]) &
+    !is.na(x[cr, cc - 1])
   if (!condition) {
     stop("The corner row and column coordinates seem to be incorrect!")
   }
-
 }
 
 # Check if a vector can be safely converted to numeric
@@ -368,7 +369,11 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
 #' Write results to Excel file
 #'
 #' Writes all the data in a MetaboSet object to an Excel spreadsheet.
-#' The format is similar to the one used to read data in.
+#' The format is similar to the one used to read data in, except for the fact that
+#' EVERYTHING NEEDS TO BE WRITTEN AS TEXT. To fix numeric values in Excel,
+#' choose any cell with a number, press Ctrl + A, then go to the dropdown menu
+#' in upper left corner and choose "Convert to Number". This will fix the file,
+#' but can take quite a while.
 #'
 #' @param object a MetaboSet object
 #' @param file path to the file to write

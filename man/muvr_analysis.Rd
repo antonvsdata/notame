@@ -4,9 +4,19 @@
 \alias{muvr_analysis}
 \title{MUVR}
 \usage{
-muvr_analysis(object, y = NULL, id = NULL, multi_level = FALSE,
-  multi_level_var = NULL, nRep = 5, nOuter = 6, nInner = nOuter -
-  1, varRatio = 0.75, method = c("PLS", "RF"), ...)
+muvr_analysis(
+  object,
+  y = NULL,
+  id = NULL,
+  multi_level = FALSE,
+  multi_level_var = NULL,
+  nRep = 5,
+  nOuter = 6,
+  nInner = nOuter - 1,
+  varRatio = 0.75,
+  method = c("PLS", "RF"),
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

@@ -16,16 +16,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-### MetaboSet utility vignette
 
 This vignette provides an introduction to the ```MetaboSet``` class, along with a summary of many of the functions for accessing elements of ```MetaboSet``` objects and other utility functions.
 
-#### Introduction to MetaboSets
+## Introduction to MetaboSets
 
 ```MetaboSet``` objects are the primary data structure of this package. ```MetaboSet``` is built upon the ```ExpressionSet``` class from the Biobase package by Bioconductor. ```ExpressionSet``` is used to record gene expression data, but the structure of the class is easily adaptable to LC-MS. For more information, read the [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf). ```MetaboSet``` objects consist of three main parts, each a matrix or a data frame:
 
 - Information about the samples (phenotype) such as injection order, group label, time point etc. Accessible with ```pData(object)```
-- Feature data: information about the features such as retention time and mass. Results from preprocessing and statistical tests will also be recoreded here. Accessible with ```fData(object)```
+- Feature data: information about the features such as retention time and mass. Results from preprocessing and statistical tests will also be recorded here. Accessible with ```fData(object)```
 - Abundances of features in each sample. Accessible with ```exprs(object)```
 
 In addition to these, a ```MetaboSet``` can store the names of special columns in ```pData``` that store group labels, time points or subject identifiers. These columns are used as defaults in many of the functions of the package.  
@@ -36,7 +35,7 @@ In addition to these, a ```MetaboSet``` can store the names of special columns i
 
 Let's look at the three main parts in more detail:
 
-##### Pheno data / Sample information
+### Pheno data / Sample information
 
 The sample information data frame, or ```pData``` has many special column names that are created when data is read from the Excel spreadsheet.  
 
@@ -46,7 +45,7 @@ The sample information data frame, or ```pData``` has many special column names 
 
 In addition to these three columns, pheno data often holds at least one of the group, time and subject ID columns that are defined separately. They are used as defaults by many functions for visualization and quality control.
 
-##### Feature data
+### Feature data
 
 All the information about individual molecular features is stored here. This includes information given by the peak picking software, and information added by functions in this package, such as quality metrics and results from statistical tests. The feature data part usually has many columns that are created by the peak picking software, but for the sake of this package, the most important are:  
 
@@ -61,14 +60,14 @@ In addition, this package will automatically create new columns:
 
 ```Flag``` column is used to flag features that are deemed low-quality for some reason (see ```?flag_detection``` and ```?flag_quality```). Many functions have an ```all_features``` that controls whether all features or only the good quality features should be used for the function. By default, ```all_features``` is always set to ```FALSE```, which means that all flagged features (features with a non-NA value in the ```Flag``` column) are ignored.
 
-##### Abundances
+### Abundances
 
 Naturally, the abundance part, ```exprs```, is used by almost all the functions as it actually holds the data. Not much more to say here.
 
 
-#### How to make MetaboSets?
+## How to make MetaboSets?
 
-##### Reading data from Excel spreadsheets
+### Reading data from Excel spreadsheets
 
 ```{r, out.width = "600px", echo=FALSE}
 knitr::include_graphics("Data_input.png")
@@ -97,11 +96,11 @@ The function returns a list holding the three parts of the data:
 - ```pheno_data```: sample information  
 - ```feature_data```: feature information
 
-##### Construction of MetaboSet objects
+### Construction of MetaboSet objects
 
 ```MetaboSet``` objects are constructed with the ```construct_metabosets``` function. The functions parameters include all the main parts of a ```MetaboSet``` object. The special column names can also be set for this function. Note that the function returns a named list of ```MetaboSet``` objects, where the feature data and abundances are split by the ```Split``` column in feature data (most commonly this means the four modes are returned separately). The sample information and special column names are identical for each object.
 
-#### Inherited from ExpressionSet
+## Inherited methods from ExpressionSet
 
 These functions from Biobase might be useful:
 
@@ -115,13 +114,13 @@ In addition, MetaboSets can be subset using the syntax for ExpressionSets, namel
 - Columns in ```pData``` can be accessed via a shortcut, for example ```example_set$Group```  
 - So to get rid of a particular group, you can run ```example_set[, example_set$Group != "B""]```
 
-#### MetaboSet-specific
+## MetaboSet-specific methods
 
 Utility functions for MetaboSet in particular:
 
 - ```group_col```, ```time_col``` and ```subject_col``` for the special column names  
 - ```quality``` for the quality metrics of signals  
-- ```combined_data``` for a data frame with sample information and feature abundances as columns (one row per smaple).
+- ```combined_data``` for a data frame with sample information and feature abundances as columns (one row per sample).
 - ```write_to_excel``` writes the whole object to an Excel spreadsheet
 
 In addition, there are many functions that modify MetaboSets:

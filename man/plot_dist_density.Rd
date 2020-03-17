@@ -4,12 +4,17 @@
 \alias{plot_dist_density}
 \title{Distance density plot}
 \usage{
-plot_dist_density(object, all_features = FALSE,
-  dist_method = "euclidean", center = TRUE, scale = "uv",
+plot_dist_density(
+  object,
+  all_features = FALSE,
+  dist_method = "euclidean",
+  center = TRUE,
+  scale = "uv",
   color_scale = getOption("notame.color_scale_dis"),
   fill_scale = getOption("notame.fill_scale_dis"),
-  title = paste("Density plot of", dist_method,
-  "distances between samples"), subtitle = NULL)
+  title = paste("Density plot of", dist_method, "distances between samples"),
+  subtitle = NULL
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}

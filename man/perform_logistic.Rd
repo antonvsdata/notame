@@ -4,8 +4,13 @@
 \alias{perform_logistic}
 \title{Logistic regression}
 \usage{
-perform_logistic(object, formula_char, all_features = FALSE,
-  ci_level = 0.95, ...)
+perform_logistic(
+  object,
+  formula_char,
+  all_features = FALSE,
+  ci_level = 0.95,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
