@@ -23,7 +23,7 @@ major steps of data preprocessing. Saves all visualizations as PDFs with a set p
 If \code{merge} is \code{TRUE}, then a file containing all the visualizations
 named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
 (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
-Mac is not yet supported.
+On MacOS, no external software is needed.
 The type of visualizations to be saved depends on the type of object.
 Here is a comprehensive list of the visualizations:
 \itemize{

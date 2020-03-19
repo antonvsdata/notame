@@ -35,7 +35,7 @@ save_plot <- function(p, file, ...) {
 #' @details If \code{merge} is \code{TRUE}, then a file containing all the visualizations
 #' named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
 #' (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
-#' Mac is not yet supported.
+#' On MacOS, no external software is needed.
 #' The type of visualizations to be saved depends on the type of object.
 #' Here is a comprehensive list of the visualizations:
 #' \itemize{
@@ -159,15 +159,23 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
     prefix <- gsub("_$", "", prefix)
     merged_file <- paste0(prefix, ".pdf")
     os <- Sys.info()[["sysname"]]
+    output <- NULL
     if (os == "Windows") {
       # Merge files
-      system(paste("pdftk", file_names, "cat output", merged_file))
-      log_text(paste("Attempted merging plots to", merged_file))
+      output <- system(paste("pdftk", file_names, "cat output", merged_file))
     } else if (os == "Linux"){
-      system(paste("pdfunite", file_names, merged_file))
-      log_text(paste("Attempted merging plots to", merged_file))
+      output <- system(paste("pdfunite", file_names, merged_file))
+    } else if (os == "Darwin") {
+      output <- system(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" - o',
+                             merged_file, file_names))
     } else {
       log_text("Unfortunately your operating system is not yet supported by the merging")
+      return()
+    }
+    if (length(output)) {
+      log_text(paste("Merging plots resulted in the following message:", paste0(output, collapse = " ")))
+    } else {
+      log_text(paste("Attempted merging plots to", merged_file))
     }
   }
 }
