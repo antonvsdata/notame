@@ -8,18 +8,20 @@ Authors@R: c(
     person("Oskari", "Timonen", role = "aut"))
 Description: Automates common preprocessing steps in a LC-MS metabolomics workflow
     such as drift correction, quality control and common visualizations.
-License: MIT license
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 biocViews:
 Depends:
-    ggplot2,
-    magrittr,
+    R (>= 3.5),
     Biobase,
-    BiocGenerics
+    BiocGenerics,
+    ggplot2,
+    magrittr
 Imports:
     dplyr,
     foreach,
+    grDevices,
     methods,
     tibble,
     tidyr
@@ -28,6 +30,7 @@ Suggests:
     cowplot,
     doParallel,
     fpc,
+    ggbeeswarm,
     ggdendro,
     ggrepel,
     Hmisc,
@@ -43,9 +46,9 @@ Suggests:
     PK,
     randomForest,
     RColorBrewer,
-    rmarkdown,
     Rtsne,
     RUVSeq,
+    supraHex,
     testthat
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr

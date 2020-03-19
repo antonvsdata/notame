@@ -1,6 +1,7 @@
 
 
-# Set default color scales on load
+#' Set default color scales on load
+#' @importFrom grDevices rgb
 .onLoad <- function(libname, pkgname) {
   op <- options()
   op.notame <- list(

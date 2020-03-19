@@ -11,10 +11,12 @@
 #' @return a MetaboSet object with the corrected abundances
 #'
 #' @examples
+#' \dontrun{
 #' batch_corrected <- dobc(merged_sample, batch = "Batch", ref = "QC", ref_label = "QC")
 #' # Evaluate batch correction
 #' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
 #' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
+#' }
 #' @export
 dobc <- function(object, batch, ref, ref_label, ...) {
 
@@ -58,11 +60,13 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 #'
 #' @examples
 #' # Batch correction
+#' \dontrun{
 #' replicates <- list(which(merged_sample$QC == "QC"))
 #' batch_corrected <- ruvs_qc(merged_sample, batch = "Batch", replicates = replicates)
 #' # Evaluate batch correction
 #' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
 #' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
+#' }
 #' @export
 ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 
@@ -108,11 +112,12 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #'
 #' @examples
 #' # Batch correction
+#' \dontrun{
 #' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
 #' # Evaluate batch correction
 #' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
 #' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
-#'
+#' }
 #' @export
 pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center = TRUE,
                                    scale = "uv", nPcs = 3, ...) {
@@ -192,13 +197,14 @@ repeatability <- function(x, group) {
 #'
 #' @examples
 #' # Batch correction
+#' \dontrun{
 #' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
 #' # Evaluate batch correction
 #' rep_orig <- perform_repeatability(merged_sample, group = "Group")
 #' mean(rep_orig$Repeatability)
 #' rep_corr <- perform_repeatability(batch_corrected, group = "Group")
 #' mean(rep_corr$Repeatability)
-#'
+#' }
 #' @export
 perform_repeatability <- function(object, group) {
 
@@ -224,6 +230,8 @@ perform_repeatability <- function(object, group) {
 #' @param plot_folder path to the location where the plots should be saved, if NULL, no plots are saved
 #'
 #' @return a MetaboSet object with the aligned features
+#'
+#' @export
 align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
@@ -277,10 +285,12 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #'
 #' @examples
 #' # Batch correction
+#' \dontrun{
 #' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
 #' # Evaluate batch correction
 #' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
 #' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
+#' }
 #' @export
 normalize_batches <- function(object, batch, group, ref_label, ...) {
 

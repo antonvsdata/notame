@@ -644,7 +644,7 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
 #' @param color column name used to color the plots
 #' @param p_breaks a numerical vector of the p_values to show on the y-axis
 #' @param fdr_limit the significance level used in the experiment
-#' @param x_lim,ylim numerical vectors of length 2 for manually setting the axis limits
+#' @param x_lim,y_lim numerical vectors of length 2 for manually setting the axis limits
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
 #' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can

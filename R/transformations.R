@@ -361,6 +361,10 @@ setGeneric("scale")
 #' Scale exprs data
 #'
 #' Applies the base R function scale to transposed exprs matrix. See ?scale for details
+#'
+#' @param x a MetaboSet object
+#' @param center,scale as in base scale function
+#'
 #' @export
 setMethod("scale", "MetaboSet", function(x, center = TRUE, scale = TRUE) {
   exprs(x) <- t(scale(t(exprs(x)), center = center, scale = scale))

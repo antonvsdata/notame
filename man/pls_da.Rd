@@ -9,7 +9,15 @@
 \usage{
 mixomics_plsda(object, y, ncomp, plot_scores = TRUE, ...)
 
-mixomics_plsda_optimize(object, y, ncomp, plot_scores = TRUE, ...)
+mixomics_plsda_optimize(
+  object,
+  y,
+  ncomp,
+  folds = 5,
+  nrepeat = 50,
+  plot_scores = TRUE,
+  ...
+)
 
 mixomics_splsda_optimize(
   object,
@@ -35,14 +43,14 @@ be drawn, with both prediction surface and ellipses}
 
 \item{...}{any parameters passed to \code{mixOmics::plsda}}
 
+\item{folds}{the number of folds to use in k-fold cross validation}
+
+\item{nrepeat}{the number of times to repeat the cross validation. Lower this for faster testing.}
+
 \item{dist}{the distance metric to use, one of "max.dist", "mahalanobis.dist", "centroids.dist".
 use \code{\link{mixomics_plsda_optimize}} to find the best distance metric}
 
 \item{n_features}{the number of features to try for each component}
-
-\item{folds}{the number of folds to use in k-fold cross validation}
-
-\item{nrepeat}{the number of times to repeat the cross validation. Lower this for faster testing.}
 }
 \value{
 an object of class "mixo_plsda"
@@ -59,6 +67,7 @@ choose the one with minimal balanced error rate}
 }
 }
 \examples{
+\dontrun{
 noqc <- drop_qcs(merged_sample)
 plsda_res <- mixomics_plsda(noqc, y = "Group", ncomp = 2)
 set.seed(38)
@@ -66,7 +75,7 @@ plsda_opt <- mixomics_plsda_optimize(noqc, y = "Group", ncomp = 3)
 set.seed(38)
 splsda_opt <- mixomics_splsda_optimize(noqc, y = "Group", dist = "max.dist", ncomp = 2,
                                       n_features <- c(1:10, 12, 15, 20))
-
+}
 }
 \seealso{
 \code{\link[mixOmics]{plsda}}, \code{\link[mixOmics]{perf}},

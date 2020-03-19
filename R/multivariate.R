@@ -116,10 +116,12 @@ plot_pls <- function(model, Y, y, title) {
 #' @return an object of class "mixo_pls" or "mixo_spls"
 #'
 #' @examples
+#' \dontrun{
 #' pls_res <- mixomics_pls(merged_sample, y = "Injection_order", ncomp = 3)
 #' pls_opt <- mixomics_pls_optimize(merged_sample, y = "Injection_order", ncomp = 3)
 #' pls_res <- mixomics_spls_optimize(merged_sample, y = "Injection_order", ncomp = 3,
 #'                                   n_features <- c(1:10, 12, 15, 20))
+#' }
 #' @name pls
 #' @seealso \code{\link[mixOmics]{pls}}, \code{\link[mixOmics]{perf}},
 #' \code{\link[mixOmics]{spls}}, \code{\link[mixOmics]{tune.spls}}
@@ -273,6 +275,7 @@ plot_plsda <- function(model, Y, title, dist = "max.dist") {
 #' @return an object of class "mixo_plsda"
 #'
 #' @examples
+#' \dontrun{
 #' noqc <- drop_qcs(merged_sample)
 #' plsda_res <- mixomics_plsda(noqc, y = "Group", ncomp = 2)
 #' set.seed(38)
@@ -280,7 +283,7 @@ plot_plsda <- function(model, Y, title, dist = "max.dist") {
 #' set.seed(38)
 #' splsda_opt <- mixomics_splsda_optimize(noqc, y = "Group", dist = "max.dist", ncomp = 2,
 #'                                       n_features <- c(1:10, 12, 15, 20))
-#'
+#' }
 #' @name pls_da
 #' @seealso \code{\link[mixOmics]{plsda}}, \code{\link[mixOmics]{perf}},
 #' \code{\link[mixOmics]{splsda}}, \code{\link[mixOmics]{tune.splsda}}
@@ -313,15 +316,15 @@ mixomics_plsda <- function(object, y, ncomp, plot_scores = TRUE, ...) {
 
 #' @rdname pls_da
 #' @export
-mixomics_plsda_optimize <- function(object, y, ncomp, plot_scores = TRUE, ...) {
+mixomics_plsda_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plot_scores = TRUE, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  plsda_res <- mixomics_plsda(object = object, y = y, ncomp = ncomp, folds = 5, nrepeat = 50, plot_scores = FALSE, ...)
+  plsda_res <- mixomics_plsda(object = object, y = y, ncomp = ncomp, plot_scores = FALSE, ...)
 
   log_text("Evaluating PLS-DA performance")
-  perf_plsda <- mixOmics::perf(plsda_res, validation = "Mfold", folds = folds, auc = TRUE, nrepeat = nrepeat)
+  perf_plsda <- mixOmics::perf(plsda_res, validation = "Mfold", folds = 5, auc = TRUE, nrepeat = 50)
 
   plot(perf_plsda, col = mixOmics::color.mixo(1:3), sd = TRUE, legend.position = "horizontal")
   title("Performance of PLS-DA models")
@@ -403,13 +406,14 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #' @param ... other parameters to \code{MUVR::MUVR}
 #'
 #' @examples
+#' \dontrun{
 #' # Simple model, only 1 repetition for a quick example
 #' rf_model <- muvr_analysis(drop_qcs(merged_sample), y = "Group", nRep = 1, method = "RF")
 #'
 #' # PLS on multilevel variable
 #' pls_model <- muvr_analysis(drop_qcs(example_set), multi_level = TRUE,
 #' id = "Subject_ID", multi_level_var = "Time")
-#'
+#' }
 #'
 #' @seealso \code{\link[MUVR]{MUVR}}
 #'

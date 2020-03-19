@@ -6,6 +6,11 @@
 \usage{
 \S4method{scale}{MetaboSet}(x, center = TRUE, scale = TRUE)
 }
+\arguments{
+\item{x}{a MetaboSet object}
+
+\item{center, scale}{as in base scale function}
+}
 \description{
 Applies the base R function scale to transposed exprs matrix. See ?scale for details
 }

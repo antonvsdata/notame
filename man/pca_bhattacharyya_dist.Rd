@@ -38,9 +38,10 @@ projecting the samples into PCA space with pcaMethods::pca
 }
 \examples{
 # Batch correction
+\dontrun{
 batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
 # Evaluate batch correction
 pca_bhattacharyya_dist(merged_sample, batch = "Batch")
 pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
-
+}
 }

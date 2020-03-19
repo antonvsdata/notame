@@ -25,9 +25,11 @@ An interface for the RUVs method in RUVSeq package.
 }
 \examples{
 # Batch correction
+\dontrun{
 replicates <- list(which(merged_sample$QC == "QC"))
 batch_corrected <- ruvs_qc(merged_sample, batch = "Batch", replicates = replicates)
 # Evaluate batch correction
 pca_bhattacharyya_dist(merged_sample, batch = "Batch")
 pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
+}
 }

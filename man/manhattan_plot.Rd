@@ -36,7 +36,7 @@ manhattan_plot(
 
 \item{fdr_limit}{the significance level used in the experiment}
 
-\item{x_lim, ylim}{numerical vectors of length 2 for manually setting the axis limits}
+\item{x_lim, y_lim}{numerical vectors of length 2 for manually setting the axis limits}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 

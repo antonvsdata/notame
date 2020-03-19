@@ -35,7 +35,7 @@
 #' @export
 cluster_features <- function(object, mz_col = NULL, rt_col = NULL,
                              all_features = FALSE, rt_window = 1/60,
-                             corr_thresh = 0.9, d_thresh = 0.8, 
+                             corr_thresh = 0.9, d_thresh = 0.8,
                              plotting = FALSE, min_size_plotting = 3, prefix = NULL) {
   # Drop flagged compounds before clustering
   orig <- object
@@ -230,6 +230,8 @@ pull_clusters <- function(data, features, name_col) {
 #' \item cor: correlation coefficient
 #' \item mz_diff & rt_diff: mass and retention time difference
 #' }
+#'
+#' @importFrom foreach "%dopar%"
 #'
 #' @export
 find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1/60,

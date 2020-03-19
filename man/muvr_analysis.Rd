@@ -47,13 +47,14 @@ A wrapper around the MUVR algorithm from the MUVR package. For more information
 about the algorithm, visit https://gitlab.com/CarlBrunius/MUVR.
 }
 \examples{
+\dontrun{
 # Simple model, only 1 repetition for a quick example
 rf_model <- muvr_analysis(drop_qcs(merged_sample), y = "Group", nRep = 1, method = "RF")
 
 # PLS on multilevel variable
 pls_model <- muvr_analysis(drop_qcs(example_set), multi_level = TRUE,
 id = "Subject_ID", multi_level_var = "Time")
-
+}
 
 }
 \seealso{
