@@ -166,7 +166,7 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
     } else if (os == "Linux"){
       output <- system(paste("pdfunite", file_names, merged_file))
     } else if (os == "Darwin") {
-      output <- system(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" - o',
+      output <- system(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o',
                              merged_file, file_names))
     } else {
       log_text("Unfortunately your operating system is not yet supported by the merging")
