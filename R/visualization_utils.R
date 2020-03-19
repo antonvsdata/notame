@@ -172,7 +172,7 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
       log_text("Unfortunately your operating system is not yet supported by the merging")
       return()
     }
-    if (length(output)) {
+    if (length(output) & output != "0") {
       log_text(paste("Merging plots resulted in the following message:", paste0(output, collapse = " ")))
     } else {
       log_text(paste("Attempted merging plots to", merged_file))
