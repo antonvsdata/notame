@@ -91,7 +91,9 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                  "Rtsne")
   core_bioconductor <- "pcaMethods"
   # Extra parts for certain visualizations and statistics
-  extra_cran <- c("doParallel",
+  extra_cran <- c("car",
+                  "doParallel",
+                  "ggbeeswarm",
                   "ggdendro",
                   "ggrepel",
                   "Hmisc",
@@ -100,7 +102,7 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                   "lme4",
                   "lmerTest",
                   "PK")
-  extra_bioconductor <- "mixOmics"
+  extra_bioconductor <- c("mixOmics", "supraHex")
   extra_gitlab <- "CarlBrunius/MUVR"
 
   batch_cran <- "fpc"
