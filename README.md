@@ -59,7 +59,7 @@ Read more [on the issue of remotes package](https://github.com/r-lib/remotes/iss
 
 ### Credits and license
 
-The notame package is written by Anton Kl?vus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). Notame is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Kl?vus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University.
+The notame package is written by Anton Klåvus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). Notame is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Klåvus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University.
 
 If you find any bugs or other things to fix, please submit an issue on GitHub! All contributions to the package are always welcome!
 
