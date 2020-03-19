@@ -25,16 +25,7 @@ PACKAGE requires R version 3.5.0 or greater.
 
 #### Installation
 
-To install the package along with all the possible dependencies, run:
-
-```
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools")
-}
-devtools::install_github("antonvsdata/notame", dependencies = c("Depends", "Imports", "Suggests"))
-```
-If you are having trouble installing some packages, you can install the bare minimum requirements by running the following code. Note that if you choose this type of installation, many of the functions in the package will not work as expected, as the pacakge has many dependencies.
-
+notame functions depend on a ton of other R packages. The packages you need to install depend on what you're using notame for: some packages are only needed for specific visualizations, others for batch effect correction, and others for common preprocessing tasks. This is why it's recommended to only install the packages that are really needed to make notame work. To do this, run:
 
 ```
 if (!requireNamespace("devtools", quietly = TRUE)) {
@@ -42,6 +33,9 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 }
 devtools::install_github("antonvsdata/notame")
 ```
+
+After installing the package, you can install rest of the packages you need on the fly OR use a handy function called ```install_dependencies```, which lets you install packages for core preprocessing, batch correction, specific visualizations etc.
+
 
 ### Documentation
 
@@ -65,7 +59,7 @@ Read more [on the issue of remotes package](https://github.com/r-lib/remotes/iss
 
 ### Credits and license
 
-The notame package is written by Anton Klåvus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). Notame is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Klåvus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University.
+The notame package is written by Anton Kl?vus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). Notame is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Kl?vus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University.
 
 If you find any bugs or other things to fix, please submit an issue on GitHub! All contributions to the package are always welcome!
 
