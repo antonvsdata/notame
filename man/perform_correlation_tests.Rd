@@ -10,6 +10,7 @@ perform_correlation_tests(
   y = x,
   object2 = NULL,
   fdr = TRUE,
+  all_pairs = TRUE,
   duplicates = FALSE,
   ...
 )
@@ -26,6 +27,9 @@ to be correlated agains x}
 y variables will be taken from object2. Both objects should have the same number of samples.}
 
 \item{fdr}{logical, whether p-values from the correlation test should be adjusted with FDR correction}
+
+\item{all_pairs}{logical, whether all pairs between x and y should be tested.
+If FALSE, x and y give the exact pairs of variables to test, and should have the same length.}
 
 \item{duplicates}{logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
 will be included in the results twice, where the order of the variables (which is x and which is y)
@@ -57,8 +61,11 @@ correlations <- perform_correlation_tests(no_qc, x = featureNames(example_set),
                                          y = c("Time", "Injection_order"), method = "spearman")
 
 # Correlations between variables from two distinct MetaboSets
-cross_object_cor <- perform_correlation_tests(hilic_neg_sample, x = featureNames(hilic_neg_sample),
-                                              object2 = hilic_pos_sample, y = featureNames(hilic_pos_sample))
+cross_object_cor <- perform_correlation_tests(hilic_neg_sample,
+                                              x = featureNames(hilic_neg_sample),
+                                              object2 = hilic_pos_sample,
+                                              y = featureNames(hilic_pos_sample),
+                                              all_pairs = FALSE)
 }
 \seealso{
 \code{\link{cor.test}}

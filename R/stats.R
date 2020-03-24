@@ -183,6 +183,8 @@ fold_change <- function(object, group = group_col(object)) {
 #' @param object2 optional second MeatboSet object. If provided, x variables will be taken from object and
 #' y variables will be taken from object2. Both objects should have the same number of samples.
 #' @param fdr logical, whether p-values from the correlation test should be adjusted with FDR correction
+#' @param all_pairs logical, whether all pairs between x and y should be tested.
+#' If FALSE, x and y give the exact pairs of variables to test, and should have the same length.
 #' @param duplicates logical, whether correlations should be dublicated. If \code{TRUE}, each correlation
 #' will be included in the results twice, where the order of the variables (which is x and which is y)
 #' is changed. Can be useful for e.g. plotting a heatmap of the results, see examples of
@@ -204,14 +206,17 @@ fold_change <- function(object, group = group_col(object)) {
 #'                                          y = c("Time", "Injection_order"), method = "spearman")
 #'
 #' # Correlations between variables from two distinct MetaboSets
-#' cross_object_cor <- perform_correlation_tests(hilic_neg_sample, x = featureNames(hilic_neg_sample),
-#'                                               object2 = hilic_pos_sample, y = featureNames(hilic_pos_sample))
+#' cross_object_cor <- perform_correlation_tests(hilic_neg_sample,
+#'                                               x = featureNames(hilic_neg_sample),
+#'                                               object2 = hilic_pos_sample,
+#'                                               y = featureNames(hilic_pos_sample),
+#'                                               all_pairs = FALSE)
 #' @seealso \code{\link{cor.test}}
 #'
 #' @importFrom foreach %do%
 #' @export
 perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TRUE,
-                                      duplicates = FALSE, ...) {
+                                      all_pairs = TRUE, duplicates = FALSE, ...) {
 
   data1 <- combined_data(object)
 
@@ -231,25 +236,33 @@ perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TR
                paste(not_found, collapse = ", ")))
   }
 
-  # If the same variable is present in x and y, the correlation would be computed
-  # twice. This makes sure only unique combinations of variables are treated.
-  if (identical(x,y)) {
-    var_pairs <- combn(x, 2) %>% t() %>% data.frame(stringsAsFactors = FALSE)
-    colnames(var_pairs) <- c("x", "y")
-    # Add correlations of all variables with themselves (useful for plotting)
-    var_pairs <- rbind(var_pairs, data.frame(x = x, y = x, stringsAsFactors = FALSE))
-  } else if (is.null(object2) & length(intersect(x, y))) {
-    stop("Currently only identical x & y or completely separate x & y are supported for one object")
+  if (all_pairs){
+    # If the same variable is present in x and y, the correlation would be computed
+    # twice. This makes sure only unique combinations of variables are treated.
+    if (identical(x,y)) {
+      var_pairs <- combn(x, 2) %>% t() %>% data.frame(stringsAsFactors = FALSE)
+      colnames(var_pairs) <- c("x", "y")
+      # Add correlations of all variables with themselves (useful for plotting)
+      var_pairs <- rbind(var_pairs, data.frame(x = x, y = x, stringsAsFactors = FALSE))
+    } else if (is.null(object2) & length(intersect(x, y))) {
+      stop("Currently only identical x & y or completely separate x & y are supported for one object")
+    } else {
+      var_pairs <- expand.grid(x, y, stringsAsFactors = FALSE)
+      colnames(var_pairs) <- c("x", "y")
+    }
   } else {
-    var_pairs <- expand.grid(x, y, stringsAsFactors = FALSE)
-    colnames(var_pairs) <- c("x", "y")
+    if (length(x) != length(y)) {
+      stop("If all_pairs = FALSE, x and y should have the same length")
+    }
+    var_pairs <- data.frame(x = x, y = y, stringsAsFactors = FALSE)
   }
+
 
   # Compute correlations
   cor_results <- foreach::foreach(i = seq_len(nrow(var_pairs)), .combine = rbind) %dopar% {
     x_tmp = var_pairs$x[i]
     y_tmp = var_pairs$y[i]
-    cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp], ...)
+    cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
     data.frame(X = x_tmp, Y = y_tmp,
                Correlation_coefficient = cor_tmp$estimate,
                Correlation_P = cor_tmp$p.value,
