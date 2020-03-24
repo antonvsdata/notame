@@ -14,6 +14,8 @@
 \usage{
 \S4method{combined_data}{MetaboSet}(object)
 
+\S4method{combined_data}{MetaboSet}(object)
+
 \S4method{group_col}{MetaboSet}(object)
 
 \S4method{time_col}{MetaboSet}(object)
@@ -23,6 +25,11 @@
 \S4method{flag}{MetaboSet}(object)
 
 \S4method{join_fData}{MetaboSet,data.frame}(object, dframe)
+}
+\arguments{
+\item{object}{a MetaboSet object}
+
+\item{dframe}{}
 }
 \description{
 MetaboSet is the main class used to represent data in the notame package.
@@ -35,6 +42,8 @@ defaults.
 }
 \section{Methods (by generic)}{
 \itemize{
+\item \code{combined_data}: sample information and features combined to a single data frame, one row per sample
+
 \item \code{combined_data}: sample information and features combined to a single data frame, one row per sample
 
 \item \code{group_col}: access and set group_col
