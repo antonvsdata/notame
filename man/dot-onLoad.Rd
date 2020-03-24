@@ -6,6 +6,9 @@
 \usage{
 .onLoad(libname, pkgname)
 }
+\arguments{
+\item{libname, pckgname}{default parameters}
+}
 \description{
 Set default color scales on load
 }

@@ -1,6 +1,9 @@
 
 
 #' Set default color scales on load
+#'
+#' @param libname,pckgname default parameters
+#'
 #' @importFrom grDevices rgb
 .onLoad <- function(libname, pkgname) {
   op <- options()
