@@ -290,6 +290,8 @@ name_features <- function(feature_data) {
 #' @slot time_col character, name of the column holding time points
 #' @slot subject_col character, name of the column holding subject identifiers
 #'
+#' @param object a MetaboSet object
+#' @param dframe
 #'
 #' @import methods
 #' @importClassesFrom Biobase ExpressionSet
@@ -421,7 +423,71 @@ write_to_excel <- function(object, file, ...) {
 }
 
 
-# ------------ Accessors and Replacers -----------------
+# ------------ Methods -----------------
+
+# Print and show methods
+print_levels <- function(v) {
+  t_groups <- table(v)
+  groups <- ifelse(is.factor(v), levels(v), unique(v))
+  output <- sapply(groups, function(y){
+    obs <- t_groups[y]
+    paste0(y, ": ", obs)
+  })
+  output <- paste(output, collapse = ", ")
+  cat(paste("  ", output, "\n"))
+}
+
+metaboset_printer <- function(x) {
+  cat(paste("MetaboSet object with", nrow(x), "features and", ncol(x), "samples.\n"))
+  cat(paste(sum(x$QC == "QC"), "QC samples included\n"))
+  cat(paste(sum(is.na(flag(x))), "non-flagged features,",
+            sum(!is.na(flag(x))), "flagged features.\n\n"))
+  if (!is.na(group_col(x))) {
+    cat(paste0(group_col(x), ":\n"))
+    print_levels(pData(x)[group_col(x)])
+  }
+  if (!is.na(time_col(x))){
+    cat(paste0(time_col(x)), ":\n")
+    print_levels(pData(x)[time_col(x)])
+  }
+  if (!is.na(subject_col(x))) {
+    cat(paste0(subject_col(x)), ":\n")
+    subject <- as.character(pData(x)[, subject_col(x)])
+    subject <- subject[!grepl("QC", subject)]
+    cat(paste0("  ", length(unique(subject)), " distinct subjects\n  min:",
+               min(table(subject)), ", max:", max(table(subject)),
+               " observations per subject.\n"))
+  }
+
+  cat("\nThe object has the following parts (splits):\n")
+  splits <- unique(fData(x)$Split)
+  t_splits <- table(fData(x)$Split)
+  for (split in splits) {
+    cat(paste0("  ",split, ": ", t_splits[split], " features\n"))
+  }
+}
+
+metaboset_shower <- function(object) {
+  metaboset_printer(object)
+}
+
+setMethod("print", c(x = "MetaboSet"),
+          metaboset_printer)
+
+setMethod("show", c(object = "MetaboSet"),
+          metaboset_shower)
+
+setGeneric("combined_data", signature = "object",
+           function(object) standardGeneric("combined_data"))
+
+#' @describeIn MetaboSet sample information and features combined to a single data frame, one row per sample
+#' @export
+setMethod("combined_data", c(object = "MetaboSet"),
+          function(object) {
+            cbind(pData(object), t(exprs(object)))
+          })
+
+
 
 #' Retrieve both sample information and features
 #'
@@ -518,8 +584,7 @@ setMethod("subject_col<-", "MetaboSet",
           })
 
 
-#' Extract flags of features
-#'
+# Extract flags of features
 #' @export
 setGeneric("flag", signature = "object",
            function(object) standardGeneric("flag"))
