@@ -12,11 +12,13 @@ for (mode in modes) {
   pd$Group[pd$Group == "Q"] <- "QC"
   pd$Time[pd$Time == "C"] <- "QC"
 
-  object <- construct_MetaboSet(exprs= dada$exprs, pheno_data = pd, feature_data = dada$feature_data,
+  object <- construct_metabosets(exprs= dada$exprs, pheno_data = pd, feature_data = dada$feature_data,
                                 group_col = "Group", time_col = "Time")
   obj <- object[[1]]
   obj <- obj[, obj$Injection_order < 221]
   obj$Batch <- as.factor(rep(1:2, times = c(73, ncol(obj) - 73)))
+  obj$Group <- factor(obj$Group, levels = c("A", "B", "QC"))
+  obj$Time <- factor(obj$Time, levels = c("1", "2", "QC"))
   # Remove extra QCs from the end
   objects[[mode]] <- obj
 }
