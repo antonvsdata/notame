@@ -428,7 +428,11 @@ write_to_excel <- function(object, file, ...) {
 # Print and show methods
 print_levels <- function(v) {
   t_groups <- table(v)
-  groups <- ifelse(is.factor(v), levels(v), unique(v))
+  if(is.factor(v)) {
+    groups <- levels(v)
+  } else {
+    groups <- unique(v)
+  }
   output <- sapply(groups, function(y){
     obs <- t_groups[y]
     paste0(y, ": ", obs)
@@ -444,11 +448,11 @@ metaboset_printer <- function(x) {
             sum(!is.na(flag(x))), "flagged features.\n\n"))
   if (!is.na(group_col(x))) {
     cat(paste0(group_col(x), ":\n"))
-    print_levels(pData(x)[group_col(x)])
+    print_levels(pData(x)[, group_col(x)])
   }
   if (!is.na(time_col(x))){
     cat(paste0(time_col(x)), ":\n")
-    print_levels(pData(x)[time_col(x)])
+    print_levels(pData(x)[, time_col(x)])
   }
   if (!is.na(subject_col(x))) {
     cat(paste0(subject_col(x)), ":\n")
