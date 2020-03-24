@@ -9,7 +9,6 @@
 \alias{time_col,MetaboSet-method}
 \alias{subject_col,MetaboSet-method}
 \alias{flag,MetaboSet-method}
-\alias{join_results,MetaboSet,data.frame-method}
 \alias{join_fData,MetaboSet,data.frame-method}
 \title{An S4 class used to represent LC-MS datasets}
 \usage{
@@ -22,8 +21,6 @@
 \S4method{subject_col}{MetaboSet}(object)
 
 \S4method{flag}{MetaboSet}(object)
-
-\S4method{join_results}{MetaboSet,data.frame}(object, dframe)
 
 \S4method{join_fData}{MetaboSet,data.frame}(object, dframe)
 }
@@ -47,8 +44,6 @@ defaults.
 \item \code{subject_col}: access and set subject_col
 
 \item \code{flag}: access and set results
-
-\item \code{join_results}: join new information to results
 
 \item \code{join_fData}: join new information to fData
 }}

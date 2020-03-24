@@ -542,33 +542,7 @@ setMethod("flag<-", "MetaboSet",
             }
           })
 
-#' Join results to a MetaboSet object (Deprecated)
-#'
-#' NOTE: this function is deprecated as the results part of a MetaboSet object does not exist anymore. Use \code{\link{join_fData}} instead!
-#' Join a new data frame of results to a MetaboSet object. The data frame needs to have a column "Feature_ID".
-#' This function is usually called on the results of one of the statistics functions.
-#'
-#' @param object a MetaboSet object
-#' @param dframe a data frame with the results
-#'
-#' @examples
-#' lm_results <- perform_lm(example_set, formula_char = "Feature ~ Group")
-#' with_results <- join_results(example_set, lm_results)
-#' colnames(fData(with_results))
-#'
-#' @return a MetaboSet object with the new information added to results(object)
-#'
-#' @export
-setGeneric("join_results", signature = c("object", "dframe"),
-           function(object, dframe) standardGeneric("join_results"))
 
-#' @describeIn MetaboSet join new information to results
-#' @export
-setMethod("join_results", c("MetaboSet", "data.frame"),
-          function(object, dframe) {
-            warning("join_results is deprecated, use join_fData instead. (The results part of the MetaboSet is removed and the results are now stored in featureData)")
-            join_fData(object, dframe)
-          })
 
 
 #' Join new columns to feature data
