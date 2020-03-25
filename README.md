@@ -31,7 +31,7 @@ notame functions depend on a ton of other R packages. The packages you need to i
 if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
-devtools::install_github("antonvsdata/notame")
+devtools::install_github("antonvsdata/notame", build_vignettes = TRUE)
 ```
 
 After installing the package, you can install rest of the packages you need on the fly OR use a handy function called ```install_dependencies```, which lets you install packages for core preprocessing, batch correction, specific visualizations etc.
