@@ -1,0 +1,97 @@
+---
+title: "Statistics"
+author: "Anton Klåvus"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Statistics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Statistics
+
+This vignette provides an overview of the different statistical tests provided in the package. The first section discusses univariate tests, which are repeated for each feature.
+
+Unless otherwise stated, all functions return separate data frames or other objects with the results. These can be then added to the object feature data using ```join_fData(object, results)```. The reason for not adding these to the objects automatically is that most of the functions return excess information that is not always worth saving. We encourage you to choose which information is important to you.
+
+## Univariate functions
+
+### summary statistics and effect sizes
+
+These functions provide summary statistics and effect sizes for all features:
+
+- Summary statistics (mean, sd, median, mad, quartiles): ```summary_statistics```  
+- Cohen's d: ```cohens_d```  
+- Fold changes between groups: ```fold_change```
+
+### Hypothesis tests
+
+These functions perform univariate hypothesis tests for each feature, report relevant statistics and correct the p-values using FDR correction. For features, where the model fails for some reason, all statistics are recorded as NA. **NOTE** setting ```all_features = FALSE``` does not prevent the tests on the flagged compounds, but only affects p-value correction, where flagged features are not included in the correction and thus do not have an FDR-corrected p-value. To prevent the testing of flagged features altogether, use ```drop_flagged``` before the tests.
+
+#### Formula interface
+
+Many R functions for statistical tests use a so-called formula interface. For example, the function ```lm``` that is used for fitting linear models uses the formula interface, so when predicting the fuel consumption (mpg - miles per gallon) by the car weight (wt) in the inbuilt mtcars dataset, we would run:
+
+```{r}
+lm(mpg ~ wt, data = mtcars)
+```
+
+For many of the univariate statistical test functions in this package use the formula interface, where the formula is provided as a character, with one special condition: the word "Feature" will get replaced at each iteration by the corresponding feature name. So for example, when testing if any of the features predict the difference between study groups, the formula would be: "Group ~ Feature". Or, when testing if group and time point affect metabolite levels, the formula could be "Feature ~ Group + Time + Group:Time", with the last term being an interaction term ("Feature ~ Group * Time" is equivalent).
+
+Now that we know how the formula interface looks like, let's list the univariate statistical functions available:
+
+- linear models: ```perform_lm```  
+- logistic regression: ```perform_logistic```  
+- linear mixed models: ```perform_lmer``` (uses lmer function from the lme4 package, with lmerTest package for p-values)  
+- tests of equality of variance: ```perform_homoscedasticity_tests```
+- Kruskal-Wallis test: ```perform_kruskal_wallis```  
+- Welch's ANOVA and Classic ANOVA: ```perform_oneway_anova```  
+- two-sample t-test (Welch or Student): ```perform_t_test``` 
+
+Most of the functions allow you to pass extra arguments to the underlying functions performing the actual tests, so you can set custom contrasts etc.
+
+### Functions not using the formula interface
+
+Some functions do not use the formula interface. They include
+
+- pairwise t-tests: ```perform_pairwise_t_test```
+- correlation tests between molecular features and/or phenotype variable: ```perform_correlation_tests```
+- Area under curve computation: ```perform_auc```
+
+
+## Multivariate functions
+
+### MUVR
+
+notame provides a wrapper for the MUVR analysis (Multivariate methods with Unbiased Variable selection in R, [MUVR package](https://gitlab.com/CarlBrunius/MUVR/)). MUVR allows fitting both RF and PLS models with clever variable selection for both finding a minimal subset of features that achieves a good performance AND for finding all relevant features.
+
+```muvr_analysis``` provides the wrapper for MetaboSet objects
+
+### Random forest
+
+It is possible to fir random forest models with the randomForest package.
+
+- ```fit_rf``` fits a random forest predicting a column in the sample information (```pData(object)```) by the features  
+- ```importance_rf``` extracts the feature importance in random forest prediction in a nice format
+
+
+### PLS(-DA)
+
+There are also wrappers for PLS(-DA) functions from the mixOmics package:
+
+- ```mixomics_pls and mixomics_plsda``` fits classic PLS(-DA)  
+- ```mixomics_pls and mixomics_plsda_optimize``` finds the optimal number of components for PLS(-DA)  
+- ```mixomics_spls and mixomics_splsda_optimize``` fits sPLS(-DA), which uses a clever variable selection scheme to select the optimal number of components AND the optimal number of features for each component.
+
+
+
+
+

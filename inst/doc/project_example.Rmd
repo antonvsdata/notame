@@ -1,0 +1,318 @@
+---
+title: "Project example"
+author: "Anton Klåvus"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Project example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+### Project setup
+
+##### Load libraries
+
+Load the libraries (doParallel is used for parallel processing):
+
+```{r, message=FALSE, warning=FALSE}
+library(notame)
+library(doParallel)
+```
+
+##### Set up path and logging
+
+Let's set up a path for our project. This is safer than using ```setwd()```
+
+```{r}
+ppath <- "~/test_project/"
+```
+
+Then we will set up a log file. many functions of the package will log information when they have finished. This helps monitoring the analysis process in case something goes wrong AND to review the results later.
+
+```{r}
+init_log(log_file = paste0(ppath, "log.txt"))
+# Check logging state
+log_state()
+```
+
+##### Read data
+
+Now we can read in the actual data! The file given here includes some example data and can be accessed at [the GitHub page](https://github.com/antonvsdata/notame/blob/master/inst/extdata/sample_data_whole.xlsx). The data is from a project with samples from three different groups. The data is scrambled, though (the feature information does not correspond to the abundances given).
+
+```{r}
+data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "notame"), sheet = 1,
+                        corner_row = 4, corner_column = "X",
+                        split_by = c("Column", "Ion mode"))
+```
+
+The function ```read_from_excel``` can be used to read data from an Excel spreadsheet using the following format:  
+```{r, out.width = "600px", echo=FALSE}
+knitr::include_graphics("Data_input.png")
+```
+
+The first parameters include the file name, sheet number, and coordinates for the corner ("Ion Mode" in the above examples), in which the three parts of the dataset come together. The row must be numeric, but the column can be given either as a number or a letter (or a combination of two letters), as that is how it's displayed in Excel. **NOTE:** the sheet number (default 1) and corner coordinates are now optional, as the function will try to determine them automatically. You only need to specify corner coordinates if you have information such as comments in the empty upper left corner of the sheet.
+
+Some fields in sample information and feature data have special purposes. 
+
+There are a few obligatory fields:  
+
+- "Injection_order" in sample information. The values must be numeric and unique  
+- "Mass" or "Average mz" in feature data, not case sensitive  
+- "Retention time", "RetentionTime", "Average rt(min)" or "rt"" in feature data, not case sensitive
+
+Additionally, there are a few special cases:
+
+- If sample information does not contain a "Sample_ID" field, one will be created. The sample IDs will be the injection order of the sample combined with a prefix, specified using the argument ```id_prefix```. The default prefix is "ID".  
+- If sample information does not contain a "QC" field that separates between QC samples and regular samples, the function will attempt to automatically create one using one of the columns in sample information. The value will be "QC" for QC samples and "Sample" for regular samples. If the field is given, regular samples can have any value, but the value for QC samples should always be "QC".  
+- One or more fields in feature data can be used to split the data into parts. These field names are given as the ```split_by``` parameter. Usually these columns are the LC column and Ionization mode. A new field "Split" will be added, that contains the combination of the columns given in the given order.  
+ALTERNATIVELY, if the file only contains one mode, specify the name of the mode, e.g. "HILIC_pos" as the ```name``` argument. In this case, the "Split" field will equal "HILIC_pos" for all the features.
+
+The function returns a list holding the three parts of the data:
+
+- ```exprs```: feature abundances across the samples  
+- ```pheno_data```: sample information  
+- ```feature_data```: feature information
+
+```{r}
+names(data)
+sapply(data, class)
+sapply(data, dim)
+```
+
+##### Construct MetaboSet objects
+
+These three parts can be used to construct MetaboSet objects. MetaboSet is a custom class used by most functions in notame. MetaboSet is built on ExpressionSet class in the Bioconductor package Biobase. For more information, see [ExpressionSet documentation](https://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf)
+
+MetaboSet objects are constructed using ```construct_metabosets``` function. The function parameters are the three parts of a dataset, plus special column names: ```group_col```, ```time_col``` and ```subject_col```. Any of the special columns can be omitted. These are also fields of a MetaboSet object and are recorded for convenience of the user. Many functions use these columns as default values for visualizations, hypothesis tests etc.
+
+```{r}
+modes <- construct_metabosets(exprs = data$exprs, pheno_data = data$pheno_data,
+                             feature_data = data$feature_data,
+                             group_col = "Group")
+```
+
+The function returns a list of MetaboSet objects, one per mode (LC column x ionization mode).
+
+```{r}
+names(modes)
+sapply(modes, class)
+```
+
+### Preprocessing by mode
+
+After the creation of the objects, it is common to run a few preprocessing and quality control steps for each mode, before merging them together to a single object for statistical analysis.
+
+```{r}
+# Initialize empty list for processed objects
+processed <- list()
+for (i in seq_along(modes)) {
+  # PREPROCESSING STEPS
+}
+```
+
+
+Here, the steps are presented one at a time for one mode, so text explanations can be added before each step. This corresponds to one iteration of the above for loop.
+
+```{r}
+i <- 1
+name <- names(modes)[i]
+mode <- modes[[i]]
+```
+
+##### Mark missing values as NA
+
+First, mark the missing values as ```NA```. Many peak picking programs mark missing values as 0 or 1, so they need to be set to the R equivalent so R functions can recognise them.
+
+```{r}
+# Set all zero abundances to NA
+mode <- mark_nas(mode, value = 0)
+```
+
+##### Flag features with low detection rate
+
+Next, flag all the features with extensive amounts of missing values. Peak picking software sometimes keep features that are missing from almost all samples, which does not really make sense.  
+There are two limits for the proportion of observed values: ```qc_limit``` for QC samples and ```group_limit``` for study groups. All features that are not observed in at least ```qc_limit``` of QC samples are flagged. In addition, features need to be observed in at least ```group_limit``` of samples in **at least one group**.  
+Adjust the limits as needed.
+
+```{r}
+mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
+```
+
+Next, we draw visualizations of many kind. The function ```visualizations``` is handy for saving all the relevant plots as PDF files. Note that this a very high-level function so you might need to modify it to a project specific version! For more information, read [the visualizations vignette](visualizations.html). From now on, the visualizations are repeated after each step to observe the effect of preprocessing procedures. The argument ```prefix``` is a prefix for the file paths the figures will be saved to.
+
+```{r, eval=FALSE}
+visualizations(mode, prefix = paste0(ppath, "figures/", name, "_ORIG"))
+```
+
+##### Drift correction
+
+Next, we apply drift correction with cubic spline regression. There is an option to save plots of the procedure for each feature in one large PDF file (one page per features). For studies with a relatively small number of features (a few thousand per mode) this is feasible. For plant studies and other studies with tens of thousands of features, it is probably a good idea to draw the drift correction plots after statistical analysis, and only draw them for the most interesting compounds. 
+
+```{r, include = FALSE}
+corrected <- correct_drift(mode)
+```
+
+```{r eval = FALSE}
+corrected <- correct_drift(mode)
+visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_DRIFT"))
+```
+
+
+Information about the drift correction procedure is recorded in the DC_note column of feature data:  
+- Low-quality = drift correction did not improve signal quality, original feature was retained  
+- Missing_QCs = there were not enough QC samples (minimum 4 is required) to perform drift correction, original feature is retained.
+- Negative_DC = in rare cases, drift correction results in negative values. This is unwanted behavior, so the original feature is retained. 
+- Drift_corrected = everything worked as expected, and the feature was corrected for the drift.
+
+```{r}
+fData(corrected)$DC_note
+```
+
+##### Flag low-quality features
+
+After drift correction, it is time to flag low-quality features. 
+```{r, include = FALSE}
+corrected <- flag_quality(corrected)
+processed[[i]] <- corrected
+```
+
+```{r, eval = FALSE}
+corrected <- flag_quality(corrected)
+processed[[i]] <- corrected
+
+visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_CLEANED"))
+```
+
+###### Preprocessing for each mode
+
+Before we move on, we should actually run the above preprocessing steps for each mode. We will skip the visualizations to cut down the running time, but with a real project we would naturally run those for each mode.
+
+```{r}
+# Initialize empty list for processed objects
+processed <- list()
+for (i in seq_along(modes)) {
+  name <- names(modes)[i]
+  mode <- modes[[i]]
+  # Set all zero abundances to NA
+  mode <- mark_nas(mode, value = 0)
+  mode <- flag_detection(mode, qc_limit = 0.7, group_limit = 0.8)
+  # visualizations(mode, prefix = paste0(ppath, "figures/", name, "_ORIG"))
+  corrected <- correct_drift(mode)
+  # visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_DRIFT"))
+  
+  corrected <- corrected %>% assess_quality() %>% flag_quality()
+  processed[[i]] <- corrected
+
+  # visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_CLEANED"))
+}
+```
+
+
+### Preprocessing for the complete dataset
+
+##### Merge modes
+
+Next, it is time to merge the modes together and visualize the complete dataset:
+```{r, include = FALSE}
+merged <- merge_metabosets(processed)
+```
+
+```{r, eval = FALSE}
+merged <- merge_metabosets(processed)
+
+visualizations(merged, prefix = paste0(ppath, "figures/_FULL"))
+```
+
+##### Remove QCs
+
+Then, QC samples can (and should) be removed, as they are no longer needed.
+```{r, include = FALSE}
+merged_no_qc <- drop_qcs(merged)
+
+```
+
+```{r, eval = FALSE}
+merged_no_qc <- drop_qcs(merged)
+
+visualizations(merged_no_qc, prefix = paste0(ppath, "figures/FULL_NO_QC"))
+```
+
+##### Imputation of missing values
+
+If there are any missing values in the data, they need to be imputed. We use random forest imputation to impute these values. Seed number should be set before random forest imputation to guarantee reproducibility of results.
+
+```{r}
+#Set seed number for reproducibility
+set.seed(38)
+imputed <- impute_rf(merged_no_qc)
+```
+
+By default, the imputation procedure only operates on good quality features, i.e. those that have not been flagged. To use flagged features in statistical analysis, they should be imputed as well. This can be achieved through a second round of imputation, now with all features included:
+
+```{r}
+imputed <- impute_rf(imputed, all_features = TRUE)
+```
+
+**NOTE:** It is NOT recommended to impute all features in the first round, as low quality features would affect imputation of good quality features.
+
+**NOTE** If the dataset consists of a very large number of features (tens of thousands) it might be a good idea to run the imputation inside each mode, since in that case each mode has enough features to guarantee good imputation results, and running the algorithm on the complete dataset would take too long to be practical.
+
+After imputation, a final round of visualizations is in place.
+
+```{r, eval = FALSE}
+visualizations(imputed, prefix = paste0(ppath, "figures/FULL_IMPUTED"))
+```
+
+It is a good idea to save the merged and processed data, so experimenting with different statistical analyses becomes easier:
+
+```{r, eval = FALSE}
+save(imputed, file = paste0(ppath, "full_data.RData"))
+```
+
+
+Now we are ready for statistical analysis!
+
+### Statistics
+
+For more detailed information about how statistics work in this package, look at the Statistics vignette.
+
+Let's try to find features that separate the different groups. First, we'll Welch's analysis of variance to find features that have different levels in any of the varieties: 
+
+```{r}
+anova_results <- perform_oneway_anova(imputed, formula_char = "Feature ~ Group")
+```
+
+Next, we will choose all the features that show relevant difference between the means (judged by p-value) and conduct pairwise Welch's t-tests on them:
+
+```{r}
+top_features <- anova_results$Feature_ID[which(anova_results$ANOVA_P_FDR < 0.2)]
+
+top_index <- fData(imputed)$Feature_ID %in% top_features
+
+pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Group")
+```
+
+And there are our final results! The next step is then to combine the results, add them to the object and save the object to an output Excel file:
+
+```{r, eval = FALSE}
+combined_results <- dplyr::left_join(anova_results, pairwise_results)
+imputed <- join_fData(imputed, combined_results)
+
+write_to_excel(imputed, file = paste0(ppath, "results.xlsx"))
+```
+
+And that concludes our project example! The last thing to do is finish the log we started. This will record the time and date when the project finished, as well as the output of ```sessionInfo()```, which contains information about the system, and most importantly version numbers of R and all the packages used.
+
+```{r}
+finish_log()
+```
+
+
