@@ -197,6 +197,67 @@ save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, h
   log_text(paste("Saved beeswarm plots to:", file))
 }
 
+#' Save scatter plots of each feature against a set variable
+#'
+#' Draws a scatterplots with a feature on y-axis and another variable on x-axis.
+#' A separate plot is drawn for each feature.
+#'
+#' @param object a MetaboSet object
+#' @param x character, name of the column to be used as x-axis
+#' @param file path to the PDF file where the plots should be saved
+#' @param width,height width and height of the plots in inches
+#' @param all_features logical, should all features be used? If FALSE
+#' (the default), flagged features are removed before visualization.
+#' @param color character, name of the column to be used for coloring
+#' @param color_scale the color scale as returned by a ggplot function.
+#' Set to NA to choose the appropriate scale based on the class of the coloring variable.
+#' @param shape character, name of the column used for shape
+#' @param shape_scale the shape scale as returned by a ggplot function
+#'
+#' @examples
+#' \dontrun{
+#' # Against injection order, colored by group
+#' save_scatter_plots(object = merged_sample,
+#'                            x = "Injection_order",
+#'                            color = "Group",
+#'                            file = "injection_scatter.pdf")
+#' }
+#'
+#' @export
+save_scatter_plots <- function(object, x = group_col(object), file,
+                                       width = 8, height = 6,
+                                       all_features = FALSE,
+                                       color = NULL, color_scale =  NA,
+                                       shape = NULL,
+                                       shape_scale = getOption("notame.shape_scale")) {
+
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+
+  pdf(file, width = width, height = height)
+
+  data <- combined_data(object)
+
+  for (i in seq_len(nrow(object))) {
+    if (i %% 500 == 0) {
+      cat(paste0("Iteration ", i, "/", nrow(object), "\n"))
+    }
+    fname <- Biobase::featureNames(object)[i]
+
+    p <- scatter_plot(data = data, x = x, y = fname,
+                      color = color, color_scale = color_scale,
+                      shape = shape, shape_scale = shape_scale,
+                      title = fname, ylab = "Abundance")
+
+    plot(p)
+
+  }
+  dev.off()
+
+  log_text(paste("Saved scatter plots to:", file))
+
+}
+
 #' Save line plots with errorbars by group
 #'
 #' Plots the change in the feature abundances as a function of e.g. time.

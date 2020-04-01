@@ -146,7 +146,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 }
 
-scatter_plot <- function(data, x, y, color, shape, label, density = FALSE, fixed = TRUE, color_scale = NA,
+scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
                          shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape) {
 

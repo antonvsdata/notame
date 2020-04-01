@@ -4,6 +4,10 @@ This package can be used to analyze preprocessed LC-MS data in non-targeted meta
 
 **UPDATE:** The associated paper is now published! For more detailed information on how we run our LC-MS experiments and where this package fits in our workflow, you can find the paper here: ["notame": Workflow for Non-Targeted LC-MS Metabolic Profiling](https://www.mdpi.com/2218-1989/10/4/135)
 
+## new in version 0.0.2
+
+- ```save_scatter_plots``` Plots a scatter plot of each feature against a continuous variable. Useful for checking relationship between continuous predictors of linear models and selected features.
+
 ### What does notame do acutallly?
 
 Before we go into the list of features, it is good for you to know hot the workflow in our lab works. The first step is to take raw data files created by the LC-MS instrument and create a peak table using a peak picking software (we use [MS-DIAL](http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/)). After peak picking with the dedicated software, we use R for data preprocessing, quality control, statistical analysis and visualization. We then use the obtained results in identification of the actual metabolites. During the years, we ended up with various scripts that were hard to handle and update, so we decided to make this package to keep things under control. 
