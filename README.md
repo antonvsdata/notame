@@ -1,10 +1,12 @@
-## notame - Workflow for non-targeted LC-MS metabolic profiling 
+# notame - Workflow for non-targeted LC-MS metabolic profiling 
 
 This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics (notame, see?). Notame was developed at the research group of nutritional metabolomics at University of Eastern Finland. We use notame as a way to bundle together all the preprocessing methods we use for our non-targeted LC-MS metabolomics data, so it mainly consists of methods found in other packages, and a bunch of visualizations we have found useful.
 
+**UPDATE:** The associated paper is now published! For more detailed information on how we run our LC-MS experiments and where this package fits in our workflow, you can find the paper here: ["notame": Workflow for Non-Targeted LC-MS Metabolic Profiling](https://www.mdpi.com/2218-1989/10/4/135)
+
 ### What does notame do acutallly?
 
-Before we go into the list of features, it is good for you to know hot the workflow in our lab works. The first step is to take raw data files created by the LC-MS instrument and create a peak table using a peak picking software (we use [MS-DIAL](http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/)). After peak picking with the dedicated software, we use R for data preprocessing, quality control, statistical analysis and visualization. We then use the obtained results in identification of the actual metabolites. During the years, we ended up with various scripts that were hard to handle and update, so we decided to make this package to keep things under control. For more information about our workflow, read the associated protocol paper ["NoTaMe": Workflow for Non-Targeted LC-MS Metabolic Profiling](https://www.preprints.org/manuscript/202002.0019/v1)
+Before we go into the list of features, it is good for you to know hot the workflow in our lab works. The first step is to take raw data files created by the LC-MS instrument and create a peak table using a peak picking software (we use [MS-DIAL](http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/)). After peak picking with the dedicated software, we use R for data preprocessing, quality control, statistical analysis and visualization. We then use the obtained results in identification of the actual metabolites. During the years, we ended up with various scripts that were hard to handle and update, so we decided to make this package to keep things under control. 
 
 Here is a list of the current main functionalities of the package:
 
@@ -19,11 +21,9 @@ Here is a list of the current main functionalities of the package:
 - A rather nice set of visualizations for use in quality control, explorative analysis and interpretation of results from statistical tests
 
 
-### Installation and getting started
+## Installation and getting started
 
 PACKAGE requires R version 3.5.0 or greater.
-
-#### Installation
 
 notame functions depend on a ton of other R packages. The packages you need to install depend on what you're using notame for: some packages are only needed for specific visualizations, others for batch effect correction, and others for common preprocessing tasks. This is why it's recommended to only install the packages that are really needed to make notame work. To do this, run:
 
@@ -31,17 +31,23 @@ notame functions depend on a ton of other R packages. The packages you need to i
 if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
-devtools::install_github("antonvsdata/notame", build_vignettes = TRUE)
+devtools::install_github("antonvsdata/notame")
 ```
 
 After installing the package, you can install rest of the packages you need on the fly OR use a handy function called ```install_dependencies```, which lets you install packages for core preprocessing, batch correction, specific visualizations etc.
 
+### Installing development version
 
-### Documentation
+To install the current development version between releases, install the package from the dev branch:
 
-For instructions on how to use the package, run browseVignettes("notame"). The Introduction vignette should get you started pretty well!
+```
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+devtools::install_github("antonvsdata/notame", ref = "dev")
+```
 
-##### Troubleshooting installation
+### Troubleshooting installation
 
 If ```devtools::install_github``` gives you a weird error, run the following line and try again. Read more from [the original issue](https://github.com/r-lib/devtools/issues/1900)  
 ```
@@ -56,8 +62,12 @@ Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = TRUE)
 
 Read more [on the issue of remotes package](https://github.com/r-lib/remotes/issues/403) and [the environment variables tutorial](https://github.com/r-lib/remotes#environment-variables)
 
+## Documentation
 
-### Credits and license
+For instructions on how to use the package, run browseVignettes("notame"). The Introduction vignette should get you started pretty well!
+
+
+## Credits and license
 
 The notame package is written by Anton Klåvus for his master's thesis in Bioinformatics at Aalto university (published under former name Anton Mattsson). Notame is inspired by analysis scripts written by Jussi Paananen, Oskari Timonen and Anton Klåvus (formerly Mattsson) at University of Eastern Finland. The algorithm for clustering molecular features originating from the same compound is based on MATLAB code written by David Broadhurst, Professor of Data Science & Biostatistics in the School of Science, and director of the Centre for Integrative Metabolomics & Computational Biology at the Edith Covan University.
 
