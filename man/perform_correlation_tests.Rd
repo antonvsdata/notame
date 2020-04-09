@@ -39,13 +39,15 @@ is changed. Can be useful for e.g. plotting a heatmap of the results, see exampl
 \item{...}{other parameters passed to \code{\link{cor.test}}, such as method}
 }
 \value{
-a data frame with the results of correlation tests: the pair of variables, correlation coefficient
-and p-value
+a data frame with the results of correlation tests: the pair of variables,
+correlation coefficient and p-value
 }
 \description{
 Performs a correlation test between two sets of variables. All the variables must be either
-feature names or column names of pheno data (sample information). There are two ways to use this function:
-either provide a set of variables as \code{x}, and all correlations between those variables are computed. Or
+feature names or column names of pheno data (sample information).
+There are two ways to use this function:
+either provide a set of variables as \code{x}, and all correlations between
+those variables are computed. Or
 provide two distinct sets of variables \code{x, y} and correlations between each x variable
 and each y variable are computed.
 }

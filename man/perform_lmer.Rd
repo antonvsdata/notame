@@ -27,7 +27,8 @@ for regression coefficients}
 \item{ci_method}{The method for calculating the confidence intervals, see documentation
 of confint below}
 
-\item{test_random}{logical, whether tests for the significance of the random effects should be performed}
+\item{test_random}{logical, whether tests for the significance of the random effects
+should be performed}
 
 \item{...}{additional parameters passed to lmer}
 }

@@ -3,7 +3,8 @@
 #'
 #' Computes summary statistics for each feature, possibly grouped by a factor.
 #' The statistics include mean, standard deviation (sd), median,
-#' median absolute deviation (mad), and 25% and 75% quantiles (Q25 & Q75).
+#' median absolute deviation (mad), minimum (min), maximum (max)
+#' as well as 25% and 75% quantiles (Q25 & Q75).
 #'
 #' @param object a MetaboSet object
 #' @param grouping_cols character vector, the columns by which grouping should be done. Use \code{NA}
@@ -20,48 +21,70 @@
 #' @return a data frame with the summary statistics
 #'
 #' @export
-summary_statistics <- function(object, grouping_cols = group_col(object)) {
+summary_statistics <- function(object, grouping_cols = NA) {
 
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
   # Possible grouping
-  if (!is.na(grouping_cols[1])) {
-    data <- data %>% dplyr::group_by_at(grouping_cols)
-  }
+
   statistics <- foreach::foreach(i = seq_along(features), .combine = rbind,
                                  .export = c("finite_sd", "finite_mad", "finite_mean",
                                              "finite_median", "finite_quantile")) %dopar% {
     feature <- features[i]
-    tmp <- data %>%
-      dplyr::summarise_at(dplyr::vars(feature), .funs = list(mean = finite_mean,
-                                               sd = finite_sd,
-                                               median = finite_median,
-                                               mad = finite_mad,
-                                               Q25 = ~finite_quantile(., probs = 0.25),
-                                               Q75 = ~finite_quantile(., probs = 0.75))) %>%
-      dplyr::ungroup()
-
-    # Attach the grouping column values to column names
-    if (!is.na(grouping_cols[1])) {
-      for (grouping_col in grouping_cols) {
-        tmp[grouping_col] <- paste0(grouping_col, "_",
-                                    as.character(tmp[, grouping_col, drop = TRUE]))
+    f_levels <- data[, feature]
+    if (is.na(grouping_cols)[1]) {
+      groups <- rep(1, nrow(data))
+    } else {
+      # Single grouping column
+      if (length(grouping_cols) == 1) {
+        groups <- data[, grouping_cols]
+        if (class(groups) == "factor") {
+          group_names <- levels(groups)
+        } else {
+          group_names <- unique(gropus)
+        }
+      } else {
+        groups <- rep("", nrow(data))
+        for (grouping_col in grouping_cols) {
+          tmp_group <- paste(grouping_col, data[, grouping_col], sep = "_")
+          groups <- paste(groups, tmp_group, sep = "_")
+        }
+        groups <- as.factor(gsub("^_", "", groups))
+        group_names <- levels(groups)
       }
-      tmp <- tmp %>%
-        tidyr::unite("Factors", grouping_cols) %>%
-        tidyr::gather("Statistic", "Value", -Factors) %>%
-        tidyr::unite("Key", c("Factors", "Statistic")) %>%
-        tidyr::spread(Key, Value)
+
     }
 
-    tmp <- data.frame(Feature_ID = feature, tmp, stringsAsFactors = FALSE)
-    rownames(tmp) <- feature
-    tmp
+    # Define functions to use
+    funs <- list(mean = finite_mean,
+                 sd = finite_sd,
+                 median = finite_median,
+                 mad = finite_mad,
+                 min = finite_min,
+                 Q25 = function(x){finite_quantile(x, probs = 0.25)},
+                 Q75 = function(x){finite_quantile(x, probs = 0.75)},
+                 max = finite_max)
+    # Initialize named vector for the results
+    result_row <- rep(0, times = length(group_names) * length(funs))
+    var_names <- expand.grid(names(funs), group_names)
+    names(result_row) <- paste(var_names$Var2, var_names$Var1, sep = "_")
+    # Compute statistics
+    for (fname in names(funs)) {
+      tmp <- tapply(f_levels, groups, funs[[fname]])
+      if (is.na(grouping_col)) {
+        result_row[fname] <- tmp[1]
+      } else {
+        result_row[paste(group_names, fname, sep = "_")] <- tmp
+      }
+    }
+    # Combine as data frame
+    result_row <- data.frame(Feature_ID = feature, as.list(result_row))
+
+    result_row
   }
 
   statistics
 }
-
 
 
 #' Cohen's D
@@ -110,7 +133,8 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
       dplyr::summarise(mean_diff = mean(diff, na.rm = TRUE), sd_diff = sd(diff, na.rm = TRUE))
 
     d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] - tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff),
+                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] -
+                                 tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff),
                     stringsAsFactors = FALSE)
     d
   }
@@ -141,7 +165,8 @@ fold_change <- function(object, group = group_col(object)) {
 
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind, .export = "finite_mean") %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind,
+                                 .export = "finite_mean") %dopar% {
     feature <- features[i]
     result_row <- rep(NA_real_, ncol(groups))
     # Calculate fold changes
@@ -171,8 +196,10 @@ fold_change <- function(object, group = group_col(object)) {
 #' Perform correlation tests
 #'
 #' Performs a correlation test between two sets of variables. All the variables must be either
-#' feature names or column names of pheno data (sample information). There are two ways to use this function:
-#' either provide a set of variables as \code{x}, and all correlations between those variables are computed. Or
+#' feature names or column names of pheno data (sample information).
+#' There are two ways to use this function:
+#' either provide a set of variables as \code{x}, and all correlations between
+#' those variables are computed. Or
 #' provide two distinct sets of variables \code{x, y} and correlations between each x variable
 #' and each y variable are computed.
 #'
@@ -191,8 +218,8 @@ fold_change <- function(object, group = group_col(object)) {
 #' \code{\link{plot_effect_heatmap}}
 #' @param ... other parameters passed to \code{\link{cor.test}}, such as method
 #'
-#' @return a data frame with the results of correlation tests: the pair of variables, correlation coefficient
-#' and p-value
+#' @return a data frame with the results of correlation tests: the pair of variables,
+#' correlation coefficient and p-value
 #'
 #' @examples
 #' # Correlations between all features
@@ -379,7 +406,8 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = dplyr::bind_rows, .packages = packages) %dopar% {
+  results_df <- foreach::foreach(i = seq_along(features), .combine = dplyr::bind_rows,
+                                 .packages = packages) %dopar% {
     feature <- features[i]
     # Replace "Feature" with the current feature name
     tmp_formula <- gsub("Feature", feature, formula_char)
@@ -608,7 +636,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' for regression coefficients
 #' @param ci_method The method for calculating the confidence intervals, see documentation
 #' of confint below
-#' @param test_random logical, whether tests for the significance of the random effects should be performed
+#' @param test_random logical, whether tests for the significance of the random effects
+#' should be performed
 #' @param ... additional parameters passed to lmer
 #'
 #' @return a data frame with one row per feature, with all the

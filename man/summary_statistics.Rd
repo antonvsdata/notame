@@ -4,7 +4,7 @@
 \alias{summary_statistics}
 \title{Summary statistics}
 \usage{
-summary_statistics(object, grouping_cols = group_col(object))
+summary_statistics(object, grouping_cols = NA)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -18,7 +18,8 @@ a data frame with the summary statistics
 \description{
 Computes summary statistics for each feature, possibly grouped by a factor.
 The statistics include mean, standard deviation (sd), median,
-median absolute deviation (mad), and 25% and 75% quantiles (Q25 & Q75).
+median absolute deviation (mad), minimum (min), maximum (max)
+as well as 25% and 75% quantiles (Q25 & Q75).
 }
 \examples{
 # Group by "Group"
