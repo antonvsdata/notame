@@ -11,7 +11,7 @@ fit_rf(object, response, all_features = FALSE, importance = TRUE, ...)
 
 \item{response}{character, column name of phenoData giving response}
 
-\item{all_features}{should all features be included in the model? if FALSE, flagged features are left out}
+\item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
 
 \item{importance}{Should importance of features be assessed?}
 

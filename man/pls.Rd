@@ -7,7 +7,7 @@
 \alias{mixomics_spls_optimize}
 \title{PLS}
 \usage{
-mixomics_pls(object, y, ncomp, plot_scores = TRUE, ...)
+mixomics_pls(object, y, ncomp, plot_scores = TRUE, all_features = FALSE, ...)
 
 mixomics_pls_optimize(
   object,
@@ -16,6 +16,7 @@ mixomics_pls_optimize(
   folds = 5,
   nrepeat = 50,
   plot_scores = TRUE,
+  all_features = FALSE,
   ...
 )
 
@@ -27,6 +28,7 @@ mixomics_spls_optimize(
   folds = 5,
   nrepeat = 50,
   plot_scores = TRUE,
+  all_features = FALSE,
   ...
 )
 }
@@ -39,6 +41,8 @@ mixomics_spls_optimize(
 
 \item{plot_scores}{logical, if TRUE, a scatter plot with the first two PLS-components as x and y-axis will
 be drawn, colored by the Y-variable. Only really makes sense if y is a single variable}
+
+\item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
 
 \item{...}{any parameters passed to \code{mixOmics::pls} or \code{mixOmics::spls}}
 

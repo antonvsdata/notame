@@ -10,6 +10,7 @@ muvr_analysis(
   id = NULL,
   multi_level = FALSE,
   multi_level_var = NULL,
+  all_features = FALSE,
   nRep = 5,
   nOuter = 6,
   nInner = nOuter - 1,
@@ -28,6 +29,8 @@ muvr_analysis(
 \item{multi_level}{whether multi-level modeling should be applied, see Details}
 
 \item{multi_level_var}{the variable for splitting the data in multi-level modeling}
+
+\item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
 
 \item{nRep}{Number of repetitions of double CV, parameter of MUVR}
 

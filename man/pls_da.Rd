@@ -7,7 +7,7 @@
 \alias{mixomics_splsda_optimize}
 \title{PLS-DA}
 \usage{
-mixomics_plsda(object, y, ncomp, plot_scores = TRUE, ...)
+mixomics_plsda(object, y, ncomp, plot_scores = TRUE, all_features = FALSE, ...)
 
 mixomics_plsda_optimize(
   object,
@@ -16,6 +16,7 @@ mixomics_plsda_optimize(
   folds = 5,
   nrepeat = 50,
   plot_scores = TRUE,
+  all_features = FALSE,
   ...
 )
 
@@ -28,6 +29,7 @@ mixomics_splsda_optimize(
   folds = 5,
   nrepeat = 50,
   plot_scores = TRUE,
+  all_features = FALSE,
   ...
 )
 }
@@ -40,6 +42,8 @@ mixomics_splsda_optimize(
 
 \item{plot_scores}{logical, if TRUE, a scatter plot with the first two PLS-components as x and y-axis will
 be drawn, with both prediction surface and ellipses}
+
+\item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
 
 \item{...}{any parameters passed to \code{mixOmics::plsda}}
 
