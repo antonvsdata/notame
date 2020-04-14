@@ -42,7 +42,7 @@ summary_statistics <- function(object, grouping_cols = NA) {
         if (class(groups) == "factor") {
           group_names <- levels(groups)
         } else {
-          group_names <- unique(gropus)
+          group_names <- unique(groups)
         }
       } else {
         groups <- rep("", nrow(data))
