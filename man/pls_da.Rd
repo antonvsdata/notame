@@ -7,7 +7,15 @@
 \alias{mixomics_splsda_optimize}
 \title{PLS-DA}
 \usage{
-mixomics_plsda(object, y, ncomp, plot_scores = TRUE, all_features = FALSE, ...)
+mixomics_plsda(
+  object,
+  y,
+  ncomp,
+  plot_scores = TRUE,
+  all_features = FALSE,
+  covariates = NULL,
+  ...
+)
 
 mixomics_plsda_optimize(
   object,
@@ -17,6 +25,7 @@ mixomics_plsda_optimize(
   nrepeat = 50,
   plot_scores = TRUE,
   all_features = FALSE,
+  covariates = NULL,
   ...
 )
 
@@ -30,6 +39,7 @@ mixomics_splsda_optimize(
   nrepeat = 50,
   plot_scores = TRUE,
   all_features = FALSE,
+  covariates = NULL,
   ...
 )
 }
@@ -44,6 +54,9 @@ mixomics_splsda_optimize(
 be drawn, with both prediction surface and ellipses}
 
 \item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
+
+\item{covariates}{character, column names of pData to use as covariates in the model, in addition to
+molecular features}
 
 \item{...}{any parameters passed to \code{mixOmics::plsda}}
 

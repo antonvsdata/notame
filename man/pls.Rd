@@ -7,7 +7,15 @@
 \alias{mixomics_spls_optimize}
 \title{PLS}
 \usage{
-mixomics_pls(object, y, ncomp, plot_scores = TRUE, all_features = FALSE, ...)
+mixomics_pls(
+  object,
+  y,
+  ncomp,
+  plot_scores = TRUE,
+  all_features = FALSE,
+  covariates = NULL,
+  ...
+)
 
 mixomics_pls_optimize(
   object,
@@ -17,6 +25,7 @@ mixomics_pls_optimize(
   nrepeat = 50,
   plot_scores = TRUE,
   all_features = FALSE,
+  covariates = NULL,
   ...
 )
 
@@ -29,6 +38,7 @@ mixomics_spls_optimize(
   nrepeat = 50,
   plot_scores = TRUE,
   all_features = FALSE,
+  covariates = NULL,
   ...
 )
 }
@@ -43,6 +53,9 @@ mixomics_spls_optimize(
 be drawn, colored by the Y-variable. Only really makes sense if y is a single variable}
 
 \item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
+
+\item{covariates}{character, column names of pData to use as covariates in the model, in addition to
+molecular features}
 
 \item{...}{any parameters passed to \code{mixOmics::pls} or \code{mixOmics::spls}}
 

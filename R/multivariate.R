@@ -1,4 +1,6 @@
 
+
+
 # ----------- Random Forest ----------------
 
 #' Fit Random Forest
@@ -8,8 +10,10 @@
 #' After fitting the random forest, use rf_importance as a shortcut for getting the feature importance in random forest prediction.
 #'
 #' @param object a MetaboSet object
-#' @param response character, column name of phenoData giving response
+#' @param y character, column name of phenoData giving the dependent variable of the model
 #' @param all_features logical, should all features be included in the model? if FALSE, flagged features are left out
+#' @param covariates character, column names of pData to use as covariates in the model, in addition to
+#' molecular features
 #' @param importance Should importance of features be assessed?
 #' @param ... other parameters passed to \code{randomForest::randomForest}
 #'
@@ -18,19 +22,21 @@
 #' @seealso \code{\link[randomForest]{randomForest}}, \code{\link{importance_rf}}
 #'
 #' @examples
-#' rf <- fit_rf(example_set, response = "Group")
+#' rf <- fit_rf(example_set, y = "Group")
 #' rf
 #' importance_rf(rf)
 #'
 #' @export
-fit_rf <- function(object, response, all_features = FALSE, importance = TRUE, ...) {
+fit_rf <- function(object, y, all_features = FALSE, covariates = NULL, importance = TRUE, ...) {
   if (!requireNamespace("randomForest", quietly = TRUE)) {
       stop("Package \"randomForest\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+
   object <- drop_flagged(object, all_features = all_features)
 
-  rf <- randomForest::randomForest(x = t(exprs(object)), y = pData(object)[, response], importance = importance, ...)
+  X <- combined_data(object)[, c(featureNames(object), covariates)]
+  rf <- randomForest::randomForest(x = X, y = pData(object)[, y], importance = importance, ...)
 
   rf
 }
@@ -62,6 +68,23 @@ importance_rf <- function(rf) {
 
 
 # ------------------ mixOmics PLS ---------------------------
+
+#' A helper function for extracting predictor matrix with covariates
+#'
+#' @param object a MetaboSet object
+#' @param covariates character, column names of pData to use as covariates in the model, in addition to
+#' molecular features
+get_x <- function(object, covariates) {
+  # Convert covariates to numeric
+  if (any(!sapply(pData(object)[, covariates], looks_numeric))) {
+    stop("All covariates should be convertable to numeric")
+  }
+  pData(object)[covariates] <- lapply(pData(object)[covariates], as.numeric)
+
+  # Extract X
+  X <- combined_data(object)[, c(featureNames(object), covariates)]
+  X
+}
 
 #' Plot points in PLS space
 #'
@@ -109,6 +132,8 @@ plot_pls <- function(model, Y, y, title) {
 #' @param plot_scores logical, if TRUE, a scatter plot with the first two PLS-components as x and y-axis will
 #' be drawn, colored by the Y-variable. Only really makes sense if y is a single variable
 #' @param all_features logical, should all features be included in the model? if FALSE, flagged features are left out
+#' @param covariates character, column names of pData to use as covariates in the model, in addition to
+#' molecular features
 #' @param n_features the number of features to try for each component
 #' @param ... any parameters passed to \code{mixOmics::pls} or \code{mixOmics::spls}
 #'
@@ -128,15 +153,15 @@ NULL
 
 #' @rdname pls
 #' @export
-mixomics_pls <- function(object, y, ncomp, plot_scores = TRUE, all_features = FALSE, ...) {
+mixomics_pls <- function(object, y, ncomp, plot_scores = TRUE, all_features = FALSE,
+                         covariates = NULL, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
   object <- drop_flagged(object, all_features = all_features)
 
-  # Extract X and Y matrices
-  X <- t(exprs(object))
+  X <- get_x(object, covariates)
   Y <- pData(object)[y]
 
   log_text("Fitting PLS")
@@ -152,14 +177,14 @@ mixomics_pls <- function(object, y, ncomp, plot_scores = TRUE, all_features = FA
 #'
 #' @export
 mixomics_pls_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plot_scores = TRUE,
-                                  all_features = FALSE, ...) {
+                                  all_features = FALSE, covariates = NULL, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
 
   pls_res <- mixomics_pls(object = object, y = y, ncomp = ncomp, plot_scores = FALSE,
-                          all_features = all_features, ...)
+                          all_features = all_features, covariates = covariates, ...)
 
   log_text("Evaluating PLS performance")
   perf_pls <- mixOmics::perf(pls_res, validation = "Mfold", folds = folds, nrepeat = nrepeat)
@@ -200,7 +225,8 @@ mixomics_pls_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plo
   log_text(paste0("Choosing a PLS model with ", ncomp_opt, " component(s) based on the minimal MSE\n",
                  "Take a look at the plot and make sure this is the correct number of components"))
 
-  mixomics_pls(object = object, y = y, ncomp = ncomp_opt, plot_scores = plot_scores, ...)
+  mixomics_pls(object = object, y = y, ncomp = ncomp_opt, plot_scores = plot_scores,
+               covariates = covariates, ...)
 }
 
 #' @rdname pls
@@ -208,7 +234,7 @@ mixomics_pls_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plo
 #' @export
 mixomics_spls_optimize <- function(object, y, ncomp,
                                    n_features = c(1:10, seq(20, 300, 10)), folds = 5, nrepeat = 50,
-                                   plot_scores = TRUE, all_features = FALSE, ...) {
+                                   plot_scores = TRUE, all_features = FALSE, covariates = NULL, ...) {
 
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
@@ -216,7 +242,7 @@ mixomics_spls_optimize <- function(object, y, ncomp,
   }
   object <- drop_flagged(object, all_features = all_features)
 
-  X <- t(exprs(object))
+  X <- get_x(object, covariates)
   Y <- pData(object)[y]
 
   # Test different number of components and features with cross validation
@@ -276,6 +302,8 @@ plot_plsda <- function(model, Y, title, dist = "max.dist") {
 #' @param plot_scores logical, if TRUE, a scatter plot with the first two PLS-components as x and y-axis will
 #' be drawn, with both prediction surface and ellipses
 #' @param all_features logical, should all features be included in the model? if FALSE, flagged features are left out
+#' @param covariates character, column names of pData to use as covariates in the model, in addition to
+#' molecular features
 #' @param ... any parameters passed to \code{mixOmics::plsda}
 #'
 #' @return an object of class "mixo_plsda"
@@ -297,15 +325,15 @@ NULL
 
 #' @rdname pls_da
 #' @export
-mixomics_plsda <- function(object, y, ncomp, plot_scores = TRUE, all_features = FALSE, ...) {
+mixomics_plsda <- function(object, y, ncomp, plot_scores = TRUE, all_features = FALSE,
+                           covariates = NULL, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
   object <- drop_flagged(object, all_features = all_features)
 
-  # Extract X and Y matrices
-  X <- t(exprs(object))
+  X <- get_x(object, covariates)
   Y <- pData(object)[, y]
   # Y needs to be a factor, this ensures the levels are right
   if (class(Y) != "factor") {
@@ -325,13 +353,13 @@ mixomics_plsda <- function(object, y, ncomp, plot_scores = TRUE, all_features = 
 #' @rdname pls_da
 #' @export
 mixomics_plsda_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plot_scores = TRUE,
-                                    all_features = FALSE, ...) {
+                                    all_features = FALSE, covariates = NULL, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
   plsda_res <- mixomics_plsda(object = object, y = y, ncomp = ncomp, plot_scores = FALSE,
-                              all_features = all_features, ...)
+                              all_features = all_features, covariates = covariates, ...)
 
   log_text("Evaluating PLS-DA performance")
   perf_plsda <- mixOmics::perf(plsda_res, validation = "Mfold", folds = 5, auc = TRUE, nrepeat = 50)
@@ -356,14 +384,15 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
                                      n_features = c(1:10, seq(20, 300, 10)),
                                      folds = 5, nrepeat = 50,
                                      plot_scores = TRUE,
-                                     all_features = FALSE, ...) {
+                                     all_features = FALSE,
+                                     covariates = NULL, ...) {
   if (!requireNamespace("mixOmics", quietly = TRUE)) {
       stop("Package \"mixOmics\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   object <- drop_flagged(object, all_features = all_features)
-  # Extract X and Y matrices
-  X <- t(exprs(object))
+
+  X <- get_x(object, covariates)
   Y <- pData(object)[, y]
   # Y needs to be a factor, this ensures the levels are right
   if (class(Y) != "factor") {
@@ -410,6 +439,8 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #' @param multi_level whether multi-level modeling should be applied, see Details
 #' @param multi_level_var the variable for splitting the data in multi-level modeling
 #' @param all_features logical, should all features be included in the model? if FALSE, flagged features are left out
+#' @param covariates character, column names of pData to use as covariates in the model, in addition to
+#' molecular features
 #' @param nRep Number of repetitions of double CV, parameter of MUVR
 #' @param nOuter Number of outer CV loop segments, parameter of MUVR
 #' @param nInner Number of inner CV loop segments, parameter of MUVR
@@ -432,7 +463,7 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #'
 #' @export
 muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, multi_level_var = NULL,
-                          all_features = FALSE,
+                          covariates = NULL, all_features = FALSE,
                           nRep = 5, nOuter = 6, nInner = nOuter - 1,
                           varRatio = 0.75, method = c("PLS", "RF"), ...) {
 
@@ -444,12 +475,17 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
 
   object <- drop_flagged(object, all_features = all_features)
 
+  if (any(!sapply(pData(object)[, covariates], looks_numeric))) {
+    stop("All covariates should be convertable to numeric")
+  }
+  pData(object)[covariates] <- lapply(pData(object)[covariates], as.numeric)
+
   # Classic MUVR
   if (!multi_level) {
     if (is.null(y)) {
       stop("y variable needs to be defined unless doing multi-level modeling")
     }
-    X <- t(exprs(object))
+    X <- combined_data(object)[, c(featureNames(object), covariates)]
     Y <- pData(object)[, y]
 
     # Independent samples
@@ -479,8 +515,8 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
     # Compute effect matrix
     cd <- combined_data(object)
     cd <- cd[order(cd[, id]), ]
-    X1 <- cd[cd[, multi_level_var] == levels(ml_var)[1], featureNames(object)]
-    X2 <- cd[cd[, multi_level_var] == levels(ml_var)[2], featureNames(object)]
+    X1 <- cd[cd[, multi_level_var] == levels(ml_var)[1], c(featureNames(object), covariates)]
+    X2 <- cd[cd[, multi_level_var] == levels(ml_var)[2], c(featureNames(object), covaraites)]
     X <- X2 - X1
     rownames(X) <- unique(cd[, id])
 

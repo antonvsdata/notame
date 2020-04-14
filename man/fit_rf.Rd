@@ -4,14 +4,24 @@
 \alias{fit_rf}
 \title{Fit Random Forest}
 \usage{
-fit_rf(object, response, all_features = FALSE, importance = TRUE, ...)
+fit_rf(
+  object,
+  y,
+  all_features = FALSE,
+  covariates = NULL,
+  importance = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{response}{character, column name of phenoData giving response}
+\item{y}{character, column name of phenoData giving the dependent variable of the model}
 
 \item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
+
+\item{covariates}{character, column names of pData to use as covariates in the model, in addition to
+molecular features}
 
 \item{importance}{Should importance of features be assessed?}
 
@@ -26,7 +36,7 @@ both for classification and regression. For more information, see the documentat
 After fitting the random forest, use rf_importance as a shortcut for getting the feature importance in random forest prediction.
 }
 \examples{
-rf <- fit_rf(example_set, response = "Group")
+rf <- fit_rf(example_set, y = "Group")
 rf
 importance_rf(rf)
 
