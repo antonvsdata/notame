@@ -34,6 +34,7 @@ summary_statistics <- function(object, grouping_cols = NA) {
     f_levels <- data[, feature]
     if (is.na(grouping_cols)[1]) {
       groups <- rep(1, nrow(data))
+      group_names <- ""
     } else {
       # Single grouping column
       if (length(grouping_cols) == 1) {
@@ -66,12 +67,16 @@ summary_statistics <- function(object, grouping_cols = NA) {
                  max = finite_max)
     # Initialize named vector for the results
     result_row <- rep(0, times = length(group_names) * length(funs))
-    var_names <- expand.grid(names(funs), group_names)
-    names(result_row) <- paste(var_names$Var2, var_names$Var1, sep = "_")
+    if (!is.na(grouping_cols[1])) {
+      var_names <- expand.grid(names(funs), group_names)
+      names(result_row) <- paste(var_names$Var2, var_names$Var1, sep = "_")
+    } else {
+      names(result_row) <- names(funs)
+    }
     # Compute statistics
     for (fname in names(funs)) {
       tmp <- tapply(f_levels, groups, funs[[fname]])
-      if (is.na(grouping_col)) {
+      if (is.na(grouping_cols[1])) {
         result_row[fname] <- tmp[1]
       } else {
         result_row[paste(group_names, fname, sep = "_")] <- tmp
