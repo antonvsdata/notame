@@ -4,7 +4,13 @@
 \alias{visualizations}
 \title{Write all relevant visualizations to pdf}
 \usage{
-visualizations(object, prefix, perplexity = 30, merge = FALSE)
+visualizations(
+  object,
+  prefix,
+  perplexity = 30,
+  merge = FALSE,
+  remove_singles = FALSE
+)
 }
 \arguments{
 \item{object}{A MetaboSet object}
@@ -14,6 +20,9 @@ visualizations(object, prefix, perplexity = 30, merge = FALSE)
 \item{perplexity}{perplexity for t-SNE plots}
 
 \item{merge}{logical, whether the files should be merged to a single PDF, see Details}
+
+\item{remove_singles}{logical, whether to remove single plot files after merging.
+Only used if \code{merge = TRUE}}
 }
 \description{
 A wrapper around all the major visualization functions, used for visualizing data between
@@ -28,32 +37,37 @@ so that the underlying system command will find the files.
 The type of visualizations to be saved depends on the type of object.
 Here is a comprehensive list of the visualizations:
 \itemize{
-\item Distribution of quality metrics and flags
-\item Boxplots of each sample in injection order
-\item PCA scores plot of samples colored by injection order
-\item t-SNE plot of samples colored by injection order
+\item Distribution of quality metrics and flags \code{\link{plot_quality}}
+\item Boxplots of each sample in injection order \code{\link{plot_sample_boxplots}}
+\item PCA scores plot of samples colored by injection order \code{\link{plot_pca}}
+\item t-SNE plot of samples colored by injection order \code{\link{plot_tsne}}
 \item If the object has over 60 samples, hexbin versions of the PCA and t-SNE plots above
+\code{\link{plot_pca_hexbin}}, \code{\link{plot_tsne_hexbin}}
 \item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by group if present
-\item heat map of intersample distances, ordered by hierarchical clustering
+\code{\link{plot_dendrogram}}
+\item heat map of intersample distances, ordered by hierarchical clustering \code{\link{plot_sample_heatmap}}
 \item If the object has QC samples: \itemize{
-\item Density function of the intersample distances in both QCs and biological samples
+\item Density function of the intersample distances in both QCs and biological samples \code{\link{density_plot}}
 \item Histograms of p-values from linear regression of features against injection order
-in both QCs and biological samples}
+in both QCs and biological samples \code{\link{plot_p_histogram}}}
 \item If the object has a group column: \itemize{
-\item PCA and tSNE plots with points shaped and colored by group
+\item PCA and tSNE plots with points shaped and colored by group \code{\link{plot_pca}}, \code{\link{plot_tsne}}
 }
 \item If the object has a time column: \itemize{
-\item PCA and tSNE plots with points shaped and colored by time
+\item PCA and tSNE plots with points shaped and colored by time \code{\link{plot_pca}}, \code{\link{plot_tsne}}
 \item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by time point
+\code{\link{plot_dendrogram}}
 }
 \item If the object has a group column OR a time column: \itemize{
-\item Boxplots of samples ordered and colored by group and/or time
+\item Boxplots of samples ordered and colored by group and/or time \code{\link{plot_sample_boxplots}}
 }
 \item If the object has a group column AND a time column: \itemize{
 \item PCA and tSNE plots with points shaped by group and colored by time
+\code{\link{plot_pca}}, \code{\link{plot_tsne}}
 }
 \item If the object has a time column AND a subject column: \itemize{
 \item PCA and tSNE plots with arrows connecting the samples of each subject in time point order
+\code{\link{plot_pca_arrows}}, \code{\link{plot_tsne_arrows}}
 }
 }
 }

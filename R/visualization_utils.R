@@ -31,6 +31,8 @@ save_plot <- function(p, file, ...) {
 #' @param prefix character, a file path prefix added to the file paths
 #' @param perplexity perplexity for t-SNE plots
 #' @param merge logical, whether the files should be merged to a single PDF, see Details
+#' @param remove_singles logical, whether to remove single plot files after merging.
+#' Only used if \code{merge = TRUE}
 #'
 #' @details If \code{merge} is \code{TRUE}, then a file containing all the visualizations
 #' named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
@@ -40,37 +42,43 @@ save_plot <- function(p, file, ...) {
 #' The type of visualizations to be saved depends on the type of object.
 #' Here is a comprehensive list of the visualizations:
 #' \itemize{
-#' \item Distribution of quality metrics and flags
-#' \item Boxplots of each sample in injection order
-#' \item PCA scores plot of samples colored by injection order
-#' \item t-SNE plot of samples colored by injection order
+#' \item Distribution of quality metrics and flags \code{\link{plot_quality}}
+#' \item Boxplots of each sample in injection order \code{\link{plot_sample_boxplots}}
+#' \item PCA scores plot of samples colored by injection order \code{\link{plot_pca}}
+#' \item t-SNE plot of samples colored by injection order \code{\link{plot_tsne}}
 #' \item If the object has over 60 samples, hexbin versions of the PCA and t-SNE plots above
+#' \code{\link{plot_pca_hexbin}}, \code{\link{plot_tsne_hexbin}}
 #' \item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by group if present
-#' \item heat map of intersample distances, ordered by hierarchical clustering
+#' \code{\link{plot_dendrogram}}
+#' \item heat map of intersample distances, ordered by hierarchical clustering \code{\link{plot_sample_heatmap}}
 #' \item If the object has QC samples: \itemize{
-#' \item Density function of the intersample distances in both QCs and biological samples
+#' \item Density function of the intersample distances in both QCs and biological samples \code{\link{density_plot}}
 #' \item Histograms of p-values from linear regression of features against injection order
-#' in both QCs and biological samples}
+#' in both QCs and biological samples \code{\link{plot_p_histogram}}}
 #' \item If the object has a group column: \itemize{
-#' \item PCA and tSNE plots with points shaped and colored by group
+#' \item PCA and tSNE plots with points shaped and colored by group \code{\link{plot_pca}}, \code{\link{plot_tsne}}
 #' }
 #' \item If the object has a time column: \itemize{
-#' \item PCA and tSNE plots with points shaped and colored by time
+#' \item PCA and tSNE plots with points shaped and colored by time \code{\link{plot_pca}}, \code{\link{plot_tsne}}
 #' \item Dendrogram of samples ordered by hierarchical clustering, sample labels colored by time point
+#' \code{\link{plot_dendrogram}}
 #' }
 #' \item If the object has a group column OR a time column: \itemize{
-#' \item Boxplots of samples ordered and colored by group and/or time
+#' \item Boxplots of samples ordered and colored by group and/or time \code{\link{plot_sample_boxplots}}
 #' }
 #' \item If the object has a group column AND a time column: \itemize{
 #' \item PCA and tSNE plots with points shaped by group and colored by time
+#' \code{\link{plot_pca}}, \code{\link{plot_tsne}}
 #' }
 #' \item If the object has a time column AND a subject column: \itemize{
 #' \item PCA and tSNE plots with arrows connecting the samples of each subject in time point order
+#' \code{\link{plot_pca_arrows}}, \code{\link{plot_tsne_arrows}}
 #' }
 #' }
 #'
 #' @export
-visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
+visualizations <- function(object, prefix, perplexity = 30, merge = FALSE,
+                           remove_singles = FALSE) {
 
   # Record file names for merging
   file_names <- ""
@@ -163,20 +171,32 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE) {
     output <- NULL
     if (os == "Windows") {
       # Merge files
-      output <- system(paste("pdftk", file_names, "cat output", merged_file))
+      output <- shell(paste("pdftk", file_names, "cat output", merged_file), intern = TRUE)
     } else if (os == "Linux"){
-      output <- system(paste("pdfunite", file_names, merged_file))
+      output <- shell(paste("pdfunite", file_names, merged_file), intern = TRUE)
     } else if (os == "Darwin") {
-      output <- system(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o',
-                             merged_file, file_names))
+      output <- shell(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o',
+                             merged_file, file_names), intern = TRUE)
     } else {
       log_text("Unfortunately your operating system is not yet supported by the merging")
       return()
     }
-    if (length(output) & output != "0") {
+    if (length(output) && output != "0") {
       log_text(paste("Merging plots resulted in the following message:", paste0(output, collapse = " ")))
     } else {
       log_text(paste("Attempted merging plots to", merged_file))
+      if (remove_singles) {
+        log_text("Removing single plot files")
+        if (os == "windows") {
+          output2 <- shell(paste("del", file_names), intern = TRUE)
+        } else {
+          output2 <- shell(paste("rm", file_names), intern = TRUE)
+        }
+        if (length(output2) && output2 != "0") {
+          log_text(paste("Removing single plot files resulted in the following message:",
+                         paste0(output2, collapse = " ")))
+        }
+      }
     }
   }
 }
