@@ -173,9 +173,9 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE,
       # Merge files
       output <- shell(paste("pdftk", file_names, "cat output", merged_file), intern = TRUE)
     } else if (os == "Linux"){
-      output <- shell(paste("pdfunite", file_names, merged_file), intern = TRUE)
+      output <- system(paste("pdfunite", file_names, merged_file), intern = TRUE)
     } else if (os == "Darwin") {
-      output <- shell(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o',
+      output <- system(paste('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o',
                              merged_file, file_names), intern = TRUE)
     } else {
       log_text("Unfortunately your operating system is not yet supported by the merging")
@@ -190,7 +190,7 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE,
         if (os == "windows") {
           output2 <- shell(paste("del", file_names), intern = TRUE)
         } else {
-          output2 <- shell(paste("rm", file_names), intern = TRUE)
+          output2 <- system(paste("rm", file_names), intern = TRUE)
         }
         if (length(output2) && output2 != "0") {
           log_text(paste("Removing single plot files resulted in the following message:",
