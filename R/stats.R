@@ -294,7 +294,14 @@ perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TR
   cor_results <- foreach::foreach(i = seq_len(nrow(var_pairs)), .combine = rbind) %dopar% {
     x_tmp = var_pairs$x[i]
     y_tmp = var_pairs$y[i]
-    cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
+    cor_tmp <- NULL
+    tryCatch({
+      cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
+    }, error = function(e) cat(paste0(x_tmp, " vs ", y_tmp, ": ", e$message, "\n")))
+    if (is.null(cor_tmp)) {
+      cor_tmp <- list(estimate = NA,
+                      p.value = NA)
+    }
     data.frame(X = x_tmp, Y = y_tmp,
                Correlation_coefficient = cor_tmp$estimate,
                Correlation_P = cor_tmp$p.value,
