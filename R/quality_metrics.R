@@ -169,3 +169,44 @@ flag_detection <- function(object, qc_limit = 0.7, group_limit = 0.5, group = gr
 
   object
 }
+
+
+#' Flag contaminants
+#'
+#' Flags contaminant features by comparing the median values of blanks and biological samples.
+#' Biological sampels are defined as samples that are not marked as blanks and are not QCs.
+#' If the median of blanks > the median of biological samples times a set ratio, the feature is
+#' flagged as contaminant
+#'
+#' @param object a MetaboSet object
+#' @param blank_col character, the column name in pData with blank labels
+#' @param blank_label character, the label for blank samples in blank_col
+#' @param flag_thresh numeric, the ratio threshold for flagging contaminants.
+#' If the median of blanks > flag_thresh * median of biological samples, the feature gets flagged.
+#' @param flag_label character, the label used when flagging contaminants. Can be changed if
+#' sample processing contaminants and carryover contaminants are flagged separately.
+#'
+#' @export
+flag_contaminants <- function(object, blank_col, blank_label, flag_thresh = 0.05,
+                              flag_label = "Contaminant") {
+
+  blanks <- object[, pData(object)[, blank_col] == blank_label]
+  samples <- object[, object$QC != "QC" & pData(object)[, blank_col] != blank_label]
+
+  blank_median <- apply(exprs(blanks), 1, finite_median)
+  sample_median <- apply(exprs(samples), 1, finite_median)
+  blank_flag <- blank_median/sample_median > flag_thresh
+
+  idx <- is.na(flag(object)) & !is.na(blank_flag)
+  idx <- idx & blank_flag
+  flag(object)[idx] <- flag_label
+
+  percentage <- scales::percent(sum(flag(object) == flag_label, na.rm = TRUE)/nrow(object))
+  log_text(paste0("\n", percentage, " of features flagged as contaminants"))
+
+  blank_ratio <- data.frame(Feature_ID = featureNames(object), Blank_ratio = blank_median/sample_median,
+                            stringsAsFactors = FALSE)
+  object <- join_fData(object, blank_ratio)
+
+  object
+}
