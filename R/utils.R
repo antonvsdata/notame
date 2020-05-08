@@ -49,7 +49,7 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
 
   if (!missing(github)) {
     for (pckg in github) {
-      if (!requireNamespace(pckg, quietly = TRUE)) {
+      if (!requireNamespace(strsplit(pckg, split = "/")[[1]][2], quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from GitHub\n"))
         tryCatch({
           devtools::install_github(pckg, ...)
@@ -60,7 +60,7 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
 
   if (!missing(gitlab)) {
     for (pckg in gitlab) {
-      if (!requireNamespace(pckg, quietly = TRUE)) {
+      if (!requireNamespace(strsplit(pckg, split = "/")[[1]][2], quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from GitLab\n"))
         tryCatch({
           devtools::install_gitlab(pckg, ...)
