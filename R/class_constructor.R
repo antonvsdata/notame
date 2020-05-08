@@ -345,7 +345,7 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
 
   pheno_data <- Biobase::AnnotatedDataFrame(data=pheno_data)
   if (!"Flag" %in% colnames(feature_data)) {
-    cat("Initializing the object with unflagged features")
+    cat("Initializing the object with unflagged features\n")
     feature_data$Flag <- NA
   }
   feature_data <- check_feature_data(feature_data)
