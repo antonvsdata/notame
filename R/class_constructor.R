@@ -663,3 +663,28 @@ setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY")
                    }
                  })
 
+
+setMethod("sampleNames<-",
+          signature=signature(object="MetaboSet", value="ANY"),
+          function(object, value) {
+            pd <- phenoData(object)
+            sampleNames(pd) <- value
+            ad <- assayData(object)
+            sampleNames(ad) <- value
+            prd <- protocolData(object)
+            if (nrow(prd) == 0) {
+              prd <- pd[,integer(0)]
+            } else {
+              sampleNames(prd) <- value
+            }
+            object@phenoData <- pd
+            object@protocolData <- prd
+            object@assayData <- ad
+            pData(object)$Sample_ID <- value
+            if (validObject(object)) {
+              return(object)
+            }
+          })
+
+
+
