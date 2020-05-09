@@ -1,8 +1,8 @@
 # notame - Workflow for non-targeted LC-MS metabolic profiling 
 
-This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics (notame, see?). Notame was developed at the research group of nutritional metabolomics at University of Eastern Finland. We use notame as a way to bundle together all the preprocessing methods we use for our non-targeted LC-MS metabolomics data, so it mainly consists of methods found in other packages, and a bunch of visualizations we have found useful.
+This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics (notame, see?). Notame was developed at the [research group of nutritional metabolomics at University of Eastern Finland](https://www3.uef.fi/en/web/kttravi/metabolomics2) and [Afekta Technologies](https://afekta.com/), a spinoff metabolomics company. We use notame as a way to bundle together all the preprocessing methods we use for our non-targeted LC-MS metabolomics data, so it mainly consists of methods found in other packages, and a bunch of visualizations we have found useful.
 
-**UPDATE:** The associated paper is now published! For more detailed information on how we run our LC-MS experiments and where this package fits in our workflow, you can find the paper here: ["notame": Workflow for Non-Targeted LC-MS Metabolic Profiling](https://www.mdpi.com/2218-1989/10/4/135)
+**UPDATE:** The associated paper is now published! For more detailed information on how we run our LC-MS experiments and where this package fits in our workflow, you can find the paper here: ["notame": Workflow for Non-Targeted LC-MS Metabolic Profiling](https://www.mdpi.com/2218-1989/10/4/135). A huge thank you for everyone involved in the paper!
 
 ### What does notame do acutallly?
 
