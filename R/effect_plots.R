@@ -12,6 +12,7 @@
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
 #' @param id character, name of the column containing subject IDs
+#' @param title,subtitle column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle
 #' @param color character, the column name to color the lines by (optional)
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
@@ -22,6 +23,7 @@
 #' @export
 save_subject_line_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                     x = time_col(object), id = subject_col(object),
+                                    title = "Feature_ID", subtitle = NULL,
                                     color = NA, color_scale = getOption("notame.color_scale_dis"), facet = NULL) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -44,7 +46,7 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
     fname <- Biobase::featureNames(object)[i]
 
     p <- ggplot(data, aes_string(x = x, y = fname)) +
-      labs(title = fname, y = "Abundance") +
+      labs(title = fData(object)[i, title], subtitle = fData(object)[i, subtitle], y = "Abundance") +
       theme_bw()
 
     if (is.na(color)) {
@@ -87,6 +89,7 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
 #' @param color character, name of the column to be used for coloring
+#' @param title,subtitle column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle
 #' @param color_scale the color scale as returned by a ggplot function
 #'
 #' @examples
@@ -101,6 +104,7 @@ save_subject_line_plots <- function(object, all_features = FALSE, file, width = 
 #' @export
 save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                 x = group_col(object), color = group_col(object),
+                                title = "Feature_ID", subtitle = NULL,
                                 color_scale =  getOption("notame.color_scale_dis")) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -121,7 +125,7 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
                    geom = "point", shape = 18, size = 3,
                    position = position_dodge(0.6)) +
       color_scale +
-      labs(title = fname, y = "Abundance") +
+      labs(title = fData(object)[i, title], subtitle = fData(object)[i, subtitle], y = "Abundance") +
       theme_bw()
 
     plot(p)
@@ -144,6 +148,7 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
 #' @param add_boxplots logical, should boxplots be added to the figure?
+#' @param title,subtitle column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
 #'
@@ -159,6 +164,7 @@ save_group_boxplots <- function(object, all_features = FALSE, file, width = 8, h
 #' @export
 save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                 x = group_col(object),add_boxplots = FALSE,
+                                title = "Feature_ID", subtitle = NULL,
                                 color = group_col(object), color_scale =  NULL){
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -185,7 +191,7 @@ save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, h
     p <- p +
       ggbeeswarm::geom_beeswarm() +
       color_scale +
-      labs(title = fname, y = "Abundance") +
+      labs(title = fData(object)[i, title], subtitle = fData(object)[i, subtitle], y = "Abundance") +
       theme_bw()
 
 
@@ -212,6 +218,7 @@ save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, h
 #' @param color_scale the color scale as returned by a ggplot function.
 #' Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape character, name of the column used for shape
+#' @param title,subtitle column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle
 #' @param shape_scale the shape scale as returned by a ggplot function
 #'
 #' @examples
@@ -225,11 +232,12 @@ save_beeswarm_plots <- function(object, all_features = FALSE, file, width = 8, h
 #'
 #' @export
 save_scatter_plots <- function(object, x = group_col(object), file,
-                                       width = 8, height = 6,
-                                       all_features = FALSE,
-                                       color = NULL, color_scale =  NA,
-                                       shape = NULL,
-                                       shape_scale = getOption("notame.shape_scale")) {
+                               width = 8, height = 6,
+                               all_features = FALSE,
+                               color = NULL, color_scale =  NA,
+                               shape = NULL,
+                               title = "Feature_ID", subtitle = NULL,
+                               shape_scale = getOption("notame.shape_scale")) {
 
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -247,7 +255,7 @@ save_scatter_plots <- function(object, x = group_col(object), file,
     p <- scatter_plot(data = data, x = x, y = fname,
                       color = color, color_scale = color_scale,
                       shape = shape, shape_scale = shape_scale,
-                      title = fname, ylab = "Abundance")
+                      title = fData(object)[i, title], subtitle = fData(object)[i, subtitle], ylab = "Abundance")
 
     plot(p)
 
@@ -270,6 +278,7 @@ save_scatter_plots <- function(object, x = group_col(object), file,
 #' @param width,height width and height of the plots in inches
 #' @param x character, name of the column to be used as x-axis
 #' @param group character, name of the column containing group information, used for coloring
+#' @param title,subtitle column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle
 #' @param fun.data passed to ggplot2::stat_summary and used for errorbars,
 #' "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."
 #' @param fun.ymin,fun.y,fun.ymax Alternative to fun.data, passed to ggplot2::stat_summary,
@@ -285,6 +294,7 @@ save_scatter_plots <- function(object, x = group_col(object), file,
 #' @export
 save_group_lineplots <- function(object, all_features = FALSE, file, width = 8, height = 6,
                                  x = time_col(object), group = group_col(object),
+                                 title = "Feature_ID", subtitle = NULL,
                                  fun.data = "mean_cl_boot", fun.y = NULL,
                                  fun.ymin = NULL, fun.ymax = NULL, position_dodge_amount = 0.2,
                                  color_scale =  getOption("notame.color_scale_dis")) {
@@ -323,7 +333,7 @@ save_group_lineplots <- function(object, all_features = FALSE, file, width = 8, 
                    geom = "line",
                    position = position_dodge(position_dodge_amount), size = 0.5,
                    fun.y = fun.y, fun.ymin = fun.ymin, fun.ymax = fun.ymax) +
-      labs(title = fname, y = "Abundance") +
+      labs(title = fData(object)[i, title], subtitle = fData(object)[i, subtitle], y = "Abundance") +
       color_scale +
       theme_bw()
 

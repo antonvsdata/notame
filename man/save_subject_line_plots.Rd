@@ -12,6 +12,8 @@ save_subject_line_plots(
   height = 6,
   x = time_col(object),
   id = subject_col(object),
+  title = "Feature_ID",
+  subtitle = NULL,
   color = NA,
   color_scale = getOption("notame.color_scale_dis"),
   facet = NULL
@@ -29,6 +31,8 @@ save_subject_line_plots(
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{id}{character, name of the column containing subject IDs}
+
+\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
 
 \item{color}{character, the column name to color the lines by (optional)}
 

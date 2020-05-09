@@ -12,6 +12,8 @@ save_beeswarm_plots(
   height = 6,
   x = group_col(object),
   add_boxplots = FALSE,
+  title = "Feature_ID",
+  subtitle = NULL,
   color = group_col(object),
   color_scale = NULL
 )
@@ -28,6 +30,8 @@ save_beeswarm_plots(
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{add_boxplots}{logical, should boxplots be added to the figure?}
+
+\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
 
 \item{color}{character, name of the column to be used for coloring}
 

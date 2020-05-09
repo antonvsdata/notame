@@ -12,6 +12,8 @@ save_group_lineplots(
   height = 6,
   x = time_col(object),
   group = group_col(object),
+  title = "Feature_ID",
+  subtitle = NULL,
   fun.data = "mean_cl_boot",
   fun.y = NULL,
   fun.ymin = NULL,
@@ -32,6 +34,8 @@ save_group_lineplots(
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{group}{character, name of the column containing group information, used for coloring}
+
+\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
 
 \item{fun.data}{passed to ggplot2::stat_summary and used for errorbars,
 "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."}

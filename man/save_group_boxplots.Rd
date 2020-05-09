@@ -12,6 +12,8 @@ save_group_boxplots(
   height = 6,
   x = group_col(object),
   color = group_col(object),
+  title = "Feature_ID",
+  subtitle = NULL,
   color_scale = getOption("notame.color_scale_dis")
 )
 }
@@ -27,6 +29,8 @@ save_group_boxplots(
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{color}{character, name of the column to be used for coloring}
+
+\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 }

@@ -14,6 +14,8 @@ save_scatter_plots(
   color = NULL,
   color_scale = NA,
   shape = NULL,
+  title = "Feature_ID",
+  subtitle = NULL,
   shape_scale = getOption("notame.shape_scale")
 )
 }
@@ -35,6 +37,8 @@ save_scatter_plots(
 Set to NA to choose the appropriate scale based on the class of the coloring variable.}
 
 \item{shape}{character, name of the column used for shape}
+
+\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 }
