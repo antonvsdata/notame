@@ -125,14 +125,15 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE,
     save_name(plot_tsne_hexbin, "tSNE_hexbin", perplexity = perplexity)
   }
 
-  # If grouped
-  if (!is.na(group_col(object))) {
+  # If not grouped, plot PCA and t-SNE on QC information
+  if (is.na(group_col(object))) {
+    group_col(object) <- "QC"
+  }
     set.seed(38)
     save_name(plot_pca, "PCA_group")
 
     set.seed(38)
     save_name(plot_tsne, "tSNE_group", perplexity = perplexity)
-  }
   # Time point
   if (!is.na(time_col(object))) {
     set.seed(38)
