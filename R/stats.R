@@ -356,6 +356,7 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
       stop("Package \"PK\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("PK package was used to compute AUC:", citation("PK"))
   # Start log
   log_text(paste("\nStarting AUC computation at", Sys.time()))
 
@@ -687,6 +688,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       stop("Package \"MuMIn\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("lme4 package was used to fit linear mixed models:", citation("lme4"))
+  add_citation("lmerTest package was used for statistical tests in linear mixed models:", citation("lmerTest"))
+  add_citation("MuMIn package was used to assess R2 values in linear mixed models:", citation("MuMIn"))
 
   # Check that ci_method is one of the accepted choices
   ci_method <- match.arg(ci_method)
@@ -812,6 +816,7 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
       stop("Package \"car\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("car package was used for Levene's test of homoscedasticity:", citation("car"))
   # Start log
   log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
 
@@ -1050,6 +1055,3 @@ perform_pairwise_t_test <- function(object, group = group_col(object), all_featu
 
   results_df
 }
-
-
-

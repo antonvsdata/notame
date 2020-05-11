@@ -8,6 +8,7 @@ pca_helper <- function(object, center, scale, ...) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
   res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
   pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
   R2 <- res_pca@R2
@@ -26,6 +27,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
       stop("Package \"Rtsne\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("Rtsne package was used for t-SNE figures:", citation("Rtsne"))
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
   if (sum(is.na(exprs(prepd))) > 0) {

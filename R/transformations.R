@@ -168,6 +168,7 @@ impute_rf <- function(object, all_features = FALSE, ...) {
       stop("Package \"missForest\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("missFOrest package was used for random forest imputation:", citation("lme4"))
   # Start log
   log_text(paste("\nStarting random forest imputation at", Sys.time()))
   # Drop flagged features

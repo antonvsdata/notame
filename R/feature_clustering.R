@@ -287,6 +287,7 @@ find_clusters <- function(connections, d_thresh = 0.8){
       stop("Package \"igraph\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("igraph package was used to construct networks of features for feature clustering:", citation("igraph"))
 
   # Construct graph from the given edges
   g <- igraph::graph_from_edgelist(as.matrix(connections[1:2]), directed = FALSE)
@@ -369,6 +370,7 @@ plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
       stop("Package \"igraph\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("igraph package was used to construct networks of features for feature clustering:", citation("igraph"))
 
   # Ensure a correct order of the rows
   g <- cluster$graph

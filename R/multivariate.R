@@ -32,6 +32,7 @@ fit_rf <- function(object, y, all_features = FALSE, covariates = NULL, importanc
       stop("Package \"randomForest\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("randomFOrest package was used to fit random forest models:", citation("randomForest"))
 
   object <- drop_flagged(object, all_features = all_features)
 
@@ -159,6 +160,7 @@ mixomics_pls <- function(object, y, ncomp, plot_scores = TRUE, all_features = FA
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("mixOmics package was used to fit PLS models:", citation("mixOmics"))
   object <- drop_flagged(object, all_features = all_features)
 
   X <- get_x(object, covariates)
@@ -182,6 +184,7 @@ mixomics_pls_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, plo
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("mixOmics package was used to fit PLS models:", citation("mixOmics"))
 
   pls_res <- mixomics_pls(object = object, y = y, ncomp = ncomp, plot_scores = FALSE,
                           all_features = all_features, covariates = covariates, ...)
@@ -240,6 +243,7 @@ mixomics_spls_optimize <- function(object, y, ncomp,
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("mixOmics package was used to fit PLS models:", citation("mixOmics"))
   object <- drop_flagged(object, all_features = all_features)
 
   X <- get_x(object, covariates)
@@ -331,6 +335,7 @@ mixomics_plsda <- function(object, y, ncomp, plot_scores = TRUE, all_features = 
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("mixOmics package was used to fit PLS models:", citation("mixOmics"))
   object <- drop_flagged(object, all_features = all_features)
 
   X <- get_x(object, covariates)
@@ -358,6 +363,7 @@ mixomics_plsda_optimize <- function(object, y, ncomp, folds = 5, nrepeat = 50, p
     stop("Package \"mixOmics\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("mixOmics package was used to fit PLS models:", citation("mixOmics"))
   plsda_res <- mixomics_plsda(object = object, y = y, ncomp = ncomp, plot_scores = FALSE,
                               all_features = all_features, covariates = covariates, ...)
 
@@ -390,6 +396,7 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
       stop("Package \"mixOmics\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
+  add_citation("mixOmics package was used to fit PLS models:", citation("mixOmics"))
   object <- drop_flagged(object, all_features = all_features)
 
   X <- get_x(object, covariates)
@@ -472,6 +479,7 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
          https://gitlab.com/CarlBrunius/MUVR",
          call. = FALSE)
   }
+  add_citation("MUVR package was used to fit multivariate models with variable selection:", citation("MUVR"))
 
   object <- drop_flagged(object, all_features = all_features)
 

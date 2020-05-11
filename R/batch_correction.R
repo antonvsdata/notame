@@ -25,6 +25,7 @@ dobc <- function(object, batch, ref, ref_label, ...) {
          https://github.com/rwehrens/BatchCorrMetabolomics.",
          call. = FALSE)
   }
+  add_citation("BatchCorrMetabolomics was used for batch correction:", citation("BatchCorrMetabolomics"))
 
   ref_idx <- which(pData(object)[, ref] == ref_label)
   seq_idx <- object$Injection_order
@@ -74,6 +75,7 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
     stop("Bioconductor package RUVSeq needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("RUVSeq was used for batch correction:", citation("RUVSeq"))
 
   # Transform data to pseudo counts for RUVs
   exprs(object)[exprs(object) == 0] <- 1
@@ -130,6 +132,9 @@ pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center =
     stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
+  add_citation("fpc package was used for Bhattacharyaa distance computation:", citation("fpc"))
+
   # Drop flagged features if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -239,6 +244,7 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
          https://gitlab.com/CarlBrunius/batchCorr.",
          call. = FALSE)
   }
+  add_citation("batchCorr was used for batch correction:", citation("batchCorr"))
 
   # Set working directory for plotting (the bathCorr functions saves plots in the current working directory...)
   if (!is.null(plot_folder)) {
@@ -299,6 +305,7 @@ normalize_batches <- function(object, batch, group, ref_label, ...) {
          https://gitlab.com/CarlBrunius/batchCorr.",
          call. = FALSE)
   }
+  add_citation("batchCorr was used for batch correction:", citation("batchCorr"))
 
   normData <- batchCorr::normalizeBatches(peakTable = t(exprs(object)), batches = pData(object)[, batch],
                                           sampleGroup = pData(object)[, group], refGroup = ref_label, ...)

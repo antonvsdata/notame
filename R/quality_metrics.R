@@ -94,7 +94,8 @@ flag_quality <- function(object,
   if (is.null(quality(object))) {
     object <- assess_quality(object)
   }
-
+  add_citation("Quality metrics were computed according to guidelines in:",
+               "Broadhurst, David et al. Guidelines and considerations for the use of system suitability and quality control samples in mass spectrometry assays applied in untargeted clinical metabolomic studies. Metabolomics : Official journal of the Metabolomic Society vol. 14,6 (2018): 72. doi:10.1007/s11306-018-1367-3")
   good <- paste0("fData(object) %>% dplyr::filter(", condition, ")") %>%
     parse(text = .) %>% eval()
   good <- good$Feature_ID

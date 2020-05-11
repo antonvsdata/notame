@@ -33,6 +33,7 @@ plot_sample_suprahex <- function(object, file, width = 16, height = 16, all_feat
     stop("Package \"supraHex\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  add_citation("supraHex package was used for suprahexagonal maps:", citation("supraHex"))
 
   object <- drop_flagged(object, all_features = all_features)
   data <- scale(exprs(object))

@@ -146,7 +146,7 @@ read_from_excel <- function(file, sheet = 1, corner_row = NULL, corner_column = 
   }
 
   if (is.null(split_by) & is.null(name)) {
-    stop("Etiher name or split_by needs to be defined, see documentation")
+    stop("Either name or split_by needs to be defined, see documentation")
   } else if ((!is.null(split_by)) & (!is.null(name))) {
     stop("Only define split_by OR name, see documentation")
   }

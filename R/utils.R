@@ -10,6 +10,9 @@
   op.notame <- list(
     notame.logging = FALSE,
     notame.log_file = NULL,
+    notame.citations = list("Preprocessing and analyses were performed using notame package:" = citation("notame"),
+                            "notame is built on a class from Biobase package:" = citation("Biobase"),
+                            "visualizations in notame are built with ggplot2:" = citation("ggplot2")),
     notame.color_scale_con = ggplot2::scale_color_viridis_c(),
     notame.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
     notame.fill_scale_con = ggplot2::scale_fill_viridis_c(),
@@ -104,6 +107,7 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                   "igraph",
                   "lme4",
                   "lmerTest",
+                  "MuMIn",
                   "PK")
   extra_bioconductor <- c("mixOmics", "supraHex")
   extra_gitlab <- "CarlBrunius/MUVR"
@@ -133,6 +137,23 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
     install_helper(cran = misc_cran, ...)
   }
 
+}
+
+add_citation <- function(name, ref) {
+  cites <- getOption("notame.citations")
+  if (!name %in% names(cites)) {
+    cites[[name]] <- ref
+    options(notame.citations = cites)
+  }
+}
+
+# Show citation
+citations <- function() {
+  cites <- getOption("notame.citations")
+  for (i in seq_along(cites)) {
+    log_text(names(cites)[i])
+    log_text(capture.output(show(cites[[i]])))
+  }
 }
 
 
