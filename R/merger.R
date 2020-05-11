@@ -14,9 +14,10 @@ check_column_match <- function(x, y, fun, name) {
   if (!check) {
     stop(paste(name, "returns different column names"))
   }
+  common <- intersect(sampleNames(x), sampleNames(y))
   if (!is.na(fun(x))) {
-    if(!identical(pData(x)[, fun(x)], pData(y)[, fun(y)])) {
-      stop(paste(name, "columns contain different elements"))
+    if(!identical(pData(x)[common, fun(x)], pData(y)[common, fun(y)])) {
+      stop(paste(name, "columns contain different elements for common samples"))
     }
   }
 }
@@ -33,7 +34,7 @@ check_match <- function(x, y) {
 
   # Amount of samples must be equal
   if (nrow(pData(x)) != nrow(pData(y))) {
-    stop("Unequal amount of samples")
+    warning("Unequal amount of samples")
   }
   # Resulting feature ID must be unique
   feature_id <- c(fData(x)$Feature_ID, fData(y)$Feature_ID)
@@ -46,11 +47,19 @@ check_match <- function(x, y) {
     check_column_match(x, y, funs[[i]], names(funs)[i])
   }
 
-  if (!identical(pData(x)$Injection_order, pData(y)$Injection_order)) {
-    stop("Injection orders are not identical")
+  common <- intersect(sampleNames(x), sampleNames(y))
+  if (!identical(pData(x)[common, "Injection_order"], pData(y)[common, "Injection_order"])) {
+    stop("Injection orders of common samples are not identical")
   }
   if (!identical(pData(x)$Sample_ID, pData(y)$Sample_ID)) {
-    stop("Sample IDs are not identical")
+    warning("Sample IDs are not identical")
+    samples_x <- setdiff(sampleNames(x), sampleNames(y))
+    samples_y <- setdiff(sampleNames(y), sampleNames(x))
+    log_text("Merging objects with unequal amounts of samples.")
+    log_text("Samples only in first object:")
+    log_text(paste0(paste(samples_x, collapse = ", "), "\n"))
+    log_text("Samples only in second object:")
+    log_text(paste0(paste(samples_y, collapse = ", "), "\n"))
   }
 
 
@@ -59,7 +68,7 @@ check_match <- function(x, y) {
 
   if (length(overlap_cols)) {
     for (overlap_col in overlap_cols) {
-      if (!identical(pData(x)[overlap_col], pData(y)[overlap_col])) {
+      if (!identical(pData(x)[common, overlap_col], pData(y)[common, overlap_col])) {
         stop(paste("Columns named", overlap_col, "in pheno data have different content"))
       }
     }
@@ -69,24 +78,21 @@ check_match <- function(x, y) {
     stop("fData have different column names")
   }
 
-  if (!identical(colnames(exprs(x)), colnames(exprs(y)))) {
-    stop("exprs have different column names")
-  }
-
 }
 
 # Merge two MetaboSet objects together
-merge_helper <- function(x, y) {
+merge_mode_helper <- function(x, y) {
   # Check that the match is ok
   check_match(x,y)
 
-  merged_pdata <- dplyr::left_join(pData(x), pData(y), by =
+  merged_pdata <- dplyr::full_join(pData(x), pData(y), by =
                                      intersect(colnames(pData(x)), colnames(pData(y)))) %>%
     Biobase::AnnotatedDataFrame()
-  rownames(merged_pdata) <- rownames(pData(x))
-  merged_exprs <- rbind(exprs(x), exprs(y))
+  rownames(merged_pdata) <- merged_pdata$Sample_ID
   merged_fdata <- rbind(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
+  merged_exprs <- dplyr::bind_rows(as.data.frame(exprs(x)), as.data.frame(exprs(y))) %>% as.matrix()
+  rownames(merged_exprs) <- rownames(merged_fdata)
 
   merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
@@ -102,19 +108,9 @@ merge_helper <- function(x, y) {
   merged_object
 }
 
-#' Merge MetaboSet objects together
-#'
-#' @param ... MetaboSet objects or a list of Metaboset objects
-#'
-#' @return A merged MetaboSet object
-#'
-#' @examples
-#' merged <- merge_metabosets(hilic_neg_sample, hilic_pos_sample,
-#'                            rp_neg_sample, rp_pos_sample)
-#'
-#' @export
-merge_metabosets <- function(...) {
-
+# Convert metaboset objects in ... to al list
+# OR if a list is given in the first place, preserve that list
+to_list <- function(...) {
   # Combine the objects to a list
   objects <- list(...)
   # If a list is given in the first place, it should move to top level
@@ -123,21 +119,59 @@ merge_metabosets <- function(...) {
       objects <- objects[[1]]
     }
   }
+
+  objects
+}
+
+#' Merge MetaboSet objects together
+#'
+#' Merges two or more MetaboSet objects together. Can be used to merge analytical modes or batches.
+#'
+#'
+#' @param ... MetaboSet objects or a list of Metaboset objects
+#' @param merge what to merge? features is used for combining analytical modes,
+#' samples is used for batches
+#'
+#' @return A merged MetaboSet object
+#'
+#' @details When merging samples, sample IDs that beging with "QC" or "Ref" are combined so that they have
+#' running numbers on them. This means that if both bathces have samples called "QC_1", this will not result in an error,
+#' but the sample IDs will be adjusted so that they are unique
+#'
+#' @examples
+#' # Merge analytical modes
+#' merged <- merge_metabosets(hilic_neg_sample, hilic_pos_sample,
+#'                            rp_neg_sample, rp_pos_sample)
+#' # Merge batches
+#' batch1 <- merged_sample[, merged_sample$Batch == 1]
+#' batch2 <- merged_sample[, merged_sample$Batch == 2]
+#' merged <- merge_batches(batch1, batch2)
+#'
+#' @export
+merge_metabosets <- function(..., merge = c("features", "samples")) {
+
+  merge <- match.arg(merge)
+  # Combine the objects to a list
+  objects <- to_list(...)
   # Class check
   if (!all(sapply(objects, class) == "MetaboSet")) {
     stop("The arguments should only contain MetaboSet objects")
   }
-
+  # Choose merging function
+  if (merge == "features") {
+    merge_fun <- merge_mode_helper
+  } else {
+    merge_fun <- merge_batch_helper
+  }
   # Merge objects together one by one
   merged <- NULL
   for (object in objects) {
     if (is.null(merged)) {
       merged <- object
     } else {
-      merged <- merge_helper(merged, object)
+      merged <- merge_fun(merged, object)
     }
   }
-
   merged
 }
 
@@ -189,7 +223,9 @@ merge_batch_helper <- function(x, y) {
 }
 
 
-#' Merge MetaboSet objects of batches together
+#' DEPRECATED: Merge MetaboSet objects of batches together
+#'
+#' NOTE: This function is deprecated, use merge_metabosets(..., merge = "samples") instead.
 #'
 #' @param ... MetaboSet objects or a list of Metaboset objects
 #'
@@ -203,33 +239,8 @@ merge_batch_helper <- function(x, y) {
 #' @export
 merge_batches <- function(...) {
 
-  # Combine the objects to a list
-  objects <- list(...)
-  # If a list is given in the first place, it should move to top level
-  if (length(objects) == 1) {
-    if (class(objects[[1]]) == "list") {
-      objects <- objects[[1]]
-    }
-  }
-  # Class check
-  if (!all(sapply(objects, class) == "MetaboSet")) {
-    stop("The arguments should only contain MetaboSet objects")
-  }
+  warning("merge_batches is deprecated, merge_metabosets can now merge object from different batches as
+          well as objects from different modes. merge_batches(...) is equivalent to merge_metabosets(..., merge = 'samples')", .call = FALSE)
 
-  # Merge objects together one by one
-  merged <- NULL
-  for (object in objects) {
-    if (is.null(merged)) {
-      merged <- object
-    } else {
-      merged <- merge_batch_helper(merged, object)
-    }
-  }
-
-  merged
+  merge_metabosets(..., merge = "samples")
 }
-
-
-
-
-

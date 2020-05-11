@@ -2,7 +2,7 @@
 % Please edit documentation in R/merger.R
 \name{merge_batches}
 \alias{merge_batches}
-\title{Merge MetaboSet objects of batches together}
+\title{DEPRECATED: Merge MetaboSet objects of batches together}
 \usage{
 merge_batches(...)
 }
@@ -13,7 +13,7 @@ merge_batches(...)
 A merged MetaboSet object
 }
 \description{
-Merge MetaboSet objects of batches together
+NOTE: This function is deprecated, use merge_metabosets(..., merge = "samples") instead.
 }
 \examples{
 batch1 <- merged_sample[, merged_sample$Batch == 1]
