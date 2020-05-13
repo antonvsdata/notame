@@ -524,7 +524,7 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
     cd <- combined_data(object)
     cd <- cd[order(cd[, id]), ]
     X1 <- cd[cd[, multi_level_var] == levels(ml_var)[1], c(featureNames(object), covariates)]
-    X2 <- cd[cd[, multi_level_var] == levels(ml_var)[2], c(featureNames(object), covaraites)]
+    X2 <- cd[cd[, multi_level_var] == levels(ml_var)[2], c(featureNames(object), covariates)]
     X <- X2 - X1
     rownames(X) <- unique(cd[, id])
 
