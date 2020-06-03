@@ -276,6 +276,7 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
       stop("ids do not match between the two objects: make sure the subjects are in the same order!",
            call. = FALSE)
     }
+    add_citation("rmcorr package was used to compute correlations with repeated measuremtns:", citation("rmcorr"))
   }
 
   # All x and y should be columns names of combined data

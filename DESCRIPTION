@@ -45,6 +45,7 @@ Suggests:
     pcaMethods,
     PK,
     randomForest,
+    rmcorr,
     RColorBrewer,
     Rtsne,
     RUVSeq,
