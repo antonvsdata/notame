@@ -47,7 +47,7 @@ Here is a comprehensive list of the visualizations:
 \code{\link{plot_dendrogram}}
 \item heat map of intersample distances, ordered by hierarchical clustering \code{\link{plot_sample_heatmap}}
 \item If the object has QC samples: \itemize{
-\item Density function of the intersample distances in both QCs and biological samples \code{\link{density_plot}}
+\item Density function of the intersample distances in both QCs and biological samples \code{\link{plot_dist_density}}
 \item Histograms of p-values from linear regression of features against injection order
 in both QCs and biological samples \code{\link{plot_p_histogram}}}
 \item If the object has a group column: \itemize{
