@@ -703,7 +703,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #'
 #' @export
 perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
-                         ci_method = c("boot", "profile", "Wald"),
+                         ci_method = c("Wald", "profile", "boot"),
                          test_random = FALSE, ...) {
   # Start log
   log_text(paste("\nStarting fitting linear mixed models at", Sys.time()))
