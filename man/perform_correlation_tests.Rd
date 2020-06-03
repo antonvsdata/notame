@@ -8,6 +8,7 @@ perform_correlation_tests(
   object,
   x,
   y = x,
+  id = NULL,
   object2 = NULL,
   fdr = TRUE,
   all_pairs = TRUE,
@@ -22,6 +23,9 @@ perform_correlation_tests(
 
 \item{y}{character vector, either identical to x (the default) or a distinct set of variables
 to be correlated agains x}
+
+\item{id}{character, column name for subject IDs. If provided, the correlation will be computed
+using the rmcorr package}
 
 \item{object2}{optional second MeatboSet object. If provided, x variables will be taken from object and
 y variables will be taken from object2. Both objects should have the same number of samples.}
@@ -70,5 +74,5 @@ cross_object_cor <- perform_correlation_tests(hilic_neg_sample,
                                               all_pairs = FALSE)
 }
 \seealso{
-\code{\link{cor.test}}
+\code{\link{cor.test}}, \code{\link[rmcorr]{rmcorr}}
 }

@@ -212,6 +212,8 @@ fold_change <- function(object, group = group_col(object)) {
 #' @param x character vector, names of variables to be correlated
 #' @param y character vector, either identical to x (the default) or a distinct set of variables
 #' to be correlated agains x
+#' @param id character, column name for subject IDs. If provided, the correlation will be computed
+#' using the rmcorr package
 #' @param object2 optional second MeatboSet object. If provided, x variables will be taken from object and
 #' y variables will be taken from object2. Both objects should have the same number of samples.
 #' @param fdr logical, whether p-values from the correlation test should be adjusted with FDR correction
@@ -243,11 +245,11 @@ fold_change <- function(object, group = group_col(object)) {
 #'                                               object2 = hilic_pos_sample,
 #'                                               y = featureNames(hilic_pos_sample),
 #'                                               all_pairs = FALSE)
-#' @seealso \code{\link{cor.test}}
+#' @seealso \code{\link{cor.test}}, \code{\link[rmcorr]{rmcorr}}
 #'
 #' @importFrom foreach %do%
 #' @export
-perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TRUE,
+perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NULL, fdr = TRUE,
                                       all_pairs = TRUE, duplicates = FALSE, ...) {
 
   data1 <- combined_data(object)
@@ -260,6 +262,22 @@ perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TR
   } else {
     data2 <- data1
   }
+
+  # Checks for repeated measures correlation
+  if (!is.null(id)) {
+    if (!requireNamespace("rmcorr", quietly = TRUE)) {
+      stop("Package \"rmcorr\" needed for this function to work. Please install it.",
+           call. = FALSE)
+    }
+    if (!id %in% colnames(data1) || !id %in% colnames(data2)) {
+      stop("id column not found", call. = FALSE)
+    }
+    if (!identical(data1[, id], data2[, id])) {
+      stop("ids do not match between the two objects: make sure the subjects are in the same order!",
+           call. = FALSE)
+    }
+  }
+
   # All x and y should be columns names of combined data
   not_found <- setdiff(x, colnames(data1))
   not_found <- c(not_found, setdiff(y, colnames(data2)))
@@ -296,7 +314,17 @@ perform_correlation_tests <- function(object, x, y = x, object2 = NULL, fdr = TR
     y_tmp = var_pairs$y[i]
     cor_tmp <- NULL
     tryCatch({
-      cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
+      if (is.null(id)) {
+        cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
+      } else {
+        id_tmp <- data1[, id]
+        df_tmp <- data.frame(id_var = id_tmp, x_var = data1[, x_tmp], y_var = data2[, y_tmp])
+        cor_tmp <- rmcorr::rmcorr(participant = id_var,
+                                  measure1 = x_var,
+                                  measure2 = y_var,
+                                  dataset = df_tmp)
+        cor_tmp <- list(estimate = cor_tmp$r, p.value = cor_tmp$p)
+      }
     }, error = function(e) cat(paste0(x_tmp, " vs ", y_tmp, ": ", e$message, "\n")))
     if (is.null(cor_tmp)) {
       cor_tmp <- list(estimate = NA,
