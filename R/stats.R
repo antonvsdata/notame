@@ -394,8 +394,8 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
                                     subject_col = subject) %>%
     merge_metabosets()
 
+  log_text(paste("\nAUC computation finished at", Sys.time()))
   new_object
-
 }
 
 # Helper function for FDR correction
@@ -413,6 +413,23 @@ adjust_p_values <- function(x, flags) {
   x
 }
 
+# Helper function for filling missing rows in results files with NAs
+# Some statistical tests may fail for some features, due to e.g. missing values.
+fill_results <- function(results_df, features) {
+  # Add NA rows for features where the test failed
+  results_df <- results_df %>% dplyr::select(Feature_ID, dplyr::everything())
+  missing_features <- setdiff(features, results_df$Feature_ID)
+  fill_nas <- matrix(NA, nrow = length(missing_features), ncol = ncol(results_df) - 1) %>%
+    as.data.frame()
+  results_fill <- data.frame(Feature_ID = missing_features, fill_nas)
+  rownames(results_fill) <- missing_features
+  colnames(results_fill) <- colnames(results_df)
+  results_df <- rbind(results_df, results_fill)
+  # Set Feature ID to the original order
+  results_df <- results_df[features, ]
+  results_df
+}
+
 # Helper function for running a variety of simple statistical tests
 perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE, packages = NULL) {
 
@@ -424,7 +441,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     feature <- features[i]
     # Replace "Feature" with the current feature name
     tmp_formula <- gsub("Feature", feature, formula_char)
-
+    # Run test
     result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
     # In case Feature is used as predictor, make the column names match
     if (!is.null(result_row)){
@@ -438,21 +455,9 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     stop("All the test failed, to see the individual error messages run the tests withot parallelization.",
          call. = FALSE)
   }
-
-  # Add NA rows for features where the test failed
-  results_df <- results_df %>% dplyr::select(Feature_ID, dplyr::everything())
-  missing_features <- setdiff(features, results_df$Feature_ID)
-  fill_nas <- matrix(NA, nrow = length(missing_features), ncol = ncol(results_df) - 1) %>%
-    as.data.frame()
-  results_fill <- data.frame(Feature_ID = missing_features, fill_nas)
-  rownames(results_fill) <- missing_features
-  colnames(results_fill) <- colnames(results_df)
-  results_df <- rbind(results_df, results_fill)
-  # Set Feature ID to the original order
-  results_df <- results_df %>%
-    dplyr::mutate(Feature_ID = factor(Feature_ID, levels = featureNames(object))) %>%
-    dplyr::arrange(Feature_ID) %>%
-    dplyr::mutate(Feature_ID = as.character(Feature_ID))
+  rownames(results_df) <- results_df$Feature_ID
+  # Rows full of NA for features where the test failed
+  results_df <- fill_results(results_df, features)
 
   # FDR correction
   if (fdr) {
@@ -466,7 +471,6 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 
   results_df
 }
-
 
 #' Linear models
 #'
@@ -526,8 +530,6 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
       result_row$R2 <- summary(fit)$r.squared
       result_row$Adj_R2 <- summary(fit)$adj.r.squared
       result_row$Feature_ID <- feature
-      rownames(result_row) <- feature
-
     }
     result_row
   }
@@ -604,7 +606,6 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
         tidyr::unite("Column", Variable, Metric, sep="_") %>%
         tidyr::spread(Column, Value)
       result_row$Feature_ID <- feature
-      rownames(result_row) <- feature
     }
     result_row
   }
@@ -735,7 +736,6 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
       # Add Feature ID
       result_row$Feature_ID <- feature
-      rownames(result_row) <- feature
     }
 
     # Add optional test results for the random effects
@@ -990,7 +990,6 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
-      rownames(result_row) <- feature
     }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
@@ -999,6 +998,88 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   results_df <- perform_test(object, formula_char, t_fun, all_features)
   # Start log
   log_text(paste("t-tests performed at", Sys.time()))
+
+  results_df
+}
+
+#' Perform paired t-tests
+#'
+#' Performs paired t-tests between two groups.
+#'
+#' @param object a MetaboSet object
+#' @param group character, column name of pData with the group information
+#' @param id character, column name of pData with the identifiers for the pairs
+#' @param all_features should all features be included in FDR correction?
+#' @param ... additional parameters to t.test
+#'
+#' @return data frame with the results
+#'
+#' @examples
+#' paired_t_results <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#'
+#' @seealso \code{\link{t.test}}
+#'
+#' @export
+perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
+
+  data <- combined_data(object)
+  groups <- data[, group]
+  if (class(groups) != "factor") {
+    groups <- as.factor(groups)
+  }
+  if (length(levels(groups)) > 2) {
+    warning("More than two groups detected, only using the first two", call. = FALSE)
+  }
+
+  # Split to groups
+  group1 <- data[which(groups == levels(groups)[1]), ]
+  group2 <- data[which(groups == levels(groups)[2]), ]
+  # Keep only complete pairs, order by id
+  common_ids <- intersect(group1[, id], group2[, id])
+  group1 <- group1[group1[, id] %in% common_ids, ][order(common_ids), ]
+  group2 <- group2[group2[, id] %in% common_ids, ][order(common_ids), ]
+  log_text(paste("Found", length(common_ids), "complete pairs"))
+
+  features <- featureNames(object)
+  results_df <- foreach::foreach(i = seq_along(features), .combine = dplyr::bind_rows) %dopar% {
+    feature <- features[i]
+    result_row <- NULL
+    tryCatch({
+      t_res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
+
+      conf_level <- attr(t_res$conf.int, "conf.level") * 100
+
+      result_row <- data.frame(Feature_ID = feature,
+                               Mean_diff = t_res$estimate[1],
+                               "Lower_CI_" = t_res$conf.int[1],
+                               "Upper_CI_" = t_res$conf.int[2],
+                               t_test_P = t_res$p.value,
+                               stringsAsFactors = FALSE)
+      colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+
+    result_row
+  }
+
+  # Check that results actually contain something
+  # If the tests are run on parallel, the error messages from failing tests are not visible
+  if (nrow(results_df) == 0) {
+    stop("All the test failed, to see the individual error messages run the tests withot parallelization.",
+         call. = FALSE)
+  }
+  rownames(results_df) <- results_df$Feature_ID
+  colnames(results_df)[2] <- paste0("Mean_diff_", levels(groups)[1],
+                                    "_minus_", levels(groups)[2])
+  # Rows full of NA for features where the test failed
+  results_df <- fill_results(results_df, features)
+
+  # FDR correction
+  if (all_features) {
+    flags <- rep(NA_character_, nrow(results_df))
+  } else {
+    flags <- flag(object)
+  }
+  results_df <- adjust_p_values(results_df, flags)
 
   results_df
 }
