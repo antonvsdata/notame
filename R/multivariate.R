@@ -499,12 +499,12 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
     # Independent samples
     if (is.null(id)) {
       muvr_model <- MUVR::MUVR(X = X, Y = Y, nRep = nRep, nOuter = nOuter, nInner = nInner,
-                               varRatio = varRatio, method = method)
+                               varRatio = varRatio, method = method, ...)
     } else {
       # Multiple measurements
       ID <- pData(object)[, id]
       muvr_model <- MUVR::MUVR(X = X, Y = Y, ID = ID, nRep = nRep, nOuter = nOuter, nInner = nInner,
-                               varRatio = varRatio, method = method)
+                               varRatio = varRatio, method = method, ...)
 
     }
   } else { # Multi-level analysis
@@ -532,10 +532,10 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
     if (!is.null(y)) { # Compare change of multi_level_var between levels of y
       Y <- cd[cd[, multi_level_var] == levels(ml_var)[1], y]
       muvr_model <- MUVR::MUVR(X = X, Y = Y, nRep = nRep, nOuter = nOuter, nInner = nInner,
-                               varRatio = varRatio, method = method)
+                               varRatio = varRatio, method = method, ...)
     } else { # Compare levels of multi_level_var
       muvr_model <- MUVR::MUVR(X = X, ML = TRUE, nRep = nRep, nOuter = nOuter, nInner = nInner,
-                               varRatio = varRatio, method = method)
+                               varRatio = varRatio, method = method, ...)
     }
 
   }
