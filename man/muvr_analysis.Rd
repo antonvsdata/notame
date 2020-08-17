@@ -11,6 +11,7 @@ muvr_analysis(
   multi_level = FALSE,
   multi_level_var = NULL,
   covariates = NULL,
+  static_covariates = NULL,
   all_features = FALSE,
   nRep = 5,
   nOuter = 6,
@@ -31,8 +32,10 @@ muvr_analysis(
 
 \item{multi_level_var}{the variable for splitting the data in multi-level modeling}
 
-\item{covariates}{character, column names of pData to use as covariates in the model, in addition to
-molecular features}
+\item{covariates, static_covariates}{character, column names of pData to use as covariates in the model, in addition to
+molecular features. For multi-level moddels, the change in \code{covariates} is computed, while
+\code{static_covariates} are taken from the first time point. \code{static_covariates} are ignored for
+non-multi-level models.}
 
 \item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
 
@@ -52,6 +55,10 @@ parameter of MUVR}
 \description{
 A wrapper around the MUVR algorithm from the MUVR package. For more information
 about the algorithm, visit https://gitlab.com/CarlBrunius/MUVR.
+}
+\details{
+For example, sex should be entered as a static covariate, since the change in sex
+is zero for all individuals, so computing the change and using that as a covariate does not make sense.
 }
 \examples{
 \dontrun{

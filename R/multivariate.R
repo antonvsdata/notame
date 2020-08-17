@@ -446,8 +446,10 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #' @param multi_level whether multi-level modeling should be applied, see Details
 #' @param multi_level_var the variable for splitting the data in multi-level modeling
 #' @param all_features logical, should all features be included in the model? if FALSE, flagged features are left out
-#' @param covariates character, column names of pData to use as covariates in the model, in addition to
-#' molecular features
+#' @param covariates,static_covariates character, column names of pData to use as covariates in the model, in addition to
+#' molecular features. For multi-level moddels, the change in \code{covariates} is computed, while
+#' \code{static_covariates} are taken from the first time point. \code{static_covariates} are ignored for
+#' non-multi-level models.
 #' @param nRep Number of repetitions of double CV, parameter of MUVR
 #' @param nOuter Number of outer CV loop segments, parameter of MUVR
 #' @param nInner Number of inner CV loop segments, parameter of MUVR
@@ -455,6 +457,9 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #'  parameter of MUVR
 #' @param method Multivariate method. Supports 'PLS' and 'RF', parameter of MUVR
 #' @param ... other parameters to \code{MUVR::MUVR}
+#'
+#' @details For example, sex should be entered as a static covariate, since the change in sex
+#' is zero for all individuals, so computing the change and using that as a covariate does not make sense.
 #'
 #' @examples
 #' \dontrun{
@@ -470,7 +475,7 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #'
 #' @export
 muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, multi_level_var = NULL,
-                          covariates = NULL, all_features = FALSE,
+                          covariates = NULL, static_covariates = NULL, all_features = FALSE,
                           nRep = 5, nOuter = 6, nInner = nOuter - 1,
                           varRatio = 0.75, method = c("PLS", "RF"), ...) {
 
@@ -480,6 +485,13 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
          call. = FALSE)
   }
   add_citation("MUVR package was used to fit multivariate models with variable selection:", citation("MUVR"))
+
+  # MUVR can only use numeric input
+  classes <- sapply(pData(object)[, c(covariates, static_covariates)], class)
+  if (length(classes) && any(classes != "numeric")) {
+    stop("MUVR can only deal with numeric inputs, please transform all covariates to numeric",
+         call. = FALSE)
+  }
 
   object <- drop_flagged(object, all_features = all_features)
 
@@ -517,15 +529,17 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
       stop("The multilevel variable should have exactly 2 unique values")
     } else {
       cat(paste("Computing effect matrix according to", multi_level_var, ":",
-          levels(ml_var)[2], "-", levels(ml_var)[1]))
+                levels(ml_var)[2], "-", levels(ml_var)[1]))
     }
 
-    # Compute effect matrix
+    # Compute effect matrix with covariates
     cd <- combined_data(object)
     cd <- cd[order(cd[, id]), ]
     X1 <- cd[cd[, multi_level_var] == levels(ml_var)[1], c(featureNames(object), covariates)]
     X2 <- cd[cd[, multi_level_var] == levels(ml_var)[2], c(featureNames(object), covariates)]
     X <- X2 - X1
+    # Add static covariates, where we don't want to compute change, such as sex
+    X[, static_covariates] <- cd[cd[, multi_level_var] == levels(ml_var)[1], static_covariates]
     rownames(X) <- unique(cd[, id])
 
     # Modeling

@@ -9,7 +9,7 @@ perform_lmer(
   formula_char,
   all_features = FALSE,
   ci_level = 0.95,
-  ci_method = c("boot", "profile", "Wald"),
+  ci_method = c("Wald", "profile", "boot"),
   test_random = FALSE,
   ...
 )

@@ -34,6 +34,10 @@ Basically everything in this package revolves around a class of objects called M
 
 The general workflow of an analysis run with this package is shown in the diagram below. The diagram also includes the function names for each step.
 
+For keeping track of the analysis, notame offers a logging sytem for different stages of the analysis. Use ```init_log()``` to start logging, check the current log file with ```log_state()``` and finish logging and write session information with ```finish_log()```.
+
+notame also keeps track of all the external packages used, offering you references for each. To see and log a list of references, use ```citations()```.
+
 ```{r, out.heigth = "900px", echo=FALSE}
 knitr::include_graphics("notame_workflow.png")
 ```

@@ -64,7 +64,9 @@ The primary function of the QC samples is to allow us to (surprise) assess the q
 
 First, we look at QC detection rate. This can be defined as simply the number of detected QC samples divided by the number of expected QC samples for a given metabolite, expressed as a percentage. If a signal can't be reliably detected in QC samples, it is regarded as noise. The paper suggests an acceptance limit of 70%, but this seems quite harsh for studies where the groups differ significantly. In these cases, some group might have metabolites that are not present in others, which means that their concentration in the QC samples might fall below the resolution of the mass spectrometer. 
 
-Additionally, it is sometimes useful to flag features that
+### Contaminants
+
+Blank samples can be used to detect contaminants: either from the analytical prcedure i.e. remains of tubes etc. or carryover from previous samples.
 
 ### Spread of the QCs
 The actual quality metrics measure two things: internal spread of the QCs and spread of the QCs compared to the spread of the biological samples. 
@@ -99,8 +101,9 @@ The distribution of the quality metrics across signals can be used as a good qua
 
 ### Code
 
-```flag_detection``` is used to flag features based on detection
-```flag_quality``` is used to flag features based on the other quality metrics
+- ```flag_detection``` is used to flag features based on detection
+- ```flag_contaminants``` is used to flag contaminants
+- ```flag_quality``` is used to flag features based on the other quality metrics
 
 
 ## Imputation of missing values

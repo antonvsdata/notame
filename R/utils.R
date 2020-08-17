@@ -108,7 +108,8 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                   "lme4",
                   "lmerTest",
                   "MuMIn",
-                  "PK")
+                  "PK",
+                  "rmcorr")
   extra_bioconductor <- c("mixOmics", "supraHex")
   extra_gitlab <- "CarlBrunius/MUVR"
 
@@ -147,7 +148,24 @@ add_citation <- function(name, ref) {
   }
 }
 
-# Show citation
+#' Show citations
+#'
+#' This function lists citations for all the major packages used by the notame functions that
+#' have been called during the session. All notame functions update the list automatically.
+#' The citations are taken from the call to \code{citation("package")}, and complemented with
+#' a brief description of what the package was used for.
+#' NOTE: the citations might not point to the correct paper if the package authors have not
+#' supplied correct citation information for their package.
+#' The output is written to the current log file, if specified.
+#'
+#' @examples
+#'
+#' citations()
+#'
+#' plot_tsne(merged_sample)
+#'
+#' # Rtsne added to citations
+#' citations()
 citations <- function() {
   cites <- getOption("notame.citations")
   for (i in seq_along(cites)) {
