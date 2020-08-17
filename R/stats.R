@@ -107,25 +107,41 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #' d_results <- cohens_d(drop_qcs(example_set))
 #'
 #' @export
-cohens_d <- function(object, id = subject_col(object), group = group_col(object),
-                     time = time_col(object)) {
+cohens_d <- function(object, group = group_col(object),
+                     id = NULL, time = NULL) {
 
   data <- combined_data(object)
 
-  # Check that both group and time have exactly 2 levels
+  # Check that both group and time have exactly 2 levels and convert levels to 1 and 2
   for (column in c(group, time)) {
+    if (is.null(column)) {
+      next
+    }
     if (class(data[, column]) != "factor") {
       data[, column] <- as.factor(data[, column])
     }
     if (length(levels(data[, column])) != 2) {
       stop(paste("Column", column, "should contain exactly 2 levels!"))
     }
+    data[column] <- ifelse(data[, column] == levels(data[, column])[1], 1, 2)
   }
 
-  data[time] <- ifelse(data[, time] == levels(data[, time])[1], "time1", "time2")
-  data[group] <- ifelse(data[, group] == levels(data[, group])[1], "group1", "group2")
+  if (is.null(time)) {
+    group1 <- data[which(data[, group] == levels(data[,group])[1]), ]
+    group2 <- data[which(data[, group] == levels(data[,group])[2]), ]
+  } else {
+    if (is.null(id)) {
+      stop("Please specify id column.", call. = FALSE)
+    }
+    group1 <- data[which(data[, group] == levels(data[,group])[1]), ]
+    group2 <- data[which(data[, group] == levels(data[,group])[2]), ]
 
-  features <- Biobase::featureNames(object)
+    common_ids <- intersect(group1[, id], group2[, id])
+    group1 <- group1[group1[, id] %in% common_ids, ][order(common_ids), ]
+    group2 <- group2[group2[, id] %in% common_ids, ][order(common_ids), ]
+  }
+
+
   ds <- foreach::foreach(i = seq_along(features), .combine = rbind,
                          .packages = c("dplyr", "tidyr")) %dopar% {
     feature <- features[i]
@@ -143,6 +159,17 @@ cohens_d <- function(object, id = subject_col(object), group = group_col(object)
                     stringsAsFactors = FALSE)
     d
   }
+
+  features <- Biobase::featureNames(object)
+  ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+    feature <- features[i]
+    f1 <- group1[, feature]
+    f2 <- group2[, feature]
+    d <- data.frame(Feature_ID = feature,
+                    Cohen_d = (mean(f2) - mean(f1)) / sqrt((sd(f1)^2 + sd(f2)^2) / 2),
+                    stringsAsFactors = FALSE)
+  }
+
   rownames(ds) <- ds$Feature_ID
   ds
 }
