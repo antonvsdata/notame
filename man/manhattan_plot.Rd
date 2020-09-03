@@ -5,7 +5,7 @@
 \title{Manhattan plot}
 \usage{
 manhattan_plot(
-  data,
+  object,
   x,
   p,
   effect = NULL,
@@ -22,9 +22,10 @@ manhattan_plot(
 )
 }
 \arguments{
-\item{data}{a data frame with the effect size and p-values}
+\item{object}{a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
+If x is a data frame, it is used as is.}
 
-\item{x, p}{the column names of effect size (x-axis) and p-values}
+\item{x, p}{the column names of x-axis and p-values}
 
 \item{effect}{column name of effect size (should have negative and positive values).}
 
@@ -58,12 +59,13 @@ This results in a so-called directed Manhattan plot.
 # naturally, this looks messy as there are not enough p-values
 lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
-# Traditional Manhattan plot
-manhattan_plot(data = lm_data, x = "Average.Mz",
+# Traditional Manhattan plot from data frame
+manhattan_plot(lm_data, x = "Average.Mz",
              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
              fdr_limit = 0.1)
-# Directed Manhattan plot
-manhattan_plot(data = lm_data, x = "Average.Mz", effect = "GroupB_Estimate",
+# Directed Manhattan plot from MetaboSet
+with_results <- join_fData(merged_sample, lm_results)
+manhattan_plot(with_results, x = "Average.Mz", effect = "GroupB_Estimate",
              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
              fdr_limit = 0.1)
 

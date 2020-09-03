@@ -539,7 +539,7 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
 
 # -------- VOLCANO PLOT -----------
 
-minus_log10 <- scales::trans_new("minus_log19",
+minus_log10 <- scales::trans_new("minus_log10",
                                  transform = function(x) {-log10(x)},
                                  inverse = function(x) {10^{-x}})
 
@@ -547,7 +547,8 @@ minus_log10 <- scales::trans_new("minus_log19",
 #'
 #' Draws a volcano plot of effect size and p-values.
 #'
-#' @param data a data frame with the effect size and p-values
+#' @param object a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
+#' If x is a data frame, it is used as is.
 #' @param x,p the column names of effect size (x-axis) and p-values
 #' @param p_fdr column name of FDR corrected p-values, used to draw a line showing the fdr-corrected significance level
 #' @param color column name used to color the plots
@@ -567,16 +568,53 @@ minus_log10 <- scales::trans_new("minus_log19",
 #' @examples
 #' # naturally, this looks messy as there are not enough p-values
 #' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
-#' volcano_plot(data = lm_results, x = "GroupB_Estimate",
+#' volcano_plot(lm_results, x = "GroupB_Estimate",
 #'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
 #'              fdr_limit = 0.1)
 #'
 #' @export
-volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
-                         p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                         log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
-                         color_scale = getOption("notame.color_scale_con"),
-                         title = "Volcano plot", subtitle = NULL, ...) {
+setGeneric("volcano_plot", signature = "object",
+           function(object, x, p, p_fdr = NULL, color = NULL,
+                    p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                    log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                    color_scale = getOption("notame.color_scale_con"),
+                    title = "Volcano plot", subtitle = NULL, ...) standardGeneric("volcano_plot"))
+
+
+#' @export
+setMethod("volcano_plot", c(object = "MetaboSet"),
+          function(object, x, p, p_fdr = NULL, color = NULL,
+                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                   color_scale = getOption("notame.color_scale_con"),
+                   title = "Volcano plot", subtitle = NULL, ...) {
+            volcano_plotter(fData(object), x, p, p_fdr, color,
+                            p_breaks, fdr_limit,
+                            log2_x, center_x_axis, x_lim,
+                            color_scale,
+                            title, subtitle, ...)
+          })
+
+#' @export
+setMethod("volcano_plot", c(object = "data.frame"),
+          function(object, x, p, p_fdr = NULL, color = NULL,
+                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                   color_scale = getOption("notame.color_scale_con"),
+                   title = "Volcano plot", subtitle = NULL, ...) {
+            volcano_plotter(object, x, p, p_fdr, color,
+                            p_breaks, fdr_limit,
+                            log2_x, center_x_axis, x_lim,
+                            color_scale,
+                            title, subtitle, ...)
+          })
+
+
+volcano_plotter <- function(data, x, p, p_fdr, color,
+                         p_breaks, fdr_limit,
+                         log2_x, center_x_axis, x_lim,
+                         color_scale,
+                         title, subtitle, ...) {
 
   if (center_x_axis & !is.null(x_lim)) {
     warning("Manually setting x-axis limits overrides x-axis centering")
@@ -648,8 +686,9 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
 #' by the direction (sign) of the effect, so part of the points will "drop" from the p = 1 (-log10(p) = 0) line.
 #' This results in a so-called directed Manhattan plot.
 #'
-#' @param data a data frame with the effect size and p-values
-#' @param x,p the column names of effect size (x-axis) and p-values
+#' @param object a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
+#' If x is a data frame, it is used as is.
+#' @param x,p the column names of x-axis and p-values
 #' @param effect column name of effect size (should have negative and positive values).
 #' @param p_fdr column name of FDR corrected p-values, used to draw a line showing the fdr-corrected significance level
 #' @param color column name used to color the plots
@@ -667,21 +706,60 @@ volcano_plot <- function(data, x, p, p_fdr = NULL, color = NULL,
 #' # naturally, this looks messy as there are not enough p-values
 #' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 #' lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
-#' # Traditional Manhattan plot
-#' manhattan_plot(data = lm_data, x = "Average.Mz",
+#' # Traditional Manhattan plot from data frame
+#' manhattan_plot(lm_data, x = "Average.Mz",
 #'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
 #'              fdr_limit = 0.1)
-#' # Directed Manhattan plot
-#' manhattan_plot(data = lm_data, x = "Average.Mz", effect = "GroupB_Estimate",
+#' # Directed Manhattan plot from MetaboSet
+#' with_results <- join_fData(merged_sample, lm_results)
+#' manhattan_plot(with_results, x = "Average.Mz", effect = "GroupB_Estimate",
 #'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
 #'              fdr_limit = 0.1)
 #'
 #' @export
-manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL,
-                           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                           x_lim = NULL, y_lim = NULL,
-                           color_scale = getOption("notame.color_scale_con"),
-                           title = "Manhattan plot", subtitle = NULL, ...) {
+#'
+setGeneric("manhattan_plot", signature = "object",
+           function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+                    p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                    x_lim = NULL, y_lim = NULL,
+                    color_scale = getOption("notame.color_scale_con"),
+                    title = "Manhattan plot", subtitle = NULL, ...) standardGeneric("manhattan_plot"))
+
+
+#' @export
+setMethod("manhattan_plot", c(object = "MetaboSet"),
+          function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                   x_lim = NULL, y_lim = NULL,
+                   color_scale = getOption("notame.color_scale_con"),
+                   title = "Manhattan plot", subtitle = NULL, ...) {
+            manhattan_plotter(fData(object), x, p, effect, p_fdr, color,
+                              p_breaks, fdr_limit,
+                              x_lim, y_lim,
+                              color_scale,
+                              title, subtitle, ...)
+          })
+
+#' @export
+setMethod("manhattan_plot", c(object = "data.frame"),
+          function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+                   x_lim = NULL, y_lim = NULL,
+                   color_scale = getOption("notame.color_scale_con"),
+                   title = "Manhattan plot", subtitle = NULL, ...) {
+            manhattan_plotter(object, x, p, effect, p_fdr, color,
+                              p_breaks, fdr_limit,
+                              x_lim, y_lim,
+                              color_scale,
+                              title, subtitle, ...)
+          })
+
+
+manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
+                           p_breaks, fdr_limit,
+                           x_lim, y_lim,
+                           color_scale,
+                           title, subtitle, ...) {
 
   if (min(data[, p]) > max(p_breaks)) {
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
@@ -742,4 +820,79 @@ manhattan_plot <- function(data, x, p, effect = NULL, p_fdr = NULL, color = NULL
 
   pl
 
+}
+
+
+# -----M/Z vs RT PLOT -------
+
+#' Plot m/z vs retention time plot
+#'
+#' Plots a scatter plot of results of statistical tests, where each point represents a feature.
+#' The plot has retention time on x-axis, m/z on y-axis and the size of the points is scaled based on p-value
+#'
+#' @param object a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
+#' If x is a data frame, it is used as is.
+#' @param p_col the column name containing p-values. This is used to scale the size of the points.
+#' @param mz_col,rt_col the column names for m/z and retention time. if NULL, automatic detection is attempted.
+#' @param color the column name used to color the points
+#' @param color_scale color scale as returned by a ggplot function. Defaults to current continuous color scale.
+#'
+#' @return a ggplot object
+#'
+#' @examples
+#'
+#'
+#' @export
+setGeneric("mz_rt_plot", signature = "object",
+           function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                    color_scale = getOption("notame.color_scale_dis")) standardGeneric("mz_rt_plot"))
+
+
+#' @export
+setMethod("mz_rt_plot", c(object = "MetaboSet"),
+          function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                   color_scale = getOption("notame.color_scale_con")) {
+            mz_rt_plotter(fData(object), p_col, mz_col, rt_col, color,
+                          color_scale)
+          })
+
+#' @export
+setMethod("mz_rt_plot", c(object = "data.frame"),
+          function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                   color_scale = getOption("notame.color_scale_con")) {
+            mz_rt_plotter(object, p_col, mz_col, rt_col, color,
+                          color_scale)
+          })
+
+
+mz_rt_plotter <- function(x, p_col, mz_col, rt_col, color,
+                          color_scale) {
+
+  if (is.null(mz_col) || is.null(rt_col)) {
+    mz_rt_cols <- find_mz_rt_cols(x)
+    mz_col <- mz_col %||% mz_rt_cols$mz_col
+    rt_col <- rt_col %||% mz_rt_cols$rt_col
+  }
+
+  p <- ggplot(x, aes_string(x = rt_col, y = mz_col, size = p_col,
+                            color = color)) +
+    geom_point(alpha = 0.6) +
+    scale_size_continuous(trans = minus_log10, range = c(0.5,3),
+                          breaks = c(0.05, 0.01, 0.001, 1e-4), labels = as.character(c(0.05, 0.01, 0.001, 1e-4))) +
+    theme_bw() +
+    color_scale +
+    labs(title = "m/z vs retention time",
+         x = "Retention time", y = "Mass-to-charge ratio", size = "p-value") +
+    # Scales for m/z and rt
+    scale_x_continuous(breaks = seq(0, ceiling(max(x[, rt_col])))) +
+    scale_y_continuous(breaks = seq(0, ceiling(max(x[, mz_col])), 250))
+
+  # If multiple splits are given, plot them separately
+  if (length(unique(x$Split)) > 1) {
+    cat("Multiple splits detected, plotting them to separate panes.\n")
+    p <- p +
+      facet_wrap(~Split, dir = "v")
+  }
+
+  p
 }

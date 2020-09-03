@@ -222,7 +222,7 @@ find_mz_rt_cols <- function(feature_data) {
   # Find mass and retention time columns
   mz_tags <- c("mass", "average mz", "average.mz", "molecularweight", "molecular weight")
   rt_tags <-  c("retention time", "retentiontime", "average rt[(]min[)]",
-                "^rt$")
+                "average[.]rt[.]min[.]", "^rt$")
 
   mz_col <- NULL
   for (tag in mz_tags) {

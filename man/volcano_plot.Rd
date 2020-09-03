@@ -5,7 +5,7 @@
 \title{Volcano plot}
 \usage{
 volcano_plot(
-  data,
+  object,
   x,
   p,
   p_fdr = NULL,
@@ -22,7 +22,8 @@ volcano_plot(
 )
 }
 \arguments{
-\item{data}{a data frame with the effect size and p-values}
+\item{object}{a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
+If x is a data frame, it is used as is.}
 
 \item{x, p}{the column names of effect size (x-axis) and p-values}
 
@@ -57,7 +58,7 @@ Draws a volcano plot of effect size and p-values.
 \examples{
 # naturally, this looks messy as there are not enough p-values
 lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
-volcano_plot(data = lm_results, x = "GroupB_Estimate",
+volcano_plot(lm_results, x = "GroupB_Estimate",
              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
              fdr_limit = 0.1)
 
