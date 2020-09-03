@@ -10,6 +10,7 @@
 \alias{subject_col,MetaboSet-method}
 \alias{flag,MetaboSet-method}
 \alias{join_fData,MetaboSet,data.frame-method}
+\alias{join_pData,MetaboSet,data.frame-method}
 \title{An S4 class used to represent LC-MS datasets}
 \usage{
 \S4method{combined_data}{MetaboSet}(object)
@@ -25,6 +26,8 @@
 \S4method{flag}{MetaboSet}(object)
 
 \S4method{join_fData}{MetaboSet,data.frame}(object, dframe)
+
+\S4method{join_pData}{MetaboSet,data.frame}(object, dframe)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -55,6 +58,8 @@ defaults.
 \item \code{flag}: access and set results
 
 \item \code{join_fData}: join new information to fData
+
+\item \code{join_pData}: join new information to fData
 }}
 
 \section{Slots}{

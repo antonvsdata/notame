@@ -4,19 +4,14 @@
 \alias{cohens_d}
 \title{Cohen's D}
 \usage{
-cohens_d(
-  object,
-  id = subject_col(object),
-  group = group_col(object),
-  time = time_col(object)
-)
+cohens_d(object, group = group_col(object), id = NULL, time = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{id}{character, name of the subject ID column}
-
 \item{group}{character, name of the group column}
+
+\item{id}{character, name of the subject ID column}
 
 \item{time}{character, name of the time column}
 }

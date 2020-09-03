@@ -647,6 +647,37 @@ setMethod("join_fData", c("MetaboSet", "data.frame"),
             }
           })
 
+#' Join new columns to pheno data
+#'
+#' Join a new data frame of information to pheno data of a MetaboSet object.
+#'
+#' @param object a MetaboSet object
+#' @param dframe a data frame with the new information
+#'
+#' @examples
+#' new_info <- data.frame(Sample_ID = sampleNames(example_set),
+#'                        BMI = runif(ncol(example_set), 22, 26))
+#' with_new_info <- join_pData(example_set, new_info)
+#' colnames(pData(with_new_info))
+#'
+#' @return a MetaboSet object with the new information added to pData(object)
+#'
+#' @export
+setGeneric("join_pData", signature = c("object", "dframe"),
+           function(object, dframe) standardGeneric("join_pData"))
+
+#' @describeIn MetaboSet join new information to fData
+#' @export
+setMethod("join_pData", c("MetaboSet", "data.frame"),
+          function(object, dframe) {
+            pData(object) <- dplyr::left_join(pData(object),
+                                              dframe)
+            rownames(pData(object)) <- pData(object)$Sample_ID
+            if (validObject(object)) {
+              return(object)
+            }
+          })
+
 # FeatureNames also changing Feature_ID column in featureData
 #' @export
 setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY"),
