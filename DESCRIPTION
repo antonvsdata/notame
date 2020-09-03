@@ -1,7 +1,7 @@
 Package: notame
 Type: Package
 Title: Workflow for non-targeted LC-MS metabolic profiling
-Version: 0.0.4.9000
+Version: 0.0.5
 Authors@R: c(
     person("Anton", "Klåvus", email = "anton.klavus@iki.fi", role = c("aut", "cre")),
     person("Jussi", "Paananen", role = "aut"),
