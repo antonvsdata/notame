@@ -24,13 +24,13 @@ muvr_analysis(
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{y}{the target variable to predict}
+\item{y}{character, column name in pData of the target variable to predict}
 
-\item{id}{subject ID variable in case of repeated measurements}
+\item{id}{character, column name in pData of the subject ID variable in case of repeated measurements}
 
-\item{multi_level}{whether multi-level modeling should be applied, see Details}
+\item{multi_level}{logical, whether multi-level modeling should be applied, see Details}
 
-\item{multi_level_var}{the variable for splitting the data in multi-level modeling}
+\item{multi_level_var}{character, column name in pData of the variable for splitting the data in multi-level modeling}
 
 \item{covariates, static_covariates}{character, column names of pData to use as covariates in the model, in addition to
 molecular features. For multi-level moddels, the change in \code{covariates} is computed, while

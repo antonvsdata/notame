@@ -441,10 +441,10 @@ mixomics_splsda_optimize <- function(object, y, ncomp, dist,
 #' about the algorithm, visit https://gitlab.com/CarlBrunius/MUVR.
 #'
 #' @param object a MetaboSet object
-#' @param y the target variable to predict
-#' @param id subject ID variable in case of repeated measurements
-#' @param multi_level whether multi-level modeling should be applied, see Details
-#' @param multi_level_var the variable for splitting the data in multi-level modeling
+#' @param y character, column name in pData of the target variable to predict
+#' @param id character, column name in pData of the subject ID variable in case of repeated measurements
+#' @param multi_level logical, whether multi-level modeling should be applied, see Details
+#' @param multi_level_var character, column name in pData of the variable for splitting the data in multi-level modeling
 #' @param all_features logical, should all features be included in the model? if FALSE, flagged features are left out
 #' @param covariates,static_covariates character, column names of pData to use as covariates in the model, in addition to
 #' molecular features. For multi-level moddels, the change in \code{covariates} is computed, while
