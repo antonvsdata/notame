@@ -94,7 +94,9 @@ summary_statistics <- function(object, grouping_cols = NA) {
 
 #' Cohen's D
 #'
-#' Computes Cohen's D for each feature
+#' Computes Cohen's D for each feature. If time and ID are supplied,
+#' change between two time points is computed for each subject,
+#' and Cohen's d is computed from the changes
 #'
 #' @param object a MetaboSet object
 #' @param id character, name of the subject ID column
@@ -105,13 +107,15 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #'
 #' @examples
 #' d_results <- cohens_d(drop_qcs(example_set))
+#' d_results_time <- cohens_d(drop_qcs(example_set),
+#'                            time = "Time", id = "Subject_ID")
 #'
 #' @export
 cohens_d <- function(object, group = group_col(object),
                      id = NULL, time = NULL) {
 
   data <- combined_data(object)
-
+  features <- Biobase::featureNames(object)
   # Check that both group and time have exactly 2 levels and convert levels to 1 and 2
   for (column in c(group, time)) {
     if (is.null(column)) {
@@ -123,7 +127,6 @@ cohens_d <- function(object, group = group_col(object),
     if (length(levels(data[, column])) != 2) {
       stop(paste("Column", column, "should contain exactly 2 levels!"))
     }
-    data[column] <- ifelse(data[, column] == levels(data[, column])[1], 1, 2)
   }
 
   if (is.null(time)) {
@@ -133,40 +136,33 @@ cohens_d <- function(object, group = group_col(object),
     if (is.null(id)) {
       stop("Please specify id column.", call. = FALSE)
     }
-    group1 <- data[which(data[, group] == levels(data[,group])[1]), ]
-    group2 <- data[which(data[, group] == levels(data[,group])[2]), ]
-
-    common_ids <- intersect(group1[, id], group2[, id])
-    group1 <- group1[group1[, id] %in% common_ids, ][order(common_ids), ]
-    group2 <- group2[group2[, id] %in% common_ids, ][order(common_ids), ]
+    # Split to time poiints
+    time1 <- data[which(data[, time] == levels(data[, time])[1]),]
+    time2 <- data[which(data[, time] == levels(data[, time])[2]),]
+    common_ids <- intersect(time1[, id], time2[, id])
+    rownames(time1) <- time1$Subject_ID
+    rownames(time2) <- time2$Subject_ID
+    time1 <- time1[common_ids, ]
+    time2 <- time2[common_ids, ]
+    if (!identical(time1[, group], time2[, group])) {
+      stop("Groups of subjects do not match between time points",
+           call. = FALSE)
+    }
+    # Change between time points
+    new_data <- time2[, features] - time1[, features]
+    # Split to groups
+    group1 <- new_data[which(time1[, group] == levels(time1[,group])[1]), ]
+    group2 <- new_data[which(time1[, group] == levels(time1[,group])[2]), ]
   }
 
 
-  ds <- foreach::foreach(i = seq_along(features), .combine = rbind,
-                         .packages = c("dplyr", "tidyr")) %dopar% {
-    feature <- features[i]
-    tmp <- data[c(id, group, time, feature)]
-    colnames(tmp) <- c("ID", "group", "time", "feature")
-    tmp <- tmp %>%
-      spread(time, feature) %>%
-      mutate(diff = time2 - time1) %>%
-      group_by(group) %>%
-      dplyr::summarise(mean_diff = mean(diff, na.rm = TRUE), sd_diff = sd(diff, na.rm = TRUE))
-
-    d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (tmp$mean_diff[tmp$group == "group2"] -
-                                 tmp$mean_diff[tmp$group == "group1"]) / mean(tmp$sd_diff),
-                    stringsAsFactors = FALSE)
-    d
-  }
-
-  features <- Biobase::featureNames(object)
   ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
     feature <- features[i]
     f1 <- group1[, feature]
     f2 <- group2[, feature]
     d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (mean(f2) - mean(f1)) / sqrt((sd(f1)^2 + sd(f2)^2) / 2),
+                    Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
+                      sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
                     stringsAsFactors = FALSE)
   }
 
