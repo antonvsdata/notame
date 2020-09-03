@@ -3,16 +3,16 @@
 # ------- HELPER FUNCTIONS ----------------
 
 # Helper function for computing PCA
-pca_helper <- function(object, center, scale, ...) {
+pca_helper <- function(object, pcs, center, scale, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
-  res_pca <- pcaMethods::pca(object, scale = scale, center = center, ...)
-  pca_scores <- pcaMethods::scores(res_pca) %>% as.data.frame()
-  R2 <- res_pca@R2
-  labels <- paste0(c("PC1", "PC2"), " (", scales::percent(R2), ")")
+  res_pca <- pcaMethods::pca(object, nPcs = max(pcs), scale = scale, center = center, ...)
+  pca_scores <- as.data.frame(pcaMethods::scores(res_pca))[, pcs]
+  R2 <- res_pca@R2[pcs]
+  labels <- paste0(paste0("PC", pcs), " (", scales::percent(R2), ")")
 
   return(list(pca_scores = pca_scores, labels = labels))
 }
@@ -50,6 +50,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
+#' @param pcs numeric vector of length 2, the principal components to plot
 #' @param all_features logical, should all features be used? If FALSE (the default),
 #' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
@@ -73,7 +74,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, scale = "uv",
                      color = group_col(object), shape = NULL, label = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NA,
                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
@@ -82,13 +83,14 @@ plot_pca <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
   shape <- shape %||% color
 
-  pca_results <- pca_helper(object, center, scale, ...)
+  pca_results <- pca_helper(object, pcs, center, scale, ...)
   pca_scores <- pca_results$pca_scores
+  pc_names <- colnames(pca_scores)
   pca_scores[color] <- pData(object)[, color]
   pca_scores[shape] <- pData(object)[, shape]
   pca_scores[label] <- pData(object)[, label]
 
-  scatter_plot(pca_scores, x = "PC1", y = "PC2", xlab = pca_results$labels[1], ylab = pca_results$labels[2],
+  scatter_plot(pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
                color = color, shape = shape, label = label, density = density, title = title,
                subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
                fill_scale = fill_scale)
@@ -238,11 +240,13 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
+#' @param pcs numeric vector of length 2, the principal components to plot
 #' @param all_features logical, should all features be used? If FALSE (the default),
 #' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
-#' @param npc1,npc2 number of top feature to plot for first and second principal component
+#' @param npcs numeric vector of length two, number of top feature to plot
+#' for each principal component
 #' @param title,subtitle the titles of the plot
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
@@ -254,8 +258,8 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
-                              npc1 = 10, npc2 = 10,
+plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
+                              npcs = c(10, 10),
                               title = "PCA loadings", subtitle = NULL, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
@@ -265,18 +269,18 @@ plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale
       stop("Package \"ggrepel\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
-  pca_res <- pcaMethods::pca(object, center = TRUE, scale = "uv", ...)
+  pca_res <- pcaMethods::pca(object, nPcs = max(pcs), center = TRUE, scale = "uv", ...)
 
-  loads <- pca_res@loadings %>%
-    as.data.frame()
+  loads <- as.data.frame(pca_res@loadings)[, pcs]
+  pc_names <- colnames(loads)
   loads$Feature_ID <- rownames(loads)
 
-  features_pc1 <- loads$Feature_ID[order(abs(loads$PC1), decreasing = TRUE)][seq_len(npc1)]
-  features_pc2 <- loads$Feature_ID[order(abs(loads$PC2), decreasing = TRUE)][seq_len(npc2)]
+  features_pc1 <- loads$Feature_ID[order(abs(loads[, pc_names[1]]), decreasing = TRUE)][seq_len(npcs[1])]
+  features_pc2 <- loads$Feature_ID[order(abs(loads[, pc_names[2]]), decreasing = TRUE)][seq_len(npcs[2])]
 
   loads <- loads[union(features_pc1, features_pc2),]
 
-  ggplot(loads, aes(x = PC1, y = PC2, label = Feature_ID)) +
+  ggplot(loads, aes_string(x = pc_names[1], y = pc_names[2], label = "Feature_ID")) +
     geom_point() +
     ggrepel::geom_text_repel() +
     theme_bw() +
@@ -296,6 +300,8 @@ plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 #'
 #' @param object a MetaboSet object
+#' @param pcs numeric vector of length 2, the principal components to plot
+#' @param pcs numeric vector of length 2, the principal components to plot
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
@@ -314,17 +320,18 @@ plot_pca_loadings <- function(object, all_features = FALSE, center = TRUE, scale
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
                      subtitle = NULL, fill_scale = getOption("notame.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  pca_results <- pca_helper(object, center, scale, ...)
+  pca_results <- pca_helper(object, pcs, center, scale, ...)
   pca_scores <- pca_results$pca_scores
+  pc_names <- colnames(pca_scores)
   pca_scores[fill] <- pData(object)[, fill]
 
-  hexbin_plot(data = pca_scores, x = "PC1", y = "PC2", xlab = pca_results$labels[1], ylab = pca_results$labels[2],
+  hexbin_plot(data = pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
               fill = fill, summary_fun = summary_fun, bins = bins, fill_scale = fill_scale,
                           title = title, subtitle = subtitle)
 }
@@ -426,6 +433,7 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 #' by an arrow ending at the last observation.
 #'
 #' @param object a MetaboSet object
+#' @param pcs numeric vector of length 2, the principal components to plot
 #' @param all_features logical, should all features be used? If FALSE (the default),
 #' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
@@ -450,20 +458,21 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca_arrows <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
+plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
                             color = group_col(object), time = time_col(object), subject = subject_col(object),
                             alpha = 0.6, arrow_style = arrow(), title = "PCA changes",
                             subtitle = NULL, color_scale = getOption("notame.color_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
-  pca_results <- pca_helper(object, center, scale, ...)
+  pca_results <- pca_helper(object, pcs, center, scale, ...)
   pca_scores <- pca_results$pca_scores
+  pc_names <- colnames(pca_scores)
   pca_scores[color] <- pData(object)[, color]
   pca_scores[time] <- pData(object)[, time]
   pca_scores[subject] <- pData(object)[, subject]
 
-  arrow_plot(data = pca_scores, x = "PC1", y = "PC2", color = color, time = time, subject = subject,
+  arrow_plot(data = pca_scores, x = pc_names[1], y = pc_names[2], color = color, time = time, subject = subject,
              alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
              title = title, subtitle = subtitle,
              xlab = pca_results$labels[1], ylab = pca_results$labels[2])

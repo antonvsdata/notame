@@ -6,11 +6,11 @@
 \usage{
 plot_pca_loadings(
   object,
+  pcs = c(1, 2),
   all_features = FALSE,
   center = TRUE,
   scale = "uv",
-  npc1 = 10,
-  npc2 = 10,
+  npcs = c(10, 10),
   title = "PCA loadings",
   subtitle = NULL,
   ...
@@ -19,6 +19,8 @@ plot_pca_loadings(
 \arguments{
 \item{object}{a MetaboSet object}
 
+\item{pcs}{numeric vector of length 2, the principal components to plot}
+
 \item{all_features}{logical, should all features be used? If FALSE (the default),
 flagged features are removed before visualization.}
 
@@ -26,7 +28,8 @@ flagged features are removed before visualization.}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
-\item{npc1, npc2}{number of top feature to plot for first and second principal component}
+\item{npcs}{numeric vector of length two, number of top feature to plot
+for each principal component}
 
 \item{title, subtitle}{the titles of the plot}
 

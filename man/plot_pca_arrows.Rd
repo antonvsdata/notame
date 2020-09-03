@@ -6,6 +6,7 @@
 \usage{
 plot_pca_arrows(
   object,
+  pcs = c(1, 2),
   all_features = FALSE,
   center = TRUE,
   scale = "uv",
@@ -22,6 +23,8 @@ plot_pca_arrows(
 }
 \arguments{
 \item{object}{a MetaboSet object}
+
+\item{pcs}{numeric vector of length 2, the principal components to plot}
 
 \item{all_features}{logical, should all features be used? If FALSE (the default),
 flagged features are removed before visualization.}
