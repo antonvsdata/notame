@@ -54,7 +54,7 @@ fit_rf <- function(object, y, all_features = FALSE, covariates = NULL, importanc
 #' @seealso \code{\link[randomForest]{randomForest}}, \code{\link{fit_rf}}
 #'
 #' @examples
-#' rf <- fit_rf(example_set, response = "Group")
+#' rf <- fit_rf(example_set, y = "Group")
 #' rf
 #' importance_rf(rf)
 #'

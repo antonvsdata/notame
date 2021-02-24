@@ -166,6 +166,8 @@ add_citation <- function(name, ref) {
 #'
 #' # Rtsne added to citations
 #' citations()
+#'
+#' @export
 citations <- function() {
   cites <- getOption("notame.citations")
   for (i in seq_along(cites)) {

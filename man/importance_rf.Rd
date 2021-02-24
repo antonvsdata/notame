@@ -16,7 +16,7 @@ data frame of feature importance
 Extracts feature importance in random forest in a nice format.
 }
 \examples{
-rf <- fit_rf(example_set, response = "Group")
+rf <- fit_rf(example_set, y = "Group")
 rf
 importance_rf(rf)
 
