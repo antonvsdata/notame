@@ -91,8 +91,12 @@ merge_mode_helper <- function(x, y) {
   rownames(merged_pdata) <- merged_pdata$Sample_ID
   merged_fdata <- rbind(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
-  merged_exprs <- dplyr::bind_rows(as.data.frame(exprs(x)), as.data.frame(exprs(y))) %>% as.matrix()
-  rownames(merged_exprs) <- rownames(merged_fdata)
+  if (identical(colnames(exprs(x)), colnames(exprs(y)))) {
+    merged_exprs <- rbind(exprs(x), exprs(y))
+  } else {
+    merged_exprs <- dplyr::bind_rows(as.data.frame(exprs(x)), as.data.frame(exprs(y))) %>% as.matrix()
+    rownames(merged_exprs) <- rownames(merged_fdata)
+  }
 
   merged_group_col <- ifelse(!is.na(group_col(x)), group_col(x), group_col(y))
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
@@ -203,8 +207,12 @@ merge_batch_helper <- function(x, y) {
   merged_pdata <- merged_pdata %>%
     Biobase::AnnotatedDataFrame()
 
-  merged_exprs <- dplyr::bind_rows(as.data.frame(t(exprs(x))), as.data.frame(t(exprs(y)))) %>% t()
-  colnames(merged_exprs) <- rownames(merged_pdata)
+  if (identical(rownames(exprs(x)), rownames(exprs(y)))) {
+    merged_exprs <- cbind(exprs(x), exprs(y))
+  } else {
+    merged_exprs <- dplyr::bind_rows(as.data.frame(t(exprs(x))), as.data.frame(t(exprs(y)))) %>% t()
+    colnames(merged_exprs) <- rownames(merged_pdata)
+  }
 
   merged_fdata <- fdata_batch_helper(fData(x), fData(y)) %>%
     Biobase::AnnotatedDataFrame()
