@@ -30,6 +30,9 @@ library(notame)
 # Define the project path
 ppath <- ""
 
+# Start logging
+init_log(log_file = paste0(ppath, "results/log_preprocessing.txt"))
+
 # Read data from Excel file
 data <- read_from_excel(file = paste0(ppath, "data/"),
                         split_by = c("RP_HILIC", "POS_NEG"))
@@ -37,15 +40,13 @@ data <- read_from_excel(file = paste0(ppath, "data/"),
 # Modify pheno_data if necessary (set factor levels etc.)
 
 # Create MetaboSet objects for each analytical mode
-objects <- construct_metabosets(exprs = data$exprs, pheno_data = data$pheno_data, feature_data = data$feature_data,
+objects <- construct_metabosets(exprs = data$exprs,
+                                pheno_data = data$pheno_data,
+                                feature_data = data$feature_data,
                                 group_col = "status")
-
-# Start logging
-init_log(log_file = paste0(ppath, "results/log_preprocessing.txt"))
 
 
 # Preprocessing by mode
-pre_drift_correction <- list()
 processed <- list()
 for (name in names(objects)) {
   log_text(paste("Processing", name))
@@ -54,13 +55,10 @@ for (name in names(objects)) {
   
   # Mark NAs correctly and flag features with low detection
   object <- mark_nas(object, 0)
-  detected <- flag_detection(object, qc_limit = 0.3, group_limit = 0.4)
+  detected <- flag_detection(object, qc_limit = 0.7, group_limit = 0.5)
   
   # Visualizations with original data
   visualizations(detected, prefix = paste0(ppath, "results/figures/", name, "_ORIG"))
-  
-  # Save current state for drift correction plots later
-  pre_drift_correction[[name]] <- detected
   
   # Drift correction with cubic spline in log space
   corrected <- correct_drift(detected)
@@ -86,7 +84,6 @@ for (name in names(objects)) {
 }
 
 # Merge analytical modes
-pre_drfit_merged <- merge_metabosets(pre_drift_correction)
 merged <- merge_metabosets(processed)
 log_text(paste("Merged analytical modes together, the merged object has", nrow(merged), "features and", ncol(merged), "samples."))
 
@@ -117,8 +114,6 @@ interesting <- lm_results$Feature_ID[lm_results$GroupB_P_FDR < 0.05] # NOTE: jus
 # Group box plots as an example
 save_group_boxplots(merged[interesting, ], color = "Group",
                     file = paste0(ppath, "results/figures/group_boxplots.pdf"))
-# Drift correction plots
-drift_corr <- correct_drift(pre_drift_merged, plotting = TRUE, file = paste0(ppath, "results/figures/drift_plots.pdf"))
 
 # Finish logging and save session information
 finish_log()
