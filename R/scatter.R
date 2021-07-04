@@ -253,13 +253,13 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 #' @return a ggplot object.
 #'
 #' @examples
-#' plot_pca_loadings(merged_sample, npc1 = 5, npc2 = 5)
+#' plot_pca_loadings(merged_sample, n_features = c(2, 4))
 #'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
 plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
-                              npcs = c(10, 10),
+                              n_features = c(10, 10),
                               title = "PCA loadings", subtitle = NULL, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
       stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
@@ -269,14 +269,16 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
       stop("Package \"ggrepel\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
-  pca_res <- pcaMethods::pca(object, nPcs = max(pcs), center = TRUE, scale = "uv", ...)
+  # Drop flagged compounds if not told otherwise
+  object <- drop_flagged(object, all_features)
+  pca_res <- pcaMethods::pca(object, nPcs = max(pcs), center = center, scale = scale, ...)
 
   loads <- as.data.frame(pca_res@loadings)[, pcs]
   pc_names <- colnames(loads)
   loads$Feature_ID <- rownames(loads)
 
-  features_pc1 <- loads$Feature_ID[order(abs(loads[, pc_names[1]]), decreasing = TRUE)][seq_len(npcs[1])]
-  features_pc2 <- loads$Feature_ID[order(abs(loads[, pc_names[2]]), decreasing = TRUE)][seq_len(npcs[2])]
+  features_pc1 <- loads$Feature_ID[order(abs(loads[, pc_names[1]]), decreasing = TRUE)][seq_len(n_features[1])]
+  features_pc2 <- loads$Feature_ID[order(abs(loads[, pc_names[2]]), decreasing = TRUE)][seq_len(n_features[2])]
 
   loads <- loads[union(features_pc1, features_pc2),]
 
