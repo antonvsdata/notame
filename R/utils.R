@@ -210,12 +210,18 @@ finite_median <- function(x) {
 #' @export
 #' @rdname finite_helpers
 finite_min <- function(x) {
+  if (all(is.na(x))) {
+    return(NA_real_)
+  }
   min(x[is.finite(x)], na.rm = TRUE)
 }
 
 #' @export
 #' @rdname finite_helpers
 finite_max <- function(x) {
+  if (all(is.na(x))) {
+    return(NA_real_)
+  }
   max(x[is.finite(x)], na.rm = TRUE)
 }
 

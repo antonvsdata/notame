@@ -4,8 +4,7 @@ library(notame)
 
 test_that("summary statistics work without grouping", {
 
-  smry <- summary_statistics(mark_nas(example_set, 0),
-                             grouping_cols = NA)
+  smry <- summary_statistics(mark_nas(example_set, 0))
   ex <- exprs(mark_nas(example_set, 0))
 
   for (fun in c("finite_mean", "finite_sd", "finite_median", "finite_mad")) {
@@ -18,23 +17,23 @@ test_that("summary statistics work without grouping", {
 
 test_that("summary statistics work with grouping", {
 
-  smry <- summary_statistics(mark_nas(example_set, 0))
+  smry <- summary_statistics(mark_nas(example_set, 0), grouping_cols = "Group")
 
   exa <- exprs(mark_nas(example_set[, example_set$Group == "A"], 0))
 
   for (fun in c("finite_mean", "finite_sd", "finite_median", "finite_mad")) {
-    expect_equal(unname(apply(exa, 1, fun)), smry[, gsub("finite", "Group_A", fun)])
+    expect_equal(unname(apply(exa, 1, fun)), smry[, gsub("finite", "A", fun)])
   }
-  expect_equal(unname(apply(exa, 1, finite_quantile, probs = 0.25)), smry$Group_A_Q25)
-  expect_equal(unname(apply(exa, 1, finite_quantile, probs = 0.75)), smry$Group_A_Q75)
+  expect_equal(unname(apply(exa, 1, finite_quantile, probs = 0.25)), smry$A_Q25)
+  expect_equal(unname(apply(exa, 1, finite_quantile, probs = 0.75)), smry$A_Q75)
 
   exb <- exprs(mark_nas(example_set[, example_set$Group == "B"], 0))
 
   for (fun in c("finite_mean", "finite_sd", "finite_median", "finite_mad")) {
-    expect_equal(unname(apply(exb, 1, fun)), smry[, gsub("finite", "Group_B", fun)])
+    expect_equal(unname(apply(exb, 1, fun)), smry[, gsub("finite", "B", fun)])
   }
-  expect_equal(unname(apply(exb, 1, finite_quantile, probs = 0.25)), smry$Group_B_Q25)
-  expect_equal(unname(apply(exb, 1, finite_quantile, probs = 0.75)), smry$Group_B_Q75)
+  expect_equal(unname(apply(exb, 1, finite_quantile, probs = 0.25)), smry$B_Q25)
+  expect_equal(unname(apply(exb, 1, finite_quantile, probs = 0.75)), smry$B_Q75)
 })
 
 test_that("summary statistics work with all NA features", {
@@ -68,10 +67,10 @@ test_that("Cohen's d works", {
     sd_a <- finite_sd(tdiff$feature[tdiff$group == "A"])
     mean_b <- finite_mean(tdiff$feature[tdiff$group == "B"])
     sd_b <- finite_sd(tdiff$feature[tdiff$group == "B"])
-    d <- c(d, (mean_b - mean_a)/mean(c(sd_a, sd_b)))
+    d <- c(d, (mean_b - mean_a)/sqrt(mean(c(sd_a^2, sd_b^2))))
   }
 
-  cohd <- cohens_d(ex)
+  cohd <- cohens_d(ex, id = "Subject_ID", time = "Time")
 
   df <- data.frame(Feature_ID = featureNames(ex),
                    Cohen_d = d,
@@ -97,12 +96,12 @@ test_that("Cohen's d is not run with multiple time or group levels", {
   expect_error(cohens_d(example_set), "Column Group")
 
   ex <- example_set
-  ex$Group <- c(1,2)
-  expect_error(cohens_d(ex), "Column Time")
+  ex$Group <- c(1, 2)
+  expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "Column Time")
 
   ex$Time <- c(1,2)
   ex$Group <- 1
-  expect_error(cohens_d(ex), "Column Group")
+  expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "Column Group")
 })
 
 

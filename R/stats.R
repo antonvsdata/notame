@@ -29,6 +29,7 @@ summary_statistics <- function(object, grouping_cols = NA) {
 
   statistics <- foreach::foreach(i = seq_along(features), .combine = rbind,
                                  .export = c("finite_sd", "finite_mad", "finite_mean",
+                                             "finite_max", "finite_min",
                                              "finite_median", "finite_quantile")) %dopar% {
     feature <- features[i]
     f_levels <- data[, feature]
@@ -83,7 +84,8 @@ summary_statistics <- function(object, grouping_cols = NA) {
       }
     }
     # Combine as data frame
-    result_row <- data.frame(Feature_ID = feature, as.list(result_row))
+    result_row <- data.frame(Feature_ID = feature, as.list(result_row),
+                             stringsAsFactors = FALSE)
 
     result_row
   }
