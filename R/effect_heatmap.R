@@ -44,6 +44,8 @@ coalesce<-function(...) {
 #' @param lower_tri logical, should only the lower triangular be plotted?
 #' @param reverse_y logical, if \code{clustering = FALSE, lower_tri = FALSE}, should the order of the y-axis
 #' be reversed so that the diagonal is from top left to bottom right?
+#' @param use_coord_fixed logical, should the heatmap tiles be squares? If yes, this uses \code{\link{ggplot2::coord_fixed()}}
+#' @param symmetric_aspect_ratio logical, should the plot panel be a square? If yes, uses ggplot2::theme(aspect.ratio = 1).
 #' @param title,subtitle the title and subtitle of the plot
 #' @param fill_scale fill scale for the heatmap as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the effect variable.
 #'
@@ -74,6 +76,7 @@ plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, poi
                            log2_effect = FALSE, discretize_effect = FALSE, breaks = 5,
                            clustering = TRUE, dist_method = "euclidean", clust_method = "ward.D2",
                            lower_tri = FALSE, reverse_y = TRUE,
+                           use_coord_fixed = TRUE, symmetric_aspect_ratio = TRUE,
                            title = NULL, subtitle = NULL, fill_scale = NA) {
   # Get default fill scales
   if (!is.null(fill_scale)) {
@@ -117,9 +120,16 @@ plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, poi
           axis.text.x = element_text(angle = 90)) +
     labs(x = "", y = "", fill = legend_label,
          title = title, subtitle = subtitle) +
-    coord_fixed() +
-    theme(aspect.ratio=1) +
     fill_scale
+
+  if (use_coord_fixed) {
+    ggp <- ggp +
+      coord_fixed()
+  }
+  if (symmetric_aspect_ratio) {
+    ggp <- ggp +
+      theme(aspect.ratio=1)
+  }
 
   if (!is.null(p)) {
     small_p <- data[data[,p] < p_limit, ]
