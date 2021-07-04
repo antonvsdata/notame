@@ -679,7 +679,6 @@ setMethod("join_pData", c("MetaboSet", "data.frame"),
           })
 
 # FeatureNames also changing Feature_ID column in featureData
-#' @export
 setMethod("featureNames<-", signature=signature(object="MetaboSet", value="ANY"),
                  function(object, value) {
                    fd <- featureData(object)
