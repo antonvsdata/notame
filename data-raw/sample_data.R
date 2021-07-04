@@ -5,7 +5,7 @@ modes <- c("HILIC_neg", "HILIC_pos", "RP_neg", "RP_pos")
 
 objects <- list()
 for (mode in modes) {
-  dada <- read_from_excel(file = system.file("extdata", paste0(mode, "_sample.xlsx"), package = "amp"),
+  dada <- read_from_excel(file = paste0("inst/extdata/", mode, "_sample.xlsx"),
                           name = mode, id_prefix = "Sample_")
   pd <- dada$pheno_data
   pd <- tidyr::separate(pd, col = "Class", into = c("Group", "Time"), sep = 1)
