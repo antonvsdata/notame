@@ -20,6 +20,8 @@ plot_effect_heatmap(
   clust_method = "ward.D2",
   lower_tri = FALSE,
   reverse_y = TRUE,
+  use_coord_fixed = TRUE,
+  symmetric_aspect_ratio = TRUE,
   title = NULL,
   subtitle = NULL,
   fill_scale = NA
@@ -58,6 +60,10 @@ see \code{\link{cut}}}
 
 \item{reverse_y}{logical, if \code{clustering = FALSE, lower_tri = FALSE}, should the order of the y-axis
 be reversed so that the diagonal is from top left to bottom right?}
+
+\item{use_coord_fixed}{logical, should the heatmap tiles be squares? If yes, this uses \code{\link[ggplot2]{coord_fixed()}}}
+
+\item{symmetric_aspect_ratio}{logical, should the plot panel be a square? If yes, uses ggplot2::theme(aspect.ratio = 1).}
 
 \item{title, subtitle}{the title and subtitle of the plot}
 

@@ -27,6 +27,8 @@ finite_quantile(x, ...)
 }
 \arguments{
 \item{x}{a numeric vector.}
+
+\item{...}{other parameters passed to underlying function}
 }
 \description{
 These functions first remove non-finite and missing values, then compute the summary statistic in question.

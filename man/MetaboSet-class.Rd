@@ -31,8 +31,6 @@
 }
 \arguments{
 \item{object}{a MetaboSet object}
-
-\item{dframe}{}
 }
 \description{
 MetaboSet is the main class used to represent data in the notame package.

@@ -2,7 +2,7 @@
 
 #' Set default color scales on load
 #'
-#' @param libname,pckgname default parameters
+#' @param libname,pkgname default parameters
 #'
 #' @importFrom grDevices rgb
 .onLoad <- function(libname, pkgname) {
@@ -10,9 +10,9 @@
   op.notame <- list(
     notame.logging = FALSE,
     notame.log_file = NULL,
-    notame.citations = list("Preprocessing and analyses were performed using notame package:" = citation("notame"),
-                            "notame is built on a class from Biobase package:" = citation("Biobase"),
-                            "visualizations in notame are built with ggplot2:" = citation("ggplot2")),
+    notame.citations = list("Preprocessing and analyses were performed using notame package:" = utils::citation("notame"),
+                            "notame is built on a class from Biobase package:" = utils::citation("Biobase"),
+                            "visualizations in notame are built with ggplot2:" = utils::citation("ggplot2")),
     notame.color_scale_con = ggplot2::scale_color_viridis_c(),
     notame.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
     notame.fill_scale_con = ggplot2::scale_fill_viridis_c(),
@@ -183,6 +183,7 @@ citations <- function() {
 #' They are helper functions used for computing quality measurements.
 #'
 #' @param x a numeric vector.
+#' @param ... other parameters passed to underlying function
 #' @name finite_helpers
 NULL
 

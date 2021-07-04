@@ -10,7 +10,7 @@ plot_pca_loadings(
   all_features = FALSE,
   center = TRUE,
   scale = "uv",
-  npcs = c(10, 10),
+  n_features = c(10, 10),
   title = "PCA loadings",
   subtitle = NULL,
   ...
@@ -28,7 +28,7 @@ flagged features are removed before visualization.}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
-\item{npcs}{numeric vector of length two, number of top feature to plot
+\item{n_features}{numeric vector of length two, number of top feature to plot
 for each principal component}
 
 \item{title, subtitle}{the titles of the plot}
@@ -44,7 +44,7 @@ pcaMethods and plots the loadings of first principal components
 \strong{CITATION:} When using this function, cite the \code{pcaMethods} package
 }
 \examples{
-plot_pca_loadings(merged_sample, npc1 = 5, npc2 = 5)
+plot_pca_loadings(merged_sample, n_features = c(2, 4))
 
 }
 \seealso{

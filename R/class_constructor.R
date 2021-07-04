@@ -291,7 +291,6 @@ name_features <- function(feature_data) {
 #' @slot subject_col character, name of the column holding subject identifiers
 #'
 #' @param object a MetaboSet object
-#' @param dframe
 #'
 #' @import methods
 #' @importClassesFrom Biobase ExpressionSet

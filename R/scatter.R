@@ -245,7 +245,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 #' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
-#' @param npcs numeric vector of length two, number of top feature to plot
+#' @param n_features numeric vector of length two, number of top feature to plot
 #' for each principal component
 #' @param title,subtitle the titles of the plot
 #' @param ... additional arguments passed to pcaMethods::pca
@@ -843,6 +843,16 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #'
 #' @examples
 #'
+#' # Compute results from a linear model
+#' lm_results <- perform_lm(merged_sample, formula_char = "Feature ~ Group")
+#' with_results <- join_fData(merged_sample, lm_results)
+#'
+#' # Plot from the MetaboSet object
+#' # automatically facet by analytical mode in variable Split
+#' mz_rt_plot(with_results, p_col = "GroupB_P", color = "GroupB_Estimate")
+#'
+#' # Plot the results from the results dataframe
+#' mz_rt_plot(with_results, p_col = "GroupB_P", color = "GroupB_Estimate")
 #'
 #' @export
 setGeneric("mz_rt_plot", signature = "object",

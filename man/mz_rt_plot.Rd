@@ -34,5 +34,15 @@ The plot has retention time on x-axis, m/z on y-axis and the size of the points 
 }
 \examples{
 
+# Compute results from a linear model
+lm_results <- perform_lm(merged_sample, formula_char = "Feature ~ Group")
+with_results <- join_fData(merged_sample, lm_results)
+
+# Plot from the MetaboSet object
+# automatically facet by analytical mode in variable Split
+mz_rt_plot(with_results, p_col = "GroupB_P", color = "GroupB_Estimate")
+
+# Plot the results from the results dataframe
+mz_rt_plot(with_results, p_col = "GroupB_P", color = "GroupB_Estimate")
 
 }
