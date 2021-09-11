@@ -188,7 +188,7 @@ visualizations <- function(object, prefix, perplexity = 30, merge = FALSE,
       log_text(paste("Attempted merging plots to", merged_file))
       if (remove_singles) {
         log_text("Removing single plot files")
-        if (os == "windows") {
+        if (os == "Windows") {
           output2 <- shell(paste("del", file_names), intern = TRUE)
         } else {
           output2 <- system(paste("rm", file_names), intern = TRUE)
