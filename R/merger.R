@@ -182,8 +182,14 @@ merge_metabosets <- function(..., merge = c("features", "samples")) {
 
 fdata_batch_helper <- function(fx, fy) {
 
-  if (!identical(colnames(fx), colnames(fy))) {
-    stop("fData have different column names")
+  non_identical_cols <- !identical(colnames(fx), colnames(fy))
+  if (non_identical_cols) {
+    only_x_cols <- setdiff(colnames(fx), colnames(fy))
+    only_x <- fx[c("Feature_ID", only_x_cols)]
+    fx[only_x_cols] <- NULL
+    only_y_cols <- setdiff(colnames(fy), colnames(fx))
+    only_y <- fy[c("Feature_ID", only_y_cols)]
+    fy[only_y_cols] <- NULL
   }
 
   # Combine common features: all NAs in fx are replaced by a value from fy
@@ -194,21 +200,33 @@ fdata_batch_helper <- function(fx, fy) {
   }
   new_features <- setdiff(fy$Feature_ID, fx$Feature_ID)
 
-  rbind(fx, fy[new_features, ])
+  merged_fdata <- rbind(fx, fy[new_features, ])
+
+  if (non_identical_cols) {
+    merged_fdata <- dplyr::left_join(merged_fdata, only_x, by = "Feature_ID") %>%
+      dplyr::left_join(only_y, by = "Feature_ID")
+    rownames(merged_fdata) <- merged_fdata$Feature_ID
+  }
+  merged_fdata
 }
 
 
 merge_batch_helper <- function(x, y) {
 
   merged_pdata <- rbind(pData(x), pData(y))
-  merged_pdata$Sample_ID[grepl("QC", merged_pdata$Sample_ID)] <- paste0("QC_", seq_len(sum(grepl("QC", merged_pdata$Sample_ID))))
-  merged_pdata$Sample_ID[grepl("Ref", merged_pdata$Sample_ID)] <- paste0("Ref_", seq_len(sum(grepl("Ref", merged_pdata$Sample_ID))))
+  if (anyDuplicated(merged_pdata$Sample_ID)) {
+    log_text("Found duplicated sample IDs when merging, renaming QC and Ref samples")
+    merged_pdata$Sample_ID[grepl("QC", merged_pdata$Sample_ID)] <- paste0("QC_", seq_len(sum(grepl("QC", merged_pdata$Sample_ID))))
+    merged_pdata$Sample_ID[grepl("Ref", merged_pdata$Sample_ID)] <- paste0("Ref_", seq_len(sum(grepl("Ref", merged_pdata$Sample_ID))))
+  }
+
   rownames(merged_pdata) <- merged_pdata$Sample_ID
   merged_pdata <- merged_pdata %>%
     Biobase::AnnotatedDataFrame()
 
   if (identical(rownames(exprs(x)), rownames(exprs(y)))) {
     merged_exprs <- cbind(exprs(x), exprs(y))
+    colnames(merged_exprs) <- rownames(merged_pdata)
   } else {
     merged_exprs <- dplyr::bind_rows(as.data.frame(t(exprs(x))), as.data.frame(t(exprs(y)))) %>% t()
     colnames(merged_exprs) <- rownames(merged_pdata)
