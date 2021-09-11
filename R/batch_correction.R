@@ -284,6 +284,7 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #' @param object a MetaboSet object
 #' @param batch,group character, column names of pData with batch labels and group labels
 #' @param ref_label the label of the reference group i.e. the group that is constant through batches
+#' @param population Identifier of population samples in group column (all (default) or any type of samples present in group)
 #' @param ... additional parameters passed to batchCorr::normalizeBatches
 #'
 #' @return list, the object with normalized features and information on which

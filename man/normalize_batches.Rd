@@ -4,7 +4,7 @@
 \alias{normalize_batches}
 \title{Normalize batches}
 \usage{
-normalize_batches(object, batch, group, ref_label, ...)
+normalize_batches(object, batch, group, ref_label, population = "all", ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -12,6 +12,8 @@ normalize_batches(object, batch, group, ref_label, ...)
 \item{batch, group}{character, column names of pData with batch labels and group labels}
 
 \item{ref_label}{the label of the reference group i.e. the group that is constant through batches}
+
+\item{population}{Identifier of population samples in group column (all (default) or any type of samples present in group)}
 
 \item{...}{additional parameters passed to batchCorr::normalizeBatches}
 }
