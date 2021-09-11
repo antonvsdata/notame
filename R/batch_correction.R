@@ -298,7 +298,7 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
 #' }
 #' @export
-normalize_batches <- function(object, batch, group, ref_label, ...) {
+normalize_batches <- function(object, batch, group, ref_label, population = "all", ...) {
 
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
     stop("Package \"batchCorr\" needed for this function to work. Please install it from
@@ -307,8 +307,9 @@ normalize_batches <- function(object, batch, group, ref_label, ...) {
   }
   add_citation("batchCorr was used for batch correction:", citation("batchCorr"))
 
-  normData <- batchCorr::normalizeBatches(peakTable = t(exprs(object)), batches = pData(object)[, batch],
-                                          sampleGroup = pData(object)[, group], refGroup = ref_label, ...)
+  normData <- batchCorr::normalizeBatches(peakTableCorr = t(exprs(object)), batches = pData(object)[, batch],
+                                          sampleGroup = pData(object)[, group], refGroup = ref_label,
+                                          population = population, ...)
 
   exprs(object) <- t(normData$peakTable)
   ref_corrected <- as.data.frame(t(normData$refCorrected))
