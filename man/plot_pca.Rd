@@ -11,7 +11,7 @@ plot_pca(
   center = TRUE,
   scale = "uv",
   color = group_col(object),
-  shape = NULL,
+  shape = color,
   label = NULL,
   density = FALSE,
   title = "PCA",
@@ -34,9 +34,9 @@ flagged features are removed before visualization.}
 
 \item{scale}{scaling used, as in pcaMethods::prep. Default is "uv" for unit variance}
 
-\item{color}{character, name of the column used for coloring the points}
+\item{color}{character, name of the column used for coloring the points. Set to NULL for black color.}
 
-\item{shape}{character, name of the column used for shape}
+\item{shape}{character, name of the column used for shape. Set to NULL for uniform round shapes.}
 
 \item{label}{character, name of the column used for point labels}
 

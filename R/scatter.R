@@ -55,8 +55,8 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
-#' @param color character, name of the column used for coloring the points
-#' @param shape character, name of the column used for shape
+#' @param color character, name of the column used for coloring the points. Set to NULL for black color.
+#' @param shape character, name of the column used for shape. Set to NULL for uniform round shapes.
 #' @param label character, name of the column used for point labels
 #' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
@@ -75,13 +75,11 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #'
 #' @export
 plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, scale = "uv",
-                     color = group_col(object), shape = NULL, label = NULL, density = FALSE,  title = "PCA",
+                     color = group_col(object), shape = color, label = NULL, density = FALSE,  title = "PCA",
                      subtitle = NULL, color_scale = NA,
                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
-
-  shape <- shape %||% color
 
   pca_results <- pca_helper(object, pcs, center, scale, ...)
   pca_scores <- pca_results$pca_scores
@@ -109,8 +107,8 @@ plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, 
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
 #' @param pca_method the method used in PCA if there are missing values
-#' @param color character, name of the column used for coloring the points
-#' @param shape character, name of the column used for shape
+#' @param color character, name of the column used for coloring the points. Set to NULL for black color.
+#' @param shape character, name of the column used for shape. Set to NULL for uniform round shapes.
 #' @param label character, name of the column used for point labels
 #' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
@@ -130,13 +128,11 @@ plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, 
 #' @export
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       pca_method = "nipals",
-                      color = group_col(object), shape = NULL, label = NULL, density = FALSE, title = "t-SNE",
+                      color = group_col(object), shape = color, label = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NA,
                       shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
-  shape <- shape %||% color
-
   # t-SNE
   tsne_scores <- t_sne_helper(object, center, scale, perplexity, pca_method, ...)
   # Add columns for plotting

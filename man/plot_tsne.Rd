@@ -12,7 +12,7 @@ plot_tsne(
   perplexity = 30,
   pca_method = "nipals",
   color = group_col(object),
-  shape = NULL,
+  shape = color,
   label = NULL,
   density = FALSE,
   title = "t-SNE",
@@ -36,9 +36,9 @@ plot_tsne(
 
 \item{pca_method}{the method used in PCA if there are missing values}
 
-\item{color}{character, name of the column used for coloring the points}
+\item{color}{character, name of the column used for coloring the points. Set to NULL for black color.}
 
-\item{shape}{character, name of the column used for shape}
+\item{shape}{character, name of the column used for shape. Set to NULL for uniform round shapes.}
 
 \item{label}{character, name of the column used for point labels}
 
