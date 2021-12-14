@@ -1025,6 +1025,12 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #'
 #' @export
 perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
+  message(paste0("Remember that t.test returns difference between group means",
+                 "in different order than lm.\n",
+                 "This function mimics this behavior, so the effect size is",
+                 " mean of reference level minus mean of second level."))
+
+
   # Start log
   log_text(paste("\nStarting t-tests at", Sys.time()))
 
