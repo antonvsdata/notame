@@ -450,11 +450,7 @@ write_to_excel <- function(object, file, ...) {
   # - feature data with results
   # - abundance values
   bottom <- cbind(fData(object),
-                  fData(object)["Feature_ID"],
                   exprs(object))
-
-  # Feature ID column is duplicated on the right for convenience
-  colnames(bottom)[ncol(fData(object)) + 1] <- "Feature_ID2"
 
   # All columns must be characters to allow combination with the top block
   bottom <- bottom %>%
@@ -472,7 +468,7 @@ write_to_excel <- function(object, file, ...) {
 
   # NA blocks to fill the empty space
   empty1 <- matrix(NA_character_, nrow = nrow(top),
-                   ncol = ncol(fData(object)))
+                   ncol = ncol(fData(object)) - 1)
   top <- cbind(empty1, top)
   colnames(top) <- colnames(bottom)
 
