@@ -81,7 +81,7 @@ check_pheno_data <- function(x, id_prefix, log_messages = FALSE) {
 # Check that the position of the corner row and column is OK
 check_position <- function(x, cc, cr) {
   condition <- is.na(x[cr - 1, cc - 1]) &
-    (is.numeric(type.convert(x[cr + 1, cc + 1])) | is.na(x[cr + 1, cc + 1])) &
+    (is.numeric(type.convert(x[cr + 1, cc + 1], as.is = TRUE)) | is.na(x[cr + 1, cc + 1])) &
     !is.na(x[cr, cc]) &
     !is.na(x[cr - 1, cc]) &
     !is.na(x[cr, cc - 1])
