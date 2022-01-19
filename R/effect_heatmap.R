@@ -44,7 +44,7 @@ coalesce<-function(...) {
 #' @param lower_tri logical, should only the lower triangular be plotted?
 #' @param reverse_y logical, if \code{clustering = FALSE, lower_tri = FALSE}, should the order of the y-axis
 #' be reversed so that the diagonal is from top left to bottom right?
-#' @param use_coord_fixed logical, should the heatmap tiles be squares? If yes, this uses \code{\link[ggplot2]{coord_fixed()}}
+#' @param use_coord_fixed logical, should the heatmap tiles be squares? If yes, this uses \code{\link[ggplot2]{coord_fixed}}
 #' @param symmetric_aspect_ratio logical, should the plot panel be a square? If yes, uses ggplot2::theme(aspect.ratio = 1).
 #' @param title,subtitle the title and subtitle of the plot
 #' @param fill_scale fill scale for the heatmap as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the effect variable.
