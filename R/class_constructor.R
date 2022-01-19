@@ -213,6 +213,7 @@ read_from_excel <- function(file, sheet = 1, corner_row = NULL, corner_column = 
   log_text(paste0("\nExtracting sample information from rows 1 to ", cr, " and columns ",
              excel_columns[cc+1], " to ", excel_columns[ncol(dada)]))
   pheno_data <- as.data.frame(t(dada[1:cr, (cc+1):ncol(dada)]), stringsAsFactors = FALSE)
+  log_text("Replacing spaces in sample information column names with underscores (_)")
   colnames(pheno_data) <- gsub(" ", "_", c(dada[1:(cr-1), cc], "Datafile"))
 
   # If a single mode is given, datafile will indicate the mode
@@ -457,10 +458,17 @@ write_to_excel <- function(object, file, ...) {
 
   # All columns must be characters to allow combination with the top block
   bottom <- bottom %>%
-    dplyr::mutate_all(as.character) %>%
+    dplyr::mutate(across(everything(), as.character)) %>%
     rbind(colnames(.), .)
   # Top block holds the sample information
-  top <- cbind(matrix(colnames(pData(object)), ncol = 1), t(pData(object)))
+  pd <- pData(object)
+  datafile_cols <- colnames(pd)[grepl("Datafile", colnames(pd))]
+  if (length(datafile_cols)) {
+    last_datafile <- datafile_cols[length(datafile_cols)]
+    pd <- pd[, c(setdiff(colnames(pd), last_datafile), last_datafile)]
+    log_text(paste0("Moved ", last_datafile, " column to last to get meaningful column names for abundances"))
+  }
+  top <- cbind(matrix(colnames(pd), ncol = 1), t(pd))
 
   # NA blocks to fill the empty space
   empty1 <- matrix(NA_character_, nrow = nrow(top),
