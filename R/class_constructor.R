@@ -390,15 +390,19 @@ setValidity("MetaboSet",
 #' @param group_col character, the name of the column in pheno_data to use as the grouping variable
 #' @param time_col character, the name of the column in pheno_data to use as the time variable
 #' @param subject_col character, the name of the column in pheno_data to use as the subject ID variable
+#' @param split_data logical, whether to split data by analytical mode recorded in the "Split" column of feature data.
+#' If TRUE (the default), will return a list of MetaboSet objects, one per analytical mode.
+#' If FALSE, will return a single MetaboSet object.
 #'
-#' @return list of MetaboSet objects
+#' @return list of MetaboSet objects or a single MetaboSet object
 #'
 #' @seealso \code{\link{read_from_excel}}
 #'
 #' @export
 construct_metabosets <- function(exprs, pheno_data, feature_data,
-                                group_col = NA_character_, time_col = NA_character_,
-                                subject_col = NA_character_) {
+                                 group_col = NA_character_, time_col = NA_character_,
+                                 subject_col = NA_character_,
+                                 split_data = TRUE) {
 
   pheno_data <- Biobase::AnnotatedDataFrame(data=pheno_data)
   if (!"Flag" %in% colnames(feature_data)) {
@@ -407,21 +411,31 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
   }
   feature_data <- check_feature_data(feature_data)
 
-  # Split the data by the Split column of feature data
-  parts <- unique(feature_data$Split)
-  obj_list <- list()
-  for (part in parts) {
-    fd_tmp <- Biobase::AnnotatedDataFrame(data = feature_data[feature_data$Split == part, ])
-    ad_tmp <- exprs[fd_tmp$Feature_ID, ]
-    obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
+  if (split_data) {
+    # Split the data by the Split column of feature data
+    parts <- unique(feature_data$Split)
+    obj_list <- list()
+    for (part in parts) {
+      fd_tmp <- Biobase::AnnotatedDataFrame(data = feature_data[feature_data$Split == part, ])
+      ad_tmp <- exprs[fd_tmp$Feature_ID, ]
+      obj_list[[part]] <- MetaboSet(exprs = ad_tmp,
+                                    phenoData = pheno_data,
+                                    featureData = fd_tmp,
+                                    group_col = group_col,
+                                    time_col = time_col,
+                                    subject_col = subject_col)
+    }
+    return(obj_list)
+  } else {
+    fd_tmp <- Biobase::AnnotatedDataFrame(feature_data)
+    object <- MetaboSet(exprs = exprs,
                         phenoData = pheno_data,
                         featureData = fd_tmp,
                         group_col = group_col,
                         time_col = time_col,
                         subject_col = subject_col)
+    return(object)
   }
-
-  obj_list
 }
 
 

@@ -10,7 +10,8 @@ construct_metabosets(
   feature_data,
   group_col = NA_character_,
   time_col = NA_character_,
-  subject_col = NA_character_
+  subject_col = NA_character_,
+  split_data = TRUE
 )
 }
 \arguments{
@@ -25,9 +26,13 @@ construct_metabosets(
 \item{time_col}{character, the name of the column in pheno_data to use as the time variable}
 
 \item{subject_col}{character, the name of the column in pheno_data to use as the subject ID variable}
+
+\item{split_data}{logical, whether to split data by analytical mode recorded in the "Split" column of feature data.
+If TRUE (the default), will return a list of MetaboSet objects, one per analytical mode.
+If FALSE, will return a single MetaboSet object.}
 }
 \value{
-list of MetaboSet objects
+list of MetaboSet objects or a single MetaboSet object
 }
 \description{
 Construct MetaboSet objects from input read by read_from_excel.
