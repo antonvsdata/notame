@@ -187,9 +187,12 @@ read_from_excel <- function(file, sheet = 1, corner_row = NULL, corner_column = 
 
   dada <- openxlsx::read.xlsx(file, sheet, colNames = FALSE)
 
-  # Define excel column order A-Z, AA - ZZ
-  combinations <- expand.grid(LETTERS, LETTERS)
-  excel_columns <- c(LETTERS, paste0(combinations$Var2, combinations$Var1))
+  # Define excel column order A-Z, AA - ZZ, AAA - ZZZ
+  grid2 <- expand.grid(LETTERS, LETTERS)
+  combinations2 <-  paste0(grid2$Var2, grid2$Var1)
+  grid3 <- expand.grid(LETTERS, combinations2)
+  combinations3 <- paste0(grid3$Var2, grid3$Var1)
+  excel_columns <- c(LETTERS, combinations2, combinations3)
 
   # If corner coordinates are omitted, try to find them automatically
   if (is.null(corner_row) || is.null(corner_column)) {
