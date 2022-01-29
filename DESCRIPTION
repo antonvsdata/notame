@@ -21,6 +21,7 @@ Depends:
 Imports:
     dplyr,
     foreach,
+    futile.logger,
     grDevices,
     methods,
     tibble,

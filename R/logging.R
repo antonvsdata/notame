@@ -19,11 +19,7 @@
 #'
 #' @export
 init_log <- function(log_file) {
-
-  options(notame.logging = TRUE, notame.log_file = log_file)
-
-  cat(paste0("Logging started: ", log_file, ".\n"))
-  write(paste(date(), "\n", sep=""), log_file)
+  futile.logger::flog.appender(futile.logger::appender.tee(log_file), name = "notame")
 }
 
 #' Log text to the current log file
@@ -44,14 +40,7 @@ init_log <- function(log_file) {
 #'
 #' @export
 log_text <- function(text) {
-
-  cat(paste(text, "\n", sep=""))
-  if (getOption("notame.logging")) {
-    if(is.null(getOption("notame.log_file"))) {
-      stop("Log file is not defined.")
-    }
-    write(text, getOption("notame.log_file"), append=TRUE)
-  }
+  futile.logger::flog.info(text)
 }
 
 #' Finish a log
@@ -63,24 +52,7 @@ log_text <- function(text) {
 #' @export
 finish_log <- function() {
   # Log end of session info
-  log_text(paste("Finished analysis. ", date(), "\nSession info:\n", sep=""))
-  log_text(capture.output(sessionInfo()))
-  options(notame.logging = FALSE, notame.log_file = NULL)
-}
-
-
-#' Get the current logging state
-#'
-#' If a log file is currently in use, prints the log file,
-#' else tells you that logging is not enabled
-#'
-#' @seealso \code{\link{init_log}}, \code{\link{log_text}}, \code{\link{finish_log}}
-#'
-#' @export
-log_state <- function() {
-  if (!getOption("notame.logging")) {
-    cat("Logging is not enabled")
-  } else {
-    cat(paste("Current log file:", getOption("notame.log_file")))
-  }
+  futile.logger::flog.info(paste("Finished analysis. ", date(), "\nSession info:\n", sep=""))
+  futile.logger::flog.info(capture.output(sessionInfo()))
+  futile.logger::flog.appender(futile.logger::appender.console(), name = "notame")
 }
