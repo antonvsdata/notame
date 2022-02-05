@@ -21,7 +21,71 @@ mark_nas <- function(object, value) {
   object
 }
 
+#' Transform the MS/MS output to publication ready
+#'
+#' Change the MS/MS output from MS-DIAL format to publication-ready format.
+#' Original spectra is sorted according to abundance percentage and clarified. See the example below.
+#'
+#' Original MS/MS spectra from MS-DIAL
+#' m/z:Raw Abundance
+#' 23.193:254 26.13899:5 27.50986:25 55.01603:82 70.1914:16 73.03017:941 73.07685:13 73.13951:120
+#'
+#' Spectra after transformation:
+#' m/z  (Abundance)
+#' 73.03 (100), 23.193 (27), 73.14 (12.8), 55.016 (8.7)
+#'
+#' @param object a MetaboSet object
+#' @param peak_num maximum number of peak that is kept (Recommended: 4-10)
+#' @param min_abund minimum relative abundance to be kept (Recommended: 1-5)
+#' @param deci_num maximum number of decimals to m/z value (Recommended: >2)
+#'
+#' @return MetaboSet object as the one supplied, with publication-ready MS/MS peak information
+#'
+#' @examples
+#' fixed_MSMS_peaks <- fix_MSMS(imputed)
+#'
+#' @export
+fix_MSMS <- function(object, peak_num = 10,
+                     min_abund = 5, deci_num = 3) {
+  if (!requireNamespace("stringr", quietly = TRUE)) {
+    stop("Package \"stringr\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  spec <- fData(object)$MS.MS.spectrum
+  to_metab <- NULL
 
+  for (i in 1:length(spec)) {
+    # Check the feature spectra and skip if it doesn't exist
+    if(is.na(spec[i])){
+      to_metab[i] <- NA
+      next()
+    }
+    # browser()
+    # Transform format
+    spectrum <- spec[i]
+    spectrum2 <- t(stringr::str_split(spectrum, pattern = " ", simplify = T))
+    spectrum3 <- as.data.frame(stringr::str_split(spectrum2, pattern = ":", simplify = T))
+    spectrum3 <- as.data.frame(lapply(spectrum3,as.numeric))
+    spectrum3 <- spectrum3[order(spectrum3$V2,decreasing = T),]
+
+    # Leave n most intense fragment peaks or all peaks if number of peaks < n
+    ifelse(nrow(spectrum3) > peak_num, num <- peak_num, num <- nrow(spectrum3))
+    spectrum4 <- spectrum3[c(1:num),]
+
+    # Round the m/z of fragments to n decimals and calculate the relative intensity (%)
+    spectrum4$V1 <- round(spectrum4$V1,digits = deci_num)
+    spectrum4$relative <- round(spectrum4$V2 / max(spectrum3$V2)*100, digits = 1)
+
+    # Remove fragment peaks with relative intensity less than n% (recommended: 1-5)
+    spectrum5 <- spectrum4[c(spectrum4$relative > min_abund),]
+
+    # Finalize format and write results
+    to_metab[i] <- paste(paste0(spectrum5$V1, " (", spectrum5$relative, ")"), collapse = ", ")
+  }
+
+  fData(object)$MS_MS_Spectrum_clean <- to_metab
+  object
+}
 
 #' Replace NA values in pheno data columns with "QC"
 #'
