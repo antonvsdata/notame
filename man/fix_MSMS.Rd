@@ -4,7 +4,13 @@
 \alias{fix_MSMS}
 \title{Transform the MS/MS output to publication ready}
 \usage{
-fix_MSMS(object, peak_num = 10, min_abund = 5, deci_num = 3)
+fix_MSMS(
+  object,
+  ms_ms_spectrum_col = "MS.MS.spectrum",
+  peak_num = 10,
+  min_abund = 5,
+  deci_num = 3
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -34,6 +40,11 @@ m/z  (Abundance)
 73.03 (100), 23.193 (27), 73.14 (12.8), 55.016 (8.7)
 }
 \examples{
-fixed_MSMS_peaks <- fix_MSMS(imputed)
+# Spectra before fixing
+fData(merged_sample)$MS.MS.spectrum[!is.na(fData(merged_sample)$MS.MS.spectrum)]
+# Fixing spectra with default settings
+fixed_MSMS_peaks <- fix_MSMS(merged_sample)
+# Spectra after fixing
+fData(fixed_MSMS_peaks)$MS_MS_Spectrum_clean[!is.na(fData(fixed_MSMS_peaks)$MS_MS_Spectrum_clean)]
 
 }

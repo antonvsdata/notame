@@ -44,16 +44,23 @@ mark_nas <- function(object, value) {
 #' @return MetaboSet object as the one supplied, with publication-ready MS/MS peak information
 #'
 #' @examples
-#' fixed_MSMS_peaks <- fix_MSMS(imputed)
+#' # Spectra before fixing
+#' fData(merged_sample)$MS.MS.spectrum[!is.na(fData(merged_sample)$MS.MS.spectrum)]
+#' # Fixing spectra with default settings
+#' fixed_MSMS_peaks <- fix_MSMS(merged_sample)
+#' # Spectra after fixing
+#' fData(fixed_MSMS_peaks)$MS_MS_Spectrum_clean[!is.na(fData(fixed_MSMS_peaks)$MS_MS_Spectrum_clean)]
 #'
 #' @export
-fix_MSMS <- function(object, peak_num = 10,
-                     min_abund = 5, deci_num = 3) {
+fix_MSMS <- function(object, ms_ms_spectrum_col = "MS.MS.spectrum",
+                     peak_num = 10,
+                     min_abund = 5,
+                     deci_num = 3) {
   if (!requireNamespace("stringr", quietly = TRUE)) {
     stop("Package \"stringr\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  spec <- fData(object)$MS.MS.spectrum
+  spec <- fData(object)[, ms_ms_spectrum_col]
   to_metab <- NULL
 
   for (i in 1:length(spec)) {
@@ -85,6 +92,7 @@ fix_MSMS <- function(object, peak_num = 10,
   }
 
   fData(object)$MS_MS_Spectrum_clean <- to_metab
+  log_text('Saving fixed MS/MS spectra to column "MS_MS_Spectrum_clean" in fData')
   object
 }
 
