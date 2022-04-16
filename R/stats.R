@@ -478,7 +478,8 @@ fill_results <- function(results_df, features) {
   results_fill <- data.frame(Feature_ID = missing_features, fill_nas)
   rownames(results_fill) <- missing_features
   colnames(results_fill) <- colnames(results_df)
-  results_df <- rbind(results_df, results_fill)
+  results_df <- rbind(results_df, results_fill) %>% as.data.frame()
+  rownames(results_df) <- results_df$Feature_ID
   # Set Feature ID to the original order
   results_df <- results_df[features, ]
   results_df
@@ -509,7 +510,6 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     stop("All the test failed, to see the individual error messages run the tests withot parallelization.",
          call. = FALSE)
   }
-  rownames(results_df) <- results_df$Feature_ID
   # Rows full of NA for features where the test failed
   results_df <- fill_results(results_df, features)
 
