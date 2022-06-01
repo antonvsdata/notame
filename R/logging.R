@@ -20,6 +20,7 @@
 #' @export
 init_log <- function(log_file) {
   futile.logger::flog.appender(futile.logger::appender.tee(log_file), name = "notame")
+  log_text(paste0("Starting logging"))
 }
 
 #' Log text to the current log file
