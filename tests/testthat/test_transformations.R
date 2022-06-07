@@ -14,7 +14,7 @@ test_that("Marking NAs works properly", {
 })
 
 
-test_that("Imputation works as expected", {
+test_that("RF imputation works as expected", {
   marked <- mark_nas(example_set, value = 0)
   imputed <- impute_rf(marked)
 
@@ -105,5 +105,28 @@ test_that("Inverse normalization works as expected", {
   shapiro_p <- exprs(normalized) %>%
     apply(1, function(x) { shapiro.test(x)$p.value})
   expect_true(all(shapiro_p > 0.9))
+})
+
+test_that("Simple imputation works as expected", {
+  marked <- mark_nas(example_set, value = 0)
+  imputed <- impute_simple(marked, value = 0)
+
+  # Check that all missing values are imputed
+  expect_equal(sum(is.na(exprs(imputed))), 0)
+
+  # Check that non-missing values are unchanged
+  na_idx <- is.na(exprs(marked))
+
+  non_na_marked <- exprs(marked)[!na_idx]
+  non_na_imputed <- exprs(imputed)[!na_idx]
+  expect_equal(non_na_imputed, non_na_marked)
+})
+
+test_that("Simple imputation with only one feature works", {
+  marked <- example_set
+  exprs(marked)[2,5] <- NA
+  imputed <- impute_simple(marked, value = 0)
+  #
+  expect_equal(exprs(imputed)[2,5], 0)
 })
 
