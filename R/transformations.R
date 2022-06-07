@@ -298,7 +298,7 @@ impute_simple <- function(object, value, na_limit = 0) {
 
   imp <- exprs(object)
   nas <- apply(imp, 1, prop_na)
-  imp <- imp[nas > na_limit, , drop = FALSE]
+  imp <- imp[nas > na_limit,, drop = FALSE] #
   if (nrow(imp) == 0) {
     warning("none of the features satisfy the NA limit, returning the original object")
     return(object)
