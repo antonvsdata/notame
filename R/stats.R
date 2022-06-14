@@ -116,6 +116,8 @@ summary_statistics <- function(object, grouping_cols = NA) {
 cohens_d <- function(object, group = group_col(object),
                      id = NULL, time = NULL) {
 
+  log_text("Starting to compute Cohen's D")
+
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
   # Check that both group and time have exactly 2 levels and convert levels to 1 and 2
@@ -169,6 +171,8 @@ cohens_d <- function(object, group = group_col(object),
   }
 
   rownames(ds) <- ds$Feature_ID
+
+  log_text("Cohen's D computed.")
   ds
 }
 
@@ -189,6 +193,8 @@ cohens_d <- function(object, group = group_col(object),
 #'
 #' @export
 fold_change <- function(object, group = group_col(object)) {
+
+  log_text("Starting to compute fold changes.")
 
   data <- combined_data(object)
   groups <- combn(levels(data[, group]), 2)
@@ -217,6 +223,9 @@ fold_change <- function(object, group = group_col(object)) {
   results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
   colnames(results_df) <- c("Feature_ID", comp_labels)
   rownames(results_df) <- results_df$Feature_ID
+
+  log_text("Fold changes computed.")
+
   # Order the columns accordingly
   results_df[c("Feature_ID", comp_labels[order(comp_labels)])]
 }
@@ -276,6 +285,8 @@ fold_change <- function(object, group = group_col(object)) {
 #' @export
 perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NULL, fdr = TRUE,
                                       all_pairs = TRUE, duplicates = FALSE, ...) {
+
+  log_text("Starting correlation tests.")
 
   data1 <- combined_data(object)
 
@@ -379,6 +390,9 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
   }
 
   rownames(cor_results) <- seq_len(nrow(cor_results))
+
+  log_text("Correlation tests performed.")
+
   cor_results
 }
 
@@ -411,8 +425,8 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
            call. = FALSE)
   }
   add_citation("PK package was used to compute AUC:", citation("PK"))
-  # Start log
-  log_text(paste("\nStarting AUC computation at", Sys.time()))
+
+  log_text("Starting AUC computation.")
 
   data <- combined_data(object)
 
@@ -448,7 +462,7 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
                                     subject_col = subject) %>%
     merge_metabosets()
 
-  log_text(paste("\nAUC computation finished at", Sys.time()))
+  log_text("AUC computation finished.")
   new_object
 }
 
@@ -556,8 +570,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @export
 perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
-  # Start log
-  log_text(paste("\nStarting linear regression at", Sys.time()))
+  log_text("Starting linear regression.")
 
   lm_fun <- function(feature, formula, data) {
     # Try to fit the linear model
@@ -597,8 +610,8 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     tidyr::unite("Column", Var2, Var1)
   col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
-  # End log
-  log_text(paste("Linear regression performed at", Sys.time()))
+
+  log_text("Linear regression performed.")
 
   results_df[col_order]
 }
@@ -635,8 +648,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @export
 perform_logistic <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
 
-  # Start log
-  log_text(paste("\nStarting logistic regression at", Sys.time()))
+  log_text("Starting logistic regression.")
 
   logistic_fun <- function(feature, formula, data) {
     # Try to fit the linear model
@@ -684,8 +696,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
   }
 
-  # End log
-  log_text(paste("Logistic regression performed at", Sys.time()))
+
+  log_text("Logistic regression performed.")
 
   results_df
 }
@@ -732,8 +744,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
                          ci_method = c("Wald", "profile", "boot"),
                          test_random = FALSE, ...) {
-  # Start log
-  log_text(paste("\nStarting fitting linear mixed models at", Sys.time()))
+
+  log_text("Starting fitting linear mixed models.")
 
   if (!requireNamespace("lmerTest", quietly = TRUE)) {
       stop("Package \"lmerTest\" needed for this function to work. Please install it.",
@@ -834,8 +846,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     col_order <- c(col_order, random_effect_order$Column)
   }
 
-  # End log
-  log_text(paste("Linear mixed models fit at", Sys.time()))
+  log_text("Linear mixed models fit.")
 
   results_df[col_order]
 }
@@ -871,8 +882,8 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
            call. = FALSE)
   }
   add_citation("car package was used for Levene's test of homoscedasticity:", citation("car"))
-  # Start log
-  log_text(paste("\nStarting homoscedasticity tests at", Sys.time()))
+
+  log_text("Starting homoscedasticity tests.")
 
   homosced_fun <- function(feature, formula, data) {
     result_row <- NULL
@@ -894,8 +905,7 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 
   results_df <- perform_test(object, formula_char, homosced_fun, all_features)
 
-  # Start log
-  log_text(paste("Homoscedasticity tests performed at", Sys.time()))
+  log_text("Homoscedasticity tests performed.")
 
   results_df
 }
@@ -924,8 +934,8 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 #'
 #' @export
 perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
-  # Start log
-  log_text(paste("\nStarting Kruskal_wallis tests at", Sys.time()))
+
+  log_text("Starting Kruskal_wallis tests.")
 
   kruskal_fun <- function(feature, formula, data) {
     result_row <- NULL
@@ -942,7 +952,7 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 
   results_df <- perform_test(object, formula_char, kruskal_fun, all_features)
 
-  log_text(paste("Kruskal_wallis tests performed at", Sys.time()))
+  log_text("Kruskal_wallis tests performed.")
 
   results_df
 }
@@ -975,8 +985,8 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 #'
 #' @export
 perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...) {
-  # Start log
-  log_text(paste("\nStarting ANOVA tests at", Sys.time()))
+
+  log_text("Starting ANOVA tests.")
 
   anova_fun <- function(feature, formula, data) {
     result_row <- NULL
@@ -994,7 +1004,7 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 
   results_df <- perform_test(object, formula_char, anova_fun, all_features)
 
-  log_text(paste("ANOVA performed at", Sys.time()))
+  log_text("ANOVA performed.")
 
   results_df
 }
@@ -1031,8 +1041,7 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
                  " mean of reference level minus mean of second level."))
 
 
-  # Start log
-  log_text(paste("\nStarting t-tests at", Sys.time()))
+  log_text("Starting t-tests.")
 
   t_fun <- function(feature, formula, data) {
     result_row <- NULL
@@ -1056,8 +1065,8 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   }
 
   results_df <- perform_test(object, formula_char, t_fun, all_features)
-  # Start log
-  log_text(paste("t-tests performed at", Sys.time()))
+
+  log_text("t-tests performed.")
 
   results_df
 }
@@ -1081,6 +1090,8 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
 #'
 #' @export
 perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
+
+  log_text("Starting paired t-tests.")
 
   data <- combined_data(object)
   groups <- data[, group]
@@ -1141,6 +1152,8 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
   }
   results_df <- adjust_p_values(results_df, flags)
 
+  log_text("Paired t-tests performed.")
+
   results_df
 }
 
@@ -1165,6 +1178,8 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 #'
 #' @export
 perform_pairwise_t_test <- function(object, group = group_col(object), all_features = FALSE, ...) {
+
+  log_text("Starting pairwise t-tests.")
 
   if (class(pData(object)[, group]) == "factor") {
     groups <- levels(pData(object)[, group])
@@ -1193,6 +1208,8 @@ perform_pairwise_t_test <- function(object, group = group_col(object), all_featu
     }
 
   }
+
+  log_text("Pairwise t-tests performed.")
 
   results_df
 }
