@@ -610,7 +610,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     tidyr::unite("Column", Var2, Var1)
   col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
-  # End log
+
   log_text("Linear regression performed.")
 
   results_df[col_order]
@@ -696,7 +696,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
   }
 
-  # End log
+
   log_text("Logistic regression performed.")
 
   results_df
@@ -846,7 +846,6 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
     col_order <- c(col_order, random_effect_order$Column)
   }
 
-  # End log
   log_text("Linear mixed models fit.")
 
   results_df[col_order]
