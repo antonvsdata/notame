@@ -7,10 +7,14 @@
 mz_rt_plot(
   object,
   p_col = NULL,
+  p_limit = NULL,
   mz_col = NULL,
   rt_col = NULL,
   color = NULL,
-  color_scale = getOption("notame.color_scale_dis")
+  title = "m/z retention time",
+  subtitle = NULL,
+  color_scale = getOption("notame.color_scale_con"),
+  ...
 )
 }
 \arguments{
@@ -19,11 +23,19 @@ If x is a data frame, it is used as is.}
 
 \item{p_col}{the column name containing p-values. This is used to scale the size of the points.}
 
-\item{mz_col, rt_col}{the column names for m/z and retention time. if NULL, automatic detection is attempted.}
+\item{p_limit}{numeric, limits plotted features by p-values. If NULL, plots all features.}
+
+\item{mz_col, rt_col}{the column names for m/z and retention time. If NULL, automatic detection is attempted.}
 
 \item{color}{the column name used to color the points}
 
+\item{title}{The plot title}
+
+\item{subtitle}{The plot subtitle}
+
 \item{color_scale}{color scale as returned by a ggplot function. Defaults to current continuous color scale.}
+
+\item{all_features}{logical, should all features be retained? Should be used only if x is a MetaboSet object.}
 }
 \value{
 a ggplot object
