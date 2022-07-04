@@ -49,6 +49,20 @@ test_that("Pheno data checking works", {
 })
 
 
+test_that("Feature data checking works", {
+  df <- data.frame(Feature_ID = 1:5)
+  expect_error(check_feature_data(df), "Numbers are not allowed as feature IDs")
+
+  df <- data.frame(Feature_ID = c(letters[1:5], letters[3:5]))
+  expect_error(check_feature_data(df), "Feature_ID is not unique")
+
+  df <- data.frame(Feature_ID = letters[1:9])
+  df$Feature_ID[6] <- NA
+  expect_error(check_feature_data(df), "Missing values in Feature IDs")
+
+})
+
+
 test_that("Easy example data is read correctly", {
   # Pheno data
   pd <- data.frame(Sample_ID = paste0("TEST_", seq_len(12)),
@@ -143,6 +157,16 @@ test_that("Data is split correctly", {
   expect_equal(read$pheno_data, pd)
   expect_equal(read$feature_data, fd)
 
+})
+
+test_that("Splitting data works as expected", {
+  split_by <- c("Ion mode", "gswregh") # Wrong column name
+  expect_error(read_from_excel(system.file("extdata", "sample_data_whole.xlsx",
+                                           package = "notame"),
+                               corner_row = 4,
+                               corner_column = "X",
+                               split_by = split_by)
+  )
 })
 
 
