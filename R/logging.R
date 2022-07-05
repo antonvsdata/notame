@@ -4,9 +4,6 @@
 #' Initialize a log file with the current data and time.
 #' All major operations run after this will be logged to the specified file.
 #'
-#' @section Warning:
-#' This overwrites the current contents of the file
-#'
 #' @param log_file Path to the log file
 #'
 #' @examples
@@ -22,7 +19,6 @@ init_log <- function(log_file) {
   futile.logger::flog.appender(futile.logger::appender.tee(log_file), name = "notame")
   log_text(paste0("Starting logging"))
 }
-
 #' Log text to the current log file
 #'
 #' The specified text is printed and written to the current log file. Does not overwrite the file.
@@ -57,3 +53,9 @@ finish_log <- function() {
   futile.logger::flog.info(capture.output(sessionInfo()))
   futile.logger::flog.appender(futile.logger::appender.console(), name = "notame")
 }
+
+# Pass errors to log
+options(error = function(){
+  txt <- paste0(geterrmessage())
+  futile.logger::flog.error(txt, name = "notame")
+})
