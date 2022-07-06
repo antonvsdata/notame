@@ -10,15 +10,21 @@
 #' file_name <- "~/log.txt"
 #' init_log(file_name)
 #' # Print the contents of the file
-#' scan(file_name, sep="\n", what = "chracter")
+#' scan(file_name, sep = "\n", what = "character")
 #'
 #' @seealso \code{\link{log_text}}, \code{\link{finish_log}}, \code{\link{log_state}}
 #'
 #' @export
 init_log <- function(log_file) {
   futile.logger::flog.appender(futile.logger::appender.tee(log_file), name = "notame")
-  log_text(paste0("Starting logging"))
+  log_text("Starting logging")
+  # Pass errors to log
+  options(error = function() {
+      msg <- geterrmessage()
+      futile.logger::flog.error(geterrmessage(), name = "notame")
+  })
 }
+
 #' Log text to the current log file
 #'
 #' The specified text is printed and written to the current log file. Does not overwrite the file.
@@ -31,13 +37,13 @@ init_log <- function(log_file) {
 #' init_log(file_name)
 #' log_text("Hello World!")
 #' # Print the contents of the file
-#' scan(file_name, sep="\n", what = "chracter")
+#' scan(file_name, sep = "\n", what = "character")
 #'
 #' @seealso \code{\link{init_log}}, \code{\link{finish_log}}, \code{\link{log_state}}
 #'
 #' @export
 log_text <- function(text) {
-  futile.logger::flog.info(text)
+  futile.logger::flog.info(text, name = "notame")
 }
 
 #' Finish a log
@@ -48,14 +54,10 @@ log_text <- function(text) {
 #'
 #' @export
 finish_log <- function() {
+  # Return default option for error
+  options(error = NULL)
   # Log end of session info
   futile.logger::flog.info(paste("Finished analysis. ", date(), "\nSession info:\n", sep=""))
   futile.logger::flog.info(capture.output(sessionInfo()))
   futile.logger::flog.appender(futile.logger::appender.console(), name = "notame")
 }
-
-# Pass errors to log
-options(error = function(){
-  txt <- paste0(geterrmessage())
-  futile.logger::flog.error(txt, name = "notame")
-})
