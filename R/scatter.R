@@ -865,7 +865,7 @@ setMethod("mz_rt_plot", c(object = "MetaboSet"),
           function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
                    title = "m/z vs retention time", subtitle = NULL,
                    color_scale = getOption("notame.color_scale_con"), all_features = FALSE) {
-            mz_rt_plotter(object, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+            mz_rt_plotter(fData(drop_flagged(object, all_features)), p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale, all_features)
           })
 
@@ -881,14 +881,6 @@ setMethod("mz_rt_plot", c(object = "data.frame"),
 
 mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale, all_features) {
-
-  if (is(x, "MetaboSet")) {
-    if(!all_features) {
-      x <- drop_flagged(x)
-      cat("Low quality features dropped.\n")
-    }
-    x <- fData(x)
-  }
 
   if (!is.null(p_limit) && !is.null(p_col)) {
     x <- x[x[, p_col] < p_limit, ]
