@@ -409,6 +409,8 @@ setValidity("MetaboSet",
                 paste("Column", object@subject_col, "not found in pheno data")
               } else if (!all(c("Injection_order", "Sample_ID", "QC") %in% colnames(pData(object)))) {
                 "Pheno data should contain columns Sample_ID, QC and Injection_order"
+              } else if (any(is.na(pData(object)[, "QC"]))) {
+                "QC column should not contain NAs"
               } else if (!"Flag" %in% colnames(fData(object))) {
                 "Flag column not found in fData"
               } else {
