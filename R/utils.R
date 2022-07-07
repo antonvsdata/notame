@@ -107,7 +107,8 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                   "lmerTest",
                   "MuMIn",
                   "PK",
-                  "rmcorr")
+                  "rmcorr",
+                  "PERMANOVA")
   extra_bioconductor <- c("mixOmics", "supraHex")
   extra_gitlab <- "CarlBrunius/MUVR"
 
