@@ -124,6 +124,10 @@ check_feature_data <- function(feature_data, log_messages = FALSE) {
   if (any(!is.na(fid_num))) {
     stop("Numbers are not allowed as feature IDs")
   }
+  fid_chr <- suppressWarnings(as.character(fid))
+  if (any(grepl("^[[:digit:]]", fid_chr))) {
+    stop("Feature IDs can not start with numbers")
+  }
   feature_data
 }
 
