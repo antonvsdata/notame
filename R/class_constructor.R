@@ -318,7 +318,7 @@ find_mz_rt_cols <- function(feature_data) {
   # Find mass and retention time columns
   mz_tags <- c("mass", "average mz", "average.mz", "molecularweight", "molecular weight", "average_mz")
   rt_tags <-  c("retention time", "retentiontime", "average rt[(]min[)]",
-                "average[.]rt[.]min[.]", "^rt$")
+                "average[_]rt[_]min[_]", "average[.]rt[.]min[.]", "^rt$")
 
   mz_col <- NULL
   for (tag in mz_tags) {
@@ -401,18 +401,18 @@ MetaboSet <- setClass("MetaboSet",
 
 setValidity("MetaboSet",
             function(object) {
-              if (!is.na(object@group_col) & !object@group_col %in% colnames(object@phenoData@data)) {
-                paste0("Column '", object@group_col, "' not found in pheno data")
-              } else if (!is.na(object@time_col) & !object@time_col %in% colnames(object@phenoData@data)) {
-                paste("Column", object@time_col, "not found in pheno data")
-              } else if (!is.na(object@subject_col) & !object@subject_col %in% colnames(object@phenoData@data)) {
-                paste("Column", object@subject_col, "not found in pheno data")
+              if (!is.na(group_col(object)) & !group_col(object) %in% colnames(pData(object))) {
+                return(paste0("Column '", group_col(object), "' not found in pheno data"))
+              } else if (!is.na(time_col(object)) & !time_col(object) %in% colnames(pData(object))) {
+                return(paste("Column", time_col(object), "not found in pheno data"))
+              } else if (!is.na(subject_col(object)) & !subject_col(object) %in% colnames(pData(object))) {
+                return(paste("Column", subject_col(object), "not found in pheno data"))
               } else if (!all(c("Injection_order", "Sample_ID", "QC") %in% colnames(pData(object)))) {
-                "Pheno data should contain columns Sample_ID, QC and Injection_order"
+                return("Pheno data should contain columns Sample_ID, QC and Injection_order")
               } else if (any(is.na(pData(object)[, "QC"]))) {
-                "QC column should not contain NAs"
+                return("QC column should not contain NAs")
               } else if (!"Flag" %in% colnames(fData(object))) {
-                "Flag column not found in fData"
+                return("Flag column not found in fData")
               } else {
                 x <- check_pheno_data(pData(object), id_prefix = "")
                 x <- check_exprs(exprs(object))
