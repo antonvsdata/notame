@@ -125,7 +125,7 @@ check_exprs <- function(exprs_, log_messages = FALSE) {
   exprs_
 }
 
-check_feature_data <- function(feature_data, mz_limits = c(10, 2000), rt_limits = c(0, 20), log_messages = FALSE) {
+check_feature_data <- function(feature_data, check_limits = TRUE, mz_limits = c(10, 2000), rt_limits = c(0, 20), log_messages = FALSE) {
   log_text_if("\nChecking feature information", log_messages)
   log_text_if("Checking that feature IDs are unique and not stored as numbers", log_messages)
   fid <- feature_data$Feature_ID
@@ -139,12 +139,14 @@ check_feature_data <- function(feature_data, mz_limits = c(10, 2000), rt_limits 
   if (any(!is.na(fid_num))) {
     stop("Numbers are not allowed as feature IDs")
   }
-  log_text_if("Checking that m/z and retention time values are reasonable", log_messages)
-  mz <- feature_data[, find_mz_rt_cols(feature_data)$mz_col]
-  rt <- feature_data[, find_mz_rt_cols(feature_data)$rt_col]
-  if (!(all(mz > mz_limits[1]) && all(mz < mz_limits[2])) ||
-      !(all(rt > rt_limits[1]) && all(rt < rt_limits[2]))) {
-    stop("Values in m/z or retention time columns are outside limits.")
+  if (check_limits) {
+    log_text_if("Checking that m/z and retention time values are reasonable", log_messages)
+    mz <- feature_data[, find_mz_rt_cols(feature_data)$mz_col]
+    rt <- feature_data[, find_mz_rt_cols(feature_data)$rt_col]
+    if (!(all(mz > mz_limits[1]) && all(mz < mz_limits[2])) ||
+        !(all(rt > rt_limits[1]) && all(rt < rt_limits[2]))) {
+      stop("Values in m/z or retention time columns are outside limits.")
+    }
   }
 
   feature_data
@@ -416,7 +418,7 @@ setValidity("MetaboSet",
               } else {
                 x <- check_pheno_data(pData(object), id_prefix = "")
                 x <- check_exprs(exprs(object))
-                x <- check_feature_data(fData(object))
+                x <- check_feature_data(fData(object), check_limits = FALSE)
                 TRUE
               }
             })
