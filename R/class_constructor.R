@@ -139,6 +139,10 @@ check_feature_data <- function(feature_data, check_limits = TRUE, mz_limits = c(
   if (any(!is.na(fid_num))) {
     stop("Numbers are not allowed as feature IDs")
   }
+  fid_chr <- suppressWarnings(as.character(fid))
+  if (any(grepl("^[[:digit:]]", fid_chr))) {
+    stop("Feature IDs can not start with numbers")
+  }
   if (check_limits) {
     log_text_if("Checking that m/z and retention time values are reasonable", log_messages)
     mz <- feature_data[, find_mz_rt_cols(feature_data)$mz_col]
