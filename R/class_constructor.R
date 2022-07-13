@@ -37,8 +37,8 @@ check_pheno_data <- function(x, id_prefix, id_column = NULL, log_messages = FALS
     if (!id_column %in% colnames(x)) {
       log_text_if(paste0("ID column '", id_column, "' not found"), log_messages)
     } else if (!any(duplicated(x[, id_column])) && !any(is.na(x[, id_column]))) {
-      colnames(x)[colnames(x) == id_column] <- "Sample_ID"
-      log_text_if(paste0("Column '", id_column, "' changed to 'Sample_ID'"), log_messages)
+      x$Sample_ID <- x[, id_column]
+      log_text_if(paste0("Column 'Sample_ID' created from ", id_column), log_messages)
     } else {
       log_text_if("Provided sample ID column is not valid", log_messages)
     }
