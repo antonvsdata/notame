@@ -1179,6 +1179,10 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 #' @export
 perform_pairwise_t_test <- function(object, group = group_col(object), all_features = FALSE, ...) {
 
+  if (!is.factor(group)) {
+    stop("Group column should be a factor")
+  }
+
   log_text("Starting pairwise t-tests.")
 
   if (class(pData(object)[, group]) == "factor") {
