@@ -671,7 +671,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
       label_data <- data[data[, p] < label_limit, ]
       pl <- pl +
         ggrepel::geom_label_repel(data = label_data,
-                                  mapping = aes(label = label_data[, label]),
+                                  mapping = aes_string(label = label),
                                   seed = 313
         )
     } else {
