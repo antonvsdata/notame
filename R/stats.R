@@ -94,6 +94,18 @@ summary_statistics <- function(object, grouping_cols = NA) {
 }
 
 
+#' Statistics cleaning
+#'
+#' Removes unnecessary columns from statistics results data frame.
+#'
+#' @param df data frame containing statistics results
+#' @param remove list containing strings that are matching to unwanted columns with \code{grepl}
+#'
+#' @export
+clean_stats_results <- function(df, remove = c("Intercept" , "CI_95", "Std_error", "t_value")) {
+  df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
+}
+
 #' Cohen's D
 #'
 #' Computes Cohen's D for each feature. If time and ID are supplied,
