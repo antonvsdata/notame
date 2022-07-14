@@ -831,9 +831,13 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #' @param object a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
 #' If x is a data frame, it is used as is.
 #' @param p_col the column name containing p-values. This is used to scale the size of the points.
-#' @param mz_col,rt_col the column names for m/z and retention time. if NULL, automatic detection is attempted.
+#' @param p_limit numeric, limits plotted features by p-values. If NULL, plots all features.
+#' @param mz_col,rt_col the column names for m/z and retention time. If NULL, automatic detection is attempted.
 #' @param color the column name used to color the points
+#' @param title The plot title
+#' @param subtitle The plot subtitle
 #' @param color_scale color scale as returned by a ggplot function. Defaults to current continuous color scale.
+#' @param all_features logical, should all features be retained? Should be used only if x is a MetaboSet object.
 #'
 #' @return a ggplot object
 #'
@@ -852,29 +856,36 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #'
 #' @export
 setGeneric("mz_rt_plot", signature = "object",
-           function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
-                    color_scale = getOption("notame.color_scale_dis")) standardGeneric("mz_rt_plot"))
-
+           function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL,
+                    color = NULL, title = "m/z retention time", subtitle = NULL,
+                    color_scale = getOption("notame.color_scale_con"), ...) standardGeneric("mz_rt_plot"))
 
 #' @export
 setMethod("mz_rt_plot", c(object = "MetaboSet"),
-          function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
-                   color_scale = getOption("notame.color_scale_con")) {
-            mz_rt_plotter(fData(object), p_col, mz_col, rt_col, color,
-                          color_scale)
+          function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                   title = "m/z vs retention time", subtitle = NULL,
+                   color_scale = getOption("notame.color_scale_con"), all_features = FALSE) {
+            mz_rt_plotter(fData(drop_flagged(object, all_features)), p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+                          color_scale, all_features)
           })
 
 #' @export
 setMethod("mz_rt_plot", c(object = "data.frame"),
-          function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+          function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                   title = "m/z vs retention time", subtitle = NULL,
                    color_scale = getOption("notame.color_scale_con")) {
-            mz_rt_plotter(object, p_col, mz_col, rt_col, color,
+            mz_rt_plotter(object, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale)
           })
 
 
-mz_rt_plotter <- function(x, p_col, mz_col, rt_col, color,
-                          color_scale) {
+mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+                          color_scale, all_features) {
+
+  if (!is.null(p_limit) && !is.null(p_col)) {
+    x <- x[x[, p_col] < p_limit, ]
+    cat(paste("All features with p-values larger than", p_limit, "dropped.\n"))
+  }
 
   if (is.null(mz_col) || is.null(rt_col)) {
     mz_rt_cols <- find_mz_rt_cols(x)
@@ -889,7 +900,7 @@ mz_rt_plotter <- function(x, p_col, mz_col, rt_col, color,
                           breaks = c(0.05, 0.01, 0.001, 1e-4), labels = as.character(c(0.05, 0.01, 0.001, 1e-4))) +
     theme_bw() +
     color_scale +
-    labs(title = "m/z vs retention time",
+    labs(title = title, subtitle = subtitle,
          x = "Retention time", y = "Mass-to-charge ratio", size = "p-value") +
     # Scales for m/z and rt
     scale_x_continuous(breaks = seq(0, ceiling(max(x[, rt_col])))) +

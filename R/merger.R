@@ -46,7 +46,6 @@ check_match <- function(x, y) {
   for (i in seq_along(funs)) {
     check_column_match(x, y, funs[[i]], names(funs)[i])
   }
-
   common <- intersect(sampleNames(x), sampleNames(y))
   if (!identical(pData(x)[common, "Injection_order"], pData(y)[common, "Injection_order"])) {
     stop("Injection orders of common samples are not identical")
@@ -82,11 +81,37 @@ check_match <- function(x, y) {
 
 # Merge two MetaboSet objects together
 merge_mode_helper <- function(x, y) {
-  # Check that the match is ok
-  check_match(x,y)
+  # Create dummy injection order if original ones differ
+  common <- intersect(sampleNames(x), sampleNames(y))
+  if (!identical(pData(x)[common, "Injection_order"], pData(y)[common, "Injection_order"])) {
+    log_text("Injection order differs between modes. Creating dummy injection order")
+    x_modes <- unique(fData(x)$Split)
+    # Save original injection order for first mode
+    if (length(x_modes) == 1) {
+      pData(x)[, paste0(x_modes, "_Injection_order")] <- x$Injection_order
+      dummy_injection <- as.numeric(-seq_along(pData(x)$Sample_ID))
+      names(dummy_injection) <- x$Sample_ID
+      pData(x)$Injection_order <- dummy_injection
+    }
+    # Save original injection order in other modes
+    pData(y)[, paste0(unique(fData(y)$Split), "_Injection_order")] <- y$Injection_order
+    # Update dummy injection
+    y_in_x <- y$Sample_ID %in% x$Sample_ID
+    new_io <- seq(from = min(dummy_injection) - 1, length.out = sum(!y_in_x))
+    names(new_io) <- y$Sample_ID[!y_in_x]
+    dummy_injection <- append(dummy_injection, new_io)
 
-  merged_pdata <- dplyr::full_join(pData(x), pData(y), by =
-                                     intersect(colnames(pData(x)), colnames(pData(y)))) %>%
+    pData(y)$Injection_order <- dummy_injection[match(pData(y)$Sample_ID, names(dummy_injection))]
+    log_text("Dummy injection order (row numbers) created")
+  }
+  # Check that the match is ok
+  check_match(x, y)
+
+  merged_pdata <- dplyr::full_join(pData(x), pData(y),
+                                   by = intersect(colnames(pData(x)),
+                                                  colnames(pData(y))
+                                   )
+  ) %>%
     Biobase::AnnotatedDataFrame()
   rownames(merged_pdata) <- merged_pdata$Sample_ID
   merged_fdata <- rbind(fData(x), fData(y)) %>%
@@ -247,7 +272,6 @@ merge_batch_helper <- function(x, y) {
 
   merged_object
 }
-
 
 #' DEPRECATED: Merge MetaboSet objects of batches together
 #'
