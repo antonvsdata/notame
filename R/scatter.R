@@ -560,7 +560,6 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' @param label_limit numeric, p-value which is used to limit label plotting. Defaults to 0.05.
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
-#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
 #' also be passed using \code{mapping = aes(...)}.
 #'
 #' @return a ggplot object
@@ -672,7 +671,11 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
       pl <- pl +
         ggrepel::geom_label_repel(data = label_data,
                                   mapping = aes_string(label = label),
-                                  seed = 313
+                                  seed = 313,
+                                  alpha = 0.5,
+                                  size = 3,
+                                  force = 10,
+                                  max.overlaps = 50
         )
     } else {
     warning("Label column not found, not plotting them")
