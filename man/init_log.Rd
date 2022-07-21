@@ -13,16 +13,11 @@ init_log(log_file)
 Initialize a log file with the current data and time.
 All major operations run after this will be logged to the specified file.
 }
-\section{Warning}{
-
-This overwrites the current contents of the file
-}
-
 \examples{
 file_name <- "~/log.txt"
 init_log(file_name)
 # Print the contents of the file
-scan(file_name, sep="\n", what = "chracter")
+scan(file_name, sep = "\n", what = "character")
 
 }
 \seealso{
