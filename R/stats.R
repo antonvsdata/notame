@@ -93,6 +93,77 @@ summary_statistics <- function(object, grouping_cols = NA) {
   statistics
 }
 
+cohens_d_fun <- function(object, group, id, time) {
+
+  data <- combined_data(object)
+  features <- Biobase::featureNames(object)
+  group_levels <- levels(data[, group])
+  time_levels <- NULL
+
+  # Check that both group and time have exactly 2 levels
+  for (column in c(group, time)) {
+    if (is.null(column)) {
+      next
+    }
+    if (class(data[, column]) != "factor") {
+      data[, column] <- as.factor(data[, column])
+    }
+    if (length(levels(data[, column])) != 2) {
+      stop(paste("Column", column, "should contain exactly 2 levels!"))
+    }
+  }
+
+  if (is.null(time)) {
+    group1 <- data[which(data[, group] == group_levels[1]), ]
+    group2 <- data[which(data[, group] == group_levels[2]), ]
+    log_text(paste("Starting to compute Cohen's D between groups",
+                   paste(group_levels, collapse = " & ")
+    ))
+  } else {
+    time_levels <- levels(data[, time])
+    # Split to time points
+    time1 <- data[which(data[, time] == time_levels[1]), ]
+    time2 <- data[which(data[, time] == time_levels[2]), ]
+    common_ids <- intersect(time1[, id], time2[, id])
+    time1 <- time1[time1$Subject_ID %in% common_ids, ]
+    time2 <- time2[time2$Subject_ID %in% common_ids, ]
+    if (!identical(time1[, group], time2[, group])) {
+      stop("Groups of subjects do not match between time points",
+           call. = FALSE)
+    }
+    # Change between time points
+    new_data <- time2[, features] - time1[, features]
+    # Split to groups
+    group1 <- new_data[which(time1[, group] == levels(time1[,group])[1]), ]
+    group2 <- new_data[which(time1[, group] == levels(time1[,group])[2]), ]
+
+    log_text(paste("Starting to compute Cohen's D between groups",
+                   paste(group_levels, collapse = " & "),
+                   "from time change",
+                   paste(rev(time_levels), collapse = " - ")
+    ))
+  }
+  ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+    feature <- features[i]
+    f1 <- group1[, feature]
+    f2 <- group2[, feature]
+    d <- data.frame(Feature_ID = feature,
+                    Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
+                      sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
+                    stringsAsFactors = FALSE)
+  }
+
+  if (is.null(time_levels)) {
+    colnames(ds)[2] <- paste0("Cohen_d_", group_levels[1], "_", group_levels[2])
+  } else {
+    colnames(ds)[2] <- paste0("Cohen_d_", group_levels[1], "_", group_levels[2],
+                              "_", time_levels[2], "_minus_", time_levels[1])
+  }
+
+  log_text("Cohen's D computed.")
+  ds
+}
+
 
 #' Cohen's D
 #'
@@ -115,65 +186,84 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #' @export
 cohens_d <- function(object, group = group_col(object),
                      id = NULL, time = NULL) {
+  res <- NULL
+  group_combos <- combn(levels(pData(object)[, group]), 2)
 
-  log_text("Starting to compute Cohen's D")
-
-  data <- combined_data(object)
-  features <- Biobase::featureNames(object)
-  # Check that both group and time have exactly 2 levels and convert levels to 1 and 2
-  for (column in c(group, time)) {
-    if (is.null(column)) {
-      next
-    }
-    if (class(data[, column]) != "factor") {
-      data[, column] <- as.factor(data[, column])
-    }
-    if (length(levels(data[, column])) != 2) {
-      stop(paste("Column", column, "should contain exactly 2 levels!"))
-    }
+  count_obs_geq_than <- function(x, n) {
+    sum(x >= n)
   }
 
-  if (is.null(time)) {
-    group1 <- data[which(data[, group] == levels(data[,group])[1]), ]
-    group2 <- data[which(data[, group] == levels(data[,group])[2]), ]
+  if(is.null(time)) {
+    for (i in seq_len(ncol(group_combos))) {
+      object_split <- object[, which(
+        pData(object)[, group] %in% c(group_combos[1, i], group_combos[2, i])
+      )]
+      pData(object_split) <- droplevels(pData(object_split))
+
+      if (is.null(res)) {
+        res <- cohens_d_fun(object_split, group, id, time)
+        } else {
+        res <- dplyr::full_join(res,
+                                cohens_d_fun(object_split, group, id, time),
+                                by = "Feature_ID"
+        )
+      }
+    }
   } else {
     if (is.null(id)) {
       stop("Please specify id column.", call. = FALSE)
     }
-    # Split to time poiints
-    time1 <- data[which(data[, time] == levels(data[, time])[1]),]
-    time2 <- data[which(data[, time] == levels(data[, time])[2]),]
-    common_ids <- intersect(time1[, id], time2[, id])
-    rownames(time1) <- time1$Subject_ID
-    rownames(time2) <- time2$Subject_ID
-    time1 <- time1[common_ids, ]
-    time2 <- time2[common_ids, ]
-    if (!identical(time1[, group], time2[, group])) {
-      stop("Groups of subjects do not match between time points",
-           call. = FALSE)
+    time_combos <- combn(levels(pData(object)[, time]), 2)
+    for (i in seq_len(ncol(group_combos))) {
+      for (j in seq_len(ncol(time_combos))) {
+        object_split <- object[, which(
+          pData(object)[, group] %in% c(group_combos[1, i], group_combos[2, i]) &
+            pData(object)[, time] %in% c(time_combos[1, j], time_combos[2, j])
+        )]
+        pData(object_split) <- droplevels(pData(object_split))
+        # Check data is valid for Cohen's D
+        group_table <- table(pData(object_split)[, c(id, group)])
+        time_table <- table(pData(object_split)[, c(id, time)])
+        column <- paste0("Cohen_d_", group_combos[1, i], "_", group_combos[2, i],
+                         "_", time_combos[2, j], "_minus_", time_combos[1, j]
+        )
+        if (any(apply(group_table, 2, count_obs_geq_than, 2) < 2)) {
+          warning(paste0("In ", column,
+                         ": Groups don't have two observations of at least two subjects, skipping!"
+          ))
+          next
+        }
+        if (any(apply(time_table, 1, count_obs_geq_than, 2) != 0)) {
+          warning(paste0("In ", column,
+                         ": Same subject recorded more than once at same time, skipping!"
+          ))
+          next
+        }
+        if (any(apply(group_table, 1, count_obs_geq_than, 1) != 1)) {
+          warning(paste0("In ", column,
+                         ": Same subject recorded in two groups, skipping!"
+          ))
+          next
+        }
+        if (!all(apply(time_table, 1, count_obs_geq_than, 1) != 1)) {
+          warning(paste("One or more subject(s) missing time points,",
+                        column, "will be counted using common subjects in time points!"
+          ))
+        }
+
+        if (is.null(res)) {
+          res <- cohens_d_fun(object_split, group, id, time)
+        } else {
+          res <- dplyr::full_join(res,
+                                  cohens_d_fun(object_split, group, id, time),
+                                  by = "Feature_ID"
+          )
+        }
+      }
     }
-    # Change between time points
-    new_data <- time2[, features] - time1[, features]
-    # Split to groups
-    group1 <- new_data[which(time1[, group] == levels(time1[,group])[1]), ]
-    group2 <- new_data[which(time1[, group] == levels(time1[,group])[2]), ]
   }
-
-
-  ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
-    feature <- features[i]
-    f1 <- group1[, feature]
-    f2 <- group2[, feature]
-    d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
-                      sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    stringsAsFactors = FALSE)
-  }
-
-  rownames(ds) <- ds$Feature_ID
-
-  log_text("Cohen's D computed.")
-  ds
+  rownames(res) <- res$Feature_ID
+  res
 }
 
 #' Fold change
@@ -218,7 +308,10 @@ fold_change <- function(object, group = group_col(object)) {
   }
 
   # Create comparison labels for result column names
-  comp_labels <- groups %>% t() %>% as.data.frame() %>% tidyr::unite("Comparison", V2, V1, sep = "_vs_")
+  comp_labels <- groups %>%
+    t() %>%
+    as.data.frame() %>%
+    tidyr::unite("Comparison", V2, V1, sep = "_vs_")
   comp_labels <- paste0("FC_",comp_labels[,1])
   results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
   colnames(results_df) <- c("Feature_ID", comp_labels)
