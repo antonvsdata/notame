@@ -96,14 +96,32 @@ summary_statistics <- function(object, grouping_cols = NA) {
 
 #' Statistics cleaning
 #'
-#' Removes unnecessary columns from statistics results data frame.
+#' Uses regexp to remove unnecessary columns from statistics results data frame.
+#' Can also rename columns effectively.
 #'
-#' @param df data frame containing statistics results
-#' @param remove list containing strings that are matching to unwanted columns with \code{grepl}
+#' @param df data frame, statistics results
+#' @param remove list, should contain strings that are matching to unwanted columns
+#' @param rename named list, names should contain matches that are replaced with values
+#'
+#' @examples
+#' # Simple manipulation to linear model results
+#' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+#' lm_results <- clean_stats_results(lm_results,
+#' rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1"))
 #'
 #' @export
-clean_stats_results <- function(df, remove = c("Intercept" , "CI_95", "Std_error", "t_value")) {
-  df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
+clean_stats_results <- function(
+    df,
+    remove = c("Intercept", "CI_95", "Std_error", "t_value", "z_value", "R2"),
+    rename = NULL) {
+  df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
+  if (!is.null(rename)) {
+    for (name in names(rename)) {
+      colnames(df) <- gsub(name, rename[name], colnames(df))
+    }
+  }
+
+  df
 }
 
 #' Cohen's D
