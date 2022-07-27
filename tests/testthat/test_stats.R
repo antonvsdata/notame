@@ -1,7 +1,7 @@
 context("Testing statistics")
 
 library(notame)
-
+# Summary statistics ----
 test_that("summary statistics work without grouping", {
 
   smry <- summary_statistics(mark_nas(example_set, 0))
@@ -16,9 +16,9 @@ test_that("summary statistics work without grouping", {
 
 
 test_that("summary statistics work with grouping", {
+  foreach::registerDoSEQ()
 
   smry <- summary_statistics(mark_nas(example_set, 0), grouping_cols = "Group")
-
   exa <- exprs(mark_nas(example_set[, example_set$Group == "A"], 0))
 
   for (fun in c("finite_mean", "finite_sd", "finite_median", "finite_mad")) {
@@ -48,7 +48,7 @@ test_that("summary statistics work with all NA features", {
   expect_true(all(is.na(smry[1, 2:ncol(smry)])))
 })
 
-
+# Cohen's D ----
 test_that("Cohen's d works", {
   ex <- example_set %>%
     drop_qcs() %>%
@@ -104,7 +104,7 @@ test_that("Cohen's d is not run with multiple time or group levels", {
   expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "Column Group")
 })
 
-
+# Fold change ----
 test_that("Fold change works", {
   ex <- example_set %>%
     mark_nas(0)
@@ -148,7 +148,7 @@ test_that("Fold change works with all NA features", {
   expect_true(all(is.na(foldc[1:2, 2:ncol(foldc)])))
 })
 
-
+# P-value correction ----
 test_that("P-value correction works", {
 
   ps <- data.frame(x = letters,
@@ -170,7 +170,7 @@ test_that("P-value correction works", {
 
 })
 
-
+# Linear model ----
 test_that("Linear model works", {
 
   cd <- combined_data(drop_qcs(example_set))
@@ -207,6 +207,7 @@ test_that("Linear model works", {
 
 })
 
+# Logistic regression ----
 test_that("Logistic regression works", {
 
   cd <- combined_data(drop_qcs(example_set))
@@ -237,5 +238,75 @@ test_that("Logistic regression works", {
   expect_true(all(is.na(glm_res[1:2, 2:ncol(glm_res)])))
 })
 
+
+# Paired t-test ----
+test_that("Paired t-test works", {
+
+  t_res <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+
+  expect_identical(rownames(t_res), featureNames(drop_qcs(example_set)))
+  expect_identical(colnames(t_res), c(
+    "Feature_ID",
+    "1_minus_2_Mean_diff",
+    "1_minus_2_Lower_CI_95",
+    "1_minus_2_Upper_CI_95",
+    "1_minus_2_t_test_P",
+    "1_minus_2_t_test_P_FDR"
+  ))
+})
+
+# Pairwise t-tests ----
+test_that("Pairwise t-test works", {
+  object <- drop_qcs(example_set)
+  pData(object)$Group <- factor(rep(c(rep("A", 3), rep("B", 3), rep("C", 2)), 3))
+  pData(object)$Subject_ID <- factor(rep(1:8, 3))
+  pData(object)$Time <- factor(c(rep(1, 8), rep(2, 8), rep(3, 8)))
+
+  pwt_res <- perform_pairwise_t_test(object, group = "Time")
+
+  expect_identical(rownames(pwt_res), featureNames(drop_qcs(example_set)))
+  prefixes <- c("1_minus_2_", "1_minus_3_", "2_minus_3_")
+  suffixes <- c("Mean_diff", "Lower_CI_95", "Upper_CI_95", "t_test_P", "t_test_P_FDR")
+  cols <- expand.grid(prefixes, suffixes)
+  expect_identical(colnames(pwt_res), c(
+    "Feature_ID", "Mean_1", "Mean_2",
+    do.call(paste0, cols[order(cols$Var1) & cols$Var1 == prefixes[1], ]),
+    "Mean_3",
+    do.call(paste0, cols[order(cols$Var1), ])[6:15]
+  ))
+  # These should be identical as no paired mode
+  pData(object)$Subject_ID <- factor(rep(1:12, 2))
+  expect_identical(perform_pairwise_t_test(object, group = "Time"), pwt_res)
+})
+
+test_that("Pairwise paired t-test works", {
+  object <- drop_qcs(example_set)
+  pData(object)$Group <- factor(rep(c(rep("A", 3), rep("B", 3), rep("C", 2)), 3))
+  pData(object)$Subject_ID <- factor(rep(1:8, 3))
+  pData(object)$Time <- factor(c(rep(1, 8), rep(2, 8), rep(3, 8)))
+
+  pwpt_res <- perform_pairwise_t_test(object,
+                                      group = "Time",
+                                      id = "Subject_ID",
+                                      is_paired = TRUE
+  )
+
+  expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
+  prefixes <- c("1_minus_2_", "1_minus_3_", "2_minus_3_")
+  suffixes <- c("Mean_diff", "Lower_CI_95", "Upper_CI_95", "t_test_P", "t_test_P_FDR")
+  cols <- expand.grid(prefixes, suffixes)
+  expect_identical(colnames(pwpt_res), c("Feature_ID",
+                                        do.call(paste0, cols[order(cols$Var1), ])
+  ))
+  pData(object)$Subject_ID <- factor(rep(1:12, 2))
+  pwpt_res_2 <- perform_pairwise_t_test(object,
+                                        group = "Time",
+                                        id = "Subject_ID",
+                                        is_paired = TRUE
+  )
+  # These shouldn't match because means are counted only from paired samples
+  # In this case 4 pairs in each
+  expect_failure(expect_identical(pwpt_res_2, pwpt_res))
+})
 
 
