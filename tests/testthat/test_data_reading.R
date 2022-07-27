@@ -186,13 +186,24 @@ test_that("Creating dummy injection order works as expected", {
   sampleNames(modes$HILIC_neg)[2] <- "ID_666"
   sampleNames(modes$RP_pos)[22] <- "ID_999"
 
-  merged <- merge_metabosets(modes)
-
+  expect_warning(merged <- merge_metabosets(modes),
+                 regexp = "Sample IDs are not identical|Unequal amount of samples"
+  )
+  # Dummy injection
   expect_equal(merged$Injection_order, -seq_along(merged$Sample_ID))
-  expect_equal(sort(as.numeric(na.omit(merged$HILIC_neg_Injection_order))), modes$HILIC_neg$Injection_order)
-  expect_equal(sort(as.numeric(na.omit(merged$HILIC_pos_Injection_order))), modes$HILIC_pos$Injection_order)
-  expect_equal(sort(as.numeric(na.omit(merged$RP_neg_Injection_order))), modes$RP_neg$Injection_order)
-  expect_equal(sort(as.numeric(na.omit(merged$RP_pos_Injection_order))), modes$RP_pos$Injection_order)
+  # Original IOs
+  expect_equal(sort(as.numeric(na.omit(merged$HILIC_neg_Injection_order))),
+               modes$HILIC_neg$Injection_order
+  )
+  expect_equal(sort(as.numeric(na.omit(merged$HILIC_pos_Injection_order))),
+               modes$HILIC_pos$Injection_order
+  )
+  expect_equal(sort(as.numeric(na.omit(merged$RP_neg_Injection_order))),
+               modes$RP_neg$Injection_order
+  )
+  expect_equal(sort(as.numeric(na.omit(merged$RP_pos_Injection_order))),
+               modes$RP_pos$Injection_order
+  )
 })
 
 
