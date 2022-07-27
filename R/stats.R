@@ -352,7 +352,7 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
     cor_tmp <- NULL
     tryCatch({
       if (is.null(id)) {
-        cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
+        cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp], ...)
       } else {
         id_tmp <- data1[, id]
         df_tmp <- data.frame(id_var = id_tmp, x_var = data1[, x_tmp], y_var = data2[, y_tmp])
