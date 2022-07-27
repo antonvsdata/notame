@@ -4,22 +4,35 @@
 \alias{perform_permanova}
 \title{Perform PERMANOVA}
 \usage{
-perform_permanova(object, all_features = FALSE, ...)
+perform_permanova(
+  object,
+  group,
+  all_features = FALSE,
+  transform = "Standardize columns",
+  coef = "Pythagorean",
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{should all features be included in FDR correction?}
+\item{group}{character, name of the column to compare}
 
-\item{...}{other parameters to \code{\link{PERMANOVA}}}
+\item{all_features}{should all features be included?}
 
-\item{transform}{Transformation to use in \code{IniTransform}}
+\item{transform}{Transformation to use in \code{IniTransform}. By default uses "Standardize columns".}
 
-\item{coef}{Coefficient to calculate continuous distances in \code{DistContinuous}. By default we use Pythagorean distances.}
+\item{coef}{Coefficient to calculate continuous distances in \code{DistContinuous}. By default uses Pythagorean distances.}
+
+\item{...}{other parameters to \code{\link[PERMANOVA]{PERMANOVA}}}
 }
 \value{
 PERMANOVA object
 }
 \description{
-Performs permutational multivariate analysis of variance.
+Performs permutational multivariate analysis of variance. Uses package called PERMANOVA.
+}
+\examples{
+permanova_res <- perform_permanova(merged_sample, group = "Group")
+
 }

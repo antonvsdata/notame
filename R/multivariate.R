@@ -566,16 +566,19 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
 #' Performs permutational multivariate analysis of variance. Uses package called PERMANOVA.
 #'
 #' @param object a MetaboSet object
-#' @param group_col A factor containing the groups to compare.
-#' @param all_features should all features be included in FDR correction?
+#' @param group character, name of the column to compare
+#' @param all_features should all features be included?
 #' @param transform Transformation to use in \code{IniTransform}. By default uses "Standardize columns".
 #' @param coef Coefficient to calculate continuous distances in \code{DistContinuous}. By default uses Pythagorean distances.
-#' @param ... other parameters to \code{\link{PERMANOVA}}
+#' @param ... other parameters to \code{\link[PERMANOVA]{PERMANOVA}}
 #'
 #' @return PERMANOVA object
 #'
+#' @examples
+#' permanova_res <- perform_permanova(merged_sample, group = "Group")
+#'
 #' @export
-perform_permanova <- function(object, group_col,
+perform_permanova <- function(object, group,
                               all_features = FALSE,
                               transform = "Standardize columns",
                               coef = "Pythagorean",
@@ -585,7 +588,7 @@ perform_permanova <- function(object, group_col,
          Please install it.",
          call. = FALSE)
   }
-  if (!is.factor(pData(object)[, group_col])) {
+  if (!is.factor(pData(object)[, group])) {
     stop("Group column is not a factor.")
   }
 
@@ -594,7 +597,7 @@ perform_permanova <- function(object, group_col,
   data <- t(exprs(object))
   data <- PERMANOVA::IniTransform(data, transform = transform)
   initialized <- PERMANOVA::DistContinuous(data, coef = coef)
-  res <- PERMANOVA::PERMANOVA(initialized, pData(object)[, group_col], ...)
+  res <- PERMANOVA::PERMANOVA(initialized, pData(object)[, group], ...)
   log_text("PERMANOVA performed")
 
   res
