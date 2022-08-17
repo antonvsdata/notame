@@ -16,11 +16,12 @@
 #'
 #' @export
 init_log <- function(log_file) {
+  # Create root logger explicitly, futile.logger throws errors otherwise
+  futile.logger::flog.logger()
   futile.logger::flog.appender(futile.logger::appender.tee(log_file), name = "notame")
   log_text("Starting logging")
   # Pass errors to log
   options(error = function() {
-      msg <- geterrmessage()
       futile.logger::flog.error(geterrmessage(), name = "notame")
   })
 }
@@ -59,5 +60,5 @@ finish_log <- function() {
   # Log end of session info
   futile.logger::flog.info(paste("Finished analysis. ", date(), "\nSession info:\n", sep=""))
   futile.logger::flog.info(capture.output(sessionInfo()))
-  futile.logger::flog.appender(futile.logger::appender.console(), name = "notame")
+  invisible(futile.logger::flog.appender(futile.logger::appender.console(), name = "notame"))
 }
