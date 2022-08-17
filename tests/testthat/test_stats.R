@@ -74,7 +74,7 @@ test_that("Cohen's d works", {
   cohd <- cohens_d(ex, id = "Subject_ID", time = "Time")
 
   df <- data.frame(Feature_ID = featureNames(ex),
-                   Cohen_d_B_vs_A_2_minus_1 = d,
+                   B_vs_A_2_minus_1_Cohen_d = d,
                    stringsAsFactors = FALSE)
   rownames(df) <- df$Feature_ID
   expect_equal(cohd, df)
@@ -102,9 +102,9 @@ test_that("Fold change works", {
   cd2 <- cd[cd$Time == 2, ]
 
   fc <- data.frame(Feature_ID = featureNames(ex),
-                   FC_B_vs_A = 1,
-                   FC_QC_vs_A = 1,
-                   FC_QC_vs_B = 1,
+                   B_vs_A_FC = 1,
+                   QC_vs_A_FC = 1,
+                   QC_vs_B_FC = 1,
                    stringsAsFactors = FALSE)
   rownames(fc) <- fc$Feature_ID
   for (i in seq_len(nrow(fc))) {
@@ -113,9 +113,9 @@ test_that("Fold change works", {
     mean_b <- finite_mean(cd[cd$Group == "B", feature])
     mean_qc <- finite_mean(cd[cd$Group == "QC", feature])
 
-    fc$FC_B_vs_A[i] <- mean_b/mean_a
-    fc$FC_QC_vs_A[i] <- mean_qc/mean_a
-    fc$FC_QC_vs_B[i] <- mean_qc/mean_b
+    fc$B_vs_A_FC[i] <- mean_b/mean_a
+    fc$QC_vs_A_FC[i] <- mean_qc/mean_a
+    fc$QC_vs_B_FC[i] <- mean_qc/mean_b
   }
 
   foldc <- fold_change(ex)
@@ -240,11 +240,11 @@ test_that("Cohens D values are counted right", {
     f2 <- group2[, feature]
     f3 <- group3[, feature]
     d <- data.frame(Feature_ID = feature,
-                    Cohen_d_B_vs_A = (finite_mean(f2) - finite_mean(f1)) /
+                    B_vs_A_Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    Cohen_d_C_vs_A = (finite_mean(f3) - finite_mean(f1)) /
+                    C_vs_A_Cohen_d = (finite_mean(f3) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-                    Cohen_d_C_vs_B = (finite_mean(f3) - finite_mean(f2)) /
+                    C_vs_B_Cohen_d = (finite_mean(f3) - finite_mean(f2)) /
                       sqrt((finite_sd(f3)^2 + finite_sd(f2)^2) / 2),
                     stringsAsFactors = FALSE)
   }
@@ -321,23 +321,23 @@ test_that("Cohens D values between time points are counted right", {
     f8 <- group8[, feature] # B 3-2
     f9 <- group9[, feature] # C 3-2
     d <- data.frame(Feature_ID = feature,
-                    "Cohen_d_B_vs_A_2_minus_1" = (finite_mean(f2) - finite_mean(f1)) /
+                    "B_vs_A_2_minus_1_Cohen_d" = (finite_mean(f2) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    "Cohen_d_B_vs_A_3_minus_1" = (finite_mean(f5) - finite_mean(f4)) /
+                    "B_vs_A_3_minus_1_Cohen_d" = (finite_mean(f5) - finite_mean(f4)) /
                       sqrt((finite_sd(f4)^2 + finite_sd(f5)^2) / 2),
-                    "Cohen_d_B_vs_A_3_minus_2" = (finite_mean(f8) - finite_mean(f7)) /
+                    "B_vs_A_3_minus_2_Cohen_d" = (finite_mean(f8) - finite_mean(f7)) /
                       sqrt((finite_sd(f7)^2 + finite_sd(f8)^2) / 2),
-                    "Cohen_d_C_vs_A_2_minus_1" = (finite_mean(f3) - finite_mean(f1)) /
+                    "C_vs_A_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-                    "Cohen_d_C_vs_A_3_minus_1" = (finite_mean(f6) - finite_mean(f4)) /
+                    "C_vs_A_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f4)) /
                       sqrt((finite_sd(f4)^2 + finite_sd(f6)^2) / 2),
-                    "Cohen_d_C_vs_A_3_minus_2" = (finite_mean(f9) - finite_mean(f7)) /
+                    "C_vs_A_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f7)) /
                       sqrt((finite_sd(f7)^2 + finite_sd(f9)^2) / 2),
-                    "Cohen_d_C_vs_B_2_minus_1" = (finite_mean(f3) - finite_mean(f2)) /
+                    "C_vs_B_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f2)) /
                       sqrt((finite_sd(f2)^2 + finite_sd(f3)^2) / 2),
-                    "Cohen_d_C_vs_B_3_minus_1" = (finite_mean(f6) - finite_mean(f5)) /
+                    "C_vs_B_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f5)) /
                       sqrt((finite_sd(f5)^2 + finite_sd(f6)^2) / 2),
-                    "Cohen_d_C_vs_B_3_minus_2" = (finite_mean(f9) - finite_mean(f8)) /
+                    "C_vs_B_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f8)) /
                       sqrt((finite_sd(f8)^2 + finite_sd(f9)^2) / 2),
                     stringsAsFactors = FALSE)
   }
