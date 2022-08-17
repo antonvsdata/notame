@@ -1055,15 +1055,15 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
       result_row <- data.frame(Feature_ID = feature,
                                Mean1 = t_res$estimate[1],
                                Mean2 = t_res$estimate[2],
-                               Mean_1_minus_2 = t_res$estimate[1] - t_res$estimate[2],
-                               "Lower_CI_" = t_res$conf.int[1],
-                               "Upper_CI_" = t_res$conf.int[2],
+                               Estimate = t_res$estimate[1] - t_res$estimate[2],
+                               "Lower_CI" = t_res$conf.int[1],
+                               "Upper_CI" = t_res$conf.int[2],
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
-      colnames(result_row)[2:3] <- paste0("Mean_", pair)
-      prefix <- paste0(pair[1], "_minus_", pair[2], "_")
-      colnames(result_row)[4] <- paste0(prefix, "Mean_diff")
+      colnames(result_row)[2:3] <- paste0(pair, "_Mean")
+      prefix <- paste0(pair[1], "_vs_", pair[2], "_")
+      colnames(result_row)[4] <- paste0(prefix, "Estimate")
       colnames(result_row)[-(1:4)] <- paste0(prefix, colnames(result_row)[-(1:4)])
     }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
@@ -1097,7 +1097,10 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
 #'
 #' @export
 perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
-
+  message(paste0("Remember that t.test returns difference between group means",
+                 " in different order than lm.\n",
+                 "This function mimics this behavior, so the effect size is",
+                 " mean of reference level minus mean of second level."))
   results_df <- NULL
   data <- combined_data(object)
   features <- featureNames(object)
@@ -1105,7 +1108,9 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
   pair <- levels(groups)[1:2]
   if (class(groups) != "factor") groups <- as.factor(groups)
   if (length(levels(groups)) > 2) {
-    warning("More than two groups detected, only using the first two.", call. = FALSE)
+    warning(paste("More than two groups detected, only using the first two.",
+                  "For multiple comparisons, please see perform_pairwise_t_test()",
+                  sep = "\n"), call. = FALSE)
   }
 
   # Split to groups
@@ -1134,13 +1139,13 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
       conf_level <- attr(t_res$conf.int, "conf.level") * 100
 
       result_row <- data.frame(Feature_ID = feature,
-                               Mean_diff = t_res$estimate[1],
-                               "Lower_CI_" = t_res$conf.int[1],
-                               "Upper_CI_" = t_res$conf.int[2],
+                               Estimate = t_res$estimate[1],
+                               "Lower_CI" = t_res$conf.int[1],
+                               "Upper_CI" = t_res$conf.int[2],
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
-      colnames(result_row)[-1] <- paste0(pair[1], "_minus_",
+      colnames(result_row)[-1] <- paste0(pair[1], "_vs_",
                                          pair[2], "_",
                                          colnames(result_row)[-1]
       )

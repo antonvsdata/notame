@@ -241,17 +241,24 @@ test_that("Logistic regression works", {
 
 # Paired t-test ----
 test_that("Paired t-test works", {
-
-  t_res <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
-
+  ex <- drop_qcs(example_set)
+  cd <- combined_data(ex)
+  t_res <- perform_paired_t_test(ex, group = "Time", id = "Subject_ID")
+  feature <- "HILIC_pos_259_9623a4_4322"
+  mean1 <- finite_mean(cd[cd$Time == 1, colnames(cd) == feature])
+  mean2 <- finite_mean(cd[cd$Time == 2, colnames(cd) == feature])
+  # Check comparison order
+  expect_equal(t_res[t_res$Feature_ID == feature, 2], mean1 - mean2)
+  # Check row names
   expect_identical(rownames(t_res), featureNames(drop_qcs(example_set)))
+  # Check column names
   expect_identical(colnames(t_res), c(
     "Feature_ID",
-    "1_minus_2_Mean_diff",
-    "1_minus_2_Lower_CI_95",
-    "1_minus_2_Upper_CI_95",
-    "1_minus_2_t_test_P",
-    "1_minus_2_t_test_P_FDR"
+    "1_vs_2_Estimate",
+    "1_vs_2_Lower_CI95",
+    "1_vs_2_Upper_CI95",
+    "1_vs_2_t_test_P",
+    "1_vs_2_t_test_P_FDR"
   ))
 })
 
@@ -265,18 +272,26 @@ test_that("Pairwise t-test works", {
   pwt_res <- perform_pairwise_t_test(object, group = "Time")
 
   expect_identical(rownames(pwt_res), featureNames(drop_qcs(example_set)))
-  prefixes <- c("1_minus_2_", "1_minus_3_", "2_minus_3_")
-  suffixes <- c("Mean_diff", "Lower_CI_95", "Upper_CI_95", "t_test_P", "t_test_P_FDR")
+  prefixes <- c("1_vs_2_", "1_vs_3_", "2_vs_3_")
+  suffixes <- c("Estimate", "Lower_CI95", "Upper_CI95", "t_test_P", "t_test_P_FDR")
   cols <- expand.grid(prefixes, suffixes)
+  # Check column names
   expect_identical(colnames(pwt_res), c(
-    "Feature_ID", "Mean_1", "Mean_2",
+    "Feature_ID", "1_Mean", "2_Mean",
     do.call(paste0, cols[order(cols$Var1) & cols$Var1 == prefixes[1], ]),
-    "Mean_3",
+    "3_Mean",
     do.call(paste0, cols[order(cols$Var1), ])[6:15]
   ))
   # These should be identical as no paired mode
   pData(object)$Subject_ID <- factor(rep(1:12, 2))
   expect_identical(perform_pairwise_t_test(object, group = "Time"), pwt_res)
+  # These shouldn't match cause paired mode
+  # In this case 4 pairs in each
+  expect_failure(expect_identical(perform_pairwise_t_test(object,
+                                                          group = "Time",
+                                                          id = "Subject_ID",
+                                                          is_paired = TRUE
+  ), pwt_res))
 })
 
 test_that("Pairwise paired t-test works", {
@@ -292,12 +307,13 @@ test_that("Pairwise paired t-test works", {
   )
 
   expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
-  prefixes <- c("1_minus_2_", "1_minus_3_", "2_minus_3_")
-  suffixes <- c("Mean_diff", "Lower_CI_95", "Upper_CI_95", "t_test_P", "t_test_P_FDR")
+  prefixes <- c("1_vs_2_", "1_vs_3_", "2_vs_3_")
+  suffixes <- c("Estimate", "Lower_CI95", "Upper_CI95", "t_test_P", "t_test_P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   expect_identical(colnames(pwpt_res), c("Feature_ID",
                                         do.call(paste0, cols[order(cols$Var1), ])
   ))
+  # Change Subject IDs
   pData(object)$Subject_ID <- factor(rep(1:12, 2))
   pwpt_res_2 <- perform_pairwise_t_test(object,
                                         group = "Time",
