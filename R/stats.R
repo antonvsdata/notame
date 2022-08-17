@@ -125,8 +125,10 @@ cohens_d_fun <- function(object, group, id, time) {
     time1 <- data[which(data[, time] == time_levels[1]), ]
     time2 <- data[which(data[, time] == time_levels[2]), ]
     common_ids <- intersect(time1[, id], time2[, id])
-    time1 <- time1[time1$Subject_ID %in% common_ids, ]
-    time2 <- time2[time2$Subject_ID %in% common_ids, ]
+    rownames(time1) <- time1[, id]
+    rownames(time2) <- time2[, id]
+    time1 <- time1[common_ids, ]
+    time2 <- time2[common_ids, ]
     if (!identical(time1[, group], time2[, group])) {
       stop("Groups of subjects do not match between time points",
            call. = FALSE)
