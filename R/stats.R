@@ -158,7 +158,8 @@ cohens_d_fun <- function(object, group, id, time) {
   if (is.null(time_levels)) {
     colnames(ds)[2] <- paste0("Cohen_d_", group_levels[2], "_vs_", group_levels[1])
   } else {
-    colnames(ds)[2] <- paste0("Cohen_d_", group_levels[1], "_", group_levels[2],
+    colnames(ds)[2] <- paste0("Cohen_d_", group_levels[2], "_vs_", group_levels[1],
+
                               "_", time_levels[2], "_minus_", time_levels[1])
   }
 
