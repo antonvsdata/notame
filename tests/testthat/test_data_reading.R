@@ -29,7 +29,9 @@ test_that("Pheno data checking works", {
 
   df <- data.frame(Injection_order = seq_len(10),
                    Sample_ID = c(letters[1:5], letters[1:5]))
-  expect_error(check_pheno_data(df), "Sample_ID is not unique")
+  expect_warning(expect_error(check_pheno_data(df), "Sample_ID is not unique"),
+                 "QC column not found and can not be generated."
+  )
 
   df <- data.frame(Injection_order = seq_len(5),
                    Sample_ID = c(letters[1:5]))

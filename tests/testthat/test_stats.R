@@ -74,7 +74,7 @@ test_that("Cohen's d works", {
   cohd <- cohens_d(ex, id = "Subject_ID", time = "Time")
 
   df <- data.frame(Feature_ID = featureNames(ex),
-                   Cohen_d_A_B_2_minus_1 = d,
+                   Cohen_d_B_vs_A_2_minus_1 = d,
                    stringsAsFactors = FALSE)
   rownames(df) <- df$Feature_ID
   expect_equal(cohd, df)
@@ -240,17 +240,18 @@ test_that("Cohens D values are counted right", {
     f2 <- group2[, feature]
     f3 <- group3[, feature]
     d <- data.frame(Feature_ID = feature,
-                    Cohen_d_A_B = (finite_mean(f2) - finite_mean(f1)) /
+                    Cohen_d_B_vs_A = (finite_mean(f2) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    Cohen_d_A_C = (finite_mean(f3) - finite_mean(f1)) /
+                    Cohen_d_C_vs_A = (finite_mean(f3) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-                    Cohen_d_B_C = (finite_mean(f3) - finite_mean(f2)) /
+                    Cohen_d_C_vs_B = (finite_mean(f3) - finite_mean(f2)) /
                       sqrt((finite_sd(f3)^2 + finite_sd(f2)^2) / 2),
                     stringsAsFactors = FALSE)
   }
   rownames(ds) <- ds$Feature_ID
   foreach::registerDoSEQ()
-  expect_identical(cohens_d(object), ds)
+  cohd <- cohens_d(object)
+  expect_identical(cohd, ds)
 })
 
 test_that("Cohens D values between time points are counted right", {
@@ -299,44 +300,44 @@ test_that("Cohens D values between time points are counted right", {
     time2[time2$Subject_ID %in% common_ids_32, features]
   new_data <- rbind(new_data_21, new_data_31, new_data_32)
   # Split to groups
-  group1 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[1]), ]
-  group2 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[2]), ]
-  group3 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[3]), ]
-  group4 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[1]), ]
-  group5 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[2]), ]
-  group6 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[3]), ]
-  group7 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[1]), ]
-  group8 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[2]), ]
-  group9 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[3]), ]
+  group1 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[1]), ] # A 2-1
+  group2 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[2]), ] # B 2-1
+  group3 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[3]), ] # C 2-1
+  group4 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[1]), ] # A 3-1
+  group5 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[2]), ] # B 3-1
+  group6 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[3]), ] # C 3-1
+  group7 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[1]), ] # A 3-2
+  group8 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[2]), ] # B 3-2
+  group9 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[3]), ] # C 3-2
   ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %do% {
     feature <- features[i]
-    f1 <- group1[, feature]
-    f2 <- group2[, feature]
-    f3 <- group3[, feature]
-    f4 <- group4[, feature]
-    f5 <- group5[, feature]
-    f6 <- group6[, feature]
-    f7 <- group7[, feature]
-    f8 <- group8[, feature]
-    f9 <- group9[, feature]
+    f1 <- group1[, feature] # A 2-1
+    f2 <- group2[, feature] # B 2-1
+    f3 <- group3[, feature] # C 2-1
+    f4 <- group4[, feature] # A 3-1
+    f5 <- group5[, feature] # B 3-1
+    f6 <- group6[, feature] # C 3-1
+    f7 <- group7[, feature] # A 3-2
+    f8 <- group8[, feature] # B 3-2
+    f9 <- group9[, feature] # C 3-2
     d <- data.frame(Feature_ID = feature,
-                    "Cohen_d_A_B_2_minus_1" = (finite_mean(f2) - finite_mean(f1)) /
+                    "Cohen_d_B_vs_A_2_minus_1" = (finite_mean(f2) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    "Cohen_d_A_B_3_minus_1" = (finite_mean(f5) - finite_mean(f4)) /
+                    "Cohen_d_B_vs_A_3_minus_1" = (finite_mean(f5) - finite_mean(f4)) /
                       sqrt((finite_sd(f4)^2 + finite_sd(f5)^2) / 2),
-                    "Cohen_d_A_B_3_minus_2" = (finite_mean(f8) - finite_mean(f7)) /
+                    "Cohen_d_B_vs_A_3_minus_2" = (finite_mean(f8) - finite_mean(f7)) /
                       sqrt((finite_sd(f7)^2 + finite_sd(f8)^2) / 2),
-                    "Cohen_d_A_C_2_minus_1" = (finite_mean(f3) - finite_mean(f1)) /
+                    "Cohen_d_C_vs_A_2_minus_1" = (finite_mean(f3) - finite_mean(f1)) /
                       sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-                    "Cohen_d_A_C_3_minus_1" = (finite_mean(f6) - finite_mean(f4)) /
+                    "Cohen_d_C_vs_A_3_minus_1" = (finite_mean(f6) - finite_mean(f4)) /
                       sqrt((finite_sd(f4)^2 + finite_sd(f6)^2) / 2),
-                    "Cohen_d_A_C_3_minus_2" = (finite_mean(f9) - finite_mean(f7)) /
+                    "Cohen_d_C_vs_A_3_minus_2" = (finite_mean(f9) - finite_mean(f7)) /
                       sqrt((finite_sd(f7)^2 + finite_sd(f9)^2) / 2),
-                    "Cohen_d_B_C_2_minus_1" = (finite_mean(f3) - finite_mean(f2)) /
+                    "Cohen_d_C_vs_B_2_minus_1" = (finite_mean(f3) - finite_mean(f2)) /
                       sqrt((finite_sd(f2)^2 + finite_sd(f3)^2) / 2),
-                    "Cohen_d_B_C_3_minus_1" = (finite_mean(f6) - finite_mean(f5)) /
+                    "Cohen_d_C_vs_B_3_minus_1" = (finite_mean(f6) - finite_mean(f5)) /
                       sqrt((finite_sd(f5)^2 + finite_sd(f6)^2) / 2),
-                    "Cohen_d_B_C_3_minus_2" = (finite_mean(f9) - finite_mean(f8)) /
+                    "Cohen_d_C_vs_B_3_minus_2" = (finite_mean(f9) - finite_mean(f8)) /
                       sqrt((finite_sd(f8)^2 + finite_sd(f9)^2) / 2),
                     stringsAsFactors = FALSE)
   }

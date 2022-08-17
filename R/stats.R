@@ -146,7 +146,7 @@ cohens_d_fun <- function(object, group, id, time) {
     group1 <- data[which(data[, group] == group_levels[1]), ]
     group2 <- data[which(data[, group] == group_levels[2]), ]
     log_text(paste("Starting to compute Cohen's D between groups",
-                   paste(group_levels, collapse = " & ")
+                   paste(rev(group_levels), collapse = " & ")
     ))
   } else {
     time_levels <- levels(data[, time])
@@ -169,7 +169,7 @@ cohens_d_fun <- function(object, group, id, time) {
     group2 <- new_data[which(time1[, group] == levels(time1[,group])[2]), ]
 
     log_text(paste("Starting to compute Cohen's D between groups",
-                   paste(group_levels, collapse = " & "),
+                   paste(rev(group_levels), collapse = " & "),
                    "from time change",
                    paste(rev(time_levels), collapse = " - ")
     ))
