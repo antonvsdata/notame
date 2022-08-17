@@ -219,8 +219,8 @@ cohens_d <- function(object, group = group_col(object),
     for (i in seq_len(ncol(group_combos))) {
       for (j in seq_len(ncol(time_combos))) {
         object_split <- object[, which(
-          pData(object)[, group] %in% c(group_combos[1, i], group_combos[2, i]) &
-            pData(object)[, time] %in% c(time_combos[1, j], time_combos[2, j])
+          pData(object)[, group] %in% group_combos[, i]) &
+          pData(object)[, time] %in% time_combos[, j])
         )]
         pData(object_split) <- droplevels(pData(object_split))
         # Check data is valid for Cohen's D
