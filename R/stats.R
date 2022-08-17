@@ -187,11 +187,12 @@ cohens_d_fun <- function(object, group, id, time) {
   rownames(ds) <- ds$Feature_ID
 
   if (is.null(time_levels)) {
-    colnames(ds)[2] <- paste0("Cohen_d_", group_levels[2], "_vs_", group_levels[1])
+    colnames(ds)[2] <- paste0(group_levels[2], "_vs_", group_levels[1], "_Cohen_d")
   } else {
-    colnames(ds)[2] <- paste0("Cohen_d_", group_levels[2], "_vs_", group_levels[1],
-
-                              "_", time_levels[2], "_minus_", time_levels[1])
+    colnames(ds)[2] <- paste0( group_levels[2], "_vs_", group_levels[1],
+                              "_", time_levels[2], "_minus_", time_levels[1],
+                              "_Cohen_d"
+    )
   }
 
   log_text("Cohen's D computed.")
@@ -346,7 +347,7 @@ fold_change <- function(object, group = group_col(object)) {
     t() %>%
     as.data.frame() %>%
     tidyr::unite("Comparison", V2, V1, sep = "_vs_")
-  comp_labels <- paste0("FC_",comp_labels[,1])
+  comp_labels <- paste0(comp_labels[,1], "_FC")
   results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
   colnames(results_df) <- c("Feature_ID", comp_labels)
   rownames(results_df) <- results_df$Feature_ID
@@ -915,7 +916,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       # Gather coefficients and CIs to one data frame row
       result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
         dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value",
-                      "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
+                      "P" = "Pr...t..", "LCI95" = "X2.5..", "LCI95" = "X97.5..") %>%
         tidyr::gather("Metric", "Value", -Variable) %>%
         tidyr::unite("Column", Variable, Metric, sep="_") %>%
         tidyr::spread(Column, Value)
