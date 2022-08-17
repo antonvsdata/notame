@@ -155,6 +155,8 @@ cohens_d_fun <- function(object, group, id, time) {
                     stringsAsFactors = FALSE)
   }
 
+  rownames(ds) <- ds$Feature_ID
+
   if (is.null(time_levels)) {
     colnames(ds)[2] <- paste0("Cohen_d_", group_levels[2], "_vs_", group_levels[1])
   } else {
@@ -220,8 +222,8 @@ cohens_d <- function(object, group = group_col(object),
     for (i in seq_len(ncol(group_combos))) {
       for (j in seq_len(ncol(time_combos))) {
         object_split <- object[, which(
-          pData(object)[, group] %in% group_combos[, i]) &
-          pData(object)[, time] %in% time_combos[, j])
+          pData(object)[, group] %in% group_combos[, i] &
+            pData(object)[, time] %in% time_combos[, j]
         )]
         pData(object_split) <- droplevels(pData(object_split))
         # Check data is valid for Cohen's D
