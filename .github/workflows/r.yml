@@ -1,0 +1,49 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+name: R
+
+on:
+  push:
+    branches:
+      -main
+      -dev
+      -test_actions
+  pull_request:
+    branches:
+      -main
+      -dev
+
+permissions:
+  contents: read
+
+jobs:
+  build: # Job ID
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        r-version: ['3.6.3', '4.1.1']
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up R ${{ matrix.r-version }}
+        uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
+        with:
+          r-version: ${{ matrix.r-version }}
+      - name: Install notame
+        run: |
+          install.packages("devtools")
+          devtools::install_github("antonvsdata/notame")
+          notame::install_dependencies(extra = T)
+          # install.packages(c("remotes", "rcmdcheck"))
+          # remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+      - name: Test package
+        run: devtools::test()# rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
+        shell: Rscript {0}
