@@ -7,11 +7,14 @@
 read_from_excel(
   file,
   sheet = 1,
+  id_column = NULL,
   corner_row = NULL,
   corner_column = NULL,
   id_prefix = "ID_",
   split_by = NULL,
   name = NULL,
+  mz_limits = c(10, 2000),
+  rt_limits = c(0, 20),
   skip_checks = FALSE
 )
 }
@@ -19,6 +22,8 @@ read_from_excel(
 \item{file}{path to the Excel file}
 
 \item{sheet}{the sheet number or name}
+
+\item{id_column}{character, column name for unique identification of samples}
 
 \item{corner_row}{integer, the bottom row of sample information, usually contains data file names and feature info column names. If set to NULL, will be detected automatically.}
 
@@ -29,6 +34,10 @@ read_from_excel(
 \item{split_by}{character vector, in the case where all the modes are in the same Excel file, the column names of feature data used to separate the modes (usually Mode and Column)}
 
 \item{name}{in the case where the Excel file only contains one mode, the name of the mode, such as "Hilic_neg"}
+
+\item{mz_limits}{numeric vector of two, all m/z values should be in between these}
+
+\item{rt_limits}{numeric vector of two, all retention time values should be in between these}
 
 \item{skip_checks}{logical: skip checking data integrity. Not recommended, but sometimes useful when you
 just want to read the data in as is and fix errors later. NOTE: Sample_ID and QC columns will not be constructed.
@@ -58,7 +67,7 @@ is found in the file, a feature ID will be generated based on the value of "Spli
 The function will try to find columns for mass and retention time by looking at a few common alternatives,
 and throw an error if no matching column is found. Sample information needs to contain a row called "Injection_order",
 and the values need to be unique. In addition, a possible sample identifier row needs to be named "Sample_ID",
-and the values need to be unique, with an exception of QC samples: if there are any "QC" identifiers, they will
-be replaced with "QC_1", "QC_2" and so on. If a "Sample_ID" row is not found, it will be created using the \code{id_prefix}
-and injection order.
+or to be specified in \code{id_column}, and the values need to be unique, with an exception of QC samples:
+if there are any "QC" identifiers, they will be replaced with "QC_1", "QC_2" and so on.
+If a "Sample_ID" row is not found, it will be created using the \code{id_prefix} and injection order.
 }

@@ -15,6 +15,8 @@ volcano_plot(
   log2_x = FALSE,
   center_x_axis = TRUE,
   x_lim = NULL,
+  label = NULL,
+  label_limit = 0.05,
   color_scale = getOption("notame.color_scale_con"),
   title = "Volcano plot",
   subtitle = NULL,
@@ -35,12 +37,16 @@ If x is a data frame, it is used as is.}
 
 \item{fdr_limit}{the significance level used in the experiment}
 
-\item{log2_x}{logical, whether effect size should be plotted on a log2 axis}
+\item{log2_x}{logical, whether effect size should be plotted on a log2 axis.}
 
 \item{center_x_axis}{logical, whether x-axis should be centered. If \code{TRUE}, the "zero-effect" will
 be on the middle of the plot. The "zero effect" is 0 if \code{log2_x = FALSE} and 1 if  \code{log2_x = TRUE}}
 
 \item{x_lim}{numerical vector of length 2 for manually setting the x-axis limits}
+
+\item{label}{column name used to label the plots}
+
+\item{label_limit}{numeric, p-value which is used to limit label plotting. Defaults to 0.05.}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 

@@ -93,8 +93,37 @@ summary_statistics <- function(object, grouping_cols = NA) {
   statistics
 }
 
-cohens_d_fun <- function(object, group, id, time) {
+#' Statistics cleaning
+#'
+#' Uses regexp to remove unnecessary columns from statistics results data frame.
+#' Can also rename columns effectively.
+#'
+#' @param df data frame, statistics results
+#' @param remove list, should contain strings that are matching to unwanted columns
+#' @param rename named list, names should contain matches that are replaced with values
+#'
+#' @examples
+#' # Simple manipulation to linear model results
+#' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+#' lm_results <- clean_stats_results(lm_results,
+#' rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1"))
+#'
+#' @export
+clean_stats_results <- function(
+    df,
+    remove = c("Intercept", "CI_95", "Std_error", "t_value", "z_value", "R2"),
+    rename = NULL) {
+  df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
+  if (!is.null(rename)) {
+    for (name in names(rename)) {
+      colnames(df) <- gsub(name, rename[name], colnames(df))
+    }
+  }
 
+  df
+}
+
+cohens_d_fun <- function(object, group, id, time) {
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
   group_levels <- levels(data[, group])
@@ -450,7 +479,7 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
     cor_tmp <- NULL
     tryCatch({
       if (is.null(id)) {
-        cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp])
+        cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp], ...)
       } else {
         id_tmp <- data1[, id]
         df_tmp <- data.frame(id_var = id_tmp, x_var = data1[, x_tmp], y_var = data2[, y_tmp])
@@ -1276,6 +1305,10 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 #'
 #' @export
 perform_pairwise_t_test <- function(object, group = group_col(object), all_features = FALSE, ...) {
+
+  if (!is.factor(pData(object)[, group])) {
+    stop("Group column should be a factor")
+  }
 
   log_text("Starting pairwise t-tests.")
 
