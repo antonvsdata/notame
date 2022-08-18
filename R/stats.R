@@ -111,7 +111,7 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #' @export
 clean_stats_results <- function(
     df,
-    remove = c("Intercept", "CI_95", "Std_error", "t_value", "z_value", "R2"),
+    remove = c("Intercept", "CI95", "Std_error", "t_value", "z_value", "R2"),
     rename = NULL) {
   df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
   if (!is.null(rename)) {
