@@ -575,7 +575,7 @@ muvr_analysis <- function(object, y = NULL, id = NULL, multi_level = FALSE, mult
 #' @return PERMANOVA object
 #'
 #' @examples
-#' permanova_res <- perform_permanova(merged_sample, group = "Group")
+#' permanova_res <- perform_permanova(drop_qcs(example_set), group = "Group")
 #'
 #' @export
 perform_permanova <- function(object, group,
