@@ -16,14 +16,15 @@ Depends:
     R (>= 3.5),
     Biobase,
     BiocGenerics,
+    futile.logger,
     ggplot2,
     magrittr
 Imports:
     dplyr,
     foreach,
-    futile.logger,
     grDevices,
     methods,
+    openxlsx,
     tibble,
     tidyr
 Suggests:
@@ -42,7 +43,6 @@ Suggests:
     lmerTest,
     missForest,
     mixOmics,
-    openxlsx,
     pcaMethods,
     PK,
     randomForest,

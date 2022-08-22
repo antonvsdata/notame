@@ -22,7 +22,9 @@ test_that("Changing feature names only works if valid names are given", {
   # Duplicates are not allowed
   names <- letters[1:20]
   names[2] <- "a"
-  expect_error(featureNames(set) <- names)
+  expect_warning(expect_error(featureNames(set) <- names),
+                 "non-unique value when setting"
+  )
   # Names are not allowed to start with numbers
   names[2] <- "2a"
   expect_error(featureNames(set) <- names)
@@ -48,7 +50,9 @@ test_that("Changing sample names only works if valid names are given", {
   expect_error(sampleNames(set) <- names[1:29])
   # Duplicates are not allowed
   names[2] <- names[1]
-  expect_error(sampleNames(set) <- names)
+  expect_warning(expect_error(sampleNames(set) <- names),
+                 "non-unique value"
+  )
   # NAs are not allowed
   names[2] <- NA
   expect_error(sampleNames(set) <- names)
