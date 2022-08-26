@@ -50,9 +50,7 @@ be on the middle of the plot. The "zero effect" is 0 if \code{log2_x = FALSE} an
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
-\item{title, subtitle}{the title and subtitle of the plot}
-
-\item{...}{parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+\item{title, subtitle}{the title and subtitle of the plot
 also be passed using \code{mapping = aes(...)}.}
 }
 \value{

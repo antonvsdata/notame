@@ -115,7 +115,7 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
 
   batch_cran <- "fpc"
   batch_bioconductor <- "RUVSeq"
-  batch_github <- "rwehrens/BatchCorrMetabolomics"
+  batch_github <- NULL
   batch_gitlab <- "CarlBrunius/batchCorr"
 
   misc_cran <- c("knitr",

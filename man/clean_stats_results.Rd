@@ -6,7 +6,7 @@
 \usage{
 clean_stats_results(
   df,
-  remove = c("Intercept", "CI_95", "Std_error", "t_value", "z_value", "R2"),
+  remove = c("Intercept", "CI95", "Std_error", "t_value", "z_value", "R2"),
   rename = NULL
 )
 }
