@@ -13,8 +13,8 @@ read_from_excel(
   id_prefix = "ID_",
   split_by = NULL,
   name = NULL,
-  mz_values = c(10, 2000),
-  rt_values = c(0, 20),
+  mz_limits = c(10, 2000),
+  rt_limits = c(0, 20),
   skip_checks = FALSE
 )
 }
@@ -35,9 +35,9 @@ read_from_excel(
 
 \item{name}{in the case where the Excel file only contains one mode, the name of the mode, such as "Hilic_neg"}
 
-\item{mz_values}{numeric vector of two, all m/z values should be in between these}
+\item{mz_limits}{numeric vector of two, all m/z values should be in between these}
 
-\item{rt_values}{numeric vector of two, all retention time values should be in between these}
+\item{rt_limits}{numeric vector of two, all retention time values should be in between these}
 
 \item{skip_checks}{logical: skip checking data integrity. Not recommended, but sometimes useful when you
 just want to read the data in as is and fix errors later. NOTE: Sample_ID and QC columns will not be constructed.

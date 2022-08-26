@@ -1,6 +1,6 @@
 #' Batch correction
 #'
-#' "Basic" batch correction by median? from BatchCorrMetabolomics::doBC
+#' DEPRECATED
 #'
 #' @param object a MetaboSet object
 #' @param batch the column name for batch labels
@@ -8,43 +8,9 @@
 #' @param ref_label the label for reference samples
 #' @param ... other parameters pased to doBC
 #'
-#' @return a MetaboSet object with the corrected abundances
-#'
-#' @examples
-#' \dontrun{
-#' batch_corrected <- dobc(merged_sample, batch = "Batch", ref = "QC", ref_label = "QC")
-#' # Evaluate batch correction
-#' pca_bhattacharyya_dist(merged_sample, batch = "Batch")
-#' pca_bhattacharyya_dist(batch_corrected, batch = "Batch")
-#' }
 #' @export
 dobc <- function(object, batch, ref, ref_label, ...) {
-
-  if (!requireNamespace("BatchCorrMetabolomics", quietly = TRUE)) {
-    stop("Package \"BatchCorrMetabolomics\" needed for this function to work. Please install it from
-         https://github.com/rwehrens/BatchCorrMetabolomics.",
-         call. = FALSE)
-  }
-  add_citation("BatchCorrMetabolomics was used for batch correction:", citation("BatchCorrMetabolomics"))
-
-  ref_idx <- which(pData(object)[, ref] == ref_label)
-  seq_idx <- object$Injection_order
-  batch_idx <- pData(object)[, batch]
-
-  batch_corrected <- foreach::foreach(feature = featureNames(object), .combine = rbind) %dopar% {
-    tmp <- BatchCorrMetabolomics::doBC(Xvec = exprs(object)[feature, ],
-                                       ref.idx = ref_idx,
-                                       batch.idx = batch_idx,
-                                       seq.idx = seq_idx,
-                                       minBsamp = 1,
-                                       method = "lm",
-                                       correctionFormula = "X ~ B")
-    matrix(tmp, nrow = 1, dimnames = list(feature, names(tmp)))
-  }
-
-  exprs(object) <- batch_corrected
-
-  object
+  stop("This function is deprecated.")
 }
 
 #' Remove Unwanted Variation

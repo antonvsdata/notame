@@ -89,10 +89,10 @@ merge_mode_helper <- function(x, y) {
     # Save original injection order for first mode
     if (length(x_modes) == 1) {
       pData(x)[, paste0(x_modes, "_Injection_order")] <- x$Injection_order
-      dummy_injection <- as.numeric(-seq_along(pData(x)$Sample_ID))
-      names(dummy_injection) <- x$Sample_ID
-      pData(x)$Injection_order <- dummy_injection
     }
+    dummy_injection <- as.numeric(-seq_along(pData(x)$Sample_ID))
+    names(dummy_injection) <- x$Sample_ID
+    pData(x)$Injection_order <- dummy_injection
     # Save original injection order in other modes
     pData(y)[, paste0(unique(fData(y)$Split), "_Injection_order")] <- y$Injection_order
     # Update dummy injection
