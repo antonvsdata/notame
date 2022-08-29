@@ -13,6 +13,7 @@ test_that("mz_rt_plot works with right objects", {
 })
 
 test_that("Low quality features are dropped when they should", {
+  foreach::registerDoSEQ()
   flagged <- flag_quality(merged_sample)
   no_low <- drop_flagged(flagged)
   gg_flagged <- mz_rt_plot(flagged, all_features = FALSE)
