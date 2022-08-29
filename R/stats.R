@@ -663,7 +663,6 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
     }
     results_df <- adjust_p_values(results_df, flags)
   }
-
   results_df
 }
 
@@ -1143,7 +1142,6 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #'
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
-#' Defaults to "Feature ~ group_col(object)
 #' @param all_features should all features be included in FDR correction?
 #' @param ... additional parameters to t.test
 #'
@@ -1163,12 +1161,16 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #' @export
 perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   message(paste0("Remember that t.test returns difference between group means",
-                 "in different order than lm.\n",
+                 " in different order than lm.\n",
                  "This function mimics this behavior, so the effect size is",
                  " mean of reference level minus mean of second level."))
+  exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
+  pair <- levels(pData(object)[, exp_var])
+  if(length(pair) != 2) {
+    stop("'", paste0(exp_var, "' in formula should contain exactly two levels"))
+  }
 
-
-  log_text("Starting t-tests.")
+  log_text(paste0("Starting t-tests for ", paste0(pair, collapse = " & ")))
 
   t_fun <- function(feature, formula, data) {
     result_row <- NULL
@@ -1180,18 +1182,23 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
       result_row <- data.frame(Feature_ID = feature,
                                Mean1 = t_res$estimate[1],
                                Mean2 = t_res$estimate[2],
-                               Mean_1_minus_2 = t_res$estimate[1] - t_res$estimate[2],
-                               "Lower_CI_" = t_res$conf.int[1],
-                               "Upper_CI_" = t_res$conf.int[2],
+                               Estimate = t_res$estimate[1] - t_res$estimate[2],
+                               "Lower_CI" = t_res$conf.int[1],
+                               "Upper_CI" = t_res$conf.int[2],
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
+      colnames(result_row)[2:3] <- paste0(pair, "_Mean")
+      prefix <- paste0(pair[1], "_vs_", pair[2], "_")
+      colnames(result_row)[4] <- paste0(prefix, "Estimate")
+      colnames(result_row)[-(1:4)] <- paste0(prefix, colnames(result_row)[-(1:4)])
     }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
   }
 
   results_df <- perform_test(object, formula_char, t_fun, all_features)
+  rownames(results_df) <- results_df$Feature_ID
 
   log_text("t-tests performed.")
 
@@ -1217,29 +1224,40 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
 #'
 #' @export
 perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
-
-  log_text("Starting paired t-tests.")
-
+  message(paste0("Remember that t.test returns difference between group means",
+                 " in different order than lm.\n",
+                 "This function mimics this behavior, so the effect size is",
+                 " mean of reference level minus mean of second level."))
+  results_df <- NULL
   data <- combined_data(object)
+  features <- featureNames(object)
   groups <- data[, group]
-  if (class(groups) != "factor") {
-    groups <- as.factor(groups)
-  }
+  pair <- levels(groups)[1:2]
+  if (class(groups) != "factor") groups <- as.factor(groups)
   if (length(levels(groups)) > 2) {
-    warning("More than two groups detected, only using the first two", call. = FALSE)
+    warning(paste("More than two groups detected, only using the first two.",
+                  "For multiple comparisons, please see perform_pairwise_t_test()",
+                  sep = "\n"), call. = FALSE)
   }
 
   # Split to groups
-  group1 <- data[which(groups == levels(groups)[1]), ]
-  group2 <- data[which(groups == levels(groups)[2]), ]
+  group1 <- data[which(groups == pair[1]), ]
+  group2 <- data[which(groups == pair[2]), ]
   # Keep only complete pairs, order by id
   common_ids <- intersect(group1[, id], group2[, id])
   group1 <- group1[group1[, id] %in% common_ids, ][order(common_ids), ]
   group2 <- group2[group2[, id] %in% common_ids, ][order(common_ids), ]
-  log_text(paste("Found", length(common_ids), "complete pairs"))
 
-  features <- featureNames(object)
-  results_df <- foreach::foreach(i = seq_along(features), .combine = dplyr::bind_rows) %dopar% {
+  log_text(paste0("Starting paired t-tests for ", paste0(pair, collapse = " & ")))
+  log_text(paste("Found", length(common_ids), "complete pairs"))
+  if (length(common_ids) == 0) {
+    warning(paste0("Skipped ", paste0(pair, collapse = " & "), ": no common IDs"))
+    return(data.frame("Feature_ID" = features))
+  }
+  results_df <- foreach::foreach(
+    i = seq_along(features),
+    .combine = dplyr::bind_rows
+  ) %dopar% {
     feature <- features[i]
     result_row <- NULL
     tryCatch({
@@ -1248,13 +1266,19 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
       conf_level <- attr(t_res$conf.int, "conf.level") * 100
 
       result_row <- data.frame(Feature_ID = feature,
-                               Mean_diff = t_res$estimate[1],
-                               "Lower_CI_" = t_res$conf.int[1],
-                               "Upper_CI_" = t_res$conf.int[2],
+                               Estimate = t_res$estimate[1],
+                               "Lower_CI" = t_res$conf.int[1],
+                               "Upper_CI" = t_res$conf.int[2],
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
-    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+      colnames(result_row)[-1] <- paste0(pair[1], "_vs_",
+                                         pair[2], "_",
+                                         colnames(result_row)[-1]
+      )
+    },
+    error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))}
+    )
 
     result_row
   }
@@ -1266,8 +1290,6 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
          call. = FALSE)
   }
   rownames(results_df) <- results_df$Feature_ID
-  colnames(results_df)[2] <- paste0("Mean_diff_", levels(groups)[1],
-                                    "_minus_", levels(groups)[2])
   # Rows full of NA for features where the test failed
   results_df <- fill_results(results_df, features)
 
@@ -1286,10 +1308,14 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 
 #' Perform pairwise t-tests
 #'
-#' Performs pairwise t-tests between all study groups. NOTE! Does not use formula interface
+#' Performs pairwise t-tests between all study groups.
+#' Use \code{is_paired} for pairwise paired t-tests.
+#' NOTE! Does not use formula interface
 #'
 #' @param object a MetaboSet object
 #' @param group character, column name of phenoData giving the groups
+#' @param is_paired logical, use pairwise paired t-test
+#' @param id character, name of the subject identification column for paired version
 #' @param all_features should all features be included in FDR correction?
 #' @param ... other parameters passed to perform_t_test, and eventually to base R t.test
 #'
@@ -1298,49 +1324,57 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 #' @return data frame with the results
 #'
 #' @examples
-#' #Including QCs as a study group for example
+#' # Including QCs as a study group for example
 #' t_test_results <- perform_pairwise_t_test(merged_sample, group = "Group")
+#' # Using paired mode (pairs with QC are skipped as there are no common IDs in 'example_set')
+#' t_test_results <- perform_pairwise_t_test(example_set, group = "Time", is_paired = TRUE, id = "Subject_ID")
 #'
-#' @seealso \code{\link{perform_t_test}}, \code{\link{t.test}}
+#' @seealso \code{\link{perform_t_test}},
+#' \code{\link{perform_paired_t_test}},
+#' \code{\link{t.test}}
 #'
 #' @export
-perform_pairwise_t_test <- function(object, group = group_col(object), all_features = FALSE, ...) {
+perform_pairwise_t_test <- function(object, group = group_col(object), is_paired = FALSE, id = NULL, all_features = FALSE, ...) {
+
+  pairwise_t_fun <- function(fun, object, ...) {
+    df <- NULL
+    groups <- levels(pData(object)[, group])
+    combinations <- combn(groups, 2)
+    for (i in seq_len(ncol(combinations))) {
+      group1 <- as.character(combinations[1, i])
+      group2 <- as.character(combinations[2, i])
+      # Subset the pair of groups
+      object_tmp <- object[, pData(object)[, group] %in% c(group1, group2)]
+      pData(object_tmp) <- droplevels(pData(object_tmp))
+
+      t_results <- fun(object_tmp, ...)
+      ifelse(is.null(df),
+             df <- t_results,
+             df <- dplyr::left_join(df, t_results)
+      )
+    }
+    df
+  }
+
+  results_df <- NULL
 
   if (!is.factor(pData(object)[, group])) {
     stop("Group column should be a factor")
   }
 
-  log_text("Starting pairwise t-tests.")
-
-  if (class(pData(object)[, group]) == "factor") {
-    groups <- levels(pData(object)[, group])
+  if (is_paired) {
+    if (is.null(id)) stop("Subject ID column is missing, please provide it")
+    log_text("Starting pairwise paired t-tests.")
+    results_df <- pairwise_t_fun(perform_paired_t_test, object, group, id, all_features)
+    log_text("Pairwise paired t-tests performed.")
   } else {
-    groups <- unique(pData(object)[, group])
+    log_text("Starting pairwise t-tests.")
+    results_df <- pairwise_t_fun(perform_t_test, object, formula_char = paste("Feature ~", group), all_features)
+    log_text("Pairwise t-tests performed.")
   }
-  combinations <- combn(groups, 2)
-
-  for (i in seq_len(ncol(combinations))) {
-    group1 <- as.character(combinations[1, i])
-    group2 <- as.character(combinations[2, i])
-    # Subset the pair of groups
-    object_tmp <- object[, pData(object)[, group] %in% c(group1, group2)]
-    pData(object_tmp) <- droplevels(pData(object_tmp))
-
-    t_results <- perform_t_test(object_tmp, formula_char = paste("Feature ~", group), all_features)
-    colnames(t_results) <- c("Feature_ID", paste0("Mean_", c(group1, group2)),
-                          paste0("Mean_", group1, "_minus_", group2),
-                          paste0(paste0(group1, "_", group2, "_"), colnames(t_results)[5:8]))
-
-    if (i == 1) {
-      results_df <- t_results
-    } else {
-      results_df <- dplyr::left_join(results_df, t_results,
-                                     by = intersect(colnames(results_df), colnames(t_results)))
-    }
-
+  if (length(featureNames(object)) != nrow(results_df)) {
+    warning("Results don't contain all features")
   }
-
-  log_text("Pairwise t-tests performed.")
-
+  rownames(results_df) <- results_df$Feature_ID
   results_df
 }
