@@ -569,6 +569,7 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 #' volcano_plot(lm_results, x = "GroupB_Estimate",
 #'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'              label = "Feature_ID",
 #'              fdr_limit = 0.1)
 #'
 #' @export

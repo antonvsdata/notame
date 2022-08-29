@@ -129,19 +129,6 @@ cohens_d_fun <- function(object, group, id, time) {
   group_levels <- levels(data[, group])
   time_levels <- NULL
 
-  # Check that both group and time have exactly 2 levels
-  for (column in c(group, time)) {
-    if (is.null(column)) {
-      next
-    }
-    if (class(data[, column]) != "factor") {
-      data[, column] <- as.factor(data[, column])
-    }
-    if (length(levels(data[, column])) != 2) {
-      stop(paste("Column", column, "should contain exactly 2 levels!"))
-    }
-  }
-
   if (is.null(time)) {
     group1 <- data[which(data[, group] == group_levels[1]), ]
     group2 <- data[which(data[, group] == group_levels[2]), ]
@@ -222,6 +209,18 @@ cohens_d_fun <- function(object, group, id, time) {
 cohens_d <- function(object, group = group_col(object),
                      id = NULL, time = NULL) {
   res <- NULL
+  # Check that both group and time are factors and have at least two levels
+  for (column in c(group, time)) {
+    if (is.null(column)) {
+      next
+    }
+    if (!is.factor(pData(object)[, column])) {
+      stop(paste0("Column ", column, " should be a factor!"))
+    }
+    if (length(levels(pData(object)[, column])) < 2) {
+      stop(paste("Column", column, "should have at least two levels!"))
+    }
+  }
   group_combos <- combn(levels(pData(object)[, group]), 2)
 
   count_obs_geq_than <- function(x, n) {
