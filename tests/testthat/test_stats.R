@@ -92,6 +92,25 @@ test_that("Cohen's d work with all NA features", {
   expect_true(all(is.na(cohd[1:2, 2:ncol(cohd)])))
 })
 
+test_that("Cohen's d data checking works", {
+  ex <- example_set
+  ex$Group <- c(1, 2)
+  expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "should be a factor")
+
+  ex <- example_set
+  ex$Time <- c(1,2)
+  expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "should be a factor")
+
+  ex <- example_set
+  ex$Group <- factor(1)
+  expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "should have at least two levels")
+
+  ex <- example_set
+  ex$Time <- factor(1)
+  expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "should have at least two levels")
+})
+
+# Fold change ----
 test_that("Fold change works", {
   ex <- example_set %>%
     mark_nas(0)
