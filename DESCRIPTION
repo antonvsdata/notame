@@ -1,11 +1,12 @@
 Package: notame
 Type: Package
 Title: Workflow for non-targeted LC-MS metabolic profiling
-Version: 0.0.11
+Version: 0.1.0
 Authors@R: c(
     person("Anton", "Klåvus", email = "anton.klavus@iki.fi", role = c("aut", "cre")),
     person("Jussi", "Paananen", role = "aut"),
-    person("Oskari", "Timonen", role = "aut"))
+    person("Oskari", "Timonen", role = "aut"),
+    person("Atte", "Lihtamo", role = "aut"))
 Description: Automates common preprocessing steps in a LC-MS metabolomics workflow
     such as drift correction, quality control and common visualizations.
 License: MIT + file LICENSE
