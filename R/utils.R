@@ -106,14 +106,16 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
                   "lme4",
                   "lmerTest",
                   "MuMIn",
+                  "PERMANOVA",
                   "PK",
-                  "rmcorr")
+                  "rmcorr"
+  )
   extra_bioconductor <- c("mixOmics", "supraHex")
   extra_gitlab <- "CarlBrunius/MUVR"
 
   batch_cran <- "fpc"
   batch_bioconductor <- "RUVSeq"
-  batch_github <- "rwehrens/BatchCorrMetabolomics"
+  batch_github <- NULL
   batch_gitlab <- "CarlBrunius/batchCorr"
 
   misc_cran <- c("knitr",

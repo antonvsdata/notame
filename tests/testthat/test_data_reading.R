@@ -29,7 +29,9 @@ test_that("Pheno data checking works", {
 
   df <- data.frame(Injection_order = seq_len(10),
                    Sample_ID = c(letters[1:5], letters[1:5]))
-  expect_error(check_pheno_data(df), "Sample_ID is not unique")
+  expect_warning(expect_error(check_pheno_data(df), "Sample_ID is not unique"),
+                 "QC column not found and can not be generated."
+  )
 
   df <- data.frame(Injection_order = seq_len(5),
                    Sample_ID = c(letters[1:5]))
@@ -45,6 +47,20 @@ test_that("Pheno data checking works", {
                          QC = as.factor(rep(c("Sample", "QC"), each = 5)))
   rownames(expected) <- expected$Sample_ID
   expect_equal(checked, expected)
+
+})
+
+
+test_that("Feature data checking works", {
+  df <- data.frame(Feature_ID = 1:5)
+  expect_error(check_feature_data(df), "Numbers are not allowed as feature IDs")
+
+  df <- data.frame(Feature_ID = c(letters[1:5], letters[3:5]))
+  expect_error(check_feature_data(df), "Feature_ID values are not unique")
+
+  df <- data.frame(Feature_ID = letters[1:9])
+  df$Feature_ID[6] <- NA
+  expect_error(check_feature_data(df), "Missing values in Feature IDs")
 
 })
 
@@ -65,7 +81,7 @@ test_that("Easy example data is read correctly", {
                    Alignment = as.numeric(seq_len(10)),
                    Mass = 50 * seq_len(10),
                    RetentionTime = 0.5 *seq_len(10),
-                   "MS/MS Spectrum" = c("(123.45; 678)", rep(NA, 9)),
+                   "MS_MS_Spectrum" = c("(123.45; 678)", rep(NA, 9)),
                    stringsAsFactors = FALSE)
   fd <- name_features(fd)
   rownames(fd) <- fd$Feature_ID
@@ -114,7 +130,7 @@ test_that("Data is split correctly", {
                    RetentionTime = 0.5 *seq_len(16),
                    Column = rep(c("RP", "Hilic", "RP"), times = c(4, 8, 4)),
                    Mode = rep(c("pos", "neg"), each = 8),
-                   "MS/MS Spectrum" = c("(123.45; 678)", rep(NA, 15)),
+                   "MS_MS_Spectrum" = c("(123.45; 678)", rep(NA, 15)),
                    stringsAsFactors = FALSE)
   fd <- name_features(fd)
   rownames(fd) <- fd$Feature_ID
@@ -143,6 +159,53 @@ test_that("Data is split correctly", {
   expect_equal(read$pheno_data, pd)
   expect_equal(read$feature_data, fd)
 
+})
+
+test_that("Splitting data works as expected", {
+  split_by <- c("Ion mode", "gswregh") # Wrong column name
+  expect_error(read_from_excel(system.file("extdata", "sample_data_whole.xlsx",
+                                           package = "notame"),
+                               corner_row = 4,
+                               corner_column = "X",
+                               split_by = split_by)
+  )
+})
+
+test_that("Creating dummy injection order works as expected", {
+  names <- list("HILIC_neg", "HILIC_pos", "RP_neg", "RP_pos")
+  modes <- list()
+  for (name in names) {
+    file <- system.file("extdata", paste0(name, "_sample.xlsx"), package = "notame")
+    mode <- read_from_excel(file, name = name)
+    modes[name] <- construct_metabosets(mode$exprs, mode$pheno_data, mode$feature_data)
+  }
+  # Modify data
+  modes$HILIC_neg$Injection_order <- modes$HILIC_neg$Injection_order + 1
+  inj_ord_rn <- modes$RP_neg$Injection_order + 2
+  modes$RP_neg$Injection_order <- inj_ord_rn
+  inj_ord_rp <- modes$RP_pos$Injection_order[5:221] + 5
+  modes$RP_pos$Injection_order[5:221] <- inj_ord_rp
+  sampleNames(modes$HILIC_neg)[2] <- "ID_666"
+  sampleNames(modes$RP_pos)[22] <- "ID_999"
+
+  expect_warning(merged <- merge_metabosets(modes),
+                 regexp = "Sample IDs are not identical|Unequal amount of samples"
+  )
+  # Dummy injection
+  expect_equal(merged$Injection_order, -seq_along(merged$Sample_ID))
+  # Original IOs
+  expect_equal(sort(as.numeric(na.omit(merged$HILIC_neg_Injection_order))),
+               modes$HILIC_neg$Injection_order
+  )
+  expect_equal(sort(as.numeric(na.omit(merged$HILIC_pos_Injection_order))),
+               modes$HILIC_pos$Injection_order
+  )
+  expect_equal(sort(as.numeric(na.omit(merged$RP_neg_Injection_order))),
+               modes$RP_neg$Injection_order
+  )
+  expect_equal(sort(as.numeric(na.omit(merged$RP_pos_Injection_order))),
+               modes$RP_pos$Injection_order
+  )
 })
 
 

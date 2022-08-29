@@ -552,13 +552,14 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' @param color column name used to color the plots
 #' @param p_breaks a numerical vector of the p_values to show on the y-axis
 #' @param fdr_limit the significance level used in the experiment
-#' @param log2_x logical, whether effect size should be plotted on a log2 axis
+#' @param log2_x logical, whether effect size should be plotted on a log2 axis.
 #' @param center_x_axis logical, whether x-axis should be centered. If \code{TRUE}, the "zero-effect" will
 #' be on the middle of the plot. The "zero effect" is 0 if \code{log2_x = FALSE} and 1 if  \code{log2_x = TRUE}
 #' @param x_lim numerical vector of length 2 for manually setting the x-axis limits
+#' @param label column name used to label the plots
+#' @param label_limit numeric, p-value which is used to limit label plotting. Defaults to 0.05.
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
-#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
 #' also be passed using \code{mapping = aes(...)}.
 #'
 #' @return a ggplot object
@@ -568,13 +569,14 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 #' volcano_plot(lm_results, x = "GroupB_Estimate",
 #'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'              label = "Feature_ID",
 #'              fdr_limit = 0.1)
 #'
 #' @export
 setGeneric("volcano_plot", signature = "object",
            function(object, x, p, p_fdr = NULL, color = NULL,
                     p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                    log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                    log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
                     color_scale = getOption("notame.color_scale_con"),
                     title = "Volcano plot", subtitle = NULL, ...) standardGeneric("volcano_plot"))
 
@@ -583,36 +585,30 @@ setGeneric("volcano_plot", signature = "object",
 setMethod("volcano_plot", c(object = "MetaboSet"),
           function(object, x, p, p_fdr = NULL, color = NULL,
                    p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
                    color_scale = getOption("notame.color_scale_con"),
                    title = "Volcano plot", subtitle = NULL, ...) {
-            volcano_plotter(fData(object), x, p, p_fdr, color,
-                            p_breaks, fdr_limit,
-                            log2_x, center_x_axis, x_lim,
-                            color_scale,
-                            title, subtitle, ...)
+            volcano_plotter(fData(object), x, p, p_fdr, color, p_breaks, fdr_limit,
+                            log2_x, center_x_axis, x_lim, label, label_limit,
+                            color_scale, title, subtitle, ...)
           })
 
 #' @export
 setMethod("volcano_plot", c(object = "data.frame"),
           function(object, x, p, p_fdr = NULL, color = NULL,
                    p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL,
+                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
                    color_scale = getOption("notame.color_scale_con"),
                    title = "Volcano plot", subtitle = NULL, ...) {
-            volcano_plotter(object, x, p, p_fdr, color,
-                            p_breaks, fdr_limit,
-                            log2_x, center_x_axis, x_lim,
-                            color_scale,
-                            title, subtitle, ...)
+            volcano_plotter(object, x, p, p_fdr, color, p_breaks, fdr_limit,
+                            log2_x, center_x_axis, x_lim, label, label_limit,
+                            color_scale, title, subtitle, ...)
           })
 
 
-volcano_plotter <- function(data, x, p, p_fdr, color,
-                         p_breaks, fdr_limit,
-                         log2_x, center_x_axis, x_lim,
-                         color_scale,
-                         title, subtitle, ...) {
+volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
+                         log2_x, center_x_axis, x_lim, label, label_limit,
+                         color_scale, title, subtitle, ...) {
 
   if (center_x_axis & !is.null(x_lim)) {
     warning("Manually setting x-axis limits overrides x-axis centering")
@@ -635,7 +631,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color,
     if (any(data[, p_fdr] < fdr_limit)) {
       # Add horizontal line with the FDR < 0.05 limit
       q_limit <- max(data[data[, p_fdr] < fdr_limit, p], na.rm = TRUE)
-      # sec_axis writes e.g. "q < 0.05" on the right sifde of the plot
+      # sec_axis writes e.g. "q < 0.05" on the right side of the plot
       pl <- pl +
         geom_hline(yintercept = q_limit, linetype = "dashed") +
         scale_y_continuous(trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks),
@@ -668,6 +664,23 @@ volcano_plotter <- function(data, x, p, p_fdr, color,
     }
     pl <- pl +
       scale_x_continuous(limits = x_lim)
+  }
+
+  if (!is.null(label)) {
+    if (label %in% colnames(data)) {
+      label_data <- data[data[, p] < label_limit, ]
+      pl <- pl +
+        ggrepel::geom_label_repel(data = label_data,
+                                  mapping = aes_string(label = label),
+                                  seed = 313,
+                                  alpha = 0.5,
+                                  size = 3,
+                                  force = 10,
+                                  max.overlaps = 50
+        )
+    } else {
+    warning("Label column not found, not plotting them")
+    }
   }
 
   pl
@@ -831,9 +844,13 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #' @param object a MetaboSet object or a data frame. If x is a MetaboSet object, fData(x) is used.
 #' If x is a data frame, it is used as is.
 #' @param p_col the column name containing p-values. This is used to scale the size of the points.
-#' @param mz_col,rt_col the column names for m/z and retention time. if NULL, automatic detection is attempted.
+#' @param p_limit numeric, limits plotted features by p-values. If NULL, plots all features.
+#' @param mz_col,rt_col the column names for m/z and retention time. If NULL, automatic detection is attempted.
 #' @param color the column name used to color the points
+#' @param title The plot title
+#' @param subtitle The plot subtitle
 #' @param color_scale color scale as returned by a ggplot function. Defaults to current continuous color scale.
+#' @param all_features logical, should all features be retained? Should be used only if x is a MetaboSet object.
 #'
 #' @return a ggplot object
 #'
@@ -852,29 +869,36 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #'
 #' @export
 setGeneric("mz_rt_plot", signature = "object",
-           function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
-                    color_scale = getOption("notame.color_scale_dis")) standardGeneric("mz_rt_plot"))
-
+           function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL,
+                    color = NULL, title = "m/z retention time", subtitle = NULL,
+                    color_scale = getOption("notame.color_scale_con"), ...) standardGeneric("mz_rt_plot"))
 
 #' @export
 setMethod("mz_rt_plot", c(object = "MetaboSet"),
-          function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
-                   color_scale = getOption("notame.color_scale_con")) {
-            mz_rt_plotter(fData(object), p_col, mz_col, rt_col, color,
-                          color_scale)
+          function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                   title = "m/z vs retention time", subtitle = NULL,
+                   color_scale = getOption("notame.color_scale_con"), all_features = FALSE) {
+            mz_rt_plotter(fData(drop_flagged(object, all_features)), p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+                          color_scale, all_features)
           })
 
 #' @export
 setMethod("mz_rt_plot", c(object = "data.frame"),
-          function(object, p_col = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+          function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+                   title = "m/z vs retention time", subtitle = NULL,
                    color_scale = getOption("notame.color_scale_con")) {
-            mz_rt_plotter(object, p_col, mz_col, rt_col, color,
+            mz_rt_plotter(object, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale)
           })
 
 
-mz_rt_plotter <- function(x, p_col, mz_col, rt_col, color,
-                          color_scale) {
+mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+                          color_scale, all_features) {
+
+  if (!is.null(p_limit) && !is.null(p_col)) {
+    x <- x[x[, p_col] < p_limit, ]
+    cat(paste("All features with p-values larger than", p_limit, "dropped.\n"))
+  }
 
   if (is.null(mz_col) || is.null(rt_col)) {
     mz_rt_cols <- find_mz_rt_cols(x)
@@ -889,7 +913,7 @@ mz_rt_plotter <- function(x, p_col, mz_col, rt_col, color,
                           breaks = c(0.05, 0.01, 0.001, 1e-4), labels = as.character(c(0.05, 0.01, 0.001, 1e-4))) +
     theme_bw() +
     color_scale +
-    labs(title = "m/z vs retention time",
+    labs(title = title, subtitle = subtitle,
          x = "Retention time", y = "Mass-to-charge ratio", size = "p-value") +
     # Scales for m/z and rt
     scale_x_continuous(breaks = seq(0, ceiling(max(x[, rt_col])))) +

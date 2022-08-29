@@ -43,23 +43,23 @@ defaults.
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{combined_data}: sample information and features combined to a single data frame, one row per sample
+\item \code{combined_data(MetaboSet)}: sample information and features combined to a single data frame, one row per sample
 
-\item \code{combined_data}: sample information and features combined to a single data frame, one row per sample
+\item \code{combined_data(MetaboSet)}: sample information and features combined to a single data frame, one row per sample
 
-\item \code{group_col}: access and set group_col
+\item \code{group_col(MetaboSet)}: access and set group_col
 
-\item \code{time_col}: access and set time_col
+\item \code{time_col(MetaboSet)}: access and set time_col
 
-\item \code{subject_col}: access and set subject_col
+\item \code{subject_col(MetaboSet)}: access and set subject_col
 
-\item \code{flag}: access and set results
+\item \code{flag(MetaboSet)}: access and set results
 
-\item \code{join_fData}: join new information to fData
+\item \code{join_fData(object = MetaboSet, dframe = data.frame)}: join new information to fData
 
-\item \code{join_pData}: join new information to fData
+\item \code{join_pData(object = MetaboSet, dframe = data.frame)}: join new information to fData
+
 }}
-
 \section{Slots}{
 
 \describe{
