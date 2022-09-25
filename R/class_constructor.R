@@ -458,7 +458,7 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
     cat("Initializing the object(s) with unflagged features\n")
     feature_data$Flag <- NA
   }
-  feature_data <- check_feature_data(feature_data)
+  feature_data <- check_feature_data(feature_data, check_limits = FALSE)
 
   if (split_data) {
     # Split the data by the Split column of feature data
