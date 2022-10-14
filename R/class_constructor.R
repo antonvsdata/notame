@@ -419,6 +419,10 @@ setValidity("MetaboSet",
                 return("QC column should not contain NAs")
               } else if (!"Flag" %in% colnames(fData(object))) {
                 return("Flag column not found in fData")
+              } else if (!identical(object$Sample_ID, rownames(pData(object)))) {
+                return("Sample_ID does not match rownames in pheno data")
+              } else if (!identical(fData(object)$Feature_ID, rownames(fData(object)))) {
+                return("Feature_ID does not match rownames in feature data")
               } else {
                 x <- check_pheno_data(pData(object), id_prefix = "")
                 x <- check_exprs(exprs(object))
@@ -453,12 +457,16 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
                                  subject_col = NA_character_,
                                  split_data = TRUE) {
 
-  pheno_data <- Biobase::AnnotatedDataFrame(data=pheno_data)
   if (!"Flag" %in% colnames(feature_data)) {
     cat("Initializing the object(s) with unflagged features\n")
     feature_data$Flag <- NA
   }
-  feature_data <- check_feature_data(feature_data, check_limits = FALSE)
+  feature_data <- check_feature_data(feature_data, check_limits = FALSE, log_messages = TRUE)
+  exprs <- check_exprs(exprs, log_messages = TRUE)
+  log_text("Setting row and column names of exprs based on feature and pheno data")
+  rownames(exprs) <- rownames(feature_data)
+  colnames(exprs) <- rownames(pheno_data)
+  pheno_data <- Biobase::AnnotatedDataFrame(data=pheno_data)
 
   if (split_data) {
     # Split the data by the Split column of feature data
