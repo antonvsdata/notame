@@ -101,6 +101,9 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #' @param df data frame, statistics results
 #' @param remove list, should contain strings that are matching to unwanted columns
 #' @param rename named list, names should contain matches that are replaced with values
+#' @param summary logical, should summary columns be added
+#' @param p_limit numeric, limit for p-values to be counted
+#' @param fdr logical, should summary be done with fdr-fixed values
 #'
 #' @examples
 #' # Simple manipulation to linear model results
@@ -112,12 +115,31 @@ summary_statistics <- function(object, grouping_cols = NA) {
 clean_stats_results <- function(
     df,
     remove = c("Intercept", "CI95", "Std_error", "t_value", "z_value", "R2"),
-    rename = NULL) {
+    rename = NULL,
+    summary = TRUE,
+    p_limit = 0.05,
+    fdr = TRUE) {
   df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
   if (!is.null(rename)) {
     for (name in names(rename)) {
       colnames(df) <- gsub(name, rename[name], colnames(df))
     }
+  }
+  if (summary) {
+    ifelse(fdr,
+           p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))],
+           p_cols <- colnames(df)[grep("_P$", colnames(df))]
+    )
+    df$Low_p_values <- apply(df[, p_cols], 1, function(x) {
+      sum(x < p_limit, na.rm = TRUE)
+    })
+    df$Lowest_p <- apply(df[, p_cols], 1, function(x) {
+      finite_min(x)
+    })
+    df$Column <- apply(df[, p_cols], 1, function(x) {
+      m <- finite_min(x)
+      p_cols[which(x == m)]
+    })
   }
 
   df

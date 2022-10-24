@@ -7,7 +7,10 @@
 clean_stats_results(
   df,
   remove = c("Intercept", "CI95", "Std_error", "t_value", "z_value", "R2"),
-  rename = NULL
+  rename = NULL,
+  summary = TRUE,
+  p_limit = 0.05,
+  fdr = TRUE
 )
 }
 \arguments{
@@ -16,6 +19,12 @@ clean_stats_results(
 \item{remove}{list, should contain strings that are matching to unwanted columns}
 
 \item{rename}{named list, names should contain matches that are replaced with values}
+
+\item{summary}{logical, should summary columns be added}
+
+\item{p_limit}{numeric, limit for p-values to be counted}
+
+\item{fdr}{logical, should summary be done with fdr-fixed values}
 }
 \description{
 Uses regexp to remove unnecessary columns from statistics results data frame.
