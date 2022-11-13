@@ -1400,3 +1400,58 @@ perform_pairwise_t_test <- function(object, group = group_col(object), is_paired
   rownames(results_df) <- results_df$Feature_ID
   results_df
 }
+
+
+#' Perform Mann-Whitney u test
+#'
+#' Performs Mann-Whitney u test
+#' Uses base R function \code{wilcox.test}.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
+#' @param ... other parameters to \code{\link{wilcox.test}}
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' medians in study groups, use "Feature ~ Group".
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{\link{wilcox.test}}
+#'
+#' @examples
+#' perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
+#'
+#' @export
+perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...) {
+
+  log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
+
+  mw_fun <- function(feature, formula, data) {
+    result_row <- NULL
+    tryCatch({
+      mw_res <- wilcox.test(formula = formula, data = data,
+                            conf.int = TRUE, ...)
+
+      result_row <- data.frame(Feature_ID = feature,
+                               Estimate = mw_res$estimate[1],
+                               "Lower_CI" = mw_res$conf.int[1],
+                               "Upper_CI" = mw_res$conf.int[2],
+                               Wilcoxon_P = mw_res$p.value,
+                               stringsAsFactors = FALSE)
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+
+    result_row
+
+  }
+
+  results_df <- perform_test(object, formula_char, mw_fun, all_features)
+
+  log_text("Mann-Whitney tests performed.")
+
+  results_df
+}
