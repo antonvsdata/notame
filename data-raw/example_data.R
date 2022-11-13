@@ -76,8 +76,9 @@ rownames(assay_data) <- rownames(feature_data)
 colnames(assay_data) <- rownames(pheno_data)
 
 # Construct object
-example_set <- construct_MetaboSet(exprs = assay_data, pheno_data = pheno_data, feature_data = feature_data,
-                                   group_col = "Group", time_col = "Time", subject_col = "Subject_ID")[[1]]
+example_set <- construct_metabosets(exprs = assay_data, pheno_data = pheno_data, feature_data = feature_data,
+                                   group_col = "Group", time_col = "Time", subject_col = "Subject_ID",
+                                   split_data = FALSE)
 
 
 
