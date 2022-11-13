@@ -1227,29 +1227,7 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   results_df
 }
 
-#' Perform paired t-tests
-#'
-#' Performs paired t-tests between two groups.
-#'
-#' @param object a MetaboSet object
-#' @param group character, column name of pData with the group information
-#' @param id character, column name of pData with the identifiers for the pairs
-#' @param all_features should all features be included in FDR correction?
-#' @param ... additional parameters to t.test
-#'
-#' @return data frame with the results
-#'
-#' @examples
-#' paired_t_results <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
-#'
-#' @seealso \code{\link{t.test}}
-#'
-#' @export
-perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
-  message(paste0("Remember that t.test returns difference between group means",
-                 " in different order than lm.\n",
-                 "This function mimics this behavior, so the effect size is",
-                 " mean of reference level minus mean of second level."))
+perform_paired_test <- function(object, group, id, test, all_features = FALSE, ...) {
   results_df <- NULL
   data <- combined_data(object)
   features <- featureNames(object)
@@ -1270,7 +1248,7 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
   group1 <- group1[group1[, id] %in% common_ids, ][order(common_ids), ]
   group2 <- group2[group2[, id] %in% common_ids, ][order(common_ids), ]
 
-  log_text(paste0("Starting paired t-tests for ", paste0(pair, collapse = " & ")))
+  log_text(paste0("Starting paired tests for ", paste0(pair, collapse = " & ")))
   log_text(paste("Found", length(common_ids), "complete pairs"))
   if (length(common_ids) == 0) {
     warning(paste0("Skipped ", paste0(pair, collapse = " & "), ": no common IDs"))
@@ -1283,16 +1261,24 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
     feature <- features[i]
     result_row <- NULL
     tryCatch({
-      t_res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
+      if (test == "t_test") {
+        res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
+      } else if (test == "wilcox") {
+        res <- wilcox.test(group1[, feature], group2[, feature], paired = TRUE,
+                           conf.int = TRUE, ...)
+      }
 
-      conf_level <- attr(t_res$conf.int, "conf.level") * 100
+      conf_level <- attr(res$conf.int, "conf.level") * 100
 
       result_row <- data.frame(Feature_ID = feature,
-                               Estimate = t_res$estimate[1],
-                               "Lower_CI" = t_res$conf.int[1],
-                               "Upper_CI" = t_res$conf.int[2],
-                               t_test_P = t_res$p.value,
+                               Estimate = res$estimate[1],
+                               "Lower_CI" = res$conf.int[1],
+                               "Upper_CI" = res$conf.int[2],
+                               t_test_P = res$p.value,
                                stringsAsFactors = FALSE)
+      if (test == "wilcox") {
+        colnames(result_row)[5] <- "Wilcox_P"
+      }
       colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
       colnames(result_row)[-1] <- paste0(pair[1], "_vs_",
                                          pair[2], "_",
@@ -1323,9 +1309,37 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
   }
   results_df <- adjust_p_values(results_df, flags)
 
-  log_text("Paired t-tests performed.")
+  log_text("Paired tests performed.")
 
   results_df
+}
+
+#' Perform paired t-tests
+#'
+#' Performs paired t-tests between two groups.
+#'
+#' @param object a MetaboSet object
+#' @param group character, column name of pData with the group information
+#' @param id character, column name of pData with the identifiers for the pairs
+#' @param all_features should all features be included in FDR correction?
+#' @param ... additional parameters to t.test
+#'
+#' @return data frame with the results
+#'
+#' @examples
+#' paired_t_results <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#'
+#' @seealso \code{\link{t.test}}
+#'
+#' @export
+perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
+  message(paste0("Remember that t.test returns difference between group means",
+                 " in different order than lm.\n",
+                 "This function mimics this behavior, so the effect size is",
+                 " mean of reference level minus mean of second level."))
+
+  perform_paired_test(object, group, id, test = "t_test",
+                      all_features = all_features, ...)
 }
 
 #' Perform pairwise t-tests
@@ -1454,4 +1468,34 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
   log_text("Mann-Whitney tests performed.")
 
   results_df
+}
+
+#' Perform Wilcoxon signed rank test
+#'
+#' Performs Wilcoxon signed rank test
+#' Uses base R function \code{wilcox.test} with \code{paired = TRUE}.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
+#' @param ... other parameters to \code{\link{wilcox.test}}
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' medians in study groups, use "Feature ~ Group".
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{\link{wilcox.test}}
+#'
+#' @examples
+#' perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#'
+#' @export
+perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, ...) {
+  perform_paired_test(object, group, id, test = "wilcox",
+                      all_features = all_features, ...)
 }
