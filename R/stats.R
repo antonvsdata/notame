@@ -1342,6 +1342,27 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
                       all_features = all_features, ...)
 }
 
+pairwise_fun <- function(object, fun, group_, ...) {
+
+  df <- NULL
+  groups <- levels(pData(object)[, group_])
+  combinations <- combn(groups, 2)
+  for (i in seq_len(ncol(combinations))) {
+    group1 <- as.character(combinations[1, i])
+    group2 <- as.character(combinations[2, i])
+    # Subset the pair of groups
+    object_tmp <- object[, pData(object)[, group_] %in% c(group1, group2)]
+    pData(object_tmp) <- droplevels(pData(object_tmp))
+
+    res <- fun(object_tmp, ...)
+    ifelse(is.null(df),
+           df <- res,
+           df <- dplyr::left_join(df, res)
+    )
+  }
+  df
+}
+
 #' Perform pairwise t-tests
 #'
 #' Performs pairwise t-tests between all study groups.
@@ -1372,26 +1393,6 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 #' @export
 perform_pairwise_t_test <- function(object, group = group_col(object), is_paired = FALSE, id = NULL, all_features = FALSE, ...) {
 
-  pairwise_t_fun <- function(fun, object, ...) {
-    df <- NULL
-    groups <- levels(pData(object)[, group])
-    combinations <- combn(groups, 2)
-    for (i in seq_len(ncol(combinations))) {
-      group1 <- as.character(combinations[1, i])
-      group2 <- as.character(combinations[2, i])
-      # Subset the pair of groups
-      object_tmp <- object[, pData(object)[, group] %in% c(group1, group2)]
-      pData(object_tmp) <- droplevels(pData(object_tmp))
-
-      t_results <- fun(object_tmp, ...)
-      ifelse(is.null(df),
-             df <- t_results,
-             df <- dplyr::left_join(df, t_results)
-      )
-    }
-    df
-  }
-
   results_df <- NULL
 
   if (!is.factor(pData(object)[, group])) {
@@ -1401,11 +1402,15 @@ perform_pairwise_t_test <- function(object, group = group_col(object), is_paired
   if (is_paired) {
     if (is.null(id)) stop("Subject ID column is missing, please provide it")
     log_text("Starting pairwise paired t-tests.")
-    results_df <- pairwise_t_fun(perform_paired_t_test, object, group, id, all_features)
+    results_df <- pairwise_fun(object, perform_paired_t_test, group_ = group,
+                               group = group, id = id,
+                               all_features = all_features, ...)
     log_text("Pairwise paired t-tests performed.")
   } else {
     log_text("Starting pairwise t-tests.")
-    results_df <- pairwise_t_fun(perform_t_test, object, formula_char = paste("Feature ~", group), all_features)
+    results_df <- pairwise_fun(object, perform_t_test, group,
+                               formula_char = paste("Feature ~", group),
+                               all_features = all_features, ...)
     log_text("Pairwise t-tests performed.")
   }
   if (length(featureNames(object)) != nrow(results_df)) {
@@ -1444,7 +1449,9 @@ perform_pairwise_t_test <- function(object, group = group_col(object), is_paired
 perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...) {
 
   log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
-
+  exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
+  pair <- levels(pData(object)[, exp_var])
+  prefix <- paste0(pair[1], "_vs_", pair[2], "_")
   mw_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch({
@@ -1455,8 +1462,9 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
                                Estimate = mw_res$estimate[1],
                                "Lower_CI" = mw_res$conf.int[1],
                                "Upper_CI" = mw_res$conf.int[2],
-                               Wilcoxon_P = mw_res$p.value,
+                               Mann_whitney_P = mw_res$p.value,
                                stringsAsFactors = FALSE)
+      colnames(result_row)[-1] <- paste0(prefix,  colnames(result_row)[-1])
     }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 
     result_row
@@ -1498,4 +1506,63 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
 perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, ...) {
   perform_paired_test(object, group, id, test = "wilcox",
                       all_features = all_features, ...)
+}
+
+#' Perform pairwise  non-parametric tests
+#'
+#' Performs pairwise non-parametric tests between all study groups.
+#' Use \code{is_paired = FALSE} for Mann-Whitney u-tests
+#' Use \code{is_paired = TRUE} for Wilcoxon signed rank tests.
+#' NOTE! Does not use formula interface
+#'
+#' @param object a MetaboSet object
+#' @param group character, column name of phenoData giving the groups
+#' @param is_paired logical, use pairwise tests
+#' @param id character, name of the subject identification column for paired version
+#' @param all_features should all features be included in FDR correction?
+#' @param ... other parameters passed to test functions
+#'
+#' @details P-values of each comparison are corrected separately from each other.
+#'
+#' @return data frame with the results
+#'
+#' @examples
+#' # Including QCs as a study group for example
+#' mann_whitney_results <- perform_pairwise_non_parametric(merged_sample, group = "Group")
+#' # Using paired mode (pairs with QC are skipped as there are no common IDs in 'example_set')
+#' wilcoxon_signed_results <- perform_pairwise_non_parametric(example_set, group = "Time", is_paired = TRUE, id = "Subject_ID")
+#'
+#' @seealso \code{\link{perform_mann_whitney}},
+#' \code{\link{perform_wilcoxon_signed_rank}},
+#' \code{\link{wilcox.test}}
+#'
+#' @export
+perform_pairwise_non_parametric <- function(object, group = group_col(object),
+                                            is_paired = FALSE, id = NULL,
+                                            all_features = FALSE, ...) {
+
+  results_df <- NULL
+
+  if (!is.factor(pData(object)[, group])) {
+    stop("Group column should be a factor")
+  }
+
+  if (is_paired) {
+    if (is.null(id)) stop("Subject ID column is missing, please provide it")
+    log_text("Starting pairwise Wilcoxon signed rank tests.")
+    results_df <- pairwise_fun(object, perform_wilcoxon_signed_rank, group_ = group,
+                               group = group, id = id, all_features = all_features, ...)
+    log_text("Wilcoxon signed rank tests performed.")
+  } else {
+    log_text("Starting pairwise Mann-Whitney tests.")
+    results_df <- pairwise_fun(object, perform_mann_whitney, group,
+                               formula_char = paste("Feature ~", group),
+                               all_features = all_features, ...)
+    log_text("Mann-Whitney tests performed.")
+  }
+  if (length(featureNames(object)) != nrow(results_df)) {
+    warning("Results don't contain all features")
+  }
+  rownames(results_df) <- results_df$Feature_ID
+  results_df
 }
