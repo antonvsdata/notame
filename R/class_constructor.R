@@ -28,7 +28,7 @@ check_pheno_data <- function(x, id_prefix, id_column = NULL, log_messages = FALS
       x$QC <- ifelse(qc_found, "QC", "Sample")
       log_text_if(paste("QC column generated from", colnames(x)[qc_found[1]]), log_messages)
     } else {
-      warning("QC column not found and can not be generated. Please create one before constructing a MetaboSet object.")
+      warning("QC not found and column can not be generated. Please create one before constructing a MetaboSet object.")
     }
   }
   # If id_column is provided, try to change name of the column to "Sample_ID"
