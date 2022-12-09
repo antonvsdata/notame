@@ -26,7 +26,7 @@ check_pheno_data <- function(x, id_prefix, id_column = NULL, log_messages = FALS
     qc_found <- apply(x, 1, function(y) {any(grepl("QC", y))})
     if (any(qc_found)) {
       x$QC <- ifelse(qc_found, "QC", "Sample")
-      log_text_if(paste("QC column generated from", colnames(x)[qc_found[1]]), log_messages)
+      log_text_if(paste("QC column generated from rows containing 'QC'"), log_messages)
     } else {
       warning("QC not found and column can not be generated. Please create one before constructing a MetaboSet object.")
     }
