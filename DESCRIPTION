@@ -31,6 +31,7 @@ Imports:
 Suggests:
     car,
     cowplot,
+    devEMF,
     doParallel,
     fpc,
     ggbeeswarm,

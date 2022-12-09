@@ -1,3 +1,49 @@
+save_plot_helper <- function(plot, file, width, height, res = 300) {
+  # don't ask how this works but it can handle multiple file extensions and files with no extension
+  file_format = gsub("^(.*\\.|[^.]+)(?=[^.]*)", "", file, perl = TRUE)
+  switch (file_format,
+          "pdf" = {
+            pdf(file = file,
+                width = width,
+                height = height)
+          },
+          "emf" = {
+            if (!requireNamespace("devEMF", quietly = TRUE)) {
+              stop("Package devEMF needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
+            devEMF::emf(file = file,
+                        width = width,
+                        height = height)
+          },
+          "svg" = {
+            svg(file = file,
+                width = width,
+                height = height)
+          },
+          "png" = {
+            png(filename = file,
+                width = width,
+                height = height,
+                units = "in",
+                res = res)
+          },
+          "tiff" = {
+            tiff(filename = file,
+                 width = width,
+                 height = height,
+                 units = "in",
+                 res = res,
+                 compression = "lzw")
+          },
+          warning(paste0("File format '", file_format,
+                         "' is not valid, saving failed"
+          ))
+  )
+  print(plot)
+  dev.off()
+}
+
 
 
 #' Save line plots with mean
