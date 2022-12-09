@@ -23,9 +23,9 @@ check_pheno_data <- function(x, id_prefix, id_column = NULL, log_messages = FALS
 
   # If QC column is not provided explicitly, attempt to create it
   if (!"QC" %in% colnames(x)) {
-    qc_found <- which(sapply(x, function(y) {any(y == "QC")}))
-    if (length(qc_found)) {
-      x$QC <- ifelse(x[, qc_found[1]] == "QC", "QC", "Sample")
+    qc_found <- apply(x, 1, function(y) {any(grepl("QC", y))})
+    if (any(qc_found)) {
+      x$QC <- ifelse(qc_found, "QC", "Sample")
       log_text_if(paste("QC column generated from", colnames(x)[qc_found[1]]), log_messages)
     } else {
       warning("QC column not found and can not be generated. Please create one before constructing a MetaboSet object.")
