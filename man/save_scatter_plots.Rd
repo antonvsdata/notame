@@ -7,7 +7,8 @@
 save_scatter_plots(
   object,
   x = group_col(object),
-  file,
+  folder,
+  format,
   width = 8,
   height = 6,
   all_features = FALSE,
@@ -24,7 +25,9 @@ save_scatter_plots(
 
 \item{x}{character, name of the column to be used as x-axis}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{folder}{path to the folder where the plots should be saved}
+
+\item{format}{format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
 
@@ -38,13 +41,14 @@ Set to NA to choose the appropriate scale based on the class of the coloring var
 
 \item{shape}{character, name of the column used for shape}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 }
 \description{
 Draws a scatterplots with a feature on y-axis and another variable on x-axis.
-A separate plot is drawn for each feature.
+A separate plot is drawn and saved for each feature.
 }
 \examples{
 \dontrun{
@@ -52,7 +56,9 @@ A separate plot is drawn for each feature.
 save_scatter_plots(object = merged_sample,
                            x = "Injection_order",
                            color = "Group",
-                           file = "injection_scatter.pdf")
+                    folder = "./scatter_plots/",
+                    format = "pdf"
+                    )
 }
 
 }

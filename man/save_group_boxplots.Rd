@@ -7,7 +7,8 @@
 save_group_boxplots(
   object,
   all_features = FALSE,
-  file,
+  folder,
+  format = "emf",
   width = 8,
   height = 6,
   x = group_col(object),
@@ -22,7 +23,9 @@ save_group_boxplots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{folder}{path to the folder where the plots should be saved}
+
+\item{format}{format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
 
@@ -30,21 +33,29 @@ save_group_boxplots(
 
 \item{color}{character, name of the column to be used for coloring}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 }
 \description{
 Draws a boxplot of feature abundances in each group.
-A separate plot is drawn for each feature.
+A separate plot is drawn and saved for each feature.
 }
 \examples{
 \dontrun{
 # Default boxplots by group
-save_group_boxplots(drop_qcs(merged_sample), file = "boxplots.pdf")
+save_group_boxplots(drop_qcs(merged_sample),
+                    folder = "./group_boxplots/",
+                    format = "pdf"
+                    )
 # x and color can be a different variable
-save_group_boxplots(drop_qcs(merged_sample), file = "boxplots_time.pdf",
-                    x = "Time", color = "Group")
+save_group_boxplots(drop_qcs(merged_sample),
+                    folder = "./time_boxplots/",
+                    format = "pdf",
+                    x = "Time",
+                    color = "Group"
+                    )
 }
 
 }

@@ -7,7 +7,8 @@
 save_group_lineplots(
   object,
   all_features = FALSE,
-  file,
+  folder,
+  format,
   width = 8,
   height = 6,
   x = time_col(object),
@@ -27,7 +28,9 @@ save_group_lineplots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{folder}{path to the folder where the plots should be saved}
+
+\item{format}{format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
 
@@ -35,7 +38,8 @@ save_group_lineplots(
 
 \item{group}{character, name of the column containing group information, used for coloring}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{fun.data}{passed to ggplot2::stat_summary and used for errorbars,
 "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."}
@@ -53,7 +57,10 @@ A line is drawn for each group and error bars are added.
 A separate plot is drawn for each feature.
 }
 \examples{
-\dontrun{save_group_lineplots(drop_qcs(merged_sample), file = "group_lineplots.pdf")}
+\dontrun{save_group_lineplots(drop_qcs(merged_sample),
+                    folder = "./group_line_plots/",
+                    format = "pdf"
+                    )}
 
 }
 \seealso{

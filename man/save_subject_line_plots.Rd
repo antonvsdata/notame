@@ -7,7 +7,8 @@
 save_subject_line_plots(
   object,
   all_features = FALSE,
-  file,
+  folder,
+  format,
   width = 8,
   height = 6,
   x = time_col(object),
@@ -24,7 +25,9 @@ save_subject_line_plots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{folder}{path to the folder where the plots should be saved}
+
+\item{format}{format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
 
@@ -32,7 +35,8 @@ save_subject_line_plots(
 
 \item{id}{character, name of the column containing subject IDs}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color}{character, the column name to color the lines by (optional)}
 
@@ -43,9 +47,12 @@ save_subject_line_plots(
 \description{
 Plots the change in the feature abundances as a function of e.g. time.
 A line is drawn for each subject and a mean line is added.
-A separate plot is drawn for each feature.
+A separate plot is drawn and saved for each feature.
 }
 \examples{
-\dontrun{save_subject_line_plots(drop_qcs(example_set), file = "subject_lines.pdf")}
+\dontrun{save_subject_line_plots(drop_qcs(example_set),
+                    folder = "./subject_line_plots/",
+                    format = "pdf"
+                    )}
 
 }
