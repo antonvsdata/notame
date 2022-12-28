@@ -1,54 +1,3 @@
-save_plot_helper <- function(plot, file, format, width, height, res = 300) {
-  # create folder
-  folder = dirname(file)
-  if (!file.exists(folder)) {
-    dir.create(folder)
-  }
-  # save plots
-  switch (format,
-          "pdf" = {
-            pdf(file = file,
-                width = width,
-                height = height)
-          },
-          "emf" = {
-            if (!requireNamespace("devEMF", quietly = TRUE)) {
-              stop("Package devEMF needed for this function to work. Please install it.",
-                   call. = FALSE)
-            }
-            devEMF::emf(file = file,
-                        width = width,
-                        height = height)
-          },
-          "svg" = {
-            svg(file = file,
-                width = width,
-                height = height)
-          },
-          "png" = {
-            png(filename = file,
-                width = width,
-                height = height,
-                units = "in",
-                res = res)
-          },
-          "tiff" = {
-            tiff(filename = file,
-                 width = width,
-                 height = height,
-                 units = "in",
-                 res = res,
-                 compression = "lzw")
-          },
-          warning(paste0("File format '", file_format,
-                         "' is not valid, saving failed"
-          ))
-  )
-  print(plot)
-  dev.off()
-}
-
-
 
 #' Save line plots with mean
 #'
@@ -58,9 +7,10 @@ save_plot_helper <- function(plot, file, format, width, height, res = 300) {
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param folder path to the folder where the plots should be saved
-#' @param format format in which the plots should be saved
+#' @param prefix character, a file path prefix added to the file paths
+#' @param format character, format in which the plots should be saved
 #' @param width,height width and height of the plots in inches
+#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param id character, name of the column containing subject IDs
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
@@ -69,17 +19,30 @@ save_plot_helper <- function(plot, file, format, width, height, res = 300) {
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
 #'
+#' @seealso
+#' \code{\link[notame]{save_plot}}
+#'
 #' @examples
 #' \dontrun{save_subject_line_plots(drop_qcs(example_set),
-#'                     folder = "./subject_line_plots/",
+#'                     prefix = "./subject_line_plots/",
 #'                     format = "pdf"
 #'                     )}
 #'
 #' @export
-save_subject_line_plots <- function(object, all_features = FALSE, folder, format = "emf", width = 8, height = 6,
-                                    x = time_col(object), id = subject_col(object),
-                                    title = "Feature_ID", subtitle = NULL,
-                                    color = NA, color_scale = getOption("notame.color_scale_dis"), facet = NULL) {
+save_subject_line_plots <- function(
+    object,
+    all_features = FALSE,
+    prefix,
+    format = "emf",
+    width = 8,
+    height = 6,
+    res = 300,
+    x = time_col(object),
+    id = subject_col(object),
+    title = "Feature_ID",
+    subtitle = NULL,
+    color = NA,
+    color_scale = getOption("notame.color_scale_dis"), facet = NULL) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -98,23 +61,40 @@ save_subject_line_plots <- function(object, all_features = FALSE, folder, format
     }
     fname <- Biobase::featureNames(object)[i]
     name <- fData(object)[i, title]
-    if (!is.null(title)) file <- paste0(folder, name, ".", format)
-    else file <- paste0(folder, i, ".", format)
+    if (!is.null(title)) file <- paste0(prefix, name, ".", format)
+    else file <- paste0(prefix, i, ".", format)
 
     p <- ggplot(data, aes_string(x = x, y = fname)) +
-      labs(title = name, subtitle = fData(object)[i, subtitle], y = "Abundance") +
+      labs(title = name,
+           subtitle = fData(object)[i, subtitle],
+           y = "Abundance"
+      ) +
       theme_bw()
 
     if (is.na(color)) {
       p <- p +
-        geom_line(aes_string(group = id), color = "grey20", alpha = 0.35, size = 0.3) +
-        stat_summary(aes(group = 1), fun.data = "mean_se",
-                     geom = "line", size = 1.2, color = "red")
+        geom_line(aes_string(group = id),
+                  color = "grey20",
+                  alpha = 0.35,
+                  size = 0.3
+        ) +
+        stat_summary(aes(group = 1),
+                     fun.data = "mean_se",
+                     geom = "line",
+                     size = 1.2,
+                     color = "red"
+        )
     } else {
       p <- p +
-        geom_line(aes_string(group = id, color = color), alpha = 0.35, size = 0.3) +
-        stat_summary(aes_string(group = color, color = color), fun.data = "mean_se",
-                     geom = "line", size = 1.2) +
+        geom_line(aes_string(group = id, color = color),
+                  alpha = 0.35,
+                  size = 0.3
+        ) +
+        stat_summary(aes_string(group = color, color = color),
+                     fun.data = "mean_se",
+                     geom = "line",
+                     size = 1.2
+        ) +
         color_scale
     }
 
@@ -126,11 +106,11 @@ save_subject_line_plots <- function(object, all_features = FALSE, folder, format
       p <- p +
         scale_x_discrete(expand = c(0.05,0.05))
     }
-    save_plot_helper(p, file, format, width, heigth)
+    save_plot(p, file, width = width, height = height, res = res)
 
   }
 
-  log_text(paste("Saved line plots with mean line to:", folder))
+  log_text(paste("Saved line plots with mean line to:", prefix))
 }
 
 #' Save box plots of each feature by group
@@ -139,26 +119,31 @@ save_subject_line_plots <- function(object, all_features = FALSE, folder, format
 #' A separate plot is drawn and saved for each feature.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param folder path to the folder where the plots should be saved
-#' @param format format in which the plots should be saved
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
+#' @param prefix character, a file path prefix added to the file paths
+#' @param format character, format in which the plots should be saved
 #' @param width,height width and height of the plots in inches
+#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param color character, name of the column to be used for coloring
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color_scale the color scale as returned by a ggplot function
 #'
+#' @seealso
+#' \code{\link[notame]{save_plot}}
+#'
 #' @examples
 #' \dontrun{
 #' # Default boxplots by group
 #' save_group_boxplots(drop_qcs(merged_sample),
-#'                     folder = "./group_boxplots/",
+#'                     prefix = "./group_boxplots/",
 #'                     format = "pdf"
 #'                     )
 #' # x and color can be a different variable
 #' save_group_boxplots(drop_qcs(merged_sample),
-#'                     folder = "./time_boxplots/",
+#'                     prefix = "./time_boxplots/",
 #'                     format = "pdf",
 #'                     x = "Time",
 #'                     color = "Group"
@@ -166,10 +151,19 @@ save_subject_line_plots <- function(object, all_features = FALSE, folder, format
 #' }
 #'
 #' @export
-save_group_boxplots <- function(object, all_features = FALSE, folder, format = "emf", width = 8, height = 6,
-                                x = group_col(object), color = group_col(object),
-                                title = "Feature_ID", subtitle = NULL,
-                                color_scale =  getOption("notame.color_scale_dis")) {
+save_group_boxplots <- function(
+    object,
+    all_features = FALSE,
+    prefix,
+    format = "emf",
+    width = 8,
+    height = 6,
+    res = 300,
+    x = group_col(object),
+    color = group_col(object),
+    title = "Feature_ID",
+    subtitle = NULL,
+    color_scale =  getOption("notame.color_scale_dis")) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -181,23 +175,29 @@ save_group_boxplots <- function(object, all_features = FALSE, folder, format = "
     }
     fname <- Biobase::featureNames(object)[i]
     name <- fData(object)[i, title]
-    if (!is.null(title)) file <- paste0(folder, name, ".", format)
-    else file <- paste0(folder, i, ".", format)
+    if (!is.null(title)) file <- paste0(prefix, name, ".", format)
+    else file <- paste0(prefix, i, ".", format)
 
     p <- ggplot(data, aes_string(x = x, y = fname, color = color)) +
       geom_boxplot(position = position_dodge(0.6), width = 0.5) +
       stat_summary(fun.data = mean_se,
-                   geom = "point", shape = 18, size = 3,
-                   position = position_dodge(0.6)) +
+                   geom = "point",
+                   shape = 18,
+                   size = 3,
+                   position = position_dodge(0.6)
+      ) +
       color_scale +
-      labs(title = name, subtitle = fData(object)[i, subtitle], y = "Abundance") +
+      labs(title = name,
+           subtitle = fData(object)[i, subtitle],
+           y = "Abundance"
+           ) +
       theme_bw()
 
-    save_plot_helper(p, file, format, width, height)
+    save_plot(p, file, width = width, height = height, res = res)
 
   }
 
-  log_text(paste("Saved group boxplots to:", folder))
+  log_text(paste("Saved group boxplots to:", prefix))
 
 }
 
@@ -208,9 +208,10 @@ save_group_boxplots <- function(object, all_features = FALSE, folder, format = "
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param folder path to the folder where the plots should be saved
-#' @param format format in which the plots should be saved
+#' @param prefix character, a file path prefix added to the file paths
+#' @param format character, format in which the plots should be saved
 #' @param width,height width and height of the plots in inches
+#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param add_boxplots logical, should boxplots be added to the figure?
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
@@ -218,26 +219,39 @@ save_group_boxplots <- function(object, all_features = FALSE, folder, format = "
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
 #'
+#' @seealso
+#' \code{\link[notame]{save_plot}}
+#'
 #' @examples
 #' \dontrun{
 #' # Default beeswarms by group
 #' save_beeswarm_plots(drop_qcs(merged_sample),
-#'                     folder = "./beeswarm_plots/",
+#'                     prefix = "./beeswarm_plots/",
 #'                     format = "pdf"
 #'                     )
 #' # x and color can be a different variable
 #' save_beeswarm_plots(drop_qcs(merged_sample),
-#'                     folder = "./beeswarm_plots/",
+#'                     prefix = "./beeswarm_plots/",
 #'                     format = "pdf",
 #'                     x = "Time",
 #'                     color = "Group")
 #' }
 #'
 #' @export
-save_beeswarm_plots <- function(object, all_features = FALSE, folder, format, width = 8, height = 6,
-                                x = group_col(object),add_boxplots = FALSE,
-                                title = "Feature_ID", subtitle = NULL,
-                                color = group_col(object), color_scale =  NULL){
+save_beeswarm_plots <- function(
+    object,
+    all_features = FALSE,
+    prefix,
+    format,
+    width = 8,
+    height = 6,
+    res = 300,
+    x = group_col(object),
+    add_boxplots = FALSE,
+    title = "Feature_ID",
+    subtitle = NULL,
+    color = group_col(object),
+    color_scale =  NULL) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -251,8 +265,8 @@ save_beeswarm_plots <- function(object, all_features = FALSE, folder, format, wi
     }
     fname <- Biobase::featureNames(object)[i]
     name <- fData(object)[i, title]
-    if (!is.null(title)) file <- paste0(folder, name, ".", format)
-    else file <- paste0(folder, i, ".", format)
+    if (!is.null(title)) file <- paste0(prefix, name, ".", format)
+    else file <- paste0(prefix, i, ".", format)
 
     p <- ggplot(data, aes_string(x = x, y = fname, color = color))
 
@@ -264,15 +278,18 @@ save_beeswarm_plots <- function(object, all_features = FALSE, folder, format, wi
     p <- p +
       ggbeeswarm::geom_beeswarm() +
       color_scale +
-      labs(title = name, subtitle = fData(object)[i, subtitle], y = "Abundance") +
+      labs(title = name,
+           subtitle = fData(object)[i, subtitle],
+           y = "Abundance"
+      ) +
       theme_bw()
 
 
-    save_plot_helper(p, file, format, width, height)
+    save_plot(p, file, width = width, height = height, res = res)
 
   }
 
-  log_text(paste("Saved beeswarm plots to:", folder))
+  log_text(paste("Saved beeswarm plots to:", prefix))
 }
 
 #' Save scatter plots of each feature against a set variable
@@ -282,9 +299,10 @@ save_beeswarm_plots <- function(object, all_features = FALSE, folder, format, wi
 #'
 #' @param object a MetaboSet object
 #' @param x character, name of the column to be used as x-axis
-#' @param folder path to the folder where the plots should be saved
-#' @param format format in which the plots should be saved
+#' @param prefix character, a file path prefix added to the file paths
+#' @param format character, format in which the plots should be saved
 #' @param width,height width and height of the plots in inches
+#' @param res integer, resolution in ppi for non-vector formats
 #' @param all_features logical, should all features be used? If FALSE
 #' (the default), flagged features are removed before visualization.
 #' @param color character, name of the column to be used for coloring
@@ -295,26 +313,36 @@ save_beeswarm_plots <- function(object, all_features = FALSE, folder, format, wi
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param shape_scale the shape scale as returned by a ggplot function
 #'
+#' @seealso
+#' \code{\link[notame]{save_plot}}
+#'
 #' @examples
 #' \dontrun{
 #' # Against injection order, colored by group
 #' save_scatter_plots(object = merged_sample,
 #'                            x = "Injection_order",
 #'                            color = "Group",
-#'                     folder = "./scatter_plots/",
+#'                     prefix = "./scatter_plots/",
 #'                     format = "pdf"
 #'                     )
 #' }
 #'
 #' @export
-save_scatter_plots <- function(object, x = group_col(object), folder, format,
-                               width = 8, height = 6,
-                               all_features = FALSE,
-                               color = NULL, color_scale =  NA,
-                               shape = NULL,
-                               title = "Feature_ID", subtitle = NULL,
-                               shape_scale = getOption("notame.shape_scale")) {
-
+save_scatter_plots <- function(
+    object,
+    x = group_col(object),
+    prefix,
+    format,
+    width = 8,
+    height = 6,
+    res = 300,
+    all_features = FALSE,
+    color = NULL,
+    color_scale =  NA,
+    shape = NULL,
+    title = "Feature_ID",
+    subtitle = NULL,
+    shape_scale = getOption("notame.shape_scale")) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -326,19 +354,26 @@ save_scatter_plots <- function(object, x = group_col(object), folder, format,
     }
     fname <- Biobase::featureNames(object)[i]
     name <- fData(object)[i, title]
-    if (!is.null(title)) file <- paste0(folder, name, ".", format)
-    else file <- paste0(folder, i, ".", format)
+    if (!is.null(title)) file <- paste0(prefix, name, ".", format)
+    else file <- paste0(prefix, i, ".", format)
 
-    p <- scatter_plot(data = data, x = x, y = fname,
-                      color = color, color_scale = color_scale,
-                      shape = shape, shape_scale = shape_scale,
-                      title = name, subtitle = fData(object)[i, subtitle], ylab = "Abundance")
+    p <- scatter_plot(data = data,
+                      x = x,
+                      y = fname,
+                      color = color,
+                      color_scale = color_scale,
+                      shape = shape,
+                      shape_scale = shape_scale,
+                      title = name,
+                      subtitle = fData(object)[i, subtitle],
+                      ylab = "Abundance"
+    )
 
-    save_plot_helper(p, file, format, width, height)
+    save_plot(p, file, width = width, height = height, res = res)
 
   }
 
-  log_text(paste("Saved scatter plots to:", folder))
+  log_text(paste("Saved scatter plots to:", prefix))
 
 }
 
@@ -350,9 +385,10 @@ save_scatter_plots <- function(object, x = group_col(object), folder, format,
 #'
 #' @param object a MetaboSet object
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
-#' @param folder path to the folder where the plots should be saved
-#' @param format format in which the plots should be saved
+#' @param prefix character, a file path prefix added to the file paths
+#' @param format character, format in which the plots should be saved
 #' @param width,height width and height of the plots in inches
+#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param group character, name of the column containing group information, used for coloring
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
@@ -364,21 +400,35 @@ save_scatter_plots <- function(object, x = group_col(object), folder, format,
 #' @param position_dodge_amount numeric: how much the group mean points should dodge away from each other
 #' @param color_scale the color scale as returned by a ggplot function
 #'
-#' @seealso \code{\link[ggplot2]{stat_summary}}
+#' @seealso
+#' \code{\link[notame]{save_plot}},
+#' \code{\link[ggplot2]{stat_summary}}
 #'
 #' @examples
 #' \dontrun{save_group_lineplots(drop_qcs(merged_sample),
-#'                     folder = "./group_line_plots/",
+#'                     prefix = "./group_line_plots/",
 #'                     format = "pdf"
 #'                     )}
 #'
 #' @export
-save_group_lineplots <- function(object, all_features = FALSE, folder, format, width = 8, height = 6,
-                                 x = time_col(object), group = group_col(object),
-                                 title = "Feature_ID", subtitle = NULL,
-                                 fun.data = "mean_cl_boot", fun.y = NULL,
-                                 fun.ymin = NULL, fun.ymax = NULL, position_dodge_amount = 0.2,
-                                 color_scale =  getOption("notame.color_scale_dis")) {
+save_group_lineplots <- function(
+    object,
+    all_features = FALSE,
+    prefix,
+    format,
+    width = 8,
+    height = 6,
+    res = 300,
+    x = time_col(object),
+    group = group_col(object),
+    title = "Feature_ID",
+    subtitle = NULL,
+    fun.data = "mean_cl_boot",
+    fun.y = NULL,
+    fun.ymin = NULL,
+    fun.ymax = NULL,
+    position_dodge_amount = 0.2,
+    color_scale =  getOption("notame.color_scale_dis")) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -397,34 +447,49 @@ save_group_lineplots <- function(object, all_features = FALSE, folder, format, w
     }
     fname <- Biobase::featureNames(object)[i]
     name <- fData(object)[i, title]
-    if (!is.null(title)) file <- paste0(folder, name, ".", format)
-    else file <- paste0(folder, i, ".", format)
+    if (!is.null(title)) file <- paste0(prefix, name, ".", format)
+    else file <- paste0(prefix, i, ".", format)
 
-    p <- ggplot(data, aes_string(x = x, y = fname, group = group, color = group)) +
+    p <- ggplot(data,
+                aes_string(x = x, y = fname, group = group, color = group)
+    ) +
       # Errorbars with solid lines
       stat_summary(fun.data = fun.data,
                    geom = "errorbar", width = 0.5,
-                   fun.y = fun.y, fun.ymin = fun.ymin, fun.ymax = fun.ymax,
-                   position = position_dodge(position_dodge_amount)) +
+                   fun.y = fun.y,
+                   fun.ymin = fun.ymin,
+                   fun.ymax = fun.ymax,
+                   position = position_dodge(position_dodge_amount)
+      ) +
       # Plot point to mean
       stat_summary(fun.data = fun.data,
                    geom = "point",
-                   fun.y = fun.y, fun.ymin = fun.ymin, fun.ymax = fun.ymax,
-                   position = position_dodge(position_dodge_amount), size = 4) +
+                   fun.y = fun.y,
+                   fun.ymin = fun.ymin,
+                   fun.ymax = fun.ymax,
+                   position = position_dodge(position_dodge_amount),
+                   size = 4
+      ) +
       # Line from mean to mean between for example timepoints
-      stat_summary(fun.data =fun.data,
+      stat_summary(fun.data = fun.data,
                    geom = "line",
                    position = position_dodge(position_dodge_amount), size = 0.5,
-                   fun.y = fun.y, fun.ymin = fun.ymin, fun.ymax = fun.ymax) +
-      labs(title = fData(object)[i, title], subtitle = fData(object)[i, subtitle], y = "Abundance") +
+                   fun.y = fun.y,
+                   fun.ymin = fun.ymin,
+                   fun.ymax = fun.ymax
+      ) +
+      labs(title = fData(object)[i, title],
+           subtitle = fData(object)[i, subtitle],
+           y = "Abundance"
+      ) +
       color_scale +
       theme_bw()
 
-    save_plot_helper(p, file, format, width, height)
+    save_plot(p, file, width = width, height = height, res = res)
 
   }
 
-  log_text(paste("Saved line plots with mean line to:", folder))
+  log_text(paste("Saved line plots with mean line to:", prefix))
 }
 
 
