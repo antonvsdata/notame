@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_utils.R
 \name{save_plot}
 \alias{save_plot}
-\title{Save plot to PDF}
+\title{Save plot to chosen format}
 \usage{
 save_plot(p, file, ...)
 }
@@ -11,11 +11,17 @@ save_plot(p, file, ...)
 
 \item{file}{the file path}
 
-\item{...}{other arguments to pdf, like width and height}
+\item{...}{other arguments to plot function, like width and height in inches
+and res in ppi (300 by default) for non-vector formats}
 }
 \description{
-Saves the given plot to a PDF file. If an error occurs with the plot, an empty file is created.
+Saves the given plot to a file. Supports pdf, svg, emf, png and tiff formats.
+If an error occurs with the plot, an empty file is created.
 }
 \seealso{
-\code{\link[grDevices]{pdf}}
+\code{\link[grDevices]{pdf}},
+\code{\link[devEMF]{emf}},
+\code{\link[grDevices]{svg}},
+\code{\link[grDevices]{png}},
+\code{\link[grDevices]{tiff}}
 }

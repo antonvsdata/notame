@@ -7,6 +7,8 @@
 visualizations(
   object,
   prefix,
+  format = "pdf",
+  res = 300,
   perplexity = 30,
   merge = FALSE,
   remove_singles = FALSE
@@ -16,6 +18,10 @@ visualizations(
 \item{object}{A MetaboSet object}
 
 \item{prefix}{character, a file path prefix added to the file paths}
+
+\item{format}{character, format in which the plots should be saved}
+
+\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{perplexity}{perplexity for t-SNE plots}
 
@@ -29,9 +35,10 @@ A wrapper around all the major visualization functions, used for visualizing dat
 major steps of data preprocessing. Saves all visualizations as PDFs with a set prefix on filenames.
 }
 \details{
-If \code{merge} is \code{TRUE}, then a file containing all the visualizations
-named \code{prefix.pdf} will be created. NOTE: on Windows this requires installation of pdftk
-(\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}) and on Linux you need to have pdfunite installed.
+If \code{merge} is \code{TRUE} and \code{format} id \code{pdf},
+then a file containing all the visualizations named \code{prefix.pdf} will be created.
+NOTE: on Windows this requires installation of pdftk (\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/})
+and on Linux you need to have pdfunite installed.
 On MacOS, no external software is needed. Note that at least on Windows, prefix should be a path from the root,
 so that the underlying system command will find the files.
 The type of visualizations to be saved depends on the type of object.
@@ -70,4 +77,7 @@ in both QCs and biological samples \code{\link{plot_p_histogram}}}
 \code{\link{plot_pca_arrows}}, \code{\link{plot_tsne_arrows}}
 }
 }
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }

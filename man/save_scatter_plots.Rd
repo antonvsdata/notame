@@ -7,10 +7,11 @@
 save_scatter_plots(
   object,
   x = group_col(object),
-  folder,
+  prefix,
   format,
   width = 8,
   height = 6,
+  res = 300,
   all_features = FALSE,
   color = NULL,
   color_scale = NA,
@@ -25,11 +26,13 @@ save_scatter_plots(
 
 \item{x}{character, name of the column to be used as x-axis}
 
-\item{folder}{path to the folder where the plots should be saved}
+\item{prefix}{character, a file path prefix added to the file paths}
 
-\item{format}{format in which the plots should be saved}
+\item{format}{character, format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
+
+\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{all_features}{logical, should all features be used? If FALSE
 (the default), flagged features are removed before visualization.}
@@ -56,9 +59,12 @@ A separate plot is drawn and saved for each feature.
 save_scatter_plots(object = merged_sample,
                            x = "Injection_order",
                            color = "Group",
-                    folder = "./scatter_plots/",
+                    prefix = "./scatter_plots/",
                     format = "pdf"
                     )
 }
 
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }

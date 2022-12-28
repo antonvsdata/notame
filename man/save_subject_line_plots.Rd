@@ -7,10 +7,11 @@
 save_subject_line_plots(
   object,
   all_features = FALSE,
-  folder,
-  format,
+  prefix,
+  format = "emf",
   width = 8,
   height = 6,
+  res = 300,
   x = time_col(object),
   id = subject_col(object),
   title = "Feature_ID",
@@ -25,11 +26,13 @@ save_subject_line_plots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{folder}{path to the folder where the plots should be saved}
+\item{prefix}{character, a file path prefix added to the file paths}
 
-\item{format}{format in which the plots should be saved}
+\item{format}{character, format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
+
+\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{x}{character, name of the column to be used as x-axis}
 
@@ -51,8 +54,11 @@ A separate plot is drawn and saved for each feature.
 }
 \examples{
 \dontrun{save_subject_line_plots(drop_qcs(example_set),
-                    folder = "./subject_line_plots/",
+                    prefix = "./subject_line_plots/",
                     format = "pdf"
                     )}
 
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }

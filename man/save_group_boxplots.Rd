@@ -7,10 +7,11 @@
 save_group_boxplots(
   object,
   all_features = FALSE,
-  folder,
+  prefix,
   format = "emf",
   width = 8,
   height = 6,
+  res = 300,
   x = group_col(object),
   color = group_col(object),
   title = "Feature_ID",
@@ -21,13 +22,16 @@ save_group_boxplots(
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
-\item{folder}{path to the folder where the plots should be saved}
+\item{prefix}{character, a file path prefix added to the file paths}
 
-\item{format}{format in which the plots should be saved}
+\item{format}{character, format in which the plots should be saved}
 
 \item{width, height}{width and height of the plots in inches}
+
+\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{x}{character, name of the column to be used as x-axis}
 
@@ -46,16 +50,19 @@ A separate plot is drawn and saved for each feature.
 \dontrun{
 # Default boxplots by group
 save_group_boxplots(drop_qcs(merged_sample),
-                    folder = "./group_boxplots/",
+                    prefix = "./group_boxplots/",
                     format = "pdf"
                     )
 # x and color can be a different variable
 save_group_boxplots(drop_qcs(merged_sample),
-                    folder = "./time_boxplots/",
+                    prefix = "./time_boxplots/",
                     format = "pdf",
                     x = "Time",
                     color = "Group"
                     )
 }
 
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }
