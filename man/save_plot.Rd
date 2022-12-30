@@ -11,7 +11,7 @@ save_plot(p, file, ...)
 
 \item{file}{the file path}
 
-\item{...}{other arguments to plot function, like width and height in inches
+\item{...}{other arguments to graphics device function, like width and height
 and res in ppi (300 by default) for non-vector formats}
 }
 \description{

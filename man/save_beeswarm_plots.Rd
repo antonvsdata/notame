@@ -8,16 +8,14 @@ save_beeswarm_plots(
   object,
   all_features = FALSE,
   prefix,
-  format,
-  width = 8,
-  height = 6,
-  res = 300,
+  format = "emf",
   x = group_col(object),
   add_boxplots = FALSE,
   title = "Feature_ID",
   subtitle = NULL,
   color = group_col(object),
-  color_scale = NULL
+  color_scale = NULL,
+  ...
 )
 }
 \arguments{
@@ -29,10 +27,6 @@ save_beeswarm_plots(
 
 \item{format}{character, format in which the plots should be saved}
 
-\item{width, height}{width and height of the plots in inches}
-
-\item{res}{integer, resolution in ppi for non-vector formats}
-
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{add_boxplots}{logical, should boxplots be added to the figure?}
@@ -43,6 +37,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{color}{character, name of the column to be used for coloring}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{...}{other arguments to save_plot function like width and height}
 }
 \description{
 Draws a beeswarm plot of feature abundances in each group.

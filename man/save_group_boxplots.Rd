@@ -9,14 +9,12 @@ save_group_boxplots(
   all_features = FALSE,
   prefix,
   format = "emf",
-  width = 8,
-  height = 6,
-  res = 300,
   x = group_col(object),
   color = group_col(object),
   title = "Feature_ID",
   subtitle = NULL,
-  color_scale = getOption("notame.color_scale_dis")
+  color_scale = getOption("notame.color_scale_dis"),
+  ...
 )
 }
 \arguments{
@@ -29,10 +27,6 @@ flagged features are removed before visualization.}
 
 \item{format}{character, format in which the plots should be saved}
 
-\item{width, height}{width and height of the plots in inches}
-
-\item{res}{integer, resolution in ppi for non-vector formats}
-
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{color}{character, name of the column to be used for coloring}
@@ -41,6 +35,8 @@ flagged features are removed before visualization.}
 Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{...}{other arguments to save_plot function like width and height}
 }
 \description{
 Draws a boxplot of feature abundances in each group.

@@ -8,17 +8,15 @@ save_scatter_plots(
   object,
   x = group_col(object),
   prefix,
-  format,
-  width = 8,
-  height = 6,
-  res = 300,
+  format = "emf",
   all_features = FALSE,
   color = NULL,
   color_scale = NA,
   shape = NULL,
   title = "Feature_ID",
   subtitle = NULL,
-  shape_scale = getOption("notame.shape_scale")
+  shape_scale = getOption("notame.shape_scale"),
+  ...
 )
 }
 \arguments{
@@ -29,10 +27,6 @@ save_scatter_plots(
 \item{prefix}{character, a file path prefix added to the file paths}
 
 \item{format}{character, format in which the plots should be saved}
-
-\item{width, height}{width and height of the plots in inches}
-
-\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{all_features}{logical, should all features be used? If FALSE
 (the default), flagged features are removed before visualization.}
@@ -48,6 +42,8 @@ Set to NA to choose the appropriate scale based on the class of the coloring var
 Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
+
+\item{...}{other arguments to save_plot function like width and height}
 }
 \description{
 Draws a scatterplots with a feature on y-axis and another variable on x-axis.
@@ -57,11 +53,11 @@ A separate plot is drawn and saved for each feature.
 \dontrun{
 # Against injection order, colored by group
 save_scatter_plots(object = merged_sample,
-                           x = "Injection_order",
-                           color = "Group",
-                    prefix = "./scatter_plots/",
-                    format = "pdf"
-                    )
+                   x = "Injection_order",
+                   color = "Group",
+                   prefix = "./scatter_plots/",
+                   format = "pdf"
+)
 }
 
 }

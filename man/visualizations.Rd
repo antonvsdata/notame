@@ -8,7 +8,6 @@ visualizations(
   object,
   prefix,
   format = "pdf",
-  res = 300,
   perplexity = 30,
   merge = FALSE,
   remove_singles = FALSE
@@ -19,9 +18,7 @@ visualizations(
 
 \item{prefix}{character, a file path prefix added to the file paths}
 
-\item{format}{character, format in which the plots should be saved}
-
-\item{res}{integer, resolution in ppi for non-vector formats}
+\item{format}{character, format in which the plots should be saved, DO NOT use raster formats}
 
 \item{perplexity}{perplexity for t-SNE plots}
 

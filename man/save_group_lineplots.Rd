@@ -8,10 +8,7 @@ save_group_lineplots(
   object,
   all_features = FALSE,
   prefix,
-  format,
-  width = 8,
-  height = 6,
-  res = 300,
+  format = "emf",
   x = time_col(object),
   group = group_col(object),
   title = "Feature_ID",
@@ -21,7 +18,8 @@ save_group_lineplots(
   fun.ymin = NULL,
   fun.ymax = NULL,
   position_dodge_amount = 0.2,
-  color_scale = getOption("notame.color_scale_dis")
+  color_scale = getOption("notame.color_scale_dis"),
+  ...
 )
 }
 \arguments{
@@ -32,10 +30,6 @@ save_group_lineplots(
 \item{prefix}{character, a file path prefix added to the file paths}
 
 \item{format}{character, format in which the plots should be saved}
-
-\item{width, height}{width and height of the plots in inches}
-
-\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{x}{character, name of the column to be used as x-axis}
 
@@ -53,6 +47,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{position_dodge_amount}{numeric: how much the group mean points should dodge away from each other}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{...}{other arguments to save_plot function like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.
@@ -60,10 +56,16 @@ A line is drawn for each group and error bars are added.
 A separate plot is drawn for each feature.
 }
 \examples{
-\dontrun{save_group_lineplots(drop_qcs(merged_sample),
+\dontrun{
+save_group_lineplots(drop_qcs(merged_sample),
                     prefix = "./group_line_plots/",
                     format = "pdf"
-                    )}
+)
+save_group_lineplots(drop_qcs(merged_sample),
+                    prefix = "./group_line_plots/",
+                    format = "png"
+)
+}
 
 }
 \seealso{

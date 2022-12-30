@@ -9,16 +9,14 @@ save_subject_line_plots(
   all_features = FALSE,
   prefix,
   format = "emf",
-  width = 8,
-  height = 6,
-  res = 300,
   x = time_col(object),
   id = subject_col(object),
   title = "Feature_ID",
   subtitle = NULL,
   color = NA,
   color_scale = getOption("notame.color_scale_dis"),
-  facet = NULL
+  facet = NULL,
+  ...
 )
 }
 \arguments{
@@ -29,10 +27,6 @@ save_subject_line_plots(
 \item{prefix}{character, a file path prefix added to the file paths}
 
 \item{format}{character, format in which the plots should be saved}
-
-\item{width, height}{width and height of the plots in inches}
-
-\item{res}{integer, resolution in ppi for non-vector formats}
 
 \item{x}{character, name of the column to be used as x-axis}
 
@@ -46,6 +40,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{color_scale}{the color scale as returned by a ggplot function}
 
 \item{facet}{character, the column name to facet by (optional, usually same as color)}
+
+\item{...}{other arguments to save_plot function like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.
