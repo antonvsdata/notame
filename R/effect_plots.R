@@ -9,8 +9,6 @@
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param prefix character, a file path prefix added to the file paths
 #' @param format character, format in which the plots should be saved
-#' @param width,height width and height of the plots in inches
-#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param id character, name of the column containing subject IDs
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
@@ -18,6 +16,7 @@
 #' @param color character, the column name to color the lines by (optional)
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
+#' @param ... other arguments to save_plot function like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -34,15 +33,14 @@ save_subject_line_plots <- function(
     all_features = FALSE,
     prefix,
     format = "emf",
-    width = 8,
-    height = 6,
-    res = 300,
     x = time_col(object),
     id = subject_col(object),
     title = "Feature_ID",
     subtitle = NULL,
     color = NA,
-    color_scale = getOption("notame.color_scale_dis"), facet = NULL) {
+    color_scale = getOption("notame.color_scale_dis"),
+    facet = NULL,
+    ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -106,8 +104,8 @@ save_subject_line_plots <- function(
       p <- p +
         scale_x_discrete(expand = c(0.05,0.05))
     }
-    save_plot(p, file, width = width, height = height, res = res)
 
+    save_plot(p, file, ...)
   }
 
   log_text(paste("Saved line plots with mean line to:", prefix))
@@ -123,13 +121,12 @@ save_subject_line_plots <- function(
 #' flagged features are removed before visualization.
 #' @param prefix character, a file path prefix added to the file paths
 #' @param format character, format in which the plots should be saved
-#' @param width,height width and height of the plots in inches
-#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param color character, name of the column to be used for coloring
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param ... other arguments to save_plot function like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -156,14 +153,12 @@ save_group_boxplots <- function(
     all_features = FALSE,
     prefix,
     format = "emf",
-    width = 8,
-    height = 6,
-    res = 300,
     x = group_col(object),
     color = group_col(object),
     title = "Feature_ID",
     subtitle = NULL,
-    color_scale =  getOption("notame.color_scale_dis")) {
+    color_scale =  getOption("notame.color_scale_dis"),
+    ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -193,7 +188,7 @@ save_group_boxplots <- function(
            ) +
       theme_bw()
 
-    save_plot(p, file, width = width, height = height, res = res)
+    save_plot(p, file, ...)
 
   }
 
@@ -210,14 +205,13 @@ save_group_boxplots <- function(
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param prefix character, a file path prefix added to the file paths
 #' @param format character, format in which the plots should be saved
-#' @param width,height width and height of the plots in inches
-#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param add_boxplots logical, should boxplots be added to the figure?
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param ... other arguments to save_plot function like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -242,16 +236,14 @@ save_beeswarm_plots <- function(
     object,
     all_features = FALSE,
     prefix,
-    format,
-    width = 8,
-    height = 6,
-    res = 300,
+    format = "emf",
     x = group_col(object),
     add_boxplots = FALSE,
     title = "Feature_ID",
     subtitle = NULL,
     color = group_col(object),
-    color_scale =  NULL) {
+    color_scale =  NULL,
+    ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -285,7 +277,7 @@ save_beeswarm_plots <- function(
       theme_bw()
 
 
-    save_plot(p, file, width = width, height = height, res = res)
+    save_plot(p, file, ...)
 
   }
 
@@ -301,8 +293,6 @@ save_beeswarm_plots <- function(
 #' @param x character, name of the column to be used as x-axis
 #' @param prefix character, a file path prefix added to the file paths
 #' @param format character, format in which the plots should be saved
-#' @param width,height width and height of the plots in inches
-#' @param res integer, resolution in ppi for non-vector formats
 #' @param all_features logical, should all features be used? If FALSE
 #' (the default), flagged features are removed before visualization.
 #' @param color character, name of the column to be used for coloring
@@ -312,6 +302,7 @@ save_beeswarm_plots <- function(
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param shape_scale the shape scale as returned by a ggplot function
+#' @param ... other arguments to save_plot function like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -320,11 +311,11 @@ save_beeswarm_plots <- function(
 #' \dontrun{
 #' # Against injection order, colored by group
 #' save_scatter_plots(object = merged_sample,
-#'                            x = "Injection_order",
-#'                            color = "Group",
-#'                     prefix = "./scatter_plots/",
-#'                     format = "pdf"
-#'                     )
+#'                    x = "Injection_order",
+#'                    color = "Group",
+#'                    prefix = "./scatter_plots/",
+#'                    format = "pdf"
+#' )
 #' }
 #'
 #' @export
@@ -332,17 +323,15 @@ save_scatter_plots <- function(
     object,
     x = group_col(object),
     prefix,
-    format,
-    width = 8,
-    height = 6,
-    res = 300,
+    format = "emf",
     all_features = FALSE,
     color = NULL,
     color_scale =  NA,
     shape = NULL,
     title = "Feature_ID",
     subtitle = NULL,
-    shape_scale = getOption("notame.shape_scale")) {
+    shape_scale = getOption("notame.shape_scale"),
+    ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -369,8 +358,7 @@ save_scatter_plots <- function(
                       ylab = "Abundance"
     )
 
-    save_plot(p, file, width = width, height = height, res = res)
-
+    save_plot(p, file, ...)
   }
 
   log_text(paste("Saved scatter plots to:", prefix))
@@ -387,8 +375,6 @@ save_scatter_plots <- function(
 #' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
 #' @param prefix character, a file path prefix added to the file paths
 #' @param format character, format in which the plots should be saved
-#' @param width,height width and height of the plots in inches
-#' @param res integer, resolution in ppi for non-vector formats
 #' @param x character, name of the column to be used as x-axis
 #' @param group character, name of the column containing group information, used for coloring
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
@@ -399,26 +385,30 @@ save_scatter_plots <- function(
 #' "supply three individual functions that are each passed a vector of x's and should return a single number"
 #' @param position_dodge_amount numeric: how much the group mean points should dodge away from each other
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param ... other arguments to save_plot function like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}},
 #' \code{\link[ggplot2]{stat_summary}}
 #'
 #' @examples
-#' \dontrun{save_group_lineplots(drop_qcs(merged_sample),
+#' \dontrun{
+#' save_group_lineplots(drop_qcs(merged_sample),
 #'                     prefix = "./group_line_plots/",
 #'                     format = "pdf"
-#'                     )}
+#' )
+#'save_group_lineplots(drop_qcs(merged_sample),
+#'                     prefix = "./group_line_plots/",
+#'                     format = "png"
+#' )
+#'}
 #'
 #' @export
 save_group_lineplots <- function(
     object,
     all_features = FALSE,
     prefix,
-    format,
-    width = 8,
-    height = 6,
-    res = 300,
+    format = "emf",
     x = time_col(object),
     group = group_col(object),
     title = "Feature_ID",
@@ -428,7 +418,8 @@ save_group_lineplots <- function(
     fun.ymin = NULL,
     fun.ymax = NULL,
     position_dodge_amount = 0.2,
-    color_scale =  getOption("notame.color_scale_dis")) {
+    color_scale =  getOption("notame.color_scale_dis"),
+    ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -485,8 +476,7 @@ save_group_lineplots <- function(
       color_scale +
       theme_bw()
 
-    save_plot(p, file, width = width, height = height, res = res)
-
+    save_plot(p, file, ...)
   }
 
   log_text(paste("Saved line plots with mean line to:", prefix))
