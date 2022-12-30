@@ -6,7 +6,7 @@
 #'
 #' @param p a ggplot object
 #' @param file the file path
-#' @param ... other arguments to plot function, like width and height in inches
+#' @param ... other arguments to graphics device function, like width and height
 #' and res in ppi (300 by default) for non-vector formats
 #'
 #' @seealso \code{\link[grDevices]{pdf}},
@@ -20,22 +20,11 @@ save_plot <- function(p, file, ...) {
   # Create folder automatically
   folder <- dirname(file)
   if (!file.exists(folder)) {
-    dir.create(folder)
+    dir.create(folder, recursive = TRUE)
   }
 
-  format <- unlist(strsplit(basename(file), split = "\\."))[-1]
-  # Handle arguments
-  args <- list(file=file, ...)
-  if (format %in% c("png", "tiff")) {
-    args$units <- "in"
-    args$res <- args$res %||% 300
-  } else {
-    args$res <- NULL
-  }
+  format <- tail(unlist(strsplit(basename(file), split = "\\.")), 1)
   switch(format,
-         "pdf" = {
-           do.call(pdf, args)
-         },
          "emf" = {
            if (!requireNamespace("devEMF", quietly = TRUE)) {
              stop("Package devEMF needed for this function to work.
@@ -43,17 +32,12 @@ save_plot <- function(p, file, ...) {
                   call. = FALSE
              )
            }
-           do.call(devEMF::emf, args)
+           devEMF::emf(file, ...)
          },
-         "svg" = {
-           do.call(svg, args)
-         },
-         "png" = {
-           do.call(png, args)
-         },
-         "tiff" = {
-           do.call(tiff, args)
-         },
+         "pdf" = { pdf(file, ...) },
+         "svg" = { svg(file, ...) },
+         "png" = { png(file, ...) },
+         "tiff" = {  tiff(file, ...) },
          stop(paste0("File format '", format, "' is not valid, saving failed"))
   )
   tryCatch({
@@ -72,8 +56,7 @@ save_plot <- function(p, file, ...) {
 #'
 #' @param object A MetaboSet object
 #' @param prefix character, a file path prefix added to the file paths
-#' @param format character, format in which the plots should be saved
-#' @param res integer, resolution in ppi for non-vector formats
+#' @param format character, format in which the plots should be saved, DOES NOT support raster formats
 #' @param perplexity perplexity for t-SNE plots
 #' @param merge logical, whether the files should be merged to a single PDF, see Details
 #' @param remove_singles logical, whether to remove single plot files after merging.
@@ -128,7 +111,6 @@ save_plot <- function(p, file, ...) {
 visualizations <- function(object,
                            prefix,
                            format = "pdf",
-                           res = 300,
                            perplexity = 30,
                            merge = FALSE,
                            remove_singles = FALSE) {
@@ -145,7 +127,7 @@ visualizations <- function(object,
 
     if (!is.null(p)) {
       file_name <- paste0(prefix, "_", name, ".", format)
-      save_plot(p, file = file_name, width = width, height = height, res = res)
+      save_plot(p, file = file_name, width = width, height = height)
       file_names <<- paste(file_names, file_name)
     }
   }
