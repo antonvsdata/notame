@@ -14,9 +14,9 @@ save_group_lineplots(
   title = "Feature_ID",
   subtitle = NULL,
   fun.data = "mean_cl_boot",
-  fun.y = NULL,
-  fun.ymin = NULL,
-  fun.ymax = NULL,
+  fun = NULL,
+  fun.min = NULL,
+  fun.max = NULL,
   position_dodge_amount = 0.2,
   color_scale = getOption("notame.color_scale_dis"),
   ...
@@ -41,14 +41,14 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{fun.data}{passed to ggplot2::stat_summary and used for errorbars,
 "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."}
 
-\item{fun.ymin, fun.y, fun.ymax}{Alternative to fun.data, passed to ggplot2::stat_summary,
+\item{fun.min, fun, fun.max}{Alternative to fun.data, passed to ggplot2::stat_summary,
 "supply three individual functions that are each passed a vector of x's and should return a single number"}
 
 \item{position_dodge_amount}{numeric: how much the group mean points should dodge away from each other}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
-\item{...}{other arguments to save_plot function like width and height}
+\item{...}{other arguments to \code{save_plot} function, like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.

@@ -41,7 +41,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{facet}{character, the column name to facet by (optional, usually same as color)}
 
-\item{...}{other arguments to save_plot function like width and height}
+\item{...}{other arguments to \code{save_plot} function, like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.

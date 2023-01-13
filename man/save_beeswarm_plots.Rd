@@ -38,7 +38,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
-\item{...}{other arguments to save_plot function like width and height}
+\item{...}{other arguments to \code{save_plot} function, like width and height}
 }
 \description{
 Draws a beeswarm plot of feature abundances in each group.
