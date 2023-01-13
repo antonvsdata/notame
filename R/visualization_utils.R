@@ -6,8 +6,7 @@
 #'
 #' @param p a ggplot object
 #' @param file the file path
-#' @param ... other arguments to graphics device function, like width and height
-#' and res in ppi (300 by default) for non-vector formats
+#' @param ... other arguments to plot function, like width and height
 #'
 #' @seealso \code{\link[grDevices]{pdf}},
 #' \code{\link[devEMF]{emf}},

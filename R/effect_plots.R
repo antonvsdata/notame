@@ -16,7 +16,7 @@
 #' @param color character, the column name to color the lines by (optional)
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
-#' @param ... other arguments to save_plot function like width and height
+#' @param ... other arguments to \code{save_plot} function, like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -126,7 +126,7 @@ save_subject_line_plots <- function(
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color_scale the color scale as returned by a ggplot function
-#' @param ... other arguments to save_plot function like width and height
+#' @param ... other arguments to \code{save_plot} function, like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -211,7 +211,7 @@ save_group_boxplots <- function(
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
-#' @param ... other arguments to save_plot function like width and height
+#' @param ... other arguments to \code{save_plot} function, like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -302,7 +302,7 @@ save_beeswarm_plots <- function(
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param shape_scale the shape scale as returned by a ggplot function
-#' @param ... other arguments to save_plot function like width and height
+#' @param ... other arguments to \code{save_plot} function, like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}}
@@ -381,11 +381,11 @@ save_scatter_plots <- function(
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param fun.data passed to ggplot2::stat_summary and used for errorbars,
 #' "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."
-#' @param fun.ymin,fun.y,fun.ymax Alternative to fun.data, passed to ggplot2::stat_summary,
+#' @param fun.min,fun,fun.max Alternative to fun.data, passed to ggplot2::stat_summary,
 #' "supply three individual functions that are each passed a vector of x's and should return a single number"
 #' @param position_dodge_amount numeric: how much the group mean points should dodge away from each other
 #' @param color_scale the color scale as returned by a ggplot function
-#' @param ... other arguments to save_plot function like width and height
+#' @param ... other arguments to \code{save_plot} function, like width and height
 #'
 #' @seealso
 #' \code{\link[notame]{save_plot}},
@@ -414,9 +414,9 @@ save_group_lineplots <- function(
     title = "Feature_ID",
     subtitle = NULL,
     fun.data = "mean_cl_boot",
-    fun.y = NULL,
-    fun.ymin = NULL,
-    fun.ymax = NULL,
+    fun = NULL,
+    fun.min = NULL,
+    fun.max = NULL,
     position_dodge_amount = 0.2,
     color_scale =  getOption("notame.color_scale_dis"),
     ...) {
@@ -447,17 +447,17 @@ save_group_lineplots <- function(
       # Errorbars with solid lines
       stat_summary(fun.data = fun.data,
                    geom = "errorbar", width = 0.5,
-                   fun.y = fun.y,
-                   fun.ymin = fun.ymin,
-                   fun.ymax = fun.ymax,
+                   fun = fun,
+                   fun.min = fun.min,
+                   fun.max = fun.max,
                    position = position_dodge(position_dodge_amount)
       ) +
       # Plot point to mean
       stat_summary(fun.data = fun.data,
                    geom = "point",
-                   fun.y = fun.y,
-                   fun.ymin = fun.ymin,
-                   fun.ymax = fun.ymax,
+                   fun = fun,
+                   fun.min = fun.min,
+                   fun.max = fun.max,
                    position = position_dodge(position_dodge_amount),
                    size = 4
       ) +
@@ -465,9 +465,9 @@ save_group_lineplots <- function(
       stat_summary(fun.data = fun.data,
                    geom = "line",
                    position = position_dodge(position_dodge_amount), size = 0.5,
-                   fun.y = fun.y,
-                   fun.ymin = fun.ymin,
-                   fun.ymax = fun.ymax
+                   fun = fun,
+                   fun.min = fun.min,
+                   fun.max = fun.max
       ) +
       labs(title = fData(object)[i, title],
            subtitle = fData(object)[i, subtitle],
