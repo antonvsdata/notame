@@ -405,17 +405,21 @@ test_that("Paired t-test works", {
   mean1 <- finite_mean(cd[cd$Time == 1, colnames(cd) == feature])
   mean2 <- finite_mean(cd[cd$Time == 2, colnames(cd) == feature])
   # Check comparison order
-  expect_equal(t_res[t_res$Feature_ID == feature, 2], mean1 - mean2)
+  expect_equal(t_res[t_res$Feature_ID == feature, 3], mean1 - mean2)
   # Check row names
   expect_identical(rownames(t_res), featureNames(drop_qcs(example_set)))
   # Check column names
   expect_identical(colnames(t_res), c(
     "Feature_ID",
-    "1_vs_2_Estimate",
-    "1_vs_2_Lower_CI95",
-    "1_vs_2_Upper_CI95",
-    "1_vs_2_t_test_P",
-    "1_vs_2_t_test_P_FDR"
+    paste0(
+      "1_vs_2_t_test_",
+      c("Statistic",
+        "Estimate",
+        "Lower_CI95",
+        "Upper_CI95",
+        "P",
+        "P_FDR")
+    )
   ))
 })
 
@@ -457,6 +461,8 @@ test_that("Pairwise paired t-test works", {
   pData(object)$Subject_ID <- factor(rep(1:8, 3))
   pData(object)$Time <- factor(c(rep(1, 8), rep(2, 8), rep(3, 8)))
 
+  flag(object)[1:2] <- "Flagged"
+
   pwpt_res <- perform_pairwise_t_test(object,
                                       group = "Time",
                                       id = "Subject_ID",
@@ -464,12 +470,14 @@ test_that("Pairwise paired t-test works", {
   )
 
   expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
-  prefixes <- c("1_vs_2_", "1_vs_3_", "2_vs_3_")
-  suffixes <- c("Estimate", "Lower_CI95", "Upper_CI95", "t_test_P", "t_test_P_FDR")
+  prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "t_test_")
+  suffixes <- c("Statistic", "Estimate", "Lower_CI95", "Upper_CI95", "P", "P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   expect_identical(colnames(pwpt_res), c("Feature_ID",
                                         do.call(paste0, cols[order(cols$Var1), ])
   ))
+  fdr_cols <- colnames(pwpt_res[grepl("P_FDR", colnames(pwpt_res))])
+  expect(all(is.na(pwpt_res[1:2, fdr_cols])), "Pairwise paired t-tests don't skip flagged features")
   # Change Subject IDs
   pData(object)$Subject_ID <- factor(rep(1:12, 2))
   pwpt_res_2 <- perform_pairwise_t_test(object,
@@ -482,4 +490,92 @@ test_that("Pairwise paired t-test works", {
   expect_failure(expect_identical(pwpt_res_2, pwpt_res))
 })
 
+test_that("Mann-Whitney U-tests work", {
 
+  object <- drop_qcs(example_set)
+  median_diffs <- apply(exprs(object), 1, tapply, object$Group, finite_median) %>%
+    apply(2, function(x) {x[1] - x[2]})
+
+  get_u <- function(a) {
+    X <- a[object$Group == "A"]
+    Y <- a[object$Group == "B"]
+    u <- 0
+    for (x in X) {
+      for (y in Y) {
+        if (x > y) {
+          u <- u + 1
+        } else if (x == y) {
+          u <- u + 0.5
+        }
+      }
+    }
+    u
+  }
+  us <- apply(exprs(object), 1, get_u)
+
+  cols <- c("Feature_ID", paste0("A_vs_B_Mann_Whitney_",
+                                 c("U", "Estimate", "Lower_CI", "Upper_CI", "P", "P_FDR")))
+
+  mw_res <- suppressWarnings({perform_mann_whitney(object, formula_char = "Feature ~ Group")})
+
+  expect_identical(colnames(mw_res), cols)
+
+  expect_equal(cor(sign(median_diffs), sign(mw_res$A_vs_B_Mann_Whitney_Estimate), method = "spearman"), 1)
+  expect_identical(unname(us), mw_res$A_vs_B_Mann_Whitney_U)
+})
+
+
+test_that("Wilcoxon signed rank tests work", {
+
+  object <- drop_qcs(example_set)
+  flag(object)[1:2] <- "Flagged"
+  get_median_diffs <- function(a) {
+    X <- a[object$Time == 1][order(object$Subject_ID[object$Time == 1])]
+    Y <- a[object$Time == 2][order(object$Subject_ID[object$Time == 2])]
+    d <- X - Y
+    finite_median(d)
+  }
+  median_diffs <- apply(exprs(object), 1, get_median_diffs)
+
+  cols <- c("Feature_ID", paste0("1_vs_2_Wilcox_",
+                                 c("Statistic", "Estimate", "Lower_CI95", "Upper_CI95", "P", "P_FDR")))
+
+  wil_res <- perform_wilcoxon_signed_rank(object, group = "Time", id = "Subject_ID")
+
+  expect_identical(colnames(wil_res), cols)
+  expect_equal(cor(sign(median_diffs), sign(wil_res$`1_vs_2_Wilcox_Estimate`)), 1)
+
+})
+
+test_that("Pairwise Mann-Whitney tests work", {
+
+  object <- drop_qcs(example_set)
+  pData(object)$Group <- factor(rep(c(rep("A", 3), rep("B", 3), rep("C", 2)), 3))
+  pData(object)$Subject_ID <- factor(rep(1:8, 3))
+  pData(object)$Time <- factor(c(rep(1, 8), rep(2, 8), rep(3, 8)))
+
+  medians <- apply(exprs(object), 1, tapply, object$Group, finite_median)
+  median_diffs1 <- medians %>%
+    apply(2, function(x) {x[1] - x[2]})
+
+  pwnp_res <- suppressWarnings(perform_pairwise_non_parametric(object, group = "Time"))
+
+  expect_identical(rownames(pwnp_res), featureNames(drop_qcs(example_set)))
+  prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "Mann_Whitney_")
+  suffixes <- c("U", "Estimate", "Lower_CI", "Upper_CI", "P", "P_FDR")
+  cols <- expand.grid(suffixes, prefixes)
+  cols <- c("Feature_ID", paste0(cols$Var2, cols$Var1))
+  # Check column names
+  expect_identical(colnames(pwnp_res), cols)
+  # These should be identical as no paired mode
+  pData(object)$Subject_ID <- factor(rep(1:12, 2))
+  expect_identical(suppressWarnings(perform_pairwise_non_parametric(object, group = "Time")), pwnp_res)
+  # These shouldn't match cause paired mode
+  # In this case 4 pairs in each
+  expect_failure(expect_identical(suppressWarnings(perform_pairwise_non_parametric(object,
+                                                                  group = "Time",
+                                                                  id = "Subject_ID",
+                                                                  is_paired = TRUE)),
+                                  pwnp_res))
+
+})

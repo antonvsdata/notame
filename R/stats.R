@@ -1263,7 +1263,7 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
     tryCatch({
       if (test == "t_test") {
         res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
-      } else if (test == "wilcox") {
+      } else if (test == "Wilcox") {
         res <- wilcox.test(group1[, feature], group2[, feature], paired = TRUE,
                            conf.int = TRUE, ...)
       }
@@ -1271,17 +1271,17 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
       conf_level <- attr(res$conf.int, "conf.level") * 100
 
       result_row <- data.frame(Feature_ID = feature,
+                               Statistic = res$statistic,
                                Estimate = res$estimate[1],
-                               "Lower_CI" = res$conf.int[1],
-                               "Upper_CI" = res$conf.int[2],
-                               t_test_P = res$p.value,
+                               Lower_CI = res$conf.int[1],
+                               Upper_CI = res$conf.int[2],
+                               P = res$p.value,
                                stringsAsFactors = FALSE)
-      if (test == "wilcox") {
-        colnames(result_row)[5] <- "Wilcox_P"
-      }
-      colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
+      ci_idx <- grepl("CI", colnames(result_row))
+      colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
       colnames(result_row)[-1] <- paste0(pair[1], "_vs_",
                                          pair[2], "_",
+                                         test, "_",
                                          colnames(result_row)[-1]
       )
     },
@@ -1451,7 +1451,7 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
   log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
   exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
   pair <- levels(pData(object)[, exp_var])
-  prefix <- paste0(pair[1], "_vs_", pair[2], "_")
+  prefix <- paste0(pair[1], "_vs_", pair[2], "_Mann_Whitney_")
   mw_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch({
@@ -1459,10 +1459,11 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
                             conf.int = TRUE, ...)
 
       result_row <- data.frame(Feature_ID = feature,
+                               U = mw_res$statistic,
                                Estimate = mw_res$estimate[1],
-                               "Lower_CI" = mw_res$conf.int[1],
-                               "Upper_CI" = mw_res$conf.int[2],
-                               Mann_whitney_P = mw_res$p.value,
+                               Lower_CI = mw_res$conf.int[1],
+                               Upper_CI = mw_res$conf.int[2],
+                               P = mw_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[-1] <- paste0(prefix,  colnames(result_row)[-1])
     }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
@@ -1504,7 +1505,7 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
 #'
 #' @export
 perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, ...) {
-  perform_paired_test(object, group, id, test = "wilcox",
+  perform_paired_test(object, group, id, test = "Wilcox",
                       all_features = all_features, ...)
 }
 
