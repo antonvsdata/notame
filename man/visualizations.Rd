@@ -18,7 +18,7 @@ visualizations(
 
 \item{prefix}{character, a file path prefix added to the file paths}
 
-\item{format}{character, format in which the plots should be saved, DO NOT use raster formats}
+\item{format}{character, format in which the plots should be saved, DOES NOT support raster formats}
 
 \item{perplexity}{perplexity for t-SNE plots}
 

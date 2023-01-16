@@ -6,9 +6,6 @@
 \usage{
 plot_sample_suprahex(
   object,
-  file,
-  width = 16,
-  height = 16,
   all_features = FALSE,
   sample_labels = "Sample_ID",
   grid_xdim = NULL,
@@ -22,10 +19,6 @@ plot_sample_suprahex(
 }
 \arguments{
 \item{object}{a MetaboSet object}
-
-\item{file}{filename (pdf)}
-
-\item{width, height}{dimensions of the plot}
 
 \item{all_features}{if FALSE, flagged features are droppped}
 
@@ -49,8 +42,8 @@ See the supraHex paper and package vignette for more information.
 }
 \examples{
 \dontrun{
-plot_sample_suprahex(merged_sample[, 1:20], file = "supra.pdf", xdim = 5, title.xy = c(0.35, 1),
-                     width = 10, height = 10, grid_xdim = 7, grid_ydim = 7, sample_labels = "Group")
+plot_sample_suprahex(merged_sample[, 1:20], xdim = 5, title.xy = c(0.35, 1),
+                     grid_xdim = 7, grid_ydim = 7, sample_labels = "Group")
 }
 }
 \seealso{
