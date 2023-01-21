@@ -696,8 +696,6 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param ci_level the confidence level used in constructing the confidence intervals
-#' for regression coefficients
 #' @param ... additional parameters passed to lm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -716,7 +714,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @seealso \code{\link[stats]{lm}}
 #'
 #' @export
-perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
+perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
 
   log_text("Starting linear regression.")
 
@@ -731,7 +729,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     } else {
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
-      confints <- confint(fit, level = ci_level)
+      confints <- confint(fit, level = 0.95)
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
@@ -773,8 +771,6 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param ci_level the confidence level used in constructing the confidence intervals
-#' for regression coefficients
 #' @param ... additional parameters passed to glm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -794,7 +790,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @seealso \code{\link[stats]{glm}}
 #'
 #' @export
-perform_logistic <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
+perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
 
   log_text("Starting logistic regression.")
 
@@ -809,7 +805,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     } else {
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
-      suppressMessages(confints <- confint(fit, level = ci_level))
+      suppressMessages(confints <- confint(fit, level = 0.95))
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
@@ -860,8 +856,6 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param ci_level the confidence level used in constructing the confidence intervals
-#' for regression coefficients
 #' @param ci_method The method for calculating the confidence intervals, see documentation
 #' of confint below
 #' @param test_random logical, whether tests for the significance of the random effects
@@ -889,7 +883,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
 #'
 #' @export
-perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
+perform_lmer <- function(object, formula_char, all_features = FALSE,
                          ci_method = c("Wald", "profile", "boot"),
                          test_random = FALSE, ...) {
 
@@ -936,7 +930,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       # Gather coefficients and CIs to one data frame row
       result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
         dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value",
-                      "P" = "Pr...t..", "LCI95" = "X2.5..", "LCI95" = "X97.5..") %>%
+                      "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
         tidyr::gather("Metric", "Value", -Variable) %>%
         tidyr::unite("Column", Variable, Metric, sep="_") %>%
         tidyr::spread(Column, Value)
@@ -1205,8 +1199,8 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
                                Mean1 = t_res$estimate[1],
                                Mean2 = t_res$estimate[2],
                                Estimate = t_res$estimate[1] - t_res$estimate[2],
-                               "Lower_CI" = t_res$conf.int[1],
-                               "Upper_CI" = t_res$conf.int[2],
+                               "LCI" = t_res$conf.int[1],
+                               "UCI" = t_res$conf.int[2],
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
@@ -1273,8 +1267,8 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
       result_row <- data.frame(Feature_ID = feature,
                                Statistic = res$statistic,
                                Estimate = res$estimate[1],
-                               Lower_CI = res$conf.int[1],
-                               Upper_CI = res$conf.int[2],
+                               LCI = res$conf.int[1],
+                               UCI = res$conf.int[2],
                                P = res$p.value,
                                stringsAsFactors = FALSE)
       ci_idx <- grepl("CI", colnames(result_row))
@@ -1458,13 +1452,17 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
       mw_res <- wilcox.test(formula = formula, data = data,
                             conf.int = TRUE, ...)
 
+      conf_level <- attr(mw_res$conf.int, "conf.level") * 100
+
       result_row <- data.frame(Feature_ID = feature,
                                U = mw_res$statistic,
                                Estimate = mw_res$estimate[1],
-                               Lower_CI = mw_res$conf.int[1],
-                               Upper_CI = mw_res$conf.int[2],
+                               LCI = mw_res$conf.int[1],
+                               UCI = mw_res$conf.int[2],
                                P = mw_res$p.value,
                                stringsAsFactors = FALSE)
+      ci_idx <- grepl("CI", colnames(result_row))
+      colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
       colnames(result_row)[-1] <- paste0(prefix,  colnames(result_row)[-1])
     }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
 

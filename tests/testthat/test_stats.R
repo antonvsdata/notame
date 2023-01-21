@@ -415,8 +415,8 @@ test_that("Paired t-test works", {
       "1_vs_2_t_test_",
       c("Statistic",
         "Estimate",
-        "Lower_CI95",
-        "Upper_CI95",
+        "LCI95",
+        "UCI95",
         "P",
         "P_FDR")
     )
@@ -434,7 +434,7 @@ test_that("Pairwise t-test works", {
 
   expect_identical(rownames(pwt_res), featureNames(drop_qcs(example_set)))
   prefixes <- c("1_vs_2_", "1_vs_3_", "2_vs_3_")
-  suffixes <- c("Estimate", "Lower_CI95", "Upper_CI95", "t_test_P", "t_test_P_FDR")
+  suffixes <- c("Estimate", "LCI95", "UCI95", "t_test_P", "t_test_P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   # Check column names
   expect_identical(colnames(pwt_res), c(
@@ -471,7 +471,7 @@ test_that("Pairwise paired t-test works", {
 
   expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
   prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "t_test_")
-  suffixes <- c("Statistic", "Estimate", "Lower_CI95", "Upper_CI95", "P", "P_FDR")
+  suffixes <- c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   expect_identical(colnames(pwpt_res), c("Feature_ID",
                                         do.call(paste0, cols[order(cols$Var1), ])
@@ -514,7 +514,7 @@ test_that("Mann-Whitney U-tests work", {
   us <- apply(exprs(object), 1, get_u)
 
   cols <- c("Feature_ID", paste0("A_vs_B_Mann_Whitney_",
-                                 c("U", "Estimate", "Lower_CI", "Upper_CI", "P", "P_FDR")))
+                                 c("U", "Estimate", "LCI95", "UCI95", "P", "P_FDR")))
 
   mw_res <- suppressWarnings({perform_mann_whitney(object, formula_char = "Feature ~ Group")})
 
@@ -538,7 +538,7 @@ test_that("Wilcoxon signed rank tests work", {
   median_diffs <- apply(exprs(object), 1, get_median_diffs)
 
   cols <- c("Feature_ID", paste0("1_vs_2_Wilcox_",
-                                 c("Statistic", "Estimate", "Lower_CI95", "Upper_CI95", "P", "P_FDR")))
+                                 c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")))
 
   wil_res <- perform_wilcoxon_signed_rank(object, group = "Time", id = "Subject_ID")
 
@@ -562,7 +562,7 @@ test_that("Pairwise Mann-Whitney tests work", {
 
   expect_identical(rownames(pwnp_res), featureNames(drop_qcs(example_set)))
   prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "Mann_Whitney_")
-  suffixes <- c("U", "Estimate", "Lower_CI", "Upper_CI", "P", "P_FDR")
+  suffixes <- c("U", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
   cols <- expand.grid(suffixes, prefixes)
   cols <- c("Feature_ID", paste0(cols$Var2, cols$Var1))
   # Check column names
