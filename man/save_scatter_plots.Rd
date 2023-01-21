@@ -7,16 +7,16 @@
 save_scatter_plots(
   object,
   x = group_col(object),
-  file,
-  width = 8,
-  height = 6,
+  prefix,
+  format = "emf",
   all_features = FALSE,
   color = NULL,
   color_scale = NA,
   shape = NULL,
   title = "Feature_ID",
   subtitle = NULL,
-  shape_scale = getOption("notame.shape_scale")
+  shape_scale = getOption("notame.shape_scale"),
+  ...
 )
 }
 \arguments{
@@ -24,9 +24,9 @@ save_scatter_plots(
 
 \item{x}{character, name of the column to be used as x-axis}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{prefix}{character, a file path prefix added to the file paths}
 
-\item{width, height}{width and height of the plots in inches}
+\item{format}{character, format in which the plots should be saved}
 
 \item{all_features}{logical, should all features be used? If FALSE
 (the default), flagged features are removed before visualization.}
@@ -38,21 +38,29 @@ Set to NA to choose the appropriate scale based on the class of the coloring var
 
 \item{shape}{character, name of the column used for shape}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
+
+\item{...}{other arguments to \code{save_plot} function, like width and height}
 }
 \description{
 Draws a scatterplots with a feature on y-axis and another variable on x-axis.
-A separate plot is drawn for each feature.
+A separate plot is drawn and saved for each feature.
 }
 \examples{
 \dontrun{
 # Against injection order, colored by group
 save_scatter_plots(object = merged_sample,
-                           x = "Injection_order",
-                           color = "Group",
-                           file = "injection_scatter.pdf")
+                   x = "Injection_order",
+                   color = "Group",
+                   prefix = "./scatter_plots/",
+                   format = "pdf"
+)
 }
 
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }

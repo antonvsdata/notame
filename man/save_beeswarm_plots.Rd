@@ -7,15 +7,15 @@
 save_beeswarm_plots(
   object,
   all_features = FALSE,
-  file,
-  width = 8,
-  height = 6,
+  prefix,
+  format = "emf",
   x = group_col(object),
   add_boxplots = FALSE,
   title = "Feature_ID",
   subtitle = NULL,
   color = group_col(object),
-  color_scale = NULL
+  color_scale = NULL,
+  ...
 )
 }
 \arguments{
@@ -23,31 +23,43 @@ save_beeswarm_plots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{prefix}{character, a file path prefix added to the file paths}
 
-\item{width, height}{width and height of the plots in inches}
+\item{format}{character, format in which the plots should be saved}
 
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{add_boxplots}{logical, should boxplots be added to the figure?}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color}{character, name of the column to be used for coloring}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{...}{other arguments to \code{save_plot} function, like width and height}
 }
 \description{
 Draws a beeswarm plot of feature abundances in each group.
-A separate plot is drawn for each feature.
+A separate plot is drawn and saved for each feature.
 }
 \examples{
 \dontrun{
 # Default beeswarms by group
-save_beeswarm_plots(drop_qcs(merged_sample), file = "beeswarms.pdf")
+save_beeswarm_plots(drop_qcs(merged_sample),
+                    prefix = "./beeswarm_plots/",
+                    format = "pdf"
+                    )
 # x and color can be a different variable
-save_beeswarm_plots(drop_qcs(merged_sample), file = "beeswarms_time.pdf",
-                    x = "Time", color = "Group")
+save_beeswarm_plots(drop_qcs(merged_sample),
+                    prefix = "./beeswarm_plots/",
+                    format = "pdf",
+                    x = "Time",
+                    color = "Group")
 }
 
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }

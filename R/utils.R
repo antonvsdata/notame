@@ -97,6 +97,7 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
   # Extra parts for certain visualizations and statistics
   extra_cran <- c("car",
                   "doParallel",
+                  "devEMF",
                   "ggbeeswarm",
                   "ggdendro",
                   "ggrepel",

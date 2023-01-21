@@ -7,19 +7,19 @@
 save_group_lineplots(
   object,
   all_features = FALSE,
-  file,
-  width = 8,
-  height = 6,
+  prefix,
+  format = "emf",
   x = time_col(object),
   group = group_col(object),
   title = "Feature_ID",
   subtitle = NULL,
   fun.data = "mean_cl_boot",
-  fun.y = NULL,
-  fun.ymin = NULL,
-  fun.ymax = NULL,
+  fun = NULL,
+  fun.min = NULL,
+  fun.max = NULL,
   position_dodge_amount = 0.2,
-  color_scale = getOption("notame.color_scale_dis")
+  color_scale = getOption("notame.color_scale_dis"),
+  ...
 )
 }
 \arguments{
@@ -27,25 +27,28 @@ save_group_lineplots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{file}{path to the PDF file where the plots should be saved}
+\item{prefix}{character, a file path prefix added to the file paths}
 
-\item{width, height}{width and height of the plots in inches}
+\item{format}{character, format in which the plots should be saved}
 
 \item{x}{character, name of the column to be used as x-axis}
 
 \item{group}{character, name of the column containing group information, used for coloring}
 
-\item{title, subtitle}{column names from fData to use as plot title and subtitle. Set to NULL for no title/subtitle}
+\item{title, subtitle}{column names from fData to use as plot title/filename and subtitle.
+Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{fun.data}{passed to ggplot2::stat_summary and used for errorbars,
 "A function that is given the complete data and should return a data frame with variables ymin, y, and ymax."}
 
-\item{fun.ymin, fun.y, fun.ymax}{Alternative to fun.data, passed to ggplot2::stat_summary,
+\item{fun.min, fun, fun.max}{Alternative to fun.data, passed to ggplot2::stat_summary,
 "supply three individual functions that are each passed a vector of x's and should return a single number"}
 
 \item{position_dodge_amount}{numeric: how much the group mean points should dodge away from each other}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{...}{other arguments to \code{save_plot} function, like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.
@@ -53,9 +56,19 @@ A line is drawn for each group and error bars are added.
 A separate plot is drawn for each feature.
 }
 \examples{
-\dontrun{save_group_lineplots(drop_qcs(merged_sample), file = "group_lineplots.pdf")}
+\dontrun{
+save_group_lineplots(drop_qcs(merged_sample),
+                    prefix = "./group_line_plots/",
+                    format = "pdf"
+)
+save_group_lineplots(drop_qcs(merged_sample),
+                    prefix = "./group_line_plots/",
+                    format = "png"
+)
+}
 
 }
 \seealso{
+\code{\link[notame]{save_plot}},
 \code{\link[ggplot2]{stat_summary}}
 }

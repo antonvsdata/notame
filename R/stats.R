@@ -101,6 +101,9 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #' @param df data frame, statistics results
 #' @param remove list, should contain strings that are matching to unwanted columns
 #' @param rename named list, names should contain matches that are replaced with values
+#' @param summary logical, should summary columns be added
+#' @param p_limit numeric, limit for p-values to be counted
+#' @param fdr logical, should summary be done with fdr-fixed values
 #'
 #' @examples
 #' # Simple manipulation to linear model results
@@ -112,12 +115,31 @@ summary_statistics <- function(object, grouping_cols = NA) {
 clean_stats_results <- function(
     df,
     remove = c("Intercept", "CI95", "Std_error", "t_value", "z_value", "R2"),
-    rename = NULL) {
+    rename = NULL,
+    summary = TRUE,
+    p_limit = 0.05,
+    fdr = TRUE) {
   df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
   if (!is.null(rename)) {
     for (name in names(rename)) {
       colnames(df) <- gsub(name, rename[name], colnames(df))
     }
+  }
+  if (summary) {
+    ifelse(fdr,
+           p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))],
+           p_cols <- colnames(df)[grep("_P$", colnames(df))]
+    )
+    df$Low_p_values <- apply(df[, p_cols], 1, function(x) {
+      sum(x < p_limit, na.rm = TRUE)
+    })
+    df$Lowest_p <- apply(df[, p_cols], 1, function(x) {
+      finite_min(x)
+    })
+    df$Column <- apply(df[, p_cols], 1, function(x) {
+      m <- finite_min(x)
+      p_cols[which(x == m)]
+    })
   }
 
   df
@@ -674,8 +696,6 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param ci_level the confidence level used in constructing the confidence intervals
-#' for regression coefficients
 #' @param ... additional parameters passed to lm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -694,7 +714,7 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @seealso \code{\link[stats]{lm}}
 #'
 #' @export
-perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
+perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
 
   log_text("Starting linear regression.")
 
@@ -709,7 +729,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
     } else {
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
-      confints <- confint(fit, level = ci_level)
+      confints <- confint(fit, level = 0.95)
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
@@ -751,8 +771,6 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param ci_level the confidence level used in constructing the confidence intervals
-#' for regression coefficients
 #' @param ... additional parameters passed to glm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -772,7 +790,7 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ci_level = 0.
 #' @seealso \code{\link[stats]{glm}}
 #'
 #' @export
-perform_logistic <- function(object, formula_char, all_features = FALSE, ci_level = 0.95, ...) {
+perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
 
   log_text("Starting logistic regression.")
 
@@ -787,7 +805,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
     } else {
       # Gather coefficients and CIs to one data frame row
       coefs <- summary(fit)$coefficients
-      suppressMessages(confints <- confint(fit, level = ci_level))
+      suppressMessages(confints <- confint(fit, level = 0.95))
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
@@ -838,8 +856,6 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param ci_level the confidence level used in constructing the confidence intervals
-#' for regression coefficients
 #' @param ci_method The method for calculating the confidence intervals, see documentation
 #' of confint below
 #' @param test_random logical, whether tests for the significance of the random effects
@@ -867,7 +883,7 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ci_leve
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
 #'
 #' @export
-perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level = 0.95,
+perform_lmer <- function(object, formula_char, all_features = FALSE,
                          ci_method = c("Wald", "profile", "boot"),
                          test_random = FALSE, ...) {
 
@@ -914,7 +930,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,  ci_level =
       # Gather coefficients and CIs to one data frame row
       result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
         dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value",
-                      "P" = "Pr...t..", "LCI95" = "X2.5..", "LCI95" = "X97.5..") %>%
+                      "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
         tidyr::gather("Metric", "Value", -Variable) %>%
         tidyr::unite("Column", Variable, Metric, sep="_") %>%
         tidyr::spread(Column, Value)
@@ -1183,8 +1199,8 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
                                Mean1 = t_res$estimate[1],
                                Mean2 = t_res$estimate[2],
                                Estimate = t_res$estimate[1] - t_res$estimate[2],
-                               "Lower_CI" = t_res$conf.int[1],
-                               "Upper_CI" = t_res$conf.int[2],
+                               "LCI" = t_res$conf.int[1],
+                               "UCI" = t_res$conf.int[2],
                                t_test_P = t_res$p.value,
                                stringsAsFactors = FALSE)
       colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
@@ -1205,29 +1221,7 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   results_df
 }
 
-#' Perform paired t-tests
-#'
-#' Performs paired t-tests between two groups.
-#'
-#' @param object a MetaboSet object
-#' @param group character, column name of pData with the group information
-#' @param id character, column name of pData with the identifiers for the pairs
-#' @param all_features should all features be included in FDR correction?
-#' @param ... additional parameters to t.test
-#'
-#' @return data frame with the results
-#'
-#' @examples
-#' paired_t_results <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
-#'
-#' @seealso \code{\link{t.test}}
-#'
-#' @export
-perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
-  message(paste0("Remember that t.test returns difference between group means",
-                 " in different order than lm.\n",
-                 "This function mimics this behavior, so the effect size is",
-                 " mean of reference level minus mean of second level."))
+perform_paired_test <- function(object, group, id, test, all_features = FALSE, ...) {
   results_df <- NULL
   data <- combined_data(object)
   features <- featureNames(object)
@@ -1248,7 +1242,7 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
   group1 <- group1[group1[, id] %in% common_ids, ][order(common_ids), ]
   group2 <- group2[group2[, id] %in% common_ids, ][order(common_ids), ]
 
-  log_text(paste0("Starting paired t-tests for ", paste0(pair, collapse = " & ")))
+  log_text(paste0("Starting paired tests for ", paste0(pair, collapse = " & ")))
   log_text(paste("Found", length(common_ids), "complete pairs"))
   if (length(common_ids) == 0) {
     warning(paste0("Skipped ", paste0(pair, collapse = " & "), ": no common IDs"))
@@ -1261,19 +1255,27 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
     feature <- features[i]
     result_row <- NULL
     tryCatch({
-      t_res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
+      if (test == "t_test") {
+        res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
+      } else if (test == "Wilcox") {
+        res <- wilcox.test(group1[, feature], group2[, feature], paired = TRUE,
+                           conf.int = TRUE, ...)
+      }
 
-      conf_level <- attr(t_res$conf.int, "conf.level") * 100
+      conf_level <- attr(res$conf.int, "conf.level") * 100
 
       result_row <- data.frame(Feature_ID = feature,
-                               Estimate = t_res$estimate[1],
-                               "Lower_CI" = t_res$conf.int[1],
-                               "Upper_CI" = t_res$conf.int[2],
-                               t_test_P = t_res$p.value,
+                               Statistic = res$statistic,
+                               Estimate = res$estimate[1],
+                               LCI = res$conf.int[1],
+                               UCI = res$conf.int[2],
+                               P = res$p.value,
                                stringsAsFactors = FALSE)
-      colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
+      ci_idx <- grepl("CI", colnames(result_row))
+      colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
       colnames(result_row)[-1] <- paste0(pair[1], "_vs_",
                                          pair[2], "_",
+                                         test, "_",
                                          colnames(result_row)[-1]
       )
     },
@@ -1301,9 +1303,58 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
   }
   results_df <- adjust_p_values(results_df, flags)
 
-  log_text("Paired t-tests performed.")
+  log_text("Paired tests performed.")
 
   results_df
+}
+
+#' Perform paired t-tests
+#'
+#' Performs paired t-tests between two groups.
+#'
+#' @param object a MetaboSet object
+#' @param group character, column name of pData with the group information
+#' @param id character, column name of pData with the identifiers for the pairs
+#' @param all_features should all features be included in FDR correction?
+#' @param ... additional parameters to t.test
+#'
+#' @return data frame with the results
+#'
+#' @examples
+#' paired_t_results <- perform_paired_t_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#'
+#' @seealso \code{\link{t.test}}
+#'
+#' @export
+perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
+  message(paste0("Remember that t.test returns difference between group means",
+                 " in different order than lm.\n",
+                 "This function mimics this behavior, so the effect size is",
+                 " mean of reference level minus mean of second level."))
+
+  perform_paired_test(object, group, id, test = "t_test",
+                      all_features = all_features, ...)
+}
+
+pairwise_fun <- function(object, fun, group_, ...) {
+
+  df <- NULL
+  groups <- levels(pData(object)[, group_])
+  combinations <- combn(groups, 2)
+  for (i in seq_len(ncol(combinations))) {
+    group1 <- as.character(combinations[1, i])
+    group2 <- as.character(combinations[2, i])
+    # Subset the pair of groups
+    object_tmp <- object[, pData(object)[, group_] %in% c(group1, group2)]
+    pData(object_tmp) <- droplevels(pData(object_tmp))
+
+    res <- fun(object_tmp, ...)
+    ifelse(is.null(df),
+           df <- res,
+           df <- dplyr::left_join(df, res)
+    )
+  }
+  df
 }
 
 #' Perform pairwise t-tests
@@ -1336,26 +1387,6 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
 #' @export
 perform_pairwise_t_test <- function(object, group = group_col(object), is_paired = FALSE, id = NULL, all_features = FALSE, ...) {
 
-  pairwise_t_fun <- function(fun, object, ...) {
-    df <- NULL
-    groups <- levels(pData(object)[, group])
-    combinations <- combn(groups, 2)
-    for (i in seq_len(ncol(combinations))) {
-      group1 <- as.character(combinations[1, i])
-      group2 <- as.character(combinations[2, i])
-      # Subset the pair of groups
-      object_tmp <- object[, pData(object)[, group] %in% c(group1, group2)]
-      pData(object_tmp) <- droplevels(pData(object_tmp))
-
-      t_results <- fun(object_tmp, ...)
-      ifelse(is.null(df),
-             df <- t_results,
-             df <- dplyr::left_join(df, t_results)
-      )
-    }
-    df
-  }
-
   results_df <- NULL
 
   if (!is.factor(pData(object)[, group])) {
@@ -1365,12 +1396,168 @@ perform_pairwise_t_test <- function(object, group = group_col(object), is_paired
   if (is_paired) {
     if (is.null(id)) stop("Subject ID column is missing, please provide it")
     log_text("Starting pairwise paired t-tests.")
-    results_df <- pairwise_t_fun(perform_paired_t_test, object, group, id, all_features)
+    results_df <- pairwise_fun(object, perform_paired_t_test, group_ = group,
+                               group = group, id = id,
+                               all_features = all_features, ...)
     log_text("Pairwise paired t-tests performed.")
   } else {
     log_text("Starting pairwise t-tests.")
-    results_df <- pairwise_t_fun(perform_t_test, object, formula_char = paste("Feature ~", group), all_features)
+    results_df <- pairwise_fun(object, perform_t_test, group,
+                               formula_char = paste("Feature ~", group),
+                               all_features = all_features, ...)
     log_text("Pairwise t-tests performed.")
+  }
+  if (length(featureNames(object)) != nrow(results_df)) {
+    warning("Results don't contain all features")
+  }
+  rownames(results_df) <- results_df$Feature_ID
+  results_df
+}
+
+
+#' Perform Mann-Whitney u test
+#'
+#' Performs Mann-Whitney u test
+#' Uses base R function \code{wilcox.test}.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
+#' @param ... other parameters to \code{\link{wilcox.test}}
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' medians in study groups, use "Feature ~ Group".
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{\link{wilcox.test}}
+#'
+#' @examples
+#' perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
+#'
+#' @export
+perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...) {
+
+  log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
+  exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
+  pair <- levels(pData(object)[, exp_var])
+  prefix <- paste0(pair[1], "_vs_", pair[2], "_Mann_Whitney_")
+  mw_fun <- function(feature, formula, data) {
+    result_row <- NULL
+    tryCatch({
+      mw_res <- wilcox.test(formula = formula, data = data,
+                            conf.int = TRUE, ...)
+
+      conf_level <- attr(mw_res$conf.int, "conf.level") * 100
+
+      result_row <- data.frame(Feature_ID = feature,
+                               U = mw_res$statistic,
+                               Estimate = mw_res$estimate[1],
+                               LCI = mw_res$conf.int[1],
+                               UCI = mw_res$conf.int[2],
+                               P = mw_res$p.value,
+                               stringsAsFactors = FALSE)
+      ci_idx <- grepl("CI", colnames(result_row))
+      colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
+      colnames(result_row)[-1] <- paste0(prefix,  colnames(result_row)[-1])
+    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+
+    result_row
+
+  }
+
+  results_df <- perform_test(object, formula_char, mw_fun, all_features)
+
+  log_text("Mann-Whitney tests performed.")
+
+  results_df
+}
+
+#' Perform Wilcoxon signed rank test
+#'
+#' Performs Wilcoxon signed rank test
+#' Uses base R function \code{wilcox.test} with \code{paired = TRUE}.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' Defaults to "Feature ~ group_col(object)
+#' @param all_features should all features be included in FDR correction?
+#' @param ... other parameters to \code{\link{wilcox.test}}
+#'
+#' @details The model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting. For example, if testing for equality of
+#' medians in study groups, use "Feature ~ Group".
+#'
+#' @return data frame with the results
+#'
+#' @seealso \code{\link{wilcox.test}}
+#'
+#' @examples
+#' perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#'
+#' @export
+perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, ...) {
+  perform_paired_test(object, group, id, test = "Wilcox",
+                      all_features = all_features, ...)
+}
+
+#' Perform pairwise  non-parametric tests
+#'
+#' Performs pairwise non-parametric tests between all study groups.
+#' Use \code{is_paired = FALSE} for Mann-Whitney u-tests
+#' Use \code{is_paired = TRUE} for Wilcoxon signed rank tests.
+#' NOTE! Does not use formula interface
+#'
+#' @param object a MetaboSet object
+#' @param group character, column name of phenoData giving the groups
+#' @param is_paired logical, use pairwise tests
+#' @param id character, name of the subject identification column for paired version
+#' @param all_features should all features be included in FDR correction?
+#' @param ... other parameters passed to test functions
+#'
+#' @details P-values of each comparison are corrected separately from each other.
+#'
+#' @return data frame with the results
+#'
+#' @examples
+#' # Including QCs as a study group for example
+#' mann_whitney_results <- perform_pairwise_non_parametric(merged_sample, group = "Group")
+#' # Using paired mode (pairs with QC are skipped as there are no common IDs in 'example_set')
+#' wilcoxon_signed_results <- perform_pairwise_non_parametric(example_set, group = "Time", is_paired = TRUE, id = "Subject_ID")
+#'
+#' @seealso \code{\link{perform_mann_whitney}},
+#' \code{\link{perform_wilcoxon_signed_rank}},
+#' \code{\link{wilcox.test}}
+#'
+#' @export
+perform_pairwise_non_parametric <- function(object, group = group_col(object),
+                                            is_paired = FALSE, id = NULL,
+                                            all_features = FALSE, ...) {
+
+  results_df <- NULL
+
+  if (!is.factor(pData(object)[, group])) {
+    stop("Group column should be a factor")
+  }
+
+  if (is_paired) {
+    if (is.null(id)) stop("Subject ID column is missing, please provide it")
+    log_text("Starting pairwise Wilcoxon signed rank tests.")
+    results_df <- pairwise_fun(object, perform_wilcoxon_signed_rank, group_ = group,
+                               group = group, id = id, all_features = all_features, ...)
+    log_text("Wilcoxon signed rank tests performed.")
+  } else {
+    log_text("Starting pairwise Mann-Whitney tests.")
+    results_df <- pairwise_fun(object, perform_mann_whitney, group,
+                               formula_char = paste("Feature ~", group),
+                               all_features = all_features, ...)
+    log_text("Mann-Whitney tests performed.")
   }
   if (length(featureNames(object)) != nrow(results_df)) {
     warning("Results don't contain all features")
