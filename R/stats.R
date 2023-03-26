@@ -762,6 +762,69 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
   results_df[col_order]
 }
 
+#' Linear models ANOVA table
+#'
+#' Fits a linear model separately for each feature and compute an ANOVA table.
+#' Returns all relevant statistics.
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param all_features should all features be included in FDR correction?
+#' @param lm_args list of arguments to lm, list names should be parameter names
+#' @param anova_args list of arguments to anova, list names should be parameter names
+#'
+#' @return a data frame with one row per feature, with all the
+#' relevant statistics of the linear model as columns
+#'
+#' @details The linear model is fit on combined_data(object). Thus, column names
+#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
+#' must be used to signal the role of the features in the formula. "Feature" will be replaced
+#' by the actual Feature IDs during model fitting, see the example
+#'
+#' @examples
+#' # A simple example without QC samples
+#' # Features predicted by Group and Time
+#' lm_anova_results <- perform_lm_anova(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
+#'
+#' @seealso \code{\link[stats]{lm}}
+#'
+#' @export
+perform_lm_anova <- function(object, formula_char, all_features = FALSE,
+                             lm_args = NULL, anova_args = NULL) {
+
+  log_text("Starting ANOVA tests")
+
+  anova_fun <- function(feature, formula, data) {
+    # Try to fit the linear model
+    fit <- NULL
+    tryCatch({
+      fit <- do.call(lm, c(list(formula = formula, data = data), lm_args))
+      anova_res <- do.call(anova, c(list(object = fit), anova_args))
+    }, error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
+    if(is.null(anova_res) | sum(!is.na(data[, feature])) < 2){
+      result_row <- NULL
+    } else {
+      effect_names <- c(names(fit$contrasts), "Residuals")
+      anova_names <- c("Df", "Sum_Sq", "Mean_Sq", "F_value", "P")
+      result_row <- data.frame(Feature_ID = feature)
+      for (i in seq_along(effect_names)) {
+        for (j in seq_along(names(anova_res))) {
+          name <- paste0(effect_names[i], "_", anova_names[j])
+          result_row[name] <- anova_res[[j]][i]
+        }
+      }
+      result_row
+    }
+    result_row
+  }
+
+  results_df <- perform_test(object, formula_char, anova_fun, all_features)
+
+  log_text("ANOVA tests performed.")
+
+  results_df
+}
+
 
 #' Logistic regression
 #'
