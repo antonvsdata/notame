@@ -7,14 +7,14 @@
 save_beeswarm_plots(
   object,
   all_features = FALSE,
-  prefix,
+  file_path,
   format = "emf",
   x = group_col(object),
   add_boxplots = FALSE,
   title = "Feature_ID",
   subtitle = NULL,
   color = group_col(object),
-  color_scale = NULL,
+  color_scale = getOption("notame.color_scale_dis"),
   ...
 )
 }
@@ -23,7 +23,7 @@ save_beeswarm_plots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{prefix}{character, a file path prefix added to the file paths}
+\item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
 \item{format}{character, format in which the plots should be saved}
 
@@ -38,7 +38,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
-\item{...}{other arguments to \code{save_plot} function, like width and height}
+\item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
 Draws a beeswarm plot of feature abundances in each group.
@@ -48,13 +48,13 @@ A separate plot is drawn and saved for each feature.
 \dontrun{
 # Default beeswarms by group
 save_beeswarm_plots(drop_qcs(merged_sample),
-                    prefix = "./beeswarm_plots/",
+                    file_path = "./beeswarm_plots.pdf",
                     format = "pdf"
                     )
 # x and color can be a different variable
-save_beeswarm_plots(drop_qcs(merged_sample),
-                    prefix = "./beeswarm_plots/",
-                    format = "pdf",
+save_beeswarm_plots(drop_qcs(merged_sample)[1:10],
+                    file_path = "./beeswarm_plots/",
+                    format = "png",
                     x = "Time",
                     color = "Group")
 }

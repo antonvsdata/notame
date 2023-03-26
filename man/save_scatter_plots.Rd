@@ -6,8 +6,8 @@
 \usage{
 save_scatter_plots(
   object,
-  x = group_col(object),
-  prefix,
+  x = "Injection_order",
+  file_path,
   format = "emf",
   all_features = FALSE,
   color = NULL,
@@ -24,7 +24,7 @@ save_scatter_plots(
 
 \item{x}{character, name of the column to be used as x-axis}
 
-\item{prefix}{character, a file path prefix added to the file paths}
+\item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
 \item{format}{character, format in which the plots should be saved}
 
@@ -43,7 +43,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
-\item{...}{other arguments to \code{save_plot} function, like width and height}
+\item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
 Draws a scatterplots with a feature on y-axis and another variable on x-axis.
@@ -52,10 +52,10 @@ A separate plot is drawn and saved for each feature.
 \examples{
 \dontrun{
 # Against injection order, colored by group
-save_scatter_plots(object = merged_sample,
+save_scatter_plots(object = merged_sample[1:10],
                    x = "Injection_order",
                    color = "Group",
-                   prefix = "./scatter_plots/",
+                   file_path = "./scatter_plots.pdf",
                    format = "pdf"
 )
 }

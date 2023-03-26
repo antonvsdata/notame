@@ -51,7 +51,7 @@ test_that("Subject line plots are saved without title", {
 })
 
 test_that("Subject line plot naming works", {
-  test_plot_saving_helper(save_subject_line_plots, title = "Feature_ID")
+  test_plot_saving_helper(save_subject_line_plots, title = "Metabolite_name")
 })
 
 test_that("Group boxplots are saved without title", {
@@ -67,7 +67,7 @@ test_that("Beeswarm plots are saved without title", {
 })
 
 test_that("Beeswarm plot naming works", {
-  test_plot_saving_helper(save_beeswarm_plots, title = "Feature_ID")
+  test_plot_saving_helper(save_beeswarm_plots, title = "Metabolite_name")
 })
 
 test_that("Scatter plots are saved without title", {

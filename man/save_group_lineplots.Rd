@@ -7,7 +7,7 @@
 save_group_lineplots(
   object,
   all_features = FALSE,
-  prefix,
+  file_path,
   format = "emf",
   x = time_col(object),
   group = group_col(object),
@@ -27,7 +27,7 @@ save_group_lineplots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{prefix}{character, a file path prefix added to the file paths}
+\item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
 \item{format}{character, format in which the plots should be saved}
 
@@ -48,7 +48,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
-\item{...}{other arguments to \code{save_plot} function, like width and height}
+\item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.
@@ -58,11 +58,11 @@ A separate plot is drawn for each feature.
 \examples{
 \dontrun{
 save_group_lineplots(drop_qcs(merged_sample),
-                    prefix = "./group_line_plots/",
+                    file_path = "./group_line_plots.pdf",
                     format = "pdf"
 )
-save_group_lineplots(drop_qcs(merged_sample),
-                    prefix = "./group_line_plots/",
+save_group_lineplots(drop_qcs(merged_sample)[1:10],
+                    file_path = "./group_line_plots/",
                     format = "png"
 )
 }

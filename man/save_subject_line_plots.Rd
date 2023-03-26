@@ -7,7 +7,7 @@
 save_subject_line_plots(
   object,
   all_features = FALSE,
-  prefix,
+  file_path,
   format = "emf",
   x = time_col(object),
   id = subject_col(object),
@@ -24,7 +24,7 @@ save_subject_line_plots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
 
-\item{prefix}{character, a file path prefix added to the file paths}
+\item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
 \item{format}{character, format in which the plots should be saved}
 
@@ -41,7 +41,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{facet}{character, the column name to facet by (optional, usually same as color)}
 
-\item{...}{other arguments to \code{save_plot} function, like width and height}
+\item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
 Plots the change in the feature abundances as a function of e.g. time.
@@ -50,7 +50,7 @@ A separate plot is drawn and saved for each feature.
 }
 \examples{
 \dontrun{save_subject_line_plots(drop_qcs(example_set),
-                    prefix = "./subject_line_plots/",
+                    file_path = "./subject_line_plots.pdf",
                     format = "pdf"
                     )}
 
