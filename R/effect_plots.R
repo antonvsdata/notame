@@ -9,8 +9,8 @@
 #' Should return a ggplot object for plotting
 #' @param ... other arguments to plotting function
 save_feature_plots <- function(object, all_features, file_path, format,
-                               title, subtitle,
-                               plot_fun, apply_theme_bw = TRUE, ...) {
+                               title, subtitle, text_base_size,
+                               plot_fun, ...) {
   object <- drop_flagged(object, all_features)
 
   data <- combined_data(object)
@@ -37,21 +37,11 @@ save_feature_plots <- function(object, all_features, file_path, format,
     fname <- featureNames(object)[i]
     name <- fData(object)[i, title]
 
-    p <- plot_fun(data, fname)
-    if (apply_theme_bw) {
-      p <- p +
-        theme_bw()
-    }
-    p <- p +
+    p <- plot_fun(data, fname) +
+      theme_bw(base_size = text_base_size) +
       labs(title = name,
            subtitle = fData(object)[i, subtitle],
-           y = "Abundance") +
-      theme(plot.title = element_text(size = 20),
-            plot.subtitle = element_text(size = 16),
-            axis.title = element_text(size = 16),
-            axis.text = element_text(size = 14),
-            legend.title = element_text(size = 16),
-            legend.text = element_text(size = 14))
+           y = "Abundance")
 
     if (format != "pdf") {
 
@@ -96,6 +86,7 @@ save_feature_plots <- function(object, all_features, file_path, format,
 #' @param color character, the column name to color the lines by (optional)
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
+#' @param text_base_size integer, base size for text in figures
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -120,6 +111,7 @@ save_subject_line_plots <- function(
     color = NA,
     color_scale = getOption("notame.color_scale_dis"),
     facet = NULL,
+    text_base_size = 14,
     ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -175,7 +167,7 @@ save_subject_line_plots <- function(
   data <- combined_data(object)
 
   save_feature_plots(object, all_features, file_path, format,
-                     title, subtitle, subject_line_fun, ...)
+                     title, subtitle, text_base_size, subject_line_fun, ...)
 
   log_text(paste("Saved line plots with mean line to:", file_path))
 }
@@ -195,6 +187,7 @@ save_subject_line_plots <- function(
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param text_base_size integer, base size for text in figures
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -227,6 +220,7 @@ save_group_boxplots <- function(
     title = "Feature_ID",
     subtitle = NULL,
     color_scale =  getOption("notame.color_scale_dis"),
+    text_base_size = 14,
     ...) {
 
   boxplot_fun <- function(data, fname) {
@@ -243,7 +237,7 @@ save_group_boxplots <- function(
   }
 
   save_feature_plots(object, all_features, file_path, format,
-                     title, subtitle, boxplot_fun, ...)
+                     title, subtitle, text_base_size, boxplot_fun, ...)
 
   log_text(paste("Saved group boxplots to:", file_path))
 
@@ -264,6 +258,7 @@ save_group_boxplots <- function(
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param text_base_size integer, base size for text in figures
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -296,6 +291,7 @@ save_beeswarm_plots <- function(
     subtitle = NULL,
     color = group_col(object),
     color_scale =  getOption("notame.color_scale_dis"),
+    text_base_size = 14,
     ...) {
 
   beeswarm_fun <- function(data, fname) {
@@ -313,7 +309,7 @@ save_beeswarm_plots <- function(
   }
 
   save_feature_plots(object, all_features, file_path, format,
-                     title, subtitle, beeswarm_fun, ...)
+                     title, subtitle, text_base_size, beeswarm_fun, ...)
 
   log_text(paste("Saved beeswarm plots to:", file_path))
 }
@@ -336,6 +332,7 @@ save_beeswarm_plots <- function(
 #' @param title,subtitle column names from fData to use as plot title/filename and subtitle.
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param shape_scale the shape scale as returned by a ggplot function
+#' @param text_base_size integer, base size for text in figures
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -365,6 +362,7 @@ save_scatter_plots <- function(
     title = "Feature_ID",
     subtitle = NULL,
     shape_scale = getOption("notame.shape_scale"),
+    text_base_size = 14,
     ...) {
 
   scatter_fun <- function(data, fname){
@@ -374,12 +372,14 @@ save_scatter_plots <- function(
                  color = color,
                  color_scale = color_scale,
                  shape = shape,
-                 shape_scale = shape_scale)
+                 shape_scale = shape_scale,
+                 fixed = FALSE,
+                 apply_theme_bw = FALSE)
     p
   }
 
   save_feature_plots(object, all_features, file_path, format,
-                     title, subtitle, scatter_fun, apply_theme_bw = FALSE, ...)
+                     title, subtitle, text_base_size, scatter_fun, ...)
 
 
   log_text(paste("Saved scatter plots to:", file_path))
@@ -406,6 +406,7 @@ save_scatter_plots <- function(
 #' "supply three individual functions that are each passed a vector of x's and should return a single number"
 #' @param position_dodge_amount numeric: how much the group mean points should dodge away from each other
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param text_base_size integer, base size for text in figures
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -440,6 +441,7 @@ save_group_lineplots <- function(
     fun.max = NULL,
     position_dodge_amount = 0.2,
     color_scale =  getOption("notame.color_scale_dis"),
+    text_base_size = 14,
     ...) {
 
   if (is.na(group)) {
@@ -482,7 +484,7 @@ save_group_lineplots <- function(
   }
 
   save_feature_plots(object, all_features, file_path, format,
-                     title, subtitle, line_fun, ...)
+                     title, subtitle, text_base_size, line_fun, ...)
 
   log_text(paste("Saved line plots with mean line to:", file_path))
 }

@@ -16,6 +16,7 @@ save_subject_line_plots(
   color = NA,
   color_scale = getOption("notame.color_scale_dis"),
   facet = NULL,
+  text_base_size = 14,
   ...
 )
 }
@@ -40,6 +41,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{color_scale}{the color scale as returned by a ggplot function}
 
 \item{facet}{character, the column name to facet by (optional, usually same as color)}
+
+\item{text_base_size}{integer, base size for text in figures}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

@@ -11,8 +11,8 @@ save_feature_plots(
   format,
   title,
   subtitle,
+  text_base_size,
   plot_fun,
-  apply_theme_bw = TRUE,
   ...
 )
 }

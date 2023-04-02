@@ -14,6 +14,7 @@ save_group_boxplots(
   title = "Feature_ID",
   subtitle = NULL,
   color_scale = getOption("notame.color_scale_dis"),
+  text_base_size = 14,
   ...
 )
 }
@@ -35,6 +36,8 @@ flagged features are removed before visualization.}
 Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{text_base_size}{integer, base size for text in figures}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

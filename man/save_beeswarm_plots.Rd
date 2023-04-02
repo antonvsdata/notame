@@ -15,6 +15,7 @@ save_beeswarm_plots(
   subtitle = NULL,
   color = group_col(object),
   color_scale = getOption("notame.color_scale_dis"),
+  text_base_size = 14,
   ...
 )
 }
@@ -37,6 +38,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{color}{character, name of the column to be used for coloring}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{text_base_size}{integer, base size for text in figures}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

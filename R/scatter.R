@@ -148,7 +148,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 
 scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
                          shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
-                         color_lab = color, shape_lab = shape) {
+                         color_lab = color, shape_lab = shape, apply_theme_bw = TRUE) {
 
   if (!is.null(color_scale)) {
     if (is.na(color_scale)) {
@@ -162,10 +162,13 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 
 
   p <- ggplot(data, aes_string(x = x, y = y, color = color)) +
-    theme_bw() +
     color_scale +
     labs(title = title, subtitle = subtitle, x = xlab, y = ylab,
          color = color_lab)
+  if (apply_theme_bw) {
+    p <- p +
+      theme_bw()
+  }
   if (fixed) {
     p <- p + coord_fixed() + theme(aspect.ratio=1)
   }
