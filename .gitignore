@@ -4,3 +4,6 @@ doc
 .Rproj.user/*
 .Rhistory
 .Rproj.user
+renv/*
+renv.lock
+
