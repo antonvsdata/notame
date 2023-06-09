@@ -7,7 +7,8 @@
 save_group_lineplots(
   object,
   all_features = FALSE,
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   x = time_col(object),
   group = group_col(object),
@@ -61,15 +62,16 @@ A separate plot is drawn for each feature.
 \examples{
 \dontrun{
 save_group_lineplots(drop_qcs(merged_sample),
-                    file_path = "./group_line_plots.pdf",
-                    format = "pdf"
+  file_path = "./group_line_plots.pdf",
+  format = "pdf"
 )
 save_group_lineplots(drop_qcs(merged_sample)[1:10],
-                    file_path = "./group_line_plots/",
-                    format = "png"
+  file_path = "./group_line_plots/",
+  format = "png"
 )
 }
-
+# Plot one feature
+save_group_lineplots(drop_qcs(merged_sample[5, ]), save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}},

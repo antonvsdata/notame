@@ -7,7 +7,8 @@
 save_beeswarm_plots(
   object,
   all_features = FALSE,
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   x = group_col(object),
   add_boxplots = FALSE,
@@ -51,17 +52,19 @@ A separate plot is drawn and saved for each feature.
 \dontrun{
 # Default beeswarms by group
 save_beeswarm_plots(drop_qcs(merged_sample),
-                    file_path = "./beeswarm_plots.pdf",
-                    format = "pdf"
-                    )
+  file_path = "./beeswarm_plots.pdf",
+  format = "pdf"
+)
 # x and color can be a different variable
 save_beeswarm_plots(drop_qcs(merged_sample)[1:10],
-                    file_path = "./beeswarm_plots/",
-                    format = "png",
-                    x = "Time",
-                    color = "Group")
+  file_path = "./beeswarm_plots/",
+  format = "png",
+  x = "Time",
+  color = "Group"
+)
 }
-
+# Plot one feature
+save_beeswarm_plots(drop_qcs(merged_sample)[5, ], save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}}

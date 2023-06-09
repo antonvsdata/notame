@@ -7,7 +7,8 @@
 save_subject_line_plots(
   object,
   all_features = FALSE,
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   x = time_col(object),
   id = subject_col(object),
@@ -24,6 +25,8 @@ save_subject_line_plots(
 \item{object}{a MetaboSet object}
 
 \item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+
+\item{save}{logical, if false, the plots are not saved but returned as a list}
 
 \item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
@@ -52,11 +55,14 @@ A line is drawn for each subject and a mean line is added.
 A separate plot is drawn and saved for each feature.
 }
 \examples{
-\dontrun{save_subject_line_plots(drop_qcs(example_set),
-                    file_path = "./subject_line_plots.pdf",
-                    format = "pdf"
-                    )}
-
+\dontrun{
+save_subject_line_plots(drop_qcs(example_set),
+  file_path = "./subject_line_plots.pdf",
+  format = "pdf"
+)
+}
+# Plot one feature
+save_subject_line_plots(drop_qcs(example_set[1, ]), save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}}

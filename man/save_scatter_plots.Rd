@@ -7,7 +7,8 @@
 save_scatter_plots(
   object,
   x = "Injection_order",
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   all_features = FALSE,
   color = NULL,
@@ -55,14 +56,16 @@ A separate plot is drawn and saved for each feature.
 \examples{
 \dontrun{
 # Against injection order, colored by group
-save_scatter_plots(object = merged_sample[1:10],
-                   x = "Injection_order",
-                   color = "Group",
-                   file_path = "./scatter_plots.pdf",
-                   format = "pdf"
+save_scatter_plots(
+  object = merged_sample[1:10],
+  x = "Injection_order",
+  color = "Group",
+  file_path = "./scatter_plots.pdf",
+  format = "pdf"
 )
 }
-
+# Plot one feature
+save_scatter_plots(merged_sample[5, ], save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}}
