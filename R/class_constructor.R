@@ -12,6 +12,10 @@ check_pheno_data <- function(x, id_prefix, id_column = NULL, log_messages = FALS
   if (!"Injection_order" %in% colnames(x)) {
     stop('"Injection_order" not found for the samples')
   }
+  # Check that injection order is numeric
+  if (!all(is.numeric(x$Injection_order))) {
+    stop('"Injection_order" is not numeric')
+  }
   # No NAs allowed in Injection order
   if (any(is.na(x$Injection_order))) {
     stop("Missing values in Injection_order")

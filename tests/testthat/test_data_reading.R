@@ -26,6 +26,9 @@ test_that("Pheno data checking works", {
 
   df <- data.frame(Injection_order = c(1:5, 3:9))
   expect_error(check_pheno_data(df), "Injection_order is not unique")
+  # Check that error is thrown if injection order is not numeric
+  df <- data.frame(Injection_order = c(1:5, "a", 3:9))
+  expect_error(check_pheno_data(df), '"Injection_order" is not numeric')
 
   # Check QC generator
   df <- data.frame(Injection_order = seq_len(10),
