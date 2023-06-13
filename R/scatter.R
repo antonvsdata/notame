@@ -5,7 +5,7 @@
 # Helper function for computing PCA
 pca_helper <- function(object, pcs, center, scale, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
@@ -20,11 +20,11 @@ pca_helper <- function(object, pcs, center, scale, ...) {
 # Helper function for computing t-SNE
 t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   if (!requireNamespace("Rtsne", quietly = TRUE)) {
-      stop("Package \"Rtsne\" needed for this function to work. Please install it.",
+    stop("Package \"Rtsne\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   add_citation("Rtsne package was used for t-SNE figures:", citation("Rtsne"))
@@ -89,8 +89,8 @@ plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, 
   pca_scores[label] <- pData(object)[, label]
 
   scatter_plot(pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
-               color = color, shape = shape, label = label, density = density, title = title,
-               subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
+    color = color, shape = shape, label = label, density = density, title = title,
+    subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
                fill_scale = fill_scale)
 }
 
@@ -141,7 +141,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   tsne_scores[label] <- pData(object)[, label]
 
   scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = shape, label = label,
-               density = density, title = title, subtitle = subtitle,
+    density = density, title = title, subtitle = subtitle,
                color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale)
 
 }
@@ -149,14 +149,15 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
 scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
                          shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape, apply_theme_bw = TRUE) {
-
   if (!is.null(color_scale)) {
-    if (is.na(color_scale)) {
+    color_scale <- if (is.na(color_scale)) {
       if (class(data[, color]) %in% c("numeric", "integer")) {
-        color_scale <- getOption("notame.color_scale_con")
+        getOption("notame.color_scale_con")
       } else {
-        color_scale <- getOption("notame.color_scale_dis")
+        getOption("notame.color_scale_dis")
       }
+    } else {
+      color_scale()
     }
   }
 
@@ -200,7 +201,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
   # Add point labels
   if (!is.null(label)) {
     if (!requireNamespace("ggrepel", quietly = TRUE)) {
-        stop("Package \"ggrepel\" needed for this function to label the points. Please install it.",
+      stop("Package \"ggrepel\" needed for this function to label the points. Please install it.",
              call. = FALSE)
     }
     p <- p +
@@ -261,11 +262,11 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
                               n_features = c(10, 10),
                               title = "PCA loadings", subtitle = NULL, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   if (!requireNamespace("ggrepel", quietly = TRUE)) {
-      stop("Package \"ggrepel\" needed for this function to work. Please install it.",
+    stop("Package \"ggrepel\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   # Drop flagged compounds if not told otherwise
@@ -322,8 +323,8 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
 #'
 #' @export
 plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
-                     fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
-                     subtitle = NULL, fill_scale = getOption("notame.fill_scale_con"), ...) {
+                            fill = "Injection_order", summary_fun = "mean", bins = 10, title = "PCA",
+                            subtitle = NULL, fill_scale = getOption("notame.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -333,7 +334,7 @@ plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center 
   pca_scores[fill] <- pData(object)[, fill]
 
   hexbin_plot(data = pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
-              fill = fill, summary_fun = summary_fun, bins = bins, fill_scale = fill_scale,
+    fill = fill, summary_fun = summary_fun, bins = bins, fill_scale = fill_scale,
                           title = title, subtitle = subtitle)
 }
 
@@ -369,8 +370,8 @@ plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center 
 #'
 #' @export
 plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", pca_method = "nipals", perplexity = 30,
-                      fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
-                      subtitle = paste("Perplexity:", perplexity), fill_scale = getOption("notame.fill_scale_con"), ...) {
+                             fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
+                             subtitle = paste("Perplexity:", perplexity), fill_scale = getOption("notame.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -380,22 +381,22 @@ plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale 
   tsne_scores[fill] <- pData(object)[, fill]
 
   hexbin_plot(tsne_scores, x = "X1", y = "X2",
-               fill = fill, summary_fun = summary_fun, bins = bins,
-               fill_scale = fill_scale,
+    fill = fill, summary_fun = summary_fun, bins = bins,
+    fill_scale = fill_scale,
                title = title, subtitle = subtitle)
 
 }
 
 
 hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_scale = NULL,
-                         title = NULL, subtitle = NULL, xlab = x, ylab = y,
-                         fill_lab = fill) {
+                        title = NULL, subtitle = NULL, xlab = x, ylab = y,
+                        fill_lab = fill) {
   if (!requireNamespace("hexbin", quietly = TRUE)) {
-      stop("Package \"hexbin\" needed for this function to work. Please install it.",
+    stop("Package \"hexbin\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
   if (!requireNamespace("Hmisc", quietly = TRUE)) {
-      stop("Package \"Hmisc\" needed for this function to work. Please install it.",
+    stop("Package \"Hmisc\" needed for this function to work. Please install it.",
            call. = FALSE)
   }
 
@@ -474,8 +475,8 @@ plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center 
   pca_scores[subject] <- pData(object)[, subject]
 
   arrow_plot(data = pca_scores, x = pc_names[1], y = pc_names[2], color = color, time = time, subject = subject,
-             alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
-             title = title, subtitle = subtitle,
+    alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
+    title = title, subtitle = subtitle,
              xlab = pca_results$labels[1], ylab = pca_results$labels[2])
 
 }
@@ -532,8 +533,8 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
   tsne_scores[subject] <- pData(object)[, subject]
 
   arrow_plot(data = tsne_scores, x = "X1", y = "X2", color = color, time = time, subject = subject,
-             alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
-             title = title, subtitle = subtitle,
+    alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
+    title = title, subtitle = subtitle,
              xlab = "X1", ylab = "X2")
 }
 
@@ -577,41 +578,41 @@ minus_log10 <- scales::trans_new("minus_log10",
 #'
 #' @export
 setGeneric("volcano_plot", signature = "object",
-           function(object, x, p, p_fdr = NULL, color = NULL,
-                    p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                    log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
-                    color_scale = getOption("notame.color_scale_con"),
+  function(object, x, p, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
+           color_scale = getOption("notame.color_scale_con"),
                     title = "Volcano plot", subtitle = NULL, ...) standardGeneric("volcano_plot"))
 
 
 #' @export
 setMethod("volcano_plot", c(object = "MetaboSet"),
-          function(object, x, p, p_fdr = NULL, color = NULL,
-                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
-                   color_scale = getOption("notame.color_scale_con"),
-                   title = "Volcano plot", subtitle = NULL, ...) {
+  function(object, x, p, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
+           color_scale = getOption("notame.color_scale_con"),
+           title = "Volcano plot", subtitle = NULL, ...) {
             volcano_plotter(fData(object), x, p, p_fdr, color, p_breaks, fdr_limit,
-                            log2_x, center_x_axis, x_lim, label, label_limit,
+      log2_x, center_x_axis, x_lim, label, label_limit,
                             color_scale, title, subtitle, ...)
           })
 
 #' @export
 setMethod("volcano_plot", c(object = "data.frame"),
-          function(object, x, p, p_fdr = NULL, color = NULL,
-                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                   log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
-                   color_scale = getOption("notame.color_scale_con"),
-                   title = "Volcano plot", subtitle = NULL, ...) {
+  function(object, x, p, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
+           color_scale = getOption("notame.color_scale_con"),
+           title = "Volcano plot", subtitle = NULL, ...) {
             volcano_plotter(object, x, p, p_fdr, color, p_breaks, fdr_limit,
-                            log2_x, center_x_axis, x_lim, label, label_limit,
+      log2_x, center_x_axis, x_lim, label, label_limit,
                             color_scale, title, subtitle, ...)
           })
 
 
 volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
-                         log2_x, center_x_axis, x_lim, label, label_limit,
-                         color_scale, title, subtitle, ...) {
+                            log2_x, center_x_axis, x_lim, label, label_limit,
+                            color_scale, title, subtitle, ...) {
 
   if (center_x_axis & !is.null(x_lim)) {
     warning("Manually setting x-axis limits overrides x-axis centering")
@@ -674,15 +675,15 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
       label_data <- data[data[, p] < label_limit, ]
       pl <- pl +
         ggrepel::geom_label_repel(data = label_data,
-                                  mapping = aes_string(label = label),
-                                  seed = 313,
-                                  alpha = 0.5,
-                                  size = 3,
-                                  force = 10,
-                                  max.overlaps = 50
+          mapping = aes_string(label = label),
+          seed = 313,
+          alpha = 0.5,
+          size = 3,
+          force = 10,
+          max.overlaps = 50
         )
     } else {
-    warning("Label column not found, not plotting them")
+      warning("Label column not found, not plotting them")
     }
   }
 
@@ -733,47 +734,47 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
 #' @export
 #'
 setGeneric("manhattan_plot", signature = "object",
-           function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
-                    p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                    x_lim = NULL, y_lim = NULL,
-                    color_scale = getOption("notame.color_scale_con"),
+  function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           x_lim = NULL, y_lim = NULL,
+           color_scale = getOption("notame.color_scale_con"),
                     title = "Manhattan plot", subtitle = NULL, ...) standardGeneric("manhattan_plot"))
 
 
 #' @export
 setMethod("manhattan_plot", c(object = "MetaboSet"),
-          function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
-                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                   x_lim = NULL, y_lim = NULL,
-                   color_scale = getOption("notame.color_scale_con"),
-                   title = "Manhattan plot", subtitle = NULL, ...) {
+  function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           x_lim = NULL, y_lim = NULL,
+           color_scale = getOption("notame.color_scale_con"),
+           title = "Manhattan plot", subtitle = NULL, ...) {
             manhattan_plotter(fData(object), x, p, effect, p_fdr, color,
-                              p_breaks, fdr_limit,
-                              x_lim, y_lim,
-                              color_scale,
+      p_breaks, fdr_limit,
+      x_lim, y_lim,
+      color_scale,
                               title, subtitle, ...)
           })
 
 #' @export
 setMethod("manhattan_plot", c(object = "data.frame"),
-          function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
-                   p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-                   x_lim = NULL, y_lim = NULL,
-                   color_scale = getOption("notame.color_scale_con"),
-                   title = "Manhattan plot", subtitle = NULL, ...) {
+  function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           x_lim = NULL, y_lim = NULL,
+           color_scale = getOption("notame.color_scale_con"),
+           title = "Manhattan plot", subtitle = NULL, ...) {
             manhattan_plotter(object, x, p, effect, p_fdr, color,
-                              p_breaks, fdr_limit,
-                              x_lim, y_lim,
-                              color_scale,
+      p_breaks, fdr_limit,
+      x_lim, y_lim,
+      color_scale,
                               title, subtitle, ...)
           })
 
 
 manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
-                           p_breaks, fdr_limit,
-                           x_lim, y_lim,
-                           color_scale,
-                           title, subtitle, ...) {
+                              p_breaks, fdr_limit,
+                              x_lim, y_lim,
+                              color_scale,
+                              title, subtitle, ...) {
 
   if (min(data[, p]) > max(p_breaks)) {
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
@@ -872,24 +873,24 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #'
 #' @export
 setGeneric("mz_rt_plot", signature = "object",
-           function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL,
-                    color = NULL, title = "m/z retention time", subtitle = NULL,
+  function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL,
+           color = NULL, title = "m/z retention time", subtitle = NULL,
                     color_scale = getOption("notame.color_scale_con"), ...) standardGeneric("mz_rt_plot"))
 
 #' @export
 setMethod("mz_rt_plot", c(object = "MetaboSet"),
-          function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
-                   title = "m/z vs retention time", subtitle = NULL,
-                   color_scale = getOption("notame.color_scale_con"), all_features = FALSE) {
+  function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+           title = "m/z vs retention time", subtitle = NULL,
+           color_scale = getOption("notame.color_scale_con"), all_features = FALSE) {
             mz_rt_plotter(fData(drop_flagged(object, all_features)), p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale, all_features)
           })
 
 #' @export
 setMethod("mz_rt_plot", c(object = "data.frame"),
-          function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
-                   title = "m/z vs retention time", subtitle = NULL,
-                   color_scale = getOption("notame.color_scale_con")) {
+  function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
+           title = "m/z vs retention time", subtitle = NULL,
+           color_scale = getOption("notame.color_scale_con")) {
             mz_rt_plotter(object, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale)
           })
