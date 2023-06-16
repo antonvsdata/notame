@@ -6,7 +6,8 @@
 pca_helper <- function(object, pcs, center, scale, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
     stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
   res_pca <- pcaMethods::pca(object, nPcs = max(pcs), scale = scale, center = center, ...)
@@ -21,18 +22,22 @@ pca_helper <- function(object, pcs, center, scale, ...) {
 t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
     stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!requireNamespace("Rtsne", quietly = TRUE)) {
     stop("Package \"Rtsne\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("Rtsne package was used for t-SNE figures:", citation("Rtsne"))
   prepd <- pcaMethods::prep(object, center = center, scale = scale)
 
   if (sum(is.na(exprs(prepd))) > 0) {
-    res_pca <- pcaMethods::pca(object, method = pca_method, nPcs = min(nrow(object), ncol(object), 50),
-                               scale = "none", center = FALSE)
+    res_pca <- pcaMethods::pca(object,
+      method = pca_method, nPcs = min(nrow(object), ncol(object), 50),
+      scale = "none", center = FALSE
+    )
     pca_scores <- pcaMethods::scores(res_pca)
     res_tsne <- Rtsne::Rtsne(pca_scores, perplexity = perplexity, pca = FALSE, ...)
   } else {
@@ -74,8 +79,8 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
 #' @export
-plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, scale = "uv",
-                     color = group_col(object), shape = color, label = NULL, density = FALSE,  title = "PCA",
+plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
+                     color = group_col(object), shape = color, label = NULL, density = FALSE, title = "PCA",
                      subtitle = NULL, color_scale = NA,
                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
@@ -88,10 +93,12 @@ plot_pca <- function(object, pcs = c(1,2), all_features = FALSE, center = TRUE, 
   pca_scores[shape] <- pData(object)[, shape]
   pca_scores[label] <- pData(object)[, label]
 
-  scatter_plot(pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
+  scatter_plot(pca_scores,
+    x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
     color = color, shape = shape, label = label, density = density, title = title,
     subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
-               fill_scale = fill_scale)
+    fill_scale = fill_scale
+  )
 }
 
 #' t-SNE scatter plot
@@ -140,54 +147,61 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   tsne_scores[shape] <- pData(object)[, shape]
   tsne_scores[label] <- pData(object)[, label]
 
-  scatter_plot(tsne_scores, x = "X1", y = "X2", color = color, shape = shape, label = label,
+  scatter_plot(tsne_scores,
+    x = "X1", y = "X2", color = color, shape = shape, label = label,
     density = density, title = title, subtitle = subtitle,
-               color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale)
-
+    color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale
+  )
 }
 
 scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
                          shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape, apply_theme_bw = TRUE) {
   if (!is.null(color_scale)) {
-    color_scale <- if (is.na(color_scale)) {
-      if (class(data[, color]) %in% c("numeric", "integer")) {
-        getOption("notame.color_scale_con")
+    if (!is.ggproto(color_scale)) {
+      color_scale <- if (is.na(color_scale)) {
+        if (class(data[, color]) %in% c("numeric", "integer")) {
+          getOption("notame.color_scale_con")
+        } else {
+          getOption("notame.color_scale_dis")
+        }
       } else {
-        getOption("notame.color_scale_dis")
+        color_scale()
       }
-    } else {
-      color_scale()
     }
   }
 
 
   p <- ggplot(data, aes_string(x = x, y = y, color = color)) +
     color_scale +
-    labs(title = title, subtitle = subtitle, x = xlab, y = ylab,
-         color = color_lab)
+    labs(
+      title = title, subtitle = subtitle, x = xlab, y = ylab,
+      color = color_lab
+    )
   if (apply_theme_bw) {
     p <- p +
       theme_bw()
   }
   if (fixed) {
-    p <- p + coord_fixed() + theme(aspect.ratio=1)
+    p <- p + coord_fixed() + theme(aspect.ratio = 1)
   }
 
   if (class(data[, shape]) == "character") {
     data[shape] <- as.factor(data[, shape])
-    warning(paste("Shape variable not given as a factor, converted to factor with levels",
-                  paste(levels(data[, shape]), collapse = ", ")),
-            call. = FALSE)
+    warning(paste(
+      "Shape variable not given as a factor, converted to factor with levels",
+      paste(levels(data[, shape]), collapse = ", ")
+    ),
+    call. = FALSE
+    )
   }
 
   if (class(data[, shape]) == "factor") {
-    if (length(levels(data[, shape])) <= 8){
+    if (length(levels(data[, shape])) <= 8) {
       p <- p +
         geom_point(aes_string(shape = shape)) +
         shape_scale +
         labs(shape = shape_lab)
-
     } else if (is.null(shape_scale)) {
       cat("Only 8 distinct shapes currently available!")
       p <- p +
@@ -202,7 +216,8 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
   if (!is.null(label)) {
     if (!requireNamespace("ggrepel", quietly = TRUE)) {
       stop("Package \"ggrepel\" needed for this function to label the points. Please install it.",
-             call. = FALSE)
+        call. = FALSE
+      )
     }
     p <- p +
       ggrepel::geom_text_repel(aes_string(label = label))
@@ -212,16 +227,21 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
   if (density) {
     if (!requireNamespace("cowplot", quietly = TRUE)) {
       stop("Package \"cowplot\" needed for this function to add density curves. Please install it.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
-    xdens <- cowplot::axis_canvas(p, axis = "x")+
-      geom_density(data = data, aes_string(x = x, fill = color),
-                   alpha = 0.7, size = 0.2) +
+    xdens <- cowplot::axis_canvas(p, axis = "x") +
+      geom_density(
+        data = data, aes_string(x = x, fill = color),
+        alpha = 0.7, size = 0.2
+      ) +
       fill_scale
 
-    ydens <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE)+
-      geom_density(data = data, aes_string(x = y, fill = color),
-                   alpha = 0.7, size = 0.2)+
+    ydens <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
+      geom_density(
+        data = data, aes_string(x = y, fill = color),
+        alpha = 0.7, size = 0.2
+      ) +
       coord_flip() +
       fill_scale
 
@@ -263,11 +283,13 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
                               title = "PCA loadings", subtitle = NULL, ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
     stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!requireNamespace("ggrepel", quietly = TRUE)) {
     stop("Package \"ggrepel\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -280,14 +302,13 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
   features_pc1 <- loads$Feature_ID[order(abs(loads[, pc_names[1]]), decreasing = TRUE)][seq_len(n_features[1])]
   features_pc2 <- loads$Feature_ID[order(abs(loads[, pc_names[2]]), decreasing = TRUE)][seq_len(n_features[2])]
 
-  loads <- loads[union(features_pc1, features_pc2),]
+  loads <- loads[union(features_pc1, features_pc2), ]
 
   ggplot(loads, aes_string(x = pc_names[1], y = pc_names[2], label = "Feature_ID")) +
     geom_point() +
     ggrepel::geom_text_repel() +
     theme_bw() +
     labs(title = title, subtitle = subtitle)
-
 }
 
 
@@ -333,9 +354,11 @@ plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center 
   pc_names <- colnames(pca_scores)
   pca_scores[fill] <- pData(object)[, fill]
 
-  hexbin_plot(data = pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
+  hexbin_plot(
+    data = pca_scores, x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
     fill = fill, summary_fun = summary_fun, bins = bins, fill_scale = fill_scale,
-                          title = title, subtitle = subtitle)
+    title = title, subtitle = subtitle
+  )
 }
 
 #' t-SNE hexbin plot
@@ -380,11 +403,12 @@ plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale 
   # Add columns for plotting
   tsne_scores[fill] <- pData(object)[, fill]
 
-  hexbin_plot(tsne_scores, x = "X1", y = "X2",
+  hexbin_plot(tsne_scores,
+    x = "X1", y = "X2",
     fill = fill, summary_fun = summary_fun, bins = bins,
     fill_scale = fill_scale,
-               title = title, subtitle = subtitle)
-
+    title = title, subtitle = subtitle
+  )
 }
 
 
@@ -393,21 +417,25 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
                         fill_lab = fill) {
   if (!requireNamespace("hexbin", quietly = TRUE)) {
     stop("Package \"hexbin\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!requireNamespace("Hmisc", quietly = TRUE)) {
     stop("Package \"Hmisc\" needed for this function to work. Please install it.",
-           call. = FALSE)
+      call. = FALSE
+    )
   }
 
   p <- ggplot(data, aes_string(x = x, y = y, z = fill)) +
     stat_summary_hex(bins = bins, fun = summary_fun) +
     theme_bw() +
     fill_scale +
-    labs(title = title, subtitle = subtitle, x = xlab, y = ylab,
-         fill = fill_lab) +
+    labs(
+      title = title, subtitle = subtitle, x = xlab, y = ylab,
+      fill = fill_lab
+    ) +
     coord_fixed() +
-    theme(aspect.ratio=1)
+    theme(aspect.ratio = 1)
   p
 }
 
@@ -416,7 +444,6 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
 
 arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
                        color_scale, title, subtitle, xlab, ylab) {
-
   data <- data[order(data[, subject], data[, time]), ]
 
   p <- ggplot(data, aes_string(x = x, y = y, color = color, group = subject)) +
@@ -424,7 +451,7 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
     theme_bw() +
     color_scale +
     coord_fixed() +
-    theme(aspect.ratio=1) +
+    theme(aspect.ratio = 1) +
     labs(x = xlab, y = ylab, title = title, subtitle = subtitle)
   p
 }
@@ -455,7 +482,7 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 #' plot_pca_arrows(drop_qcs(example_set))
 #' # If the sample size is large, plot groups separately
 #' plot_pca_arrows(drop_qcs(example_set)) +
-#' facet_wrap(~ Group)
+#'   facet_wrap(~Group)
 #'
 #' @seealso \code{\link[pcaMethods]{pca}}
 #'
@@ -474,11 +501,12 @@ plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center 
   pca_scores[time] <- pData(object)[, time]
   pca_scores[subject] <- pData(object)[, subject]
 
-  arrow_plot(data = pca_scores, x = pc_names[1], y = pc_names[2], color = color, time = time, subject = subject,
+  arrow_plot(
+    data = pca_scores, x = pc_names[1], y = pc_names[2], color = color, time = time, subject = subject,
     alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
     title = title, subtitle = subtitle,
-             xlab = pca_results$labels[1], ylab = pca_results$labels[2])
-
+    xlab = pca_results$labels[1], ylab = pca_results$labels[2]
+  )
 }
 
 
@@ -513,7 +541,7 @@ plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center 
 #' plot_tsne_arrows(drop_qcs(example_set), perplexity = 5)
 #' # If the sample size is large, plot groups separately
 #' plot_tsne_arrows(drop_qcs(example_set), perplexity = 5) +
-#' facet_wrap(~ Group)
+#'   facet_wrap(~Group)
 #'
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
@@ -532,18 +560,27 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
   tsne_scores[time] <- pData(object)[, time]
   tsne_scores[subject] <- pData(object)[, subject]
 
-  arrow_plot(data = tsne_scores, x = "X1", y = "X2", color = color, time = time, subject = subject,
+  arrow_plot(
+    data = tsne_scores, x = "X1", y = "X2", color = color, time = time, subject = subject,
     alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
     title = title, subtitle = subtitle,
-             xlab = "X1", ylab = "X2")
+    xlab = "X1", ylab = "X2"
+  )
 }
 
 
 # -------- VOLCANO PLOT -----------
 
 minus_log10 <- scales::trans_new("minus_log10",
-                                 transform = function(x) {-log10(x)},
-                                 inverse = function(x) {10^{-x}})
+  transform = function(x) {
+    -log10(x)
+  },
+  inverse = function(x) {
+    10^{
+      -x
+    }
+  }
+)
 
 #' Volcano plot
 #'
@@ -571,49 +608,62 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' @examples
 #' # naturally, this looks messy as there are not enough p-values
 #' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
-#' volcano_plot(lm_results, x = "GroupB_Estimate",
-#'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
-#'              label = "Feature_ID",
-#'              fdr_limit = 0.1)
+#' volcano_plot(lm_results,
+#'   x = "GroupB_Estimate",
+#'   p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'   label = "Feature_ID",
+#'   fdr_limit = 0.1
+#' )
 #'
 #' @export
-setGeneric("volcano_plot", signature = "object",
-  function(object, x, p, p_fdr = NULL, color = NULL,
-           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-           log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
-           color_scale = getOption("notame.color_scale_con"),
-                    title = "Volcano plot", subtitle = NULL, ...) standardGeneric("volcano_plot"))
-
-
-#' @export
-setMethod("volcano_plot", c(object = "MetaboSet"),
+setGeneric("volcano_plot",
+  signature = "object",
   function(object, x, p, p_fdr = NULL, color = NULL,
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
            title = "Volcano plot", subtitle = NULL, ...) {
-            volcano_plotter(fData(object), x, p, p_fdr, color, p_breaks, fdr_limit,
-      log2_x, center_x_axis, x_lim, label, label_limit,
-                            color_scale, title, subtitle, ...)
-          })
+    standardGeneric("volcano_plot")
+  }
+)
+
 
 #' @export
-setMethod("volcano_plot", c(object = "data.frame"),
+setMethod(
+  "volcano_plot", c(object = "MetaboSet"),
   function(object, x, p, p_fdr = NULL, color = NULL,
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
            title = "Volcano plot", subtitle = NULL, ...) {
-            volcano_plotter(object, x, p, p_fdr, color, p_breaks, fdr_limit,
+    volcano_plotter(
+      fData(object), x, p, p_fdr, color, p_breaks, fdr_limit,
       log2_x, center_x_axis, x_lim, label, label_limit,
-                            color_scale, title, subtitle, ...)
-          })
+      color_scale, title, subtitle, ...
+    )
+  }
+)
+
+#' @export
+setMethod(
+  "volcano_plot", c(object = "data.frame"),
+  function(object, x, p, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
+           color_scale = getOption("notame.color_scale_con"),
+           title = "Volcano plot", subtitle = NULL, ...) {
+    volcano_plotter(
+      object, x, p, p_fdr, color, p_breaks, fdr_limit,
+      log2_x, center_x_axis, x_lim, label, label_limit,
+      color_scale, title, subtitle, ...
+    )
+  }
+)
 
 
 volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
                             log2_x, center_x_axis, x_lim, label, label_limit,
                             color_scale, title, subtitle, ...) {
-
   if (center_x_axis & !is.null(x_lim)) {
     warning("Manually setting x-axis limits overrides x-axis centering")
     center_x_axis <- FALSE
@@ -627,31 +677,38 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
     color_scale +
     theme_bw() +
     labs(title = title, subtitle = subtitle) +
-    theme(panel.grid.minor.y = element_blank(), #only show the specified p-values, which might be unevenly spaced
-          axis.ticks.y = element_blank())
+    theme(
+      panel.grid.minor.y = element_blank(), # only show the specified p-values, which might be unevenly spaced
+      axis.ticks.y = element_blank()
+    )
 
-  if(!is.null(p_fdr)) {
-
+  if (!is.null(p_fdr)) {
     if (any(data[, p_fdr] < fdr_limit)) {
       # Add horizontal line with the FDR < 0.05 limit
       q_limit <- max(data[data[, p_fdr] < fdr_limit, p], na.rm = TRUE)
       # sec_axis writes e.g. "q < 0.05" on the right side of the plot
       pl <- pl +
         geom_hline(yintercept = q_limit, linetype = "dashed") +
-        scale_y_continuous(trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks),
-                           sec.axis = sec_axis(~., breaks = q_limit, labels = paste("q =", fdr_limit)))
+        scale_y_continuous(
+          trans = minus_log10, breaks = p_breaks, labels = as.character(p_breaks),
+          sec.axis = sec_axis(~., breaks = q_limit, labels = paste("q =", fdr_limit))
+        )
     } else {
       warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line",
-              call. = FALSE)
+        call. = FALSE
+      )
       pl <- pl +
-        scale_y_continuous(trans = minus_log10, breaks = p_breaks,
-                           labels = as.character(p_breaks))
+        scale_y_continuous(
+          trans = minus_log10, breaks = p_breaks,
+          labels = as.character(p_breaks)
+        )
     }
-
   } else {
     pl <- pl +
-      scale_y_continuous(trans = minus_log10, breaks = p_breaks,
-                         labels = as.character(p_breaks))
+      scale_y_continuous(
+        trans = minus_log10, breaks = p_breaks,
+        labels = as.character(p_breaks)
+      )
   }
 
   if (log2_x) {
@@ -674,7 +731,8 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
     if (label %in% colnames(data)) {
       label_data <- data[data[, p] < label_limit, ]
       pl <- pl +
-        ggrepel::geom_label_repel(data = label_data,
+        ggrepel::geom_label_repel(
+          data = label_data,
           mapping = aes_string(label = label),
           seed = 313,
           alpha = 0.5,
@@ -722,52 +780,68 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
 #' lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 #' lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
 #' # Traditional Manhattan plot from data frame
-#' manhattan_plot(lm_data, x = "Average.Mz",
-#'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
-#'              fdr_limit = 0.1)
+#' manhattan_plot(lm_data,
+#'   x = "Average.Mz",
+#'   p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'   fdr_limit = 0.1
+#' )
 #' # Directed Manhattan plot from MetaboSet
 #' with_results <- join_fData(merged_sample, lm_results)
-#' manhattan_plot(with_results, x = "Average.Mz", effect = "GroupB_Estimate",
-#'              p = "GroupB_P", p_fdr = "GroupB_P_FDR",
-#'              fdr_limit = 0.1)
+#' manhattan_plot(with_results,
+#'   x = "Average.Mz", effect = "GroupB_Estimate",
+#'   p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+#'   fdr_limit = 0.1
+#' )
 #'
 #' @export
 #'
-setGeneric("manhattan_plot", signature = "object",
-  function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
-           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
-           x_lim = NULL, y_lim = NULL,
-           color_scale = getOption("notame.color_scale_con"),
-                    title = "Manhattan plot", subtitle = NULL, ...) standardGeneric("manhattan_plot"))
-
-
-#' @export
-setMethod("manhattan_plot", c(object = "MetaboSet"),
+setGeneric("manhattan_plot",
+  signature = "object",
   function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            x_lim = NULL, y_lim = NULL,
            color_scale = getOption("notame.color_scale_con"),
            title = "Manhattan plot", subtitle = NULL, ...) {
-            manhattan_plotter(fData(object), x, p, effect, p_fdr, color,
-      p_breaks, fdr_limit,
-      x_lim, y_lim,
-      color_scale,
-                              title, subtitle, ...)
-          })
+    standardGeneric("manhattan_plot")
+  }
+)
+
 
 #' @export
-setMethod("manhattan_plot", c(object = "data.frame"),
+setMethod(
+  "manhattan_plot", c(object = "MetaboSet"),
   function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            x_lim = NULL, y_lim = NULL,
            color_scale = getOption("notame.color_scale_con"),
            title = "Manhattan plot", subtitle = NULL, ...) {
-            manhattan_plotter(object, x, p, effect, p_fdr, color,
+    manhattan_plotter(
+      fData(object), x, p, effect, p_fdr, color,
       p_breaks, fdr_limit,
       x_lim, y_lim,
       color_scale,
-                              title, subtitle, ...)
-          })
+      title, subtitle, ...
+    )
+  }
+)
+
+#' @export
+setMethod(
+  "manhattan_plot", c(object = "data.frame"),
+  function(object, x, p, effect = NULL, p_fdr = NULL, color = NULL,
+           p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
+           x_lim = NULL, y_lim = NULL,
+           color_scale = getOption("notame.color_scale_con"),
+           title = "Manhattan plot", subtitle = NULL, ...) {
+    manhattan_plotter(
+      object, x, p, effect, p_fdr, color,
+      p_breaks, fdr_limit,
+      x_lim, y_lim,
+      color_scale,
+      title, subtitle, ...
+    )
+  }
+)
 
 
 manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
@@ -775,15 +849,16 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
                               x_lim, y_lim,
                               color_scale,
                               title, subtitle, ...) {
-
   if (min(data[, p]) > max(p_breaks)) {
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
   }
 
   if (!is.null(effect)) {
     data$y <- -log10(data[, p]) * sign(data[, effect])
-    p_labels <- outer(c(-1,1), p_breaks) %>% as.vector() %>% as.character()
-    p_breaks <- outer(c(-1,1), -log10(p_breaks)) %>% as.vector()
+    p_labels <- outer(c(-1, 1), p_breaks) %>%
+      as.vector() %>%
+      as.character()
+    p_breaks <- outer(c(-1, 1), -log10(p_breaks)) %>% as.vector()
     p_labels <- p_labels[order(p_breaks)]
     p_breaks <- sort(p_breaks)
   } else {
@@ -798,14 +873,15 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
     geom_point(...) +
     color_scale +
     theme_bw() +
-    theme(panel.grid.minor.y = element_blank(),
-          axis.ticks.y = element_blank()) +
+    theme(
+      panel.grid.minor.y = element_blank(),
+      axis.ticks.y = element_blank()
+    ) +
     geom_hline(yintercept = 0, color = "grey") +
     labs(title = title, subtitle = subtitle, y = "p-value")
 
 
-  if(!is.null(p_fdr)) {
-
+  if (!is.null(p_fdr)) {
     if (any(data[, p_fdr] < fdr_limit)) {
       # Add horizontal line with the FDR < 0.05 limit
       q_limit <- max(data[data[, p_fdr] < fdr_limit, p], na.rm = TRUE)
@@ -814,17 +890,22 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
         pl <- pl +
           geom_hline(yintercept = log10(q_limit), linetype = "dashed") +
           geom_hline(yintercept = -log10(q_limit), linetype = "dashed") +
-          scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim,
-                             sec.axis = sec_axis(~., breaks = c(log10(q_limit), -log10(q_limit)), labels = rep(paste("q =", fdr_limit), 2)))
+          scale_y_continuous(
+            breaks = p_breaks, labels = p_labels, limits = y_lim,
+            sec.axis = sec_axis(~., breaks = c(log10(q_limit), -log10(q_limit)), labels = rep(paste("q =", fdr_limit), 2))
+          )
       } else {
         pl <- pl +
           geom_hline(yintercept = -log10(q_limit), linetype = "dashed") +
-          scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim,
-                             sec.axis = sec_axis(~., breaks = -log10(q_limit), labels = paste("q =", fdr_limit)))
+          scale_y_continuous(
+            breaks = p_breaks, labels = p_labels, limits = y_lim,
+            sec.axis = sec_axis(~., breaks = -log10(q_limit), labels = paste("q =", fdr_limit))
+          )
       }
     } else {
       warning("None of the FDR-adjusted p-values are below the significance level, not plotting the horizontal line",
-              call. = FALSE)
+        call. = FALSE
+      )
       pl <- pl +
         scale_y_continuous(breaks = p_breaks, labels = p_labels, limits = y_lim)
     }
@@ -834,7 +915,6 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
   }
 
   pl
-
 }
 
 
@@ -872,33 +952,44 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
 #' mz_rt_plot(with_results, p_col = "GroupB_P", color = "GroupB_Estimate")
 #'
 #' @export
-setGeneric("mz_rt_plot", signature = "object",
+setGeneric("mz_rt_plot",
+  signature = "object",
   function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL,
            color = NULL, title = "m/z retention time", subtitle = NULL,
-                    color_scale = getOption("notame.color_scale_con"), ...) standardGeneric("mz_rt_plot"))
+           color_scale = getOption("notame.color_scale_con"), ...) {
+    standardGeneric("mz_rt_plot")
+  }
+)
 
 #' @export
-setMethod("mz_rt_plot", c(object = "MetaboSet"),
+setMethod(
+  "mz_rt_plot", c(object = "MetaboSet"),
   function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
            title = "m/z vs retention time", subtitle = NULL,
            color_scale = getOption("notame.color_scale_con"), all_features = FALSE) {
-            mz_rt_plotter(fData(drop_flagged(object, all_features)), p_col, p_limit, mz_col, rt_col, color, title, subtitle,
-                          color_scale, all_features)
-          })
+    mz_rt_plotter(
+      fData(drop_flagged(object, all_features)), p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+      color_scale, all_features
+    )
+  }
+)
 
 #' @export
-setMethod("mz_rt_plot", c(object = "data.frame"),
+setMethod(
+  "mz_rt_plot", c(object = "data.frame"),
   function(object, p_col = NULL, p_limit = NULL, mz_col = NULL, rt_col = NULL, color = NULL,
            title = "m/z vs retention time", subtitle = NULL,
            color_scale = getOption("notame.color_scale_con")) {
-            mz_rt_plotter(object, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
-                          color_scale)
-          })
+    mz_rt_plotter(
+      object, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
+      color_scale
+    )
+  }
+)
 
 
 mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale, all_features) {
-
   if (!is.null(p_limit) && !is.null(p_col)) {
     x <- x[x[, p_col] < p_limit, ]
     cat(paste("All features with p-values larger than", p_limit, "dropped.\n"))
@@ -910,15 +1001,21 @@ mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subti
     rt_col <- rt_col %||% mz_rt_cols$rt_col
   }
 
-  p <- ggplot(x, aes_string(x = rt_col, y = mz_col, size = p_col,
-                            color = color)) +
+  p <- ggplot(x, aes_string(
+    x = rt_col, y = mz_col, size = p_col,
+    color = color
+  )) +
     geom_point(alpha = 0.6) +
-    scale_size_continuous(trans = minus_log10, range = c(0.5,3),
-                          breaks = c(0.05, 0.01, 0.001, 1e-4), labels = as.character(c(0.05, 0.01, 0.001, 1e-4))) +
+    scale_size_continuous(
+      trans = minus_log10, range = c(0.5, 3),
+      breaks = c(0.05, 0.01, 0.001, 1e-4), labels = as.character(c(0.05, 0.01, 0.001, 1e-4))
+    ) +
     theme_bw() +
     color_scale +
-    labs(title = title, subtitle = subtitle,
-         x = "Retention time", y = "Mass-to-charge ratio", size = "p-value") +
+    labs(
+      title = title, subtitle = subtitle,
+      x = "Retention time", y = "Mass-to-charge ratio", size = "p-value"
+    ) +
     # Scales for m/z and rt
     scale_x_continuous(breaks = seq(0, ceiling(max(x[, rt_col])))) +
     scale_y_continuous(breaks = seq(0, ceiling(max(x[, mz_col])), 250))
