@@ -326,9 +326,8 @@ read_from_excel <- function(file, sheet = 1, id_column = NULL, corner_row = NULL
 # Helper function to search for mass and retention time column names
 find_mz_rt_cols <- function(feature_data) {
   # Find mass and retention time columns
-  mz_tags <- c("mass", "average mz", "average.mz", "molecularweight", "molecular weight", "average_mz")
-  rt_tags <-  c("retention time", "retentiontime", "average rt[(]min[)]",
-                "average[_]rt[_]min[_]", "average[.]rt[.]min[.]", "^rt$")
+  mz_tags <- c("mass", "m.?z$", "molecular.?weight")
+  rt_tags <-  c("retention.?time", "^rt$", "(?=.*rt)(?=.*min)")
 
   mz_col <- NULL
   for (tag in mz_tags) {
