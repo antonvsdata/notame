@@ -297,7 +297,9 @@ read_from_excel <- function(file, sheet = 1, id_column = NULL, corner_row = NULL
     dplyr::mutate_if(is.factor, as.character)
   rownames(feature_data) <- feature_data$Feature_ID
   log_text("Replacing dots (.) in feature information column names with underscores (_)")
-  colnames(feature_data) <- gsub("[.]", "_", colnames(feature_data))
+  colnames(feature_data) <- gsub("[.]", "_", colnames(feature_data)) %>%
+    # remove duplicate underscores
+    gsub("_{2,}", "_", .)
 
   # Extract LC-MS measurements as matrix
   log_text(paste0("\nExtracting feature abundances from rows ", cr+1, " to ", nrow(dada),
@@ -331,7 +333,7 @@ find_mz_rt_cols <- function(feature_data) {
 
   mz_col <- NULL
   for (tag in mz_tags) {
-    hits <- grepl(tag, tolower(colnames(feature_data)))
+    hits <- grepl(tag, tolower(colnames(feature_data)), perl = TRUE)
     if (any(hits)) {
       mz_col <- colnames(feature_data)[which(hits)[1]]
       break
@@ -339,7 +341,7 @@ find_mz_rt_cols <- function(feature_data) {
   }
   rt_col <- NULL
   for (tag in rt_tags) {
-    hits <- grepl(tag, tolower(colnames(feature_data)))
+    hits <- grepl(tag, tolower(colnames(feature_data)), perl = TRUE)
     if (any(hits)) {
       rt_col <- colnames(feature_data)[which(hits)[1]]
       break
@@ -354,7 +356,7 @@ find_mz_rt_cols <- function(feature_data) {
     stop(paste0("No retention time column found - should match one of:\n",
                 paste(rt_tags, collapse = ", "), " (not case-sensitive)"))
   }
-
+  log_text(paste0("Identified m/z column ", mz_col, " and retention time column ", rt_col))
   return(list(mz_col = mz_col, rt_col = rt_col))
 }
 
