@@ -991,7 +991,7 @@ setMethod(
 mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subtitle,
                           color_scale, all_features) {
   if (!is.null(p_limit) && !is.null(p_col)) {
-    x <- x[x[, p_col] < p_limit, ]
+    x <- x[which(x[, p_col] < p_limit), ]
     cat(paste("All features with p-values larger than", p_limit, "dropped.\n"))
   }
 
