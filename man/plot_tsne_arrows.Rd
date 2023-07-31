@@ -66,7 +66,7 @@ the  method can be changed to "ppca" if nipals fails.
 plot_tsne_arrows(drop_qcs(example_set), perplexity = 5)
 # If the sample size is large, plot groups separately
 plot_tsne_arrows(drop_qcs(example_set), perplexity = 5) +
-facet_wrap(~ Group)
+  facet_wrap(~Group)
 
 }
 \seealso{

@@ -13,6 +13,7 @@ plot_tsne(
   pca_method = "nipals",
   color = group_col(object),
   shape = color,
+  point_size = 2,
   label = NULL,
   density = FALSE,
   title = "t-SNE",
@@ -39,6 +40,8 @@ plot_tsne(
 \item{color}{character, name of the column used for coloring the points. Set to NULL for black color.}
 
 \item{shape}{character, name of the column used for shape. Set to NULL for uniform round shapes.}
+
+\item{point_size}{numeric, size of the points.}
 
 \item{label}{character, name of the column used for point labels}
 

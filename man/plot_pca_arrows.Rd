@@ -60,7 +60,7 @@ by an arrow ending at the last observation.
 plot_pca_arrows(drop_qcs(example_set))
 # If the sample size is large, plot groups separately
 plot_pca_arrows(drop_qcs(example_set)) +
-facet_wrap(~ Group)
+  facet_wrap(~Group)
 
 }
 \seealso{

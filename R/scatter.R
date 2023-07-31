@@ -62,6 +62,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param color character, name of the column used for coloring the points. Set to NULL for black color.
 #' @param shape character, name of the column used for shape. Set to NULL for uniform round shapes.
+#' @param point_size numeric, size of the points.
 #' @param label character, name of the column used for point labels
 #' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
@@ -80,7 +81,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #'
 #' @export
 plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
-                     color = group_col(object), shape = color, label = NULL, density = FALSE, title = "PCA",
+                     color = group_col(object), shape = color, point_size = 2, label = NULL, density = FALSE, title = "PCA",
                      subtitle = NULL, color_scale = NA,
                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
@@ -96,7 +97,7 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
   scatter_plot(pca_scores,
     x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
     color = color, shape = shape, label = label, density = density, title = title,
-    subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
+    subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale, point_size = point_size,
     fill_scale = fill_scale
   )
 }
@@ -116,6 +117,7 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' @param pca_method the method used in PCA if there are missing values
 #' @param color character, name of the column used for coloring the points. Set to NULL for black color.
 #' @param shape character, name of the column used for shape. Set to NULL for uniform round shapes.
+#' @param point_size numeric, size of the points.
 #' @param label character, name of the column used for point labels
 #' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
@@ -135,7 +137,7 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' @export
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       pca_method = "nipals",
-                      color = group_col(object), shape = color, label = NULL, density = FALSE, title = "t-SNE",
+                      color = group_col(object), shape = color, point_size = 2, label = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NA,
                       shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
   # Drop flagged compounds if not told otherwise
@@ -148,14 +150,14 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   tsne_scores[label] <- pData(object)[, label]
 
   scatter_plot(tsne_scores,
-    x = "X1", y = "X2", color = color, shape = shape, label = label,
+    x = "X1", y = "X2", color = color, shape = shape, point_size = point_size, label = label,
     density = density, title = title, subtitle = subtitle,
     color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale
   )
 }
 
 scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
-                         shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
+                         shape_scale = NULL, point_size = 2, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape, apply_theme_bw = TRUE) {
   if (!is.null(color_scale)) {
     if (!is.ggproto(color_scale)) {
@@ -199,7 +201,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
   if (class(data[, shape]) == "factor") {
     if (length(levels(data[, shape])) <= 8) {
       p <- p +
-        geom_point(aes_string(shape = shape)) +
+        geom_point(aes_string(shape = shape), size = point_size) +
         shape_scale +
         labs(shape = shape_lab)
     } else if (is.null(shape_scale)) {
@@ -601,6 +603,7 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' @param label_limit numeric, p-value which is used to limit label plotting. Defaults to 0.05.
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
+#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
 #' also be passed using \code{mapping = aes(...)}.
 #'
 #' @return a ggplot object

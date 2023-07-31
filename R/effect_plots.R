@@ -211,6 +211,7 @@ save_subject_line_plots <- function(object,
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
+#' @param box_width numeric, width of the boxes
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -245,11 +246,12 @@ save_group_boxplots <- function(object,
                                 subtitle = NULL,
                                 color_scale = getOption("notame.color_scale_dis"),
                                 text_base_size = 14,
+                                box_width = 0.8,
                                 ...) {
   boxplot_fun <- function(object, fname) {
     data <- combined_data(object)
     p <- ggplot(data, aes_string(x = x, y = fname, color = color)) +
-      geom_boxplot(position = position_dodge(0.6), width = 0.5) +
+      geom_boxplot(position = position_dodge(0.6), width = box_width) +
       stat_summary(
         fun.data = mean_se,
         geom = "point",

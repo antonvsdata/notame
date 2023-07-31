@@ -16,6 +16,7 @@ save_group_boxplots(
   subtitle = NULL,
   color_scale = getOption("notame.color_scale_dis"),
   text_base_size = 14,
+  box_width = 0.8,
   ...
 )
 }
@@ -41,6 +42,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{color_scale}{the color scale as returned by a ggplot function}
 
 \item{text_base_size}{integer, base size for text in figures}
+
+\item{box_width}{numeric, width of the boxes}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

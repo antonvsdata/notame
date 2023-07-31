@@ -60,13 +60,17 @@ This results in a so-called directed Manhattan plot.
 lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
 lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
 # Traditional Manhattan plot from data frame
-manhattan_plot(lm_data, x = "Average.Mz",
-             p = "GroupB_P", p_fdr = "GroupB_P_FDR",
-             fdr_limit = 0.1)
+manhattan_plot(lm_data,
+  x = "Average.Mz",
+  p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+  fdr_limit = 0.1
+)
 # Directed Manhattan plot from MetaboSet
 with_results <- join_fData(merged_sample, lm_results)
-manhattan_plot(with_results, x = "Average.Mz", effect = "GroupB_Estimate",
-             p = "GroupB_P", p_fdr = "GroupB_P_FDR",
-             fdr_limit = 0.1)
+manhattan_plot(with_results,
+  x = "Average.Mz", effect = "GroupB_Estimate",
+  p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+  fdr_limit = 0.1
+)
 
 }
