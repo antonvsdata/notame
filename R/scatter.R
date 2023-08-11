@@ -156,7 +156,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   tsne_scores[label] <- pData(object)[, label]
 
   scatter_plot(tsne_scores,
-    x = "X1", y = "X2", color = color, shape = shape, point_size = point_size, label = label,
+    x = "X1", y = "X2", color = color, shape = shape, label = label,
     density = density, title = title, subtitle = subtitle,
     color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale,
     text_base_size = text_base_size, point_size = point_size
