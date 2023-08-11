@@ -13,6 +13,9 @@ plot_pca_loadings(
   n_features = c(10, 10),
   title = "PCA loadings",
   subtitle = NULL,
+  text_base_size = 14,
+  point_size = 2,
+  label_text_size = 4,
   ...
 )
 }
@@ -32,6 +35,12 @@ flagged features are removed before visualization.}
 for each principal component}
 
 \item{title, subtitle}{the titles of the plot}
+
+\item{text_base_size}{numeric, base size for text}
+
+\item{point_size}{numeric, size of the points}
+
+\item{label_text_size}{numeric, size of the labels}
 
 \item{...}{additional arguments passed to pcaMethods::pca}
 }

@@ -36,7 +36,8 @@ save_feature_plots <- function(object, file_path, format,
     fname <- featureNames(object)[i]
     name <- fData(object)[i, title]
 
-    p <- plot_fun(object, fname)
+    p <- plot_fun(object, fname) +
+      theme(plot.title = ggtext::element_textbox_simple())
 
     if (format != "pdf") {
       if (is.null(title)) {
@@ -71,7 +72,8 @@ create_feature_plot_list <- function(object, plot_fun) {
       cat(paste0("Iteration ", i, "/", nrow(object), "\n"))
     }
     fname <- featureNames(object)[i]
-    p <- plot_fun(object, fname)
+    p <- plot_fun(object, fname) +
+      theme(plot.title = ggtext::element_textbox_simple())
     plot_list[[i]] <- p
   }
 
@@ -97,6 +99,8 @@ create_feature_plot_list <- function(object, plot_fun) {
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param facet character, the column name to facet by (optional, usually same as color)
 #' @param text_base_size integer, base size for text in figures
+#' @param line_width numeric, width of the lines
+#' @param mean_line_width numeric, width of the mean line
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -125,6 +129,8 @@ save_subject_line_plots <- function(object,
                                     color_scale = getOption("notame.color_scale_dis"),
                                     facet = NULL,
                                     text_base_size = 14,
+                                    line_width = 0.3,
+                                    mean_line_width = 1.2,
                                     ...) {
   if (is.na(x)) {
     stop("The time column is missing")
@@ -143,24 +149,24 @@ save_subject_line_plots <- function(object,
         geom_line(aes_string(group = id),
           color = "grey20",
           alpha = 0.35,
-          size = 0.3
+          linewidth = line_width
         ) +
         stat_summary(aes(group = 1),
           fun.data = "mean_se",
           geom = "line",
-          size = 1.2,
+          linewidth = mean_line_width,
           color = "red"
         )
     } else {
       p <- p +
         geom_line(aes_string(group = id, color = color),
           alpha = 0.35,
-          size = 0.3
+          size = line_width
         ) +
         stat_summary(aes_string(group = color, color = color),
           fun.data = "mean_se",
           geom = "line",
-          size = 1.2
+          size = mean_line_width
         ) +
         color_scale
     }
@@ -212,6 +218,8 @@ save_subject_line_plots <- function(object,
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
 #' @param box_width numeric, width of the boxes
+#' @param line_width numeric, width of the lines
+#' @param point_size numeric, size of the mean points
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -232,7 +240,7 @@ save_subject_line_plots <- function(object,
 #'   color = "Group", title = NULL
 #' )
 #' }
-#'# Plot one feature
+#' # Plot one feature
 #' save_group_boxplots(drop_qcs(merged_sample)[5, ], save = FALSE)
 #' @export
 save_group_boxplots <- function(object,
@@ -247,17 +255,20 @@ save_group_boxplots <- function(object,
                                 color_scale = getOption("notame.color_scale_dis"),
                                 text_base_size = 14,
                                 box_width = 0.8,
+                                line_width = 0.5,
+                                point_size = 3,
                                 ...) {
   boxplot_fun <- function(object, fname) {
     data <- combined_data(object)
+    dodge_amount <- box_width + 0.05
     p <- ggplot(data, aes_string(x = x, y = fname, color = color)) +
-      geom_boxplot(position = position_dodge(0.6), width = box_width) +
+      geom_boxplot(position = position_dodge(dodge_amount), width = box_width, size = line_width) +
       stat_summary(
         fun.data = mean_se,
         geom = "point",
         shape = 18,
-        size = 3,
-        position = position_dodge(0.6)
+        size = point_size,
+        position = position_dodge(dodge_amount)
       ) +
       color_scale +
       theme_bw(base_size = text_base_size) +
@@ -266,6 +277,9 @@ save_group_boxplots <- function(object,
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
+    if (x == color) {
+      p <- p + guides(color = "none")
+    }
     p
   }
 
@@ -300,6 +314,8 @@ save_group_boxplots <- function(object,
 #' @param color character, name of the column to be used for coloring
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
+#' @param cex numeric, scaling for adjusting point spacing
+#' @param size numeric, size of points
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -335,6 +351,8 @@ save_beeswarm_plots <- function(object,
                                 color = group_col(object),
                                 color_scale = getOption("notame.color_scale_dis"),
                                 text_base_size = 14,
+                                cex = 2,
+                                size = 2,
                                 ...) {
   beeswarm_fun <- function(object, fname) {
     data <- combined_data(object)
@@ -346,7 +364,7 @@ save_beeswarm_plots <- function(object,
         stat_boxplot(geom = "errorbar", width = 0.5, lwd = .3)
     }
     p <- p +
-      ggbeeswarm::geom_beeswarm() +
+      ggbeeswarm::geom_beeswarm(cex = cex, size = size) +
       color_scale +
       theme_bw(base_size = text_base_size) +
       labs(
@@ -354,6 +372,9 @@ save_beeswarm_plots <- function(object,
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
+    if (x == color) {
+      p <- p + guides(color = "none")
+    }
     p
   }
 
@@ -390,6 +411,7 @@ save_beeswarm_plots <- function(object,
 #' Set to NULL for no title/subtitle, this creates running numbered filenames
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
+#' @param point_size numeric, size of the points
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -422,6 +444,7 @@ save_scatter_plots <- function(object,
                                subtitle = NULL,
                                shape_scale = getOption("notame.shape_scale"),
                                text_base_size = 14,
+                               point_size = 2,
                                ...) {
   scatter_fun <- function(object, fname) {
     data <- combined_data(object)
@@ -433,6 +456,7 @@ save_scatter_plots <- function(object,
       color_scale = color_scale,
       shape = shape,
       shape_scale = shape_scale,
+      point_size = point_size,
       fixed = FALSE,
       apply_theme_bw = FALSE
     ) +
@@ -479,6 +503,8 @@ save_scatter_plots <- function(object,
 #' @param position_dodge_amount numeric: how much the group mean points should dodge away from each other
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
+#' @param line_width numeric, width of the lines
+#' @param point_size numeric, size of the points
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -515,6 +541,8 @@ save_group_lineplots <- function(object,
                                  position_dodge_amount = 0.2,
                                  color_scale = getOption("notame.color_scale_dis"),
                                  text_base_size = 14,
+                                 line_width = 0.5,
+                                 point_size = 4,
                                  ...) {
   if (is.na(group)) {
     stop("The group column is missing")
@@ -532,7 +560,7 @@ save_group_lineplots <- function(object,
       # Errorbars with solid lines
       stat_summary(
         fun.data = fun.data,
-        geom = "errorbar", width = 0.5,
+        geom = "errorbar", width = line_width,
         fun = fun,
         fun.min = fun.min,
         fun.max = fun.max,
@@ -546,13 +574,13 @@ save_group_lineplots <- function(object,
         fun.min = fun.min,
         fun.max = fun.max,
         position = position_dodge(position_dodge_amount),
-        size = 4
+        size = point_size
       ) +
       # Line from mean to mean between for example timepoints
       stat_summary(
         fun.data = fun.data,
         geom = "line",
-        position = position_dodge(position_dodge_amount), size = 0.5,
+        position = position_dodge(position_dodge_amount), size = line_width,
         fun = fun,
         fun.min = fun.min,
         fun.max = fun.max
@@ -564,6 +592,11 @@ save_group_lineplots <- function(object,
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
+      if (x == group) {
+        p <- p + guides(color = "none")
+      }
+
+      p
   }
 
   object <- drop_flagged(object, all_features)

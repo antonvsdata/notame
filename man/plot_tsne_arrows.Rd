@@ -19,6 +19,8 @@ plot_tsne_arrows(
   title = "t-SNE changes",
   subtitle = paste("Perplexity:", perplexity),
   color_scale = getOption("notame.color_scale_dis"),
+  text_base_size = 14,
+  line_width = 0.5,
   ...
 )
 }
@@ -48,6 +50,10 @@ plot_tsne_arrows(
 \item{title, subtitle}{the titles of the plot}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
+
+\item{text_base_size}{the base size of the text}
+
+\item{line_width}{the width of the arrows}
 
 \item{...}{additional arguments passed to \code{Rtsne::Rtsne}}
 }

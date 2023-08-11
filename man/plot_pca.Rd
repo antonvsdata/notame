@@ -12,7 +12,6 @@ plot_pca(
   scale = "uv",
   color = group_col(object),
   shape = color,
-  point_size = 2,
   label = NULL,
   density = FALSE,
   title = "PCA",
@@ -20,6 +19,8 @@ plot_pca(
   color_scale = NA,
   shape_scale = getOption("notame.shape_scale"),
   fill_scale = getOption("notame.fill_scale_dis"),
+  text_base_size = 14,
+  point_size = 2,
   ...
 )
 }
@@ -39,8 +40,6 @@ flagged features are removed before visualization.}
 
 \item{shape}{character, name of the column used for shape. Set to NULL for uniform round shapes.}
 
-\item{point_size}{numeric, size of the points.}
-
 \item{label}{character, name of the column used for point labels}
 
 \item{density}{logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.}
@@ -52,6 +51,10 @@ flagged features are removed before visualization.}
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
 \item{fill_scale}{the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.}
+
+\item{text_base_size}{numeric, base size for text}
+
+\item{point_size}{numeric, size of the points}
 
 \item{...}{additional arguments passed to pcaMethods::pca}
 }

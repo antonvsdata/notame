@@ -17,6 +17,8 @@ save_group_boxplots(
   color_scale = getOption("notame.color_scale_dis"),
   text_base_size = 14,
   box_width = 0.8,
+  line_width = 0.5,
+  point_size = 3,
   ...
 )
 }
@@ -44,6 +46,10 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{text_base_size}{integer, base size for text in figures}
 
 \item{box_width}{numeric, width of the boxes}
+
+\item{line_width}{numeric, width of the lines}
+
+\item{point_size}{numeric, size of the mean points}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

@@ -18,6 +18,7 @@ save_scatter_plots(
   subtitle = NULL,
   shape_scale = getOption("notame.shape_scale"),
   text_base_size = 14,
+  point_size = 2,
   ...
 )
 }
@@ -46,6 +47,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
 \item{text_base_size}{integer, base size for text in figures}
+
+\item{point_size}{numeric, size of the points}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

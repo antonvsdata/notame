@@ -69,6 +69,8 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @param color_scale the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param fill_scale the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.
+#' @param text_base_size numeric, base size for text
+#' @param point_size numeric, size of the points
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -81,9 +83,10 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #'
 #' @export
 plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
-                     color = group_col(object), shape = color, point_size = 2, label = NULL, density = FALSE, title = "PCA",
+                     color = group_col(object), shape = color, label = NULL, density = FALSE, title = "PCA",
                      subtitle = NULL, color_scale = NA,
-                     shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
+                     shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"),
+                     text_base_size = 14, point_size = 2, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -97,8 +100,8 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
   scatter_plot(pca_scores,
     x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
     color = color, shape = shape, label = label, density = density, title = title,
-    subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale, point_size = point_size,
-    fill_scale = fill_scale
+    subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
+    fill_scale = fill_scale, text_base_size = text_base_size, point_size = point_size
   )
 }
 
@@ -124,6 +127,8 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' @param color_scale the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param fill_scale the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.
+#' @param text_base_size numeric, base size for text
+#' @param point_size numeric, size of the points
 #' @param ... additional arguments passed to \code{Rtsne::Rtsne}
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -137,9 +142,10 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' @export
 plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv", perplexity = 30,
                       pca_method = "nipals",
-                      color = group_col(object), shape = color, point_size = 2, label = NULL, density = FALSE, title = "t-SNE",
+                      color = group_col(object), shape = color, label = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NA,
-                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"), ...) {
+                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"),
+                      text_base_size = 14, point_size = 2, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
   # t-SNE
@@ -152,13 +158,15 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
   scatter_plot(tsne_scores,
     x = "X1", y = "X2", color = color, shape = shape, point_size = point_size, label = label,
     density = density, title = title, subtitle = subtitle,
-    color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale
+    color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale,
+    text_base_size = text_base_size, point_size = point_size
   )
 }
 
 scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
-                         shape_scale = NULL, point_size = 2, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
-                         color_lab = color, shape_lab = shape, apply_theme_bw = TRUE) {
+                         shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
+                         color_lab = color, shape_lab = shape, apply_theme_bw = TRUE,
+                         text_base_size = text_base_size, point_size = point_size, label_text_size = label_text_size) {
   if (!is.null(color_scale)) {
     if (!is.ggproto(color_scale)) {
       color_scale <- if (is.na(color_scale)) {
@@ -182,7 +190,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
     )
   if (apply_theme_bw) {
     p <- p +
-      theme_bw()
+      theme_bw(base_size = text_base_size)
   }
   if (fixed) {
     p <- p + coord_fixed() + theme(aspect.ratio = 1)
@@ -207,11 +215,11 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
     } else if (is.null(shape_scale)) {
       cat("Only 8 distinct shapes currently available!")
       p <- p +
-        geom_point()
+        geom_point(size = point_size)
     }
   } else {
     p <- p +
-      geom_point()
+      geom_point(size = point_size)
   }
 
   # Add point labels
@@ -222,7 +230,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       )
     }
     p <- p +
-      ggrepel::geom_text_repel(aes_string(label = label))
+      ggrepel::geom_text_repel(aes_string(label = label), size = label_text_size)
   }
 
   # Add density plots to top and right
@@ -270,6 +278,9 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 #' @param n_features numeric vector of length two, number of top feature to plot
 #' for each principal component
 #' @param title,subtitle the titles of the plot
+#' @param text_base_size numeric, base size for text
+#' @param point_size numeric, size of the points
+#' @param label_text_size numeric, size of the labels
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return a ggplot object.
@@ -282,7 +293,9 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 #' @export
 plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
                               n_features = c(10, 10),
-                              title = "PCA loadings", subtitle = NULL, ...) {
+                              title = "PCA loadings", subtitle = NULL,
+                              text_base_size = 14, point_size = 2, label_text_size = 4,
+                              ...) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
     stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
       call. = FALSE
@@ -307,9 +320,9 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
   loads <- loads[union(features_pc1, features_pc2), ]
 
   ggplot(loads, aes_string(x = pc_names[1], y = pc_names[2], label = "Feature_ID")) +
-    geom_point() +
-    ggrepel::geom_text_repel() +
-    theme_bw() +
+    geom_point(size = point_size) +
+    ggrepel::geom_text_repel(size = label_text_size) +
+    theme_bw(base_size = text_base_size) +
     labs(title = title, subtitle = subtitle)
 }
 
@@ -445,12 +458,13 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
 # --------- ARROW PLOTS -----------
 
 arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
-                       color_scale, title, subtitle, xlab, ylab) {
+                       color_scale, title, subtitle, xlab, ylab,
+                       text_base_size, line_width) {
   data <- data[order(data[, subject], data[, time]), ]
 
   p <- ggplot(data, aes_string(x = x, y = y, color = color, group = subject)) +
-    geom_path(arrow = arrow_style, alpha = alpha) +
-    theme_bw() +
+    geom_path(arrow = arrow_style, alpha = alpha, linewidth = line_width) +
+    theme_bw(base_size = text_base_size) +
     color_scale +
     coord_fixed() +
     theme(aspect.ratio = 1) +
@@ -476,6 +490,8 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 #' @param arrow_style a description of arrow heads, the size and angle can be modified, see \code{?arrow}
 #' @param title,subtitle the titles of the plot
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param text_base_size the base size of the text
+#' @param line_width the width of the arrows
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return a ggplot object.
@@ -492,7 +508,8 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
 plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE, scale = "uv",
                             color = group_col(object), time = time_col(object), subject = subject_col(object),
                             alpha = 0.6, arrow_style = arrow(), title = "PCA changes",
-                            subtitle = NULL, color_scale = getOption("notame.color_scale_dis"), ...) {
+                            subtitle = NULL, color_scale = getOption("notame.color_scale_dis"),
+                            text_base_size = 14, line_width = 0.5, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -507,7 +524,8 @@ plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center 
     data = pca_scores, x = pc_names[1], y = pc_names[2], color = color, time = time, subject = subject,
     alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
     title = title, subtitle = subtitle,
-    xlab = pca_results$labels[1], ylab = pca_results$labels[2]
+    xlab = pca_results$labels[1], ylab = pca_results$labels[2],
+    text_base_size = text_base_size, line_width = line_width
   )
 }
 
@@ -534,6 +552,8 @@ plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center 
 #' @param arrow_style a description of arrow heads, the size and angle can be modified, see \code{?arrow}
 #' @param title,subtitle the titles of the plot
 #' @param color_scale the color scale as returned by a ggplot function
+#' @param text_base_size the base size of the text
+#' @param line_width the width of the arrows
 #' @param ... additional arguments passed to \code{Rtsne::Rtsne}
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -552,7 +572,8 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
                              perplexity = 30, pca_method = "nipals",
                              color = group_col(object), time = time_col(object), subject = subject_col(object),
                              alpha = 0.6, arrow_style = arrow(), title = "t-SNE changes",
-                             subtitle = paste("Perplexity:", perplexity), color_scale = getOption("notame.color_scale_dis"), ...) {
+                             subtitle = paste("Perplexity:", perplexity), color_scale = getOption("notame.color_scale_dis"),
+                             text_base_size = 14, line_width = 0.5, ...) {
 
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -566,7 +587,8 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
     data = tsne_scores, x = "X1", y = "X2", color = color, time = time, subject = subject,
     alpha = alpha, arrow_style = arrow_style, color_scale = color_scale,
     title = title, subtitle = subtitle,
-    xlab = "X1", ylab = "X2"
+    xlab = "X1", ylab = "X2",
+    text_base_size = text_base_size, line_width = line_width
   )
 }
 
@@ -625,7 +647,8 @@ setGeneric("volcano_plot",
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
-           title = "Volcano plot", subtitle = NULL, ...) {
+           title = "Volcano plot", subtitle = NULL,
+            text_base_size = 14, label_text_size = 4, ...) {
     standardGeneric("volcano_plot")
   }
 )
@@ -638,11 +661,13 @@ setMethod(
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
-           title = "Volcano plot", subtitle = NULL, ...) {
+           title = "Volcano plot", subtitle = NULL,
+            text_base_size = 14, label_text_size = 4, ...) {
     volcano_plotter(
       fData(object), x, p, p_fdr, color, p_breaks, fdr_limit,
       log2_x, center_x_axis, x_lim, label, label_limit,
-      color_scale, title, subtitle, ...
+      color_scale, title, subtitle,
+      text_base_size, label_text_size, ...
     )
   }
 )
@@ -654,11 +679,13 @@ setMethod(
            p_breaks = c(0.05, 0.01, 0.001, 1e-4), fdr_limit = 0.05,
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
-           title = "Volcano plot", subtitle = NULL, ...) {
+           title = "Volcano plot", subtitle = NULL,
+            text_base_size = 14, label_text_size = 4, ...) {
     volcano_plotter(
       object, x, p, p_fdr, color, p_breaks, fdr_limit,
       log2_x, center_x_axis, x_lim, label, label_limit,
-      color_scale, title, subtitle, ...
+      color_scale, title, subtitle,
+      text_base_size, label_text_size, ...
     )
   }
 )
@@ -666,7 +693,8 @@ setMethod(
 
 volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
                             log2_x, center_x_axis, x_lim, label, label_limit,
-                            color_scale, title, subtitle, ...) {
+                            color_scale, title, subtitle,
+                            text_base_size, label_text_size, ...) {
   if (center_x_axis & !is.null(x_lim)) {
     warning("Manually setting x-axis limits overrides x-axis centering")
     center_x_axis <- FALSE
@@ -678,7 +706,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
   pl <- ggplot(data, aes_string(x = x, y = p, color = color)) +
     geom_point(...) +
     color_scale +
-    theme_bw() +
+    theme_bw(base_size = text_base_size) +
     labs(title = title, subtitle = subtitle) +
     theme(
       panel.grid.minor.y = element_blank(), # only show the specified p-values, which might be unevenly spaced
@@ -739,7 +767,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
           mapping = aes_string(label = label),
           seed = 313,
           alpha = 0.5,
-          size = 3,
+          size = label_text_size,
           force = 10,
           max.overlaps = 50
         )

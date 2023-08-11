@@ -20,6 +20,8 @@ volcano_plot(
   color_scale = getOption("notame.color_scale_con"),
   title = "Volcano plot",
   subtitle = NULL,
+  text_base_size = 14,
+  label_text_size = 4,
   ...
 )
 }

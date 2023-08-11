@@ -18,6 +18,8 @@ save_subject_line_plots(
   color_scale = getOption("notame.color_scale_dis"),
   facet = NULL,
   text_base_size = 14,
+  line_width = 0.3,
+  mean_line_width = 1.2,
   ...
 )
 }
@@ -46,6 +48,10 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{facet}{character, the column name to facet by (optional, usually same as color)}
 
 \item{text_base_size}{integer, base size for text in figures}
+
+\item{line_width}{numeric, width of the lines}
+
+\item{mean_line_width}{numeric, width of the mean line}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }
