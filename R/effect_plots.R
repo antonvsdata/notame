@@ -36,8 +36,7 @@ save_feature_plots <- function(object, file_path, format,
     fname <- featureNames(object)[i]
     name <- fData(object)[i, title]
 
-    p <- plot_fun(object, fname) +
-      theme(plot.title = ggtext::element_textbox_simple())
+    p <- plot_fun(object, fname)
 
     if (format != "pdf") {
       if (is.null(title)) {
@@ -101,6 +100,7 @@ create_feature_plot_list <- function(object, plot_fun) {
 #' @param text_base_size integer, base size for text in figures
 #' @param line_width numeric, width of the lines
 #' @param mean_line_width numeric, width of the mean line
+#' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -131,6 +131,7 @@ save_subject_line_plots <- function(object,
                                     text_base_size = 14,
                                     line_width = 0.3,
                                     mean_line_width = 1.2,
+                                    theme = theme_bw(base_size = text_base_size),
                                     ...) {
   if (is.na(x)) {
     stop("The time column is missing")
@@ -155,7 +156,7 @@ save_subject_line_plots <- function(object,
           fun.data = "mean_se",
           geom = "line",
           linewidth = mean_line_width,
-          color = "red"
+          color = color_scale$palette(1)[1]
         )
     } else {
       p <- p +
@@ -177,13 +178,16 @@ save_subject_line_plots <- function(object,
       p <- p +
         scale_x_discrete(expand = c(0.05, 0.05))
     }
+    splitted_title = 
     p <- p +
-      theme_bw(base_size = text_base_size) +
+      theme +
       labs(
         title = fData(object)[fname, title],
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
+    # Split long titles to multiple rows
+    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
@@ -220,6 +224,7 @@ save_subject_line_plots <- function(object,
 #' @param box_width numeric, width of the boxes
 #' @param line_width numeric, width of the lines
 #' @param point_size numeric, size of the mean points
+#' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -257,6 +262,7 @@ save_group_boxplots <- function(object,
                                 box_width = 0.8,
                                 line_width = 0.5,
                                 point_size = 3,
+                                theme = theme_bw(base_size = text_base_size),
                                 ...) {
   boxplot_fun <- function(object, fname) {
     data <- combined_data(object)
@@ -271,7 +277,7 @@ save_group_boxplots <- function(object,
         position = position_dodge(dodge_amount)
       ) +
       color_scale +
-      theme_bw(base_size = text_base_size) +
+      theme +
       labs(
         title = fData(object)[fname, title],
         subtitle = fData(object)[fname, subtitle],
@@ -280,6 +286,8 @@ save_group_boxplots <- function(object,
     if (x == color) {
       p <- p + guides(color = "none")
     }
+    # Split long titles to multiple rows
+    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
@@ -316,6 +324,7 @@ save_group_boxplots <- function(object,
 #' @param text_base_size integer, base size for text in figures
 #' @param cex numeric, scaling for adjusting point spacing
 #' @param size numeric, size of points
+#' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -353,6 +362,7 @@ save_beeswarm_plots <- function(object,
                                 text_base_size = 14,
                                 cex = 2,
                                 size = 2,
+                                theme = theme_bw(base_size = text_base_size),
                                 ...) {
   beeswarm_fun <- function(object, fname) {
     data <- combined_data(object)
@@ -366,7 +376,7 @@ save_beeswarm_plots <- function(object,
     p <- p +
       ggbeeswarm::geom_beeswarm(cex = cex, size = size) +
       color_scale +
-      theme_bw(base_size = text_base_size) +
+      theme +
       labs(
         title = fData(object)[fname, title],
         subtitle = fData(object)[fname, subtitle],
@@ -375,6 +385,8 @@ save_beeswarm_plots <- function(object,
     if (x == color) {
       p <- p + guides(color = "none")
     }
+    # Split long titles to multiple rows
+    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
@@ -412,6 +424,7 @@ save_beeswarm_plots <- function(object,
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
 #' @param point_size numeric, size of the points
+#' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -445,6 +458,7 @@ save_scatter_plots <- function(object,
                                shape_scale = getOption("notame.shape_scale"),
                                text_base_size = 14,
                                point_size = 2,
+                               theme = theme_bw(base_size = text_base_size),
                                ...) {
   scatter_fun <- function(object, fname) {
     data <- combined_data(object)
@@ -460,12 +474,14 @@ save_scatter_plots <- function(object,
       fixed = FALSE,
       apply_theme_bw = FALSE
     ) +
-      theme_bw(base_size = text_base_size) +
+      theme +
       labs(
         title = fData(object)[fname, title],
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
+    # Split long titles to multiple rows
+    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
   object <- drop_flagged(object, all_features)
@@ -505,6 +521,7 @@ save_scatter_plots <- function(object,
 #' @param text_base_size integer, base size for text in figures
 #' @param line_width numeric, width of the lines
 #' @param point_size numeric, size of the points
+#' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
 #' @seealso
@@ -543,6 +560,7 @@ save_group_lineplots <- function(object,
                                  text_base_size = 14,
                                  line_width = 0.5,
                                  point_size = 4,
+                                 theme = theme_bw(base_size = text_base_size),
                                  ...) {
   if (is.na(group)) {
     stop("The group column is missing")
@@ -586,7 +604,7 @@ save_group_lineplots <- function(object,
         fun.max = fun.max
       ) +
       color_scale +
-      theme_bw(base_size = text_base_size) +
+      theme +
       labs(
         title = fData(object)[fname, title],
         subtitle = fData(object)[fname, subtitle],
@@ -595,7 +613,8 @@ save_group_lineplots <- function(object,
       if (x == group) {
         p <- p + guides(color = "none")
       }
-
+      # Split long titles to multiple rows
+      p <- p + theme(plot.title = ggtext::element_textbox_simple())
       p
   }
 
