@@ -19,6 +19,7 @@ save_scatter_plots(
   shape_scale = getOption("notame.shape_scale"),
   text_base_size = 14,
   point_size = 2,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
@@ -49,6 +50,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{text_base_size}{integer, base size for text in figures}
 
 \item{point_size}{numeric, size of the points}
+
+\item{theme}{a ggplot theme to be added to the plot}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

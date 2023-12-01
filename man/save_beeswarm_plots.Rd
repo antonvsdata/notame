@@ -19,6 +19,7 @@ save_beeswarm_plots(
   text_base_size = 14,
   cex = 2,
   size = 2,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
@@ -47,6 +48,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{cex}{numeric, scaling for adjusting point spacing}
 
 \item{size}{numeric, size of points}
+
+\item{theme}{a ggplot theme to be added to the plot}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

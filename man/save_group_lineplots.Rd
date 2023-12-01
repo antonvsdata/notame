@@ -23,6 +23,7 @@ save_group_lineplots(
   text_base_size = 14,
   line_width = 0.5,
   point_size = 4,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
@@ -57,6 +58,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{line_width}{numeric, width of the lines}
 
 \item{point_size}{numeric, size of the points}
+
+\item{theme}{a ggplot theme to be added to the plot}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }

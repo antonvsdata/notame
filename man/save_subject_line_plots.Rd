@@ -20,6 +20,7 @@ save_subject_line_plots(
   text_base_size = 14,
   line_width = 0.3,
   mean_line_width = 1.2,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
@@ -52,6 +53,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{line_width}{numeric, width of the lines}
 
 \item{mean_line_width}{numeric, width of the mean line}
+
+\item{theme}{a ggplot theme to be added to the plot}
 
 \item{...}{other arguments to graphic device functions, like width and height}
 }
