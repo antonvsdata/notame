@@ -6,15 +6,17 @@
 #'
 #' @export
 quality <- function(object) {
-  if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
+  if (!all(c("RSD", "RSD_r", "D_ratio", "D_ratio_r") %in% colnames(fData(object)))) {
     return(NULL)
   }
-  fData(object)[c("Feature_ID", "RSD", "RSD_r", "D_ratio",
-                  "D_ratio_r")]
+  fData(object)[c(
+    "Feature_ID", "RSD", "RSD_r", "D_ratio",
+    "D_ratio_r"
+  )]
 }
 
 erase_quality <- function(object) {
-  if (!all(c("RSD", "RSD_r", "D_ratio","D_ratio_r") %in% colnames(fData(object)))) {
+  if (!all(c("RSD", "RSD_r", "D_ratio", "D_ratio_r") %in% colnames(fData(object)))) {
     return(NULL)
   }
   fData(object)[c("RSD", "RSD_r", "D_ratio", "D_ratio_r")] <- NULL
@@ -36,14 +38,18 @@ assess_quality <- function(object) {
   qc_data <- exprs(object)[, object$QC == "QC"]
   sample_data <- exprs(object)[, object$QC != "QC"]
 
-  quality_metrics <- foreach::foreach(i = seq_len(nrow(sample_data)), .combine = rbind,
-                                      .export = c("finite_sd", "finite_mad", "finite_mean", "finite_median")) %dopar% {
-    data.frame(Feature_ID = rownames(sample_data)[i],
-               RSD = finite_sd(qc_data[i, ]) / abs(finite_mean(qc_data[i, ])),
-               RSD_r = finite_mad(qc_data[i, ]) / abs(finite_median(qc_data[i, ])),
-               D_ratio = finite_sd(qc_data[i, ]) / finite_sd(sample_data[i, ]),
-               D_ratio_r = finite_mad(qc_data[i, ]) / finite_mad(sample_data[i, ]),
-               row.names = rownames(sample_data)[i], stringsAsFactors = FALSE)
+  quality_metrics <- foreach::foreach(
+    i = seq_len(nrow(sample_data)), .combine = rbind,
+    .export = c("finite_sd", "finite_mad", "finite_mean", "finite_median")
+  ) %dopar% {
+    data.frame(
+      Feature_ID = rownames(sample_data)[i],
+      RSD = finite_sd(qc_data[i, ]) / abs(finite_mean(qc_data[i, ])),
+      RSD_r = finite_mad(qc_data[i, ]) / abs(finite_median(qc_data[i, ])),
+      D_ratio = finite_sd(qc_data[i, ]) / finite_sd(sample_data[i, ]),
+      D_ratio_r = finite_mad(qc_data[i, ]) / finite_mad(sample_data[i, ]),
+      row.names = rownames(sample_data)[i], stringsAsFactors = FALSE
+    )
   }
 
   object <- join_fData(object, quality_metrics)
@@ -55,16 +61,20 @@ assess_quality <- function(object) {
 #' Flag low-quality features
 #'
 #' Flags low-quality features using the quality metrics defined in (Broadhurst 2018). The metrics are described in
-#' more detain in Details. A condition for keeping the features is given as a character, which is passed to \code{dplyr::filter}.
+#' more detain in Details. A condition for keeping the features is given as a character,
+#' which is passed to \code{dplyr::filter}.
 #'
 #' @param object a MetaboSet object
 #' @param condition character, condition for keeping the features, see Details
 #'
-#' @details The quality metrics measure two things: internal spread of the QCs, and spread of the QCs compared to the spread of the biological samples.
+#' @details The quality metrics measure two things: internal spread of the QCs,
+#' and spread of the QCs compared to the spread of the biological samples.
 #'   Internal spread is measured with relative standard deviation (RSD), also known as coefficient of variation (CV).
 #'   \deqn{RSD = sd(QC) / mean(QC) }
-#'   Where \eqn{sd(QC)} is the standard deviation of the QC samples and \eqn{mean(QC)} is the sample mean of the signal in the QC samples.
-#'   RSD can also be replaced by a non-parametric, robust version based on the median and median absolute deviation (MAD):
+#'   Where \eqn{sd(QC)} is the standard deviation of the QC samples and \eqn{mean(QC)} is
+#'   the sample mean of the signal in the QC samples.
+#'   RSD can also be replaced by a non-parametric, robust version based on the median and
+#'   median absolute deviation (MAD):
 #'   \deqn{RSD_r = 1.4826 * MAD(QC) / median(QC)}
 #'   The spread of the QC samples compared to the biological samples is measured using a metric called D-ratio:
 #'   \deqn{D_ratio = sd(QC) / sd(biological)}
@@ -93,16 +103,21 @@ flag_quality <- function(object,
   if (is.null(quality(object))) {
     object <- assess_quality(object)
   }
-  add_citation("Quality metrics were computed according to guidelines in:",
-               "Broadhurst, David et al. Guidelines and considerations for the use of system suitability and quality control samples in mass spectrometry assays applied in untargeted clinical metabolomic studies. Metabolomics : Official journal of the Metabolomic Society vol. 14,6 (2018): 72. doi:10.1007/s11306-018-1367-3")
+  add_citation(
+    "Quality metrics were computed according to guidelines in:",
+    "Broadhurst, David et al. Guidelines and considerations for the use of system suitability and
+    quality control samples in mass spectrometry assays applied in untargeted clinical metabolomic studies.
+    Metabolomics : Official journal of the Metabolomic Society vol. 14,6 (2018): 72. doi:10.1007/s11306-018-1367-3"
+  )
   good <- paste0("fData(object) %>% dplyr::filter(", condition, ")") %>%
-    parse(text = .) %>% eval()
+    parse(text = .) %>%
+    eval()
   good <- good$Feature_ID
 
   idx <- is.na(flag(object)) & !fData(object)$Feature_ID %in% good
   flag(object)[idx] <- "Low_quality"
 
-  percentage <- scales::percent(sum(flag(object) == "Low_quality", na.rm = TRUE)/nrow(fData(object)))
+  percentage <- scales::percent(sum(flag(object) == "Low_quality", na.rm = TRUE) / nrow(fData(object)))
   log_text(paste0("\n", percentage, " of features flagged for low quality"))
 
   object
@@ -110,11 +125,12 @@ flag_quality <- function(object,
 
 #' Flag features with low detection rate
 #'
-#' Flags features with too high amount of missing values. There are two detection rate limits, both defined as the minimum proportion of samples that need to
-#' have a value (not NA) for the feature to be kept. \code{qc_limit} is the detection rate limit for QC samples, \code{group_limit} is the detection rate limit
-#' for the actual study groups. If the group limit is passed for AT LEAST ONE GROUP, then the feature is kept. Features with low detection rate in QCs are
-#' flagged as "Low_qc_detection", while low detection rate in the study groups is flagged as "Low_group_detection". The detection rates for all the groups are
-#' recorded in \code{fData(object)}
+#' Flags features with too high amount of missing values. There are two detection rate limits, both defined as the
+#' minimum proportion of samples that need to have a value (not NA) for the feature to be kept. \code{qc_limit} is
+#' the detection rate limit for QC samples, \code{group_limit} is the detection rate limit for the actual study groups.
+#' If the group limit is passed for AT LEAST ONE GROUP, then the feature is kept. Features with low detection rate
+#' in QCs are flagged as "Low_qc_detection", while low detection rate in the study groups is flagged as
+#' "Low_group_detection". The detection rates for all the groups are recorded in \code{fData(object)}.
 #'
 #' @param object a MetaboSet object
 #' @param qc_limit the detection rate limit for QC samples
@@ -129,13 +145,14 @@ flag_quality <- function(object,
 #'
 #' @export
 flag_detection <- function(object, qc_limit = 0.7, group_limit = 0.5, group = group_col(object)) {
-
   found_qc <- Biobase::esApply(object[, object$QC == "QC"], 1, prop_found)
   bad_qc <- names(which(found_qc < qc_limit))
 
-  found_qc_df <- data.frame(Feature_ID = names(found_qc),
-                            Detection_rate_QC = found_qc,
-                            stringsAsFactors = FALSE)
+  found_qc_df <- data.frame(
+    Feature_ID = names(found_qc),
+    Detection_rate_QC = found_qc,
+    stringsAsFactors = FALSE
+  )
 
   idx <- is.na(flag(object)) & fData(object)$Feature_ID %in% bad_qc
   flag(object)[idx] <- "Low_qc_detection"
@@ -151,7 +168,9 @@ flag_detection <- function(object, qc_limit = 0.7, group_limit = 0.5, group = gr
     proportions$QC <- NULL
     colnames(proportions)[-1] <- paste0("Detection_rate_", group, "_", colnames(proportions)[-1])
     # Check if any group has enough non-missing entries
-    proportions$good <- apply(proportions[-1], 1, function(x){any(x >= group_limit)})
+    proportions$good <- apply(proportions[-1], 1, function(x) {
+      any(x >= group_limit)
+    })
 
     idx <- is.na(flag(object)) & (!fData(object)$Feature_ID %in% proportions$Feature_ID[proportions$good])
     flag(object)[idx] <- "Low_group_detection"
@@ -162,7 +181,9 @@ flag_detection <- function(object, qc_limit = 0.7, group_limit = 0.5, group = gr
     proportions <- found_qc_df
   }
 
-  percentage <- scales::percent(sum(flag(object) %in% c("Low_qc_detection", "Low_group_detection"), na.rm = TRUE)/nrow(fData(object)))
+  percentage <- scales::percent(
+    sum(flag(object) %in% c("Low_qc_detection", "Low_group_detection"), na.rm = TRUE) / nrow(fData(object))
+  )
   log_text(paste0("\n", percentage, " of features flagged for low detection rate"))
 
   object <- join_fData(object, proportions)
@@ -189,23 +210,24 @@ flag_detection <- function(object, qc_limit = 0.7, group_limit = 0.5, group = gr
 #' @export
 flag_contaminants <- function(object, blank_col, blank_label, flag_thresh = 0.05,
                               flag_label = "Contaminant") {
-
   blanks <- object[, pData(object)[, blank_col] == blank_label]
   samples <- object[, object$QC != "QC" & pData(object)[, blank_col] != blank_label]
 
   blank_median <- apply(exprs(blanks), 1, finite_median)
   sample_median <- apply(exprs(samples), 1, finite_median)
-  blank_flag <- blank_median/sample_median > flag_thresh
+  blank_flag <- blank_median / sample_median > flag_thresh
 
   idx <- is.na(flag(object)) & !is.na(blank_flag)
   idx <- idx & blank_flag
   flag(object)[idx] <- flag_label
 
-  percentage <- scales::percent(sum(flag(object) == flag_label, na.rm = TRUE)/nrow(object))
+  percentage <- scales::percent(sum(flag(object) == flag_label, na.rm = TRUE) / nrow(object))
   log_text(paste0("\n", percentage, " of features flagged as contaminants"))
 
-  blank_ratio <- data.frame(Feature_ID = featureNames(object), Blank_ratio = blank_median/sample_median,
-                            stringsAsFactors = FALSE)
+  blank_ratio <- data.frame(
+    Feature_ID = featureNames(object), Blank_ratio = blank_median / sample_median,
+    stringsAsFactors = FALSE
+  )
   object <- join_fData(object, blank_ratio)
 
   object

@@ -1,5 +1,3 @@
-
-
 # ------- HELPER FUNCTIONS ----------------
 
 # Helper function for computing PCA
@@ -12,8 +10,8 @@ pca_helper <- function(object, pcs, center, scale, ...) {
   add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
   res_pca <- pcaMethods::pca(object, nPcs = max(pcs), scale = scale, center = center, ...)
   pca_scores <- as.data.frame(pcaMethods::scores(res_pca))[, pcs]
-  R2 <- res_pca@R2[pcs]
-  labels <- paste0(paste0("PC", pcs), " (", scales::percent(R2), ")")
+  r2 <- res_pca@R2[pcs]
+  labels <- paste0(paste0("PC", pcs), " (", scales::percent(r2), ")")
 
   return(list(pca_scores = pca_scores, labels = labels))
 }
@@ -64,11 +62,14 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' @param shape character, name of the column used for shape. Set to NULL for uniform round shapes.
 #' @param point_size numeric, size of the points.
 #' @param label character, name of the column used for point labels
-#' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
+#' @param density logical, whether to include density plots to both axes.
+#' The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
-#' @param color_scale the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.
+#' @param color_scale the color scale as returned by a ggplot function.
+#' Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape_scale the shape scale as returned by a ggplot function
-#' @param fill_scale the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.
+#' @param fill_scale the fill scale used for density curves.
+#' If a continuous variable is used as color, density curve will be colorless.
 #' @param text_base_size numeric, base size for text
 #' @param point_size numeric, size of the points
 #' @param ... additional arguments passed to pcaMethods::pca
@@ -113,7 +114,8 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
@@ -122,11 +124,14 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' @param shape character, name of the column used for shape. Set to NULL for uniform round shapes.
 #' @param point_size numeric, size of the points.
 #' @param label character, name of the column used for point labels
-#' @param density logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.
+#' @param density logical, whether to include density plots to both axes.
+#' The density curves will be split and colored by the 'color' variable.
 #' @param title,subtitle the titles of the plot
-#' @param color_scale the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.
+#' @param color_scale the color scale as returned by a ggplot function.
+#' Set to NA to choose the appropriate scale based on the class of the coloring variable.
 #' @param shape_scale the shape scale as returned by a ggplot function
-#' @param fill_scale the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.
+#' @param fill_scale the fill scale used for density curves.
+#' If a continuous variable is used as color, density curve will be colorless.
 #' @param text_base_size numeric, base size for text
 #' @param point_size numeric, size of the points
 #' @param ... additional arguments passed to \code{Rtsne::Rtsne}
@@ -198,11 +203,12 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
 
   if (class(data[, shape]) == "character") {
     data[shape] <- as.factor(data[, shape])
-    warning(paste(
-      "Shape variable not given as a factor, converted to factor with levels",
-      paste(levels(data[, shape]), collapse = ", ")
-    ),
-    call. = FALSE
+    warning(
+      paste(
+        "Shape variable not given as a factor, converted to factor with levels",
+        paste(levels(data[, shape]), collapse = ", ")
+      ),
+      call. = FALSE
     )
   }
 
@@ -340,7 +346,8 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
 #' @param object a MetaboSet object
 #' @param pcs numeric vector of length 2, the principal components to plot
 #' @param pcs numeric vector of length 2, the principal components to plot
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param fill character, name of the column used for coloring the hexagons
@@ -386,7 +393,8 @@ plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center 
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param pca_method the method used in PCA if there are missing values
@@ -407,9 +415,12 @@ plot_pca_hexbin <- function(object, pcs = c(1, 2), all_features = FALSE, center 
 #' @seealso \code{\link[Rtsne]{Rtsne}}
 #'
 #' @export
-plot_tsne_hexbin <- function(object, all_features = FALSE, center = TRUE, scale = "uv", pca_method = "nipals", perplexity = 30,
+plot_tsne_hexbin <- function(object,
+                             all_features = FALSE,
+                             center = TRUE, scale = "uv", pca_method = "nipals", perplexity = 30,
                              fill = "Injection_order", summary_fun = "mean", bins = 10, title = "t-SNE",
-                             subtitle = paste("Perplexity:", perplexity), fill_scale = getOption("notame.fill_scale_con"), ...) {
+                             subtitle = paste("Perplexity:", perplexity),
+                             fill_scale = getOption("notame.fill_scale_con"), ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -540,7 +551,8 @@ plot_pca_arrows <- function(object, pcs = c(1, 2), all_features = FALSE, center 
 #' \strong{CITATION:} When using this function, cite the \code{pcaMethods} and \code{Rtsne} packages
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param perplexity the perplexity used in t-SNE
@@ -572,9 +584,9 @@ plot_tsne_arrows <- function(object, all_features = FALSE, center = TRUE, scale 
                              perplexity = 30, pca_method = "nipals",
                              color = group_col(object), time = time_col(object), subject = subject_col(object),
                              alpha = 0.6, arrow_style = arrow(), title = "t-SNE changes",
-                             subtitle = paste("Perplexity:", perplexity), color_scale = getOption("notame.color_scale_dis"),
+                             subtitle = paste("Perplexity:", perplexity),
+                             color_scale = getOption("notame.color_scale_dis"),
                              text_base_size = 14, line_width = 0.5, ...) {
-
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -625,7 +637,8 @@ minus_log10 <- scales::trans_new("minus_log10",
 #' @param label_limit numeric, p-value which is used to limit label plotting. Defaults to 0.05.
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
-#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}},
+#' such as shape and alpha values. New aesthetics can
 #' also be passed using \code{mapping = aes(...)}.
 #'
 #' @return a ggplot object
@@ -648,7 +661,7 @@ setGeneric("volcano_plot",
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
            title = "Volcano plot", subtitle = NULL,
-            text_base_size = 14, label_text_size = 4, ...) {
+           text_base_size = 14, label_text_size = 4, ...) {
     standardGeneric("volcano_plot")
   }
 )
@@ -662,7 +675,7 @@ setMethod(
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
            title = "Volcano plot", subtitle = NULL,
-            text_base_size = 14, label_text_size = 4, ...) {
+           text_base_size = 14, label_text_size = 4, ...) {
     volcano_plotter(
       fData(object), x, p, p_fdr, color, p_breaks, fdr_limit,
       log2_x, center_x_axis, x_lim, label, label_limit,
@@ -680,7 +693,7 @@ setMethod(
            log2_x = FALSE, center_x_axis = TRUE, x_lim = NULL, label = NULL, label_limit = 0.05,
            color_scale = getOption("notame.color_scale_con"),
            title = "Volcano plot", subtitle = NULL,
-            text_base_size = 14, label_text_size = 4, ...) {
+           text_base_size = 14, label_text_size = 4, ...) {
     volcano_plotter(
       object, x, p, p_fdr, color, p_breaks, fdr_limit,
       log2_x, center_x_axis, x_lim, label, label_limit,
@@ -695,7 +708,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
                             log2_x, center_x_axis, x_lim, label, label_limit,
                             color_scale, title, subtitle,
                             text_base_size, label_text_size, ...) {
-  if (center_x_axis & !is.null(x_lim)) {
+  if (center_x_axis && !is.null(x_lim)) {
     warning("Manually setting x-axis limits overrides x-axis centering")
     center_x_axis <- FALSE
   }
@@ -801,7 +814,8 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
 #' @param x_lim,y_lim numerical vectors of length 2 for manually setting the axis limits
 #' @param color_scale the color scale as returned by a ggplot function
 #' @param title,subtitle the title and subtitle of the plot
-#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+#' @param ...  parameters passed to \code{\link[ggplot2]{geom_point}},
+#' such as shape and alpha values. New aesthetics can
 #' also be passed using \code{mapping = aes(...)}.
 #'
 #' @return a ggplot object
@@ -923,7 +937,10 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
           geom_hline(yintercept = -log10(q_limit), linetype = "dashed") +
           scale_y_continuous(
             breaks = p_breaks, labels = p_labels, limits = y_lim,
-            sec.axis = sec_axis(~., breaks = c(log10(q_limit), -log10(q_limit)), labels = rep(paste("q =", fdr_limit), 2))
+            sec.axis = sec_axis(~.,
+              breaks = c(log10(q_limit), -log10(q_limit)),
+              labels = rep(paste("q =", fdr_limit), 2)
+            )
           )
       } else {
         pl <- pl +

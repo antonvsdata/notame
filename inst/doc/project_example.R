@@ -17,9 +17,11 @@ init_log(log_file = paste0(ppath, "log.txt"))
 log_state()
 
 ## ------------------------------------------------------------------------
-data <- read_from_excel(file = system.file("extdata", "sample_data_whole.xlsx", package = "notame"), sheet = 1,
-                        corner_row = 4, corner_column = "X",
-                        split_by = c("Column", "Ion mode"))
+data <- read_from_excel(
+  file = system.file("extdata", "sample_data_whole.xlsx", package = "notame"), sheet = 1,
+  corner_row = 4, corner_column = "X",
+  split_by = c("Column", "Ion mode")
+)
 
 ## ---- out.width = "600px", echo=FALSE------------------------------------
 knitr::include_graphics("Data_input.png")
@@ -30,9 +32,11 @@ sapply(data, class)
 sapply(data, dim)
 
 ## ------------------------------------------------------------------------
-modes <- construct_metabosets(exprs = data$exprs, pheno_data = data$pheno_data,
-                             feature_data = data$feature_data,
-                             group_col = "Group")
+modes <- construct_metabosets(
+  exprs = data$exprs, pheno_data = data$pheno_data,
+  feature_data = data$feature_data,
+  group_col = "Group"
+)
 
 ## ------------------------------------------------------------------------
 names(modes)
@@ -77,7 +81,7 @@ processed[[i]] <- corrected
 ## ---- eval = FALSE-------------------------------------------------------
 #  corrected <- flag_quality(corrected)
 #  processed[[i]] <- corrected
-#  
+#
 #  visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_CLEANED"))
 
 ## ------------------------------------------------------------------------
@@ -92,8 +96,10 @@ for (i in seq_along(modes)) {
   # visualizations(mode, prefix = paste0(ppath, "figures/", name, "_ORIG"))
   corrected <- correct_drift(mode)
   # visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_DRIFT"))
-  
-  corrected <- corrected %>% assess_quality() %>% flag_quality()
+
+  corrected <- corrected %>%
+    assess_quality() %>%
+    flag_quality()
   processed[[i]] <- corrected
 
   # visualizations(corrected, prefix = paste0(ppath, "figures/", name, "_CLEANED"))
@@ -104,7 +110,7 @@ merged <- merge_metabosets(processed)
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  merged <- merge_metabosets(processed)
-#  
+#
 #  visualizations(merged, prefix = paste0(ppath, "figures/_FULL"))
 
 ## ---- include = FALSE----------------------------------------------------
@@ -113,11 +119,11 @@ merged_no_qc <- drop_qcs(merged)
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  merged_no_qc <- drop_qcs(merged)
-#  
+#
 #  visualizations(merged_no_qc, prefix = paste0(ppath, "figures/FULL_NO_QC"))
 
 ## ------------------------------------------------------------------------
-#Set seed number for reproducibility
+# Set seed number for reproducibility
 set.seed(38)
 imputed <- impute_rf(merged_no_qc)
 
@@ -143,9 +149,8 @@ pairwise_results <- perform_pairwise_t_test(imputed[top_index, ], group = "Group
 ## ---- eval = FALSE-------------------------------------------------------
 #  combined_results <- dplyr::left_join(anova_results, pairwise_results)
 #  imputed <- join_fData(imputed, combined_results)
-#  
+#
 #  write_to_excel(imputed, file = paste0(ppath, "results.xlsx"))
 
 ## ------------------------------------------------------------------------
 finish_log()
-

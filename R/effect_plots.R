@@ -86,7 +86,8 @@ create_feature_plot_list <- function(object, plot_fun) {
 #' A separate plot is drawn and saved for each feature.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used?
+#' If FALSE (the default), flagged features are removed before visualization.
 #' @param save logical, if false, the plots are not saved but returned as a list
 #' @param file_path character, a file path for PDF or prefix added to the file paths for other formats
 #' @param format character, format in which the plots should be saved
@@ -178,8 +179,8 @@ save_subject_line_plots <- function(object,
       p <- p +
         scale_x_discrete(expand = c(0.05, 0.05))
     }
-    splitted_title = 
-    p <- p +
+    splitted_title <-
+      p <- p +
       theme +
       labs(
         title = fData(object)[fname, title],
@@ -312,7 +313,8 @@ save_group_boxplots <- function(object,
 #' A separate plot is drawn and saved for each feature.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param file_path character, a file path for PDF or prefix added to the file paths for other formats
 #' @param format character, format in which the plots should be saved
 #' @param x character, name of the column to be used as x-axis
@@ -505,7 +507,8 @@ save_scatter_plots <- function(object,
 #' A separate plot is drawn for each feature.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param file_path character, a file path for PDF or prefix added to the file paths for other formats
 #' @param format character, format in which the plots should be saved
 #' @param x character, name of the column to be used as x-axis
@@ -551,10 +554,10 @@ save_group_lineplots <- function(object,
                                  group = group_col(object),
                                  title = "Feature_ID",
                                  subtitle = NULL,
-                                 fun.data = "mean_cl_boot",
+                                 fun.data = "mean_cl_boot", # nolint: object_name_linter.
                                  fun = NULL,
-                                 fun.min = NULL,
-                                 fun.max = NULL,
+                                 fun.min = NULL, # nolint: object_name_linter.
+                                 fun.max = NULL, # nolint: object_name_linter.
                                  position_dodge_amount = 0.2,
                                  color_scale = getOption("notame.color_scale_dis"),
                                  text_base_size = 14,
@@ -610,12 +613,12 @@ save_group_lineplots <- function(object,
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
-      if (x == group) {
-        p <- p + guides(color = "none")
-      }
-      # Split long titles to multiple rows
-      p <- p + theme(plot.title = ggtext::element_textbox_simple())
-      p
+    if (x == group) {
+      p <- p + guides(color = "none")
+    }
+    # Split long titles to multiple rows
+    p <- p + theme(plot.title = ggtext::element_textbox_simple())
+    p
   }
 
   object <- drop_flagged(object, all_features)

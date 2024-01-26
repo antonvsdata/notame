@@ -25,11 +25,11 @@ test_that("Logging works as expected", {
   init_log(log_file)
   logs <- readLines(log_file)
   # Last line should match
-  expect_identical(gsub("\\[.+\\] " ,"" , logs[length(logs)]), "INFO Starting logging")
+  expect_identical(gsub("\\[.+\\] ", "", logs[length(logs)]), "INFO Starting logging")
   log_text("New line")
   logs <- readLines(log_file)
   # Last line should match
-  expect_identical(gsub("\\[.+\\] " ,"" , logs[length(logs)]), "INFO New line")
+  expect_identical(gsub("\\[.+\\] ", "", logs[length(logs)]), "INFO New line")
   finish_log()
   logs <- readLines(log_file)
   log_len <- length(logs)
@@ -38,4 +38,3 @@ test_that("Logging works as expected", {
   logs <- readLines(log_file)
   expect_identical(log_len, length(logs))
 })
-

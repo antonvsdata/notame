@@ -36,10 +36,10 @@ dobc <- function(object, batch, ref, ref_label, ...) {
 #' }
 #' @export
 ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
-
   if (!requireNamespace("RUVSeq", quietly = TRUE)) {
     stop("Bioconductor package RUVSeq needed for this function to work. Please install it.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("RUVSeq was used for batch correction:", citation("RUVSeq"))
 
@@ -49,13 +49,15 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 
   # Pad each replicate vector with -1 and transform to matrix
   max_len <- max(sapply(replicates, length))
-  scIdx <- matrix(-1, nrow = length(replicates), ncol = max_len)
+  scIdx <- matrix(-1, nrow = length(replicates), ncol = max_len) # nolint: object_name_linter.
   for (i in seq_along(replicates)) {
-    scIdx[i, seq_along(replicates[[i]])] <- replicates[[i]]
+    scIdx[i, seq_along(replicates[[i]])] <- replicates[[i]] # nolint: object_name_linter.
   }
 
-  ruv_results <- RUVSeq::RUVs(x = exprs(object), cIdx = featureNames(object),
-                              k = k, scIdx = scIdx, ...)
+  ruv_results <- RUVSeq::RUVs(
+    x = exprs(object), cIdx = featureNames(object),
+    k = k, scIdx = scIdx, ...
+  )
 
   exprs(object) <- ruv_results$normalizedCounts
   pData(object) <- cbind(pData(object), ruv_results$W)
@@ -70,7 +72,8 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #'
 #' @param object a MetaboSet object
 #' @param batch column name of pData givinh the batch labels
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before imputation.
 #' @param center logical, should the data be centered prior to PCA? (usually yes)
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
 #' @param nPcs the number of principal components to use
@@ -88,15 +91,16 @@ ruvs_qc <- function(object, batch, replicates, k = 3, ...) {
 #' }
 #' @export
 pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center = TRUE,
-                                   scale = "uv", nPcs = 3, ...) {
-
+                                   scale = "uv", nPcs = 3, ...) { # nolint: object_name_linter.
   if (!requireNamespace("fpc", quietly = TRUE)) {
     stop("Package \"fpc\" needed for this function to work. Please install it.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
     stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("PCA was performed using pcaMethods package:", citation("pcaMethods"))
   add_citation("fpc package was used for Bhattacharyaa distance computation:", citation("fpc"))
@@ -118,7 +122,7 @@ pca_bhattacharyya_dist <- function(object, batch, all_features = FALSE, center =
   muarray <- sapply(batches, colMeans)
   sigmaarray <- array(sapply(batches, cov), dim = c(nPcs, nPcs, length(batches)))
 
-  fpc::bhattacharyya.matrix(muarray,sigmaarray,ipairs="all", misclassification.bound = FALSE)
+  fpc::bhattacharyya.matrix(muarray, sigmaarray, ipairs = "all", misclassification.bound = FALSE)
 }
 
 
@@ -178,11 +182,15 @@ repeatability <- function(x, group) {
 #' }
 #' @export
 perform_repeatability <- function(object, group) {
-
   group <- pData(object)[, group]
-  repeatabilities <- foreach::foreach(feature = featureNames(object), .combine = rbind) %dopar% {
-    result_row <- data.frame(Feature_ID = feature,
-                             Repeatability = repeatability(exprs(object)[feature, ], group))
+  repeatabilities <- foreach::foreach(
+    feature = featureNames(object),
+    .combine = rbind
+  ) %dopar% { # nolint: object_usage_linter.
+    result_row <- data.frame( # nolint: object_usage_linter.
+      Feature_ID = feature, # nolint: object_usage_linter.
+      Repeatability = repeatability(exprs(object)[feature, ], group)
+    )
   }
   repeatabilities
 }
@@ -204,11 +212,11 @@ perform_repeatability <- function(object, group) {
 #'
 #' @export
 align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff, plot_folder = NULL) {
-
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
     stop("Package \"batchCorr\" needed for this function to work. Please install it from
          https://gitlab.com/CarlBrunius/batchCorr.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("batchCorr was used for batch correction:", citation("batchCorr"))
 
@@ -223,13 +231,15 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 
 
   # Extract peak mz and rt information
-  pInfo <- as.matrix(fData(object_na)[, c(mz, rt)])
-  colnames(pInfo) <- c("mz", "rt")
+  p_info <- as.matrix(fData(object_na)[, c(mz, rt)]) # nolint: object_usage_linter.
+  colnames(p_info) <- c("mz", "rt")
 
   # Align batches based on the QCs
-  aligned <- batchCorr::alignBatches(peakInfo = pInfo, PeakTabNoFill = t(exprs(object_na)), PeakTabFilled = t(exprs(object_fill)),
-                                     batches = pData(object_na)[, batch], sampleGroups = object_na$QC, selectGroup = "QC",
-                                     mzdiff = mzdiff, rtdiff = rtdiff, report = report)
+  aligned <- batchCorr::alignBatches(
+    peakInfo = p_info, PeakTabNoFill = t(exprs(object_na)), PeakTabFilled = t(exprs(object_fill)),
+    batches = pData(object_na)[, batch], sampleGroups = object_na$QC, selectGroup = "QC",
+    mzdiff = mzdiff, rtdiff = rtdiff, report = report
+  )
 
   # Reset working directory
   if (!is.null(plot_folder)) {
@@ -250,7 +260,8 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #' @param object a MetaboSet object
 #' @param batch,group character, column names of pData with batch labels and group labels
 #' @param ref_label the label of the reference group i.e. the group that is constant through batches
-#' @param population Identifier of population samples in group column (all (default) or any type of samples present in group)
+#' @param population Identifier of population samples in group column
+#' (all (default) or any type of samples present in group)
 #' @param ... additional parameters passed to batchCorr::normalizeBatches
 #'
 #' @return list, the object with normalized features and information on which
@@ -266,22 +277,24 @@ align_batches <- function(object_na, object_fill, batch, mz, rt, mzdiff, rtdiff,
 #' }
 #' @export
 normalize_batches <- function(object, batch, group, ref_label, population = "all", ...) {
-
   if (!requireNamespace("batchCorr", quietly = TRUE)) {
     stop("Package \"batchCorr\" needed for this function to work. Please install it from
          https://gitlab.com/CarlBrunius/batchCorr.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("batchCorr was used for batch correction:", citation("batchCorr"))
 
-  normData <- batchCorr::normalizeBatches(peakTableCorr = t(exprs(object)), batches = pData(object)[, batch],
-                                          sampleGroup = pData(object)[, group], refGroup = ref_label,
-                                          population = population, ...)
+  norm_data <- batchCorr::normalizeBatches(
+    peakTableCorr = t(exprs(object)), batches = pData(object)[, batch],
+    sampleGroup = pData(object)[, group], refGroup = ref_label,
+    population = population, ...
+  )
 
-  exprs(object) <- t(normData$peakTable)
-  ref_corrected <- as.data.frame(t(normData$refCorrected))
+  exprs(object) <- t(norm_data$peakTable)
+  ref_corrected <- as.data.frame(t(norm_data$refCorrected))
   colnames(ref_corrected) <- paste0("Ref_corrected_", seq_len(ncol(ref_corrected)))
-  ref_corrected$Feature_ID <- featureNames(object)
+  ref_corrected$Feature_ID <- featureNames(object) # nolint: object_usage_linter.
   object <- join_fData(object, ref_corrected)
 }
 
@@ -307,26 +320,27 @@ normalize_batches <- function(object, batch, group, ref_label, population = "all
 #' # Batch correction
 #' batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
 #' # Plots of each features
-#' save_batch_plots(orig = merged_sample, corrected = batch_corrected,
-#'                  file = "batch_plots.pdf")
+#' save_batch_plots(
+#'   orig = merged_sample, corrected = batch_corrected,
+#'   file = "batch_plots.pdf"
+#' )
 #' }
 #' @export
 save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
                              batch = "Batch", color = "Batch", shape = "QC",
                              color_scale = getOption("notame.color_scale_dis"),
                              shape_scale = scale_shape_manual(values = c(15, 21))) {
-
   data_orig <- combined_data(orig)
   data_corr <- combined_data(corrected)
 
   batch_injections <- data_orig %>%
-    dplyr::group_by(!! sym(batch)) %>%
-    dplyr::summarise(start = min(Injection_order), end = max(Injection_order))
+    dplyr::group_by(!!dplyr::sym(batch)) %>%
+    dplyr::summarise(start = min(Injection_order), end = max(Injection_order)) # nolint: object_usage_linter.
 
   batch_mean_helper <- function(data) {
     data %>%
-      dplyr::group_by(!! sym(batch)) %>%
-      dplyr::summarise_at(featureNames(orig), finite_mean) %>%
+      dplyr::group_by(!!dplyr::sym(batch)) %>%
+      dplyr::summarise_at(featureNames(orig), finite_mean) %>% # nolint: object_usage_linter.
       dplyr::left_join(batch_injections, ., by = batch)
   }
 
@@ -349,19 +363,25 @@ save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
 
   batch_plot_helper <- function(data, fname, batch_means) {
     p <- ggplot() +
-      geom_point(data = data, mapping = aes_string(x = "Injection_order", y = fname,
-                                                   color = color, shape = shape)) +
+      geom_point(data = data, mapping = aes_string(
+        x = "Injection_order", y = fname,
+        color = color, shape = shape
+      )) +
       theme_bw() +
       theme(panel.grid = element_blank()) +
       color_scale +
       shape_scale
 
     p <- p +
-      geom_segment(data = batch_means, mapping = aes_string(x = "start", xend = "end",
-                                                            y = fname, yend = fname,
-                                                            color = color, linetype = "QC"),
-                   size = 1) +
-      scale_linetype(guide = FALSE)
+      geom_segment(
+        data = batch_means, mapping = aes_string(
+          x = "start", xend = "end",
+          y = fname, yend = fname,
+          color = color, linetype = "QC"
+        ),
+        size = 1
+      ) +
+      scale_linetype(guide = "none")
     p
   }
 

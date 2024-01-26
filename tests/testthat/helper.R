@@ -6,7 +6,9 @@ test_plot_saving_helper <- function(func, title) {
   if (is.null(title)) {
     expect_equal(all(list.files(path = prefix) %in% paste0(featureNames(tmp), ".emf")), TRUE)
   } else if (title == "Metabolite_name") {
-    expect_equal(all(list.files(path = prefix) %in% paste0(featureNames(tmp),"_", fData(tmp)$Metabolite_name, ".emf")), TRUE)
+    expect_equal(all(
+      list.files(path = prefix) %in% paste0(featureNames(tmp), "_", fData(tmp)$Metabolite_name, ".emf")
+    ), TRUE)
   } else {
     expect_equal(all(list.files(path = prefix) %in% paste0(featureNames(tmp), ".emf")), TRUE)
   }

@@ -1,10 +1,10 @@
-
 #' Draw dendrograms
 #'
 #' Draws a dendrogram of a hierarchical clustering applied to the samples of an experiment
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param color character, name of the column used for coloring the sample labels
 #' @param dist_method distance method used in clustering, see ?dist
 #' @param clust_method method used in clustering, see ?hclust
@@ -22,17 +22,20 @@
 #' @seealso \code{\link{dist}} \code{\link{hclust}}
 #'
 #' @export
-plot_dendrogram <- function(object, all_features = FALSE, color = group_col(object), dist_method = "euclidean", clust_method = "ward.D2",
-                     center = TRUE, scale = "uv", title = "Dendrogram of hierarchical clustering",
-                     subtitle = NULL, color_scale = getOption("notame.color_scale_dis")) {
-
+plot_dendrogram <- function(
+    object, all_features = FALSE, color = group_col(object),
+    dist_method = "euclidean", clust_method = "ward.D2",
+    center = TRUE, scale = "uv", title = "Dendrogram of hierarchical clustering",
+    subtitle = NULL, color_scale = getOption("notame.color_scale_dis")) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   if (!requireNamespace("ggdendro", quietly = TRUE)) {
-      stop("Package \"ggdendro\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"ggdendro\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   color <- color %||% NULL
 
@@ -54,15 +57,16 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
   labels[, color] <- as.factor(labels[, color])
 
   p <- ggplot(ggdendro::segment(d_data)) +
-    geom_segment(aes(x=x, y=y, xend=xend, yend=yend)) +
-    geom_text(data = labels, aes_string(x="x", y="y", label = "label", color = color),
-              angle = 90, hjust = 1) +
+    geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_text(
+      data = labels, aes_string(x = "x", y = "y", label = "label", color = color),
+      angle = 90, hjust = 1
+    ) +
     ggdendro::theme_dendro() +
     color_scale +
     labs(title = title, subtitle = subtitle)
 
   p
-
 }
 #' Draw heatmaps
 #'
@@ -70,7 +74,8 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
 #' the samples are ordered by hierarchical clustering.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param dist_method distance method used in clustering, see \code{\link{dist}}
 #' @param clust_method clustering method used in clustering, see \code{\link{hclust}}
 #' @param center logical, should the data  be centered?
@@ -92,18 +97,20 @@ plot_dendrogram <- function(object, all_features = FALSE, color = group_col(obje
 #'
 #' @export
 plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euclidean", clust_method = "ward.D2",
-                         center = TRUE, scale = "uv",
-                         group_bar = TRUE, group = group_col(object),
-                         title = "Heatmap of distances between samples",
-                         subtitle = NULL, fill_scale_con = getOption("notame.fill_scale_con"),
-                         fill_scale_dis = getOption("notame.fill_scale_dis")) {
+                                center = TRUE, scale = "uv",
+                                group_bar = TRUE, group = group_col(object),
+                                title = "Heatmap of distances between samples",
+                                subtitle = NULL, fill_scale_con = getOption("notame.fill_scale_con"),
+                                fill_scale_dis = getOption("notame.fill_scale_dis")) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   if (!requireNamespace("cowplot", quietly = TRUE)) {
-      stop("Package \"cowplot\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"cowplot\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -137,7 +144,7 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = -0.05)) +
     coord_fixed()
   # Group bar
-  if (group_bar & !is.na(group)) {
+  if (group_bar && !is.na(group)) {
     pheno_data <- pData(object)
     pheno_data$Sample_ID <- factor(pheno_data$Sample_ID, levels = hc_order, ordered = TRUE)
 
@@ -146,7 +153,7 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
       theme_void() +
       fill_scale_dis
 
-    p <- cowplot::plot_grid(p, gb, ncol = 1, align = "v", rel_heights = c(10/11,1/11))
+    p <- cowplot::plot_grid(p, gb, ncol = 1, align = "v", rel_heights = c(10 / 11, 1 / 11))
   }
 
   p

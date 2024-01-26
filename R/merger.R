@@ -1,4 +1,3 @@
-
 # Check that objects have same special columns
 #
 # Used to check that the special columns of pheno data parts of MetaboSet objects
@@ -16,7 +15,7 @@ check_column_match <- function(x, y, fun, name) {
   }
   common <- intersect(sampleNames(x), sampleNames(y))
   if (!is.na(fun(x))) {
-    if(!identical(pData(x)[common, fun(x)], pData(y)[common, fun(y)])) {
+    if (!identical(pData(x)[common, fun(x)], pData(y)[common, fun(y)])) {
       stop(paste(name, "columns contain different elements for common samples"))
     }
   }
@@ -76,7 +75,6 @@ check_match <- function(x, y) {
   if (!identical(colnames(fData(x)), colnames(fData(y)))) {
     stop("fData have different column names")
   }
-
 }
 
 # Merge two MetaboSet objects together
@@ -108,9 +106,10 @@ merge_mode_helper <- function(x, y) {
   check_match(x, y)
 
   merged_pdata <- dplyr::full_join(pData(x), pData(y),
-                                   by = intersect(colnames(pData(x)),
-                                                  colnames(pData(y))
-                                   )
+    by = intersect(
+      colnames(pData(x)),
+      colnames(pData(y))
+    )
   ) %>%
     Biobase::AnnotatedDataFrame()
   rownames(merged_pdata) <- merged_pdata$Sample_ID
@@ -127,12 +126,14 @@ merge_mode_helper <- function(x, y) {
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
   merged_subject_col <- ifelse(!is.na(subject_col(x)), subject_col(x), subject_col(y))
 
-  merged_object <- MetaboSet(exprs = merged_exprs,
-                             phenoData = merged_pdata,
-                             featureData = merged_fdata,
-                             group_col = merged_group_col,
-                             time_col = merged_time_col,
-                             subject_col = merged_subject_col)
+  merged_object <- MetaboSet(
+    exprs = merged_exprs,
+    phenoData = merged_pdata,
+    featureData = merged_fdata,
+    group_col = merged_group_col,
+    time_col = merged_time_col,
+    subject_col = merged_subject_col
+  )
 
   merged_object
 }
@@ -164,13 +165,16 @@ to_list <- function(...) {
 #' @return A merged MetaboSet object
 #'
 #' @details When merging samples, sample IDs that beging with "QC" or "Ref" are combined so that they have
-#' running numbers on them. This means that if both bathces have samples called "QC_1", this will not result in an error,
+#' running numbers on them. This means that if both bathces have samples called "QC_1",
+#' this will not result in an error,
 #' but the sample IDs will be adjusted so that they are unique
 #'
 #' @examples
 #' # Merge analytical modes
-#' merged <- merge_metabosets(hilic_neg_sample, hilic_pos_sample,
-#'                            rp_neg_sample, rp_pos_sample)
+#' merged <- merge_metabosets(
+#'   hilic_neg_sample, hilic_pos_sample,
+#'   rp_neg_sample, rp_pos_sample
+#' )
 #' # Merge batches
 #' batch1 <- merged_sample[, merged_sample$Batch == 1]
 #' batch2 <- merged_sample[, merged_sample$Batch == 2]
@@ -178,7 +182,6 @@ to_list <- function(...) {
 #'
 #' @export
 merge_metabosets <- function(..., merge = c("features", "samples")) {
-
   merge <- match.arg(merge)
   # Combine the objects to a list
   objects <- to_list(...)
@@ -206,7 +209,6 @@ merge_metabosets <- function(..., merge = c("features", "samples")) {
 
 
 fdata_batch_helper <- function(fx, fy) {
-
   non_identical_cols <- !identical(colnames(fx), colnames(fy))
   if (non_identical_cols) {
     only_x_cols <- setdiff(colnames(fx), colnames(fy))
@@ -237,12 +239,13 @@ fdata_batch_helper <- function(fx, fy) {
 
 
 merge_batch_helper <- function(x, y) {
-
   merged_pdata <- rbind(pData(x), pData(y))
   if (anyDuplicated(merged_pdata$Sample_ID)) {
     log_text("Found duplicated sample IDs when merging, renaming QC and Ref samples")
-    merged_pdata$Sample_ID[grepl("QC", merged_pdata$Sample_ID)] <- paste0("QC_", seq_len(sum(grepl("QC", merged_pdata$Sample_ID))))
-    merged_pdata$Sample_ID[grepl("Ref", merged_pdata$Sample_ID)] <- paste0("Ref_", seq_len(sum(grepl("Ref", merged_pdata$Sample_ID))))
+    qc_idx <- grepl("QC", merged_pdata$Sample_ID)
+    merged_pdata$Sample_ID[qc_idx] <- paste0("QC_", seq_len(sum(grepl("QC", merged_pdata$Sample_ID))))
+    ref_idx <- grepl("Ref", merged_pdata$Sample_ID)
+    merged_pdata$Sample_ID[ref_idx] <- paste0("Ref_", seq_len(sum(grepl("Ref", merged_pdata$Sample_ID))))
   }
 
   rownames(merged_pdata) <- merged_pdata$Sample_ID
@@ -263,12 +266,14 @@ merge_batch_helper <- function(x, y) {
   merged_time_col <- ifelse(!is.na(time_col(x)), time_col(x), time_col(y))
   merged_subject_col <- ifelse(!is.na(subject_col(x)), subject_col(x), subject_col(y))
 
-  merged_object <- MetaboSet(exprs = merged_exprs,
-                             phenoData = merged_pdata,
-                             featureData = merged_fdata,
-                             group_col = merged_group_col,
-                             time_col = merged_time_col,
-                             subject_col = merged_subject_col)
+  merged_object <- MetaboSet(
+    exprs = merged_exprs,
+    phenoData = merged_pdata,
+    featureData = merged_fdata,
+    group_col = merged_group_col,
+    time_col = merged_time_col,
+    subject_col = merged_subject_col
+  )
 
   merged_object
 }
@@ -288,9 +293,9 @@ merge_batch_helper <- function(x, y) {
 #'
 #' @export
 merge_batches <- function(...) {
-
   warning("merge_batches is deprecated, merge_metabosets can now merge object from different batches as
-          well as objects from different modes. merge_batches(...) is equivalent to merge_metabosets(..., merge = 'samples')", .call = FALSE)
+          well as objects from different modes. merge_batches(...) is equivalent to
+          merge_metabosets(..., merge = 'samples')", .call = FALSE)
 
   merge_metabosets(..., merge = "samples")
 }

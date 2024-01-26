@@ -1,8 +1,6 @@
-
 density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
                          title = NULL, subtitle = NULL,
                          xlab = x, fill_lab = fill) {
-
   p <- ggplot(data, aes_string(x, fill = fill, color = fill)) +
     geom_density(alpha = 0.2) +
     fill_scale +
@@ -19,7 +17,8 @@ density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
 #' Plot density of distances between samples in QC samples and actual samples
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param dist_method method for calculating the distances, passed to dist
 #' @param center logical, should the data be centered?
 #' @param scale scaling used, as in pcaMethods::prep. Default is "uv" for unit variance
@@ -45,8 +44,9 @@ plot_dist_density <- function(object, all_features = FALSE, dist_method = "eucli
                               title = paste("Density plot of", dist_method, "distances between samples"),
                               subtitle = NULL) {
   if (!requireNamespace("pcaMethods", quietly = TRUE)) {
-      stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"pcaMethods\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
@@ -62,10 +62,12 @@ plot_dist_density <- function(object, all_features = FALSE, dist_method = "eucli
   qc <- rep(c("QC", "Sample"), times = c(length(qc_dist), length(sample_dist)))
   distances <- data.frame(dist = c(qc_dist, sample_dist), qc = qc)
 
-  density_plot(distances, x = "dist", fill = "qc", fill_scale = fill_scale,
-               color_scale = color_scale,
-               xlab = "Distance", fill_lab = NULL,
-               title = title, subtitle = subtitle)
+  density_plot(distances,
+    x = "dist", fill = "qc", fill_scale = fill_scale,
+    color_scale = color_scale,
+    xlab = "Distance", fill_lab = NULL,
+    title = title, subtitle = subtitle
+  )
 }
 
 #' Estimate the magnitude of drift
@@ -74,7 +76,8 @@ plot_dist_density <- function(object, all_features = FALSE, dist_method = "eucli
 #' by injection order alone. The expected uniform distribution is represented by a dashed red line.
 #'
 #' @param object A MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #'
 #' @return A ggplot object
 #'
@@ -94,9 +97,11 @@ plot_injection_lm <- function(object, all_features = FALSE) {
   lm_qc <- perform_lm(object[, object$QC == "QC"], "Feature ~ Injection_order")
 
   # Only interested in the p_values
-  p_values <- list("All samples" = lm_all$Injection_order_P,
-                   "Biological samples" = lm_sample$Injection_order_P,
-                   "QC samples" = lm_qc$Injection_order_P)
+  p_values <- list(
+    "All samples" = lm_all$Injection_order_P,
+    "Biological samples" = lm_sample$Injection_order_P,
+    "QC samples" = lm_qc$Injection_order_P
+  )
   # Plotting
   plot_p_histogram(p_values)
 }
@@ -105,9 +110,11 @@ plot_injection_lm <- function(object, all_features = FALSE) {
 #'
 #' Draws histograms of p-values with expected uniform distribution represented by a dashed red line
 #'
-#' @param p_values list or data frame, each element/column is a vector of p-values. The list names are used as plot titles
+#' @param p_values list or data frame, each element/column is a vector of p-values.
+#' The list names are used as plot titles
 #' @param hline logical, whether a horizontal line representing uniform distribution should be plotted
-#' @param combine logical, whether plots of individual p-value vectors should be combined into a single object. Set to FALSE if
+#' @param combine logical, whether plots of individual p-value vectors should be combined into a single object.
+#'  Set to FALSE if
 #' you want to add other plots to the list before plotting
 #' @param x_label the x-axis label
 #'
@@ -116,8 +123,9 @@ plot_injection_lm <- function(object, all_features = FALSE) {
 #' @export
 plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE, x_label = "p-value") {
   if (!requireNamespace("cowplot", quietly = TRUE)) {
-      stop("Package \"cowplot\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"cowplot\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   # Custom breaks for the x-axis
   breaks <- seq(0, 1, by = 0.05)
@@ -125,21 +133,19 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE, x_label = "
   # THree separate histograms
   plots <- list()
   for (i in seq_along(p_values)) {
-
-
     p <- ggplot(data.frame(P = p_values[[i]]), aes(P)) +
       geom_histogram(breaks = breaks, col = "grey50", fill = "grey80", size = 1) +
       labs(x = x_label, y = "Frequency") +
       ggtitle(names(p_values)[i]) +
       theme_minimal() +
-      theme(plot.title = element_text(face="bold", hjust=0.5))
+      theme(plot.title = element_text(face = "bold", hjust = 0.5))
 
     if (hline) {
       # Compute the position of the expected line
       finite_count <- sum(is.finite(p_values[[i]]))
-      h_line <- finite_count/(length(breaks)-1)
+      h_line <- finite_count / (length(breaks) - 1)
       p <- p +
-        geom_hline(yintercept = h_line, color="red", linetype = "dashed", size = 1)
+        geom_hline(yintercept = h_line, color = "red", linetype = "dashed", size = 1)
     }
 
     plots <- c(plots, list(p))
@@ -170,8 +176,9 @@ plot_p_histogram <- function(p_values, hline = TRUE, combine = TRUE, x_label = "
 #' @export
 plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
   if (!requireNamespace("cowplot", quietly = TRUE)) {
-      stop("Package \"cowplot\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"cowplot\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   if (plot_flags) {
     # Plot bar plot of flags
@@ -181,7 +188,7 @@ plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
 
     fp <- ggplot(data.frame(flags), aes(x = flags)) +
       geom_bar(col = "grey50", fill = "grey80", size = 1) +
-      scale_y_continuous(sec.axis = sec_axis(~.*100/length(flags), name = "Percentage")) +
+      scale_y_continuous(sec.axis = sec_axis(~ . * 100 / length(flags), name = "Percentage")) +
       theme_minimal() +
       labs(x = "Flag")
   }
@@ -215,7 +222,8 @@ plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
 #' fill are both determined by the combination of group and time columns.
 #'
 #' @param object a MetaboSet object
-#' @param all_features logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.
+#' @param all_features logical, should all features be used? If FALSE (the default),
+#' flagged features are removed before visualization.
 #' @param order_by character vector, names of columns used to order the samples
 #' @param fill_by character vector, names of columns used to fill the boxplots
 #' @param title,subtitle character, title and subtitle of the plot
@@ -229,10 +237,12 @@ plot_quality <- function(object, all_features = FALSE, plot_flags = TRUE) {
 #' plot_sample_boxplots(merged_sample, order_by = "Group", fill_by = "Group")
 #'
 #' @export
-plot_sample_boxplots <- function(object, all_features = FALSE, order_by = as.character(na.omit(c(group_col(object), time_col(object)))),
-                                 fill_by = as.character(na.omit(c(group_col(object), time_col(object)))),
-                                 title = "Boxplot of samples", subtitle = NULL,
-                                 fill_scale = getOption("notame.fill_scale_dis"), zoom_boxplot = TRUE) {
+plot_sample_boxplots <- function(
+    object, all_features = FALSE,
+    order_by = as.character(na.omit(c(group_col(object), time_col(object)))),
+    fill_by = as.character(na.omit(c(group_col(object), time_col(object)))),
+    title = "Boxplot of samples", subtitle = NULL,
+    fill_scale = getOption("notame.fill_scale_dis"), zoom_boxplot = TRUE) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -260,12 +270,14 @@ plot_sample_boxplots <- function(object, all_features = FALSE, order_by = as.cha
   p <- ggplot(data, aes(x = Sample_ID, y = Value, fill = fill_by))
 
   ## Zooming outliers out of view
-  if(zoom_boxplot){
+  if (zoom_boxplot) {
     # compute lower and upper whiskers
     ylimits <- data %>%
       dplyr::group_by(Sample_ID) %>%
-      dplyr::summarise(low = boxplot.stats(Value)$stats[1],
-                       high = boxplot.stats(Value)$stats[5])
+      dplyr::summarise(
+        low = boxplot.stats(Value)$stats[1],
+        high = boxplot.stats(Value)$stats[5]
+      )
 
 
     ylimits <- c(0, max(ylimits$high))
@@ -274,22 +286,25 @@ plot_sample_boxplots <- function(object, all_features = FALSE, order_by = as.cha
       geom_boxplot(outlier.shape = NA) +
       coord_cartesian(ylim = ylimits)
     # add text to main title
-    subtitle <- paste(subtitle, "(zoomed in boxplot: outliers out of view)", sep=" ")
+    subtitle <- paste(subtitle, "(zoomed in boxplot: outliers out of view)", sep = " ")
   } else {
     p <- p +
       geom_boxplot()
   }
 
   p <- p +
-    labs(x = paste(order_by, collapse = "_"),
-         y = "Abundance of metabolites",
-         fill = paste(fill_by, collapse = "_"),
-         title = title, subtitle = subtitle) +
+    labs(
+      x = paste(order_by, collapse = "_"),
+      y = "Abundance of metabolites",
+      fill = paste(fill_by, collapse = "_"),
+      title = title, subtitle = subtitle
+    ) +
     theme_bw() +
-    theme(plot.title = element_text(face="bold"),
-          axis.text.x = element_text(angle=90, vjust=0.3)) +
+    theme(
+      plot.title = element_text(face = "bold"),
+      axis.text.x = element_text(angle = 90, vjust = 0.3)
+    ) +
     fill_scale
 
   p
 }
-

@@ -5,15 +5,19 @@ modes <- c("HILIC_neg", "HILIC_pos", "RP_neg", "RP_pos")
 
 objects <- list()
 for (mode in modes) {
-  dada <- read_from_excel(file = paste0("inst/extdata/", mode, "_sample.xlsx"),
-                          name = mode, id_prefix = "Sample_")
+  dada <- read_from_excel(
+    file = paste0("inst/extdata/", mode, "_sample.xlsx"),
+    name = mode, id_prefix = "Sample_"
+  )
   pd <- dada$pheno_data
   pd <- tidyr::separate(pd, col = "Class", into = c("Group", "Time"), sep = 1)
   pd$Group[pd$Group == "Q"] <- "QC"
   pd$Time[pd$Time == "C"] <- "QC"
 
-  object <- construct_metabosets(exprs= dada$exprs, pheno_data = pd, feature_data = dada$feature_data,
-                                group_col = "Group", time_col = "Time")
+  object <- construct_metabosets(
+    exprs = dada$exprs, pheno_data = pd, feature_data = dada$feature_data,
+    group_col = "Group", time_col = "Time"
+  )
   obj <- object[[1]]
   obj <- obj[, obj$Injection_order < 221]
   obj$Batch <- as.factor(rep(1:2, times = c(73, ncol(obj) - 73)))
