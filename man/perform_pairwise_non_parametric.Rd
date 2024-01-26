@@ -42,7 +42,11 @@ P-values of each comparison are corrected separately from each other.
 # Including QCs as a study group for example
 mann_whitney_results <- perform_pairwise_non_parametric(merged_sample, group = "Group")
 # Using paired mode (pairs with QC are skipped as there are no common IDs in 'example_set')
-wilcoxon_signed_results <- perform_pairwise_non_parametric(example_set, group = "Time", is_paired = TRUE, id = "Subject_ID")
+wilcoxon_signed_results <- perform_pairwise_non_parametric(example_set,
+  group = "Time",
+  is_paired = TRUE,
+  id = "Subject_ID"
+)
 
 }
 \seealso{

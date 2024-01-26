@@ -65,11 +65,13 @@ assumptions of cubic spline regression. The drift correction in the original spa
 in negative values, and results in rejection of the drift corrrection procedure.
 If \code{spar} is set to \code{NULL} (the default), the smoothing parameter will
 be separately chosen for each feature from the range [\code{spar_lower, spar_upper}]
-using cross validation. If  \code{check_quality = TRUE}, the \code{condition} parameter should be a character giving a condition compatible
+using cross validation. If  \code{check_quality = TRUE},
+the \code{condition} parameter should be a character giving a condition compatible
 with dplyr::filter. The condition is applied on the \strong{changes} in the quality metrics
 RSD, RSD_r, D_ratio and D_ratio_r. For example, the default is "RSD_r < 0 and D_ratio_r < 0",
 meaning that both RSD_r and D_ratio_r need to decrease in the drift correction, otherwise the
-drift corrected feature is discarded and the original is retained. If \code{shape} is set to \code{NULL} (the default), the column used for color
+drift corrected feature is discarded and the original is retained.
+If \code{shape} is set to \code{NULL} (the default), the column used for color
 is also used for shape
 }
 \examples{

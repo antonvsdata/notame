@@ -25,8 +25,8 @@ a MetaboSet object with altered feature abundances
 }
 \description{
 Apply probabilistic quotient normalization (PQN) to the exprs part of a MetaboSet object. By default, reference
-is calculated from high-quality QC samples and the median of the reference is used for normalization. Check parameters for
-more options.
+is calculated from high-quality QC samples and the median of the reference is used for normalization.
+Check parameters for more options.
 }
 \examples{
 pqn_set <- pqn_normalization(merged_sample)

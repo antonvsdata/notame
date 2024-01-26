@@ -50,7 +50,7 @@ mixomics_spls_optimize(
 \item{ncomp}{number of X components}
 
 \item{plot_scores}{logical, if TRUE, a scatter plot with the first two PLS-components as x and y-axis will
-be drawn, colored by the Y-variable. Only really makes sense if y is a single variable}
+be drawn, colored by the y-variable. Only really makes sense if y is a single variable}
 
 \item{all_features}{logical, should all features be included in the model? if FALSE, flagged features are left out}
 
@@ -74,7 +74,8 @@ The object can then be passed to many of the mixOmics functions for prediction,
 performance evaluation etc. Also plot a scores plot of the first two components.
 \itemize{
 \item{\code{mixomics_pls} A simple PLS model with set number of components and all features}
-\item{\code{mixomics_pls_optimize} Test different numbers of components, choose the one with minimal mean square error}
+\item{\code{mixomics_pls_optimize} Test different numbers of components,
+choose the one with minimal mean square error}
 \item{\code{mixomics_spls_optimize} sPLS model: Test different numbers of components and features,
 choose the one with minimal mean square error}
 }
@@ -83,8 +84,10 @@ choose the one with minimal mean square error}
 \dontrun{
 pls_res <- mixomics_pls(merged_sample, y = "Injection_order", ncomp = 3)
 pls_opt <- mixomics_pls_optimize(merged_sample, y = "Injection_order", ncomp = 3)
-pls_res <- mixomics_spls_optimize(merged_sample, y = "Injection_order", ncomp = 3,
-                                  n_features <- c(1:10, 12, 15, 20))
+pls_res <- mixomics_spls_optimize(merged_sample,
+  y = "Injection_order", ncomp = 3,
+  n_features <- c(1:10, 12, 15, 20)
+)
 }
 }
 \seealso{

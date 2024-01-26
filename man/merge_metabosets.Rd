@@ -20,13 +20,16 @@ Merges two or more MetaboSet objects together. Can be used to merge analytical m
 }
 \details{
 When merging samples, sample IDs that beging with "QC" or "Ref" are combined so that they have
-running numbers on them. This means that if both bathces have samples called "QC_1", this will not result in an error,
+running numbers on them. This means that if both bathces have samples called "QC_1",
+this will not result in an error,
 but the sample IDs will be adjusted so that they are unique
 }
 \examples{
 # Merge analytical modes
-merged <- merge_metabosets(hilic_neg_sample, hilic_pos_sample,
-                           rp_neg_sample, rp_pos_sample)
+merged <- merge_metabosets(
+  hilic_neg_sample, hilic_pos_sample,
+  rp_neg_sample, rp_pos_sample
+)
 # Merge batches
 batch1 <- merged_sample[, merged_sample$Batch == 1]
 batch2 <- merged_sample[, merged_sample$Batch == 2]

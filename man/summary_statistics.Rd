@@ -25,7 +25,7 @@ as well as 25% and 75% quantiles (Q25 & Q75).
 # Group by "Group"
 sum_stats <- summary_statistics(example_set)
 # Group by Group and Time
- sum_stats <- summary_statistics(example_set, grouping_cols = c("Group", "Time"))
+sum_stats <- summary_statistics(example_set, grouping_cols = c("Group", "Time"))
 # No Grouping
 sum_stats <- summary_statistics(example_set, grouping_cols = NA)
 

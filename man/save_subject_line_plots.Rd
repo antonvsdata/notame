@@ -27,7 +27,8 @@ save_subject_line_plots(
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used?
+If FALSE (the default), flagged features are removed before visualization.}
 
 \item{save}{logical, if false, the plots are not saved but returned as a list}
 

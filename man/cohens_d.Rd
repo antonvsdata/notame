@@ -26,6 +26,7 @@ and Cohen's d is computed from the changes
 \examples{
 d_results <- cohens_d(drop_qcs(example_set))
 d_results_time <- cohens_d(drop_qcs(example_set),
-                           time = "Time", id = "Subject_ID")
+  time = "Time", id = "Subject_ID"
+)
 
 }

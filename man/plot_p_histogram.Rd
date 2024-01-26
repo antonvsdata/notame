@@ -7,11 +7,13 @@
 plot_p_histogram(p_values, hline = TRUE, combine = TRUE, x_label = "p-value")
 }
 \arguments{
-\item{p_values}{list or data frame, each element/column is a vector of p-values. The list names are used as plot titles}
+\item{p_values}{list or data frame, each element/column is a vector of p-values.
+The list names are used as plot titles}
 
 \item{hline}{logical, whether a horizontal line representing uniform distribution should be plotted}
 
-\item{combine}{logical, whether plots of individual p-value vectors should be combined into a single object. Set to FALSE if
+\item{combine}{logical, whether plots of individual p-value vectors should be combined into a single object.
+ Set to FALSE if
 you want to add other plots to the list before plotting}
 
 \item{x_label}{the x-axis label}

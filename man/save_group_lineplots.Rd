@@ -30,7 +30,8 @@ save_group_lineplots(
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 

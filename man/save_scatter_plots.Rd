@@ -71,7 +71,7 @@ save_scatter_plots(
 )
 }
 # Plot one feature
-save_scatter_plots(merged_sample[5, ], save = FALSE)
+save_scatter_plots(merged_sample[5, ], save = FALSE, color = "Group")
 }
 \seealso{
 \code{\link[notame]{save_plot}}

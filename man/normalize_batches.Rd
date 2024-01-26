@@ -13,7 +13,8 @@ normalize_batches(object, batch, group, ref_label, population = "all", ...)
 
 \item{ref_label}{the label of the reference group i.e. the group that is constant through batches}
 
-\item{population}{Identifier of population samples in group column (all (default) or any type of samples present in group)}
+\item{population}{Identifier of population samples in group column
+(all (default) or any type of samples present in group)}
 
 \item{...}{additional parameters passed to batchCorr::normalizeBatches}
 }

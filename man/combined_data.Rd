@@ -16,5 +16,4 @@ The data frame thus has one row per sample.
 \examples{
 combined_data(example_set)
 
-
 }

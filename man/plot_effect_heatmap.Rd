@@ -47,8 +47,8 @@ This needs to be adjusted to make the point size look good when compared to the 
 \item{discretize_effect}{logical, whether the effect range should be divided into discrete levels instead of using
 a continuous scale. Can sometimes make patterns more visible, but the hard limits can blur the big picture as well.}
 
-\item{breaks}{if \code{discretize_effect = TRUE}, either the number of breaks or the points where to cut for the levels,
-see \code{\link{cut}}}
+\item{breaks}{if \code{discretize_effect = TRUE}, either the number of breaks or
+the points where to cut for the levels, see \code{\link{cut}}}
 
 \item{clustering}{logical, whether the order of rows and columns should be ordered by hierarchical clustering?}
 
@@ -61,13 +61,16 @@ see \code{\link{cut}}}
 \item{reverse_y}{logical, if \code{clustering = FALSE, lower_tri = FALSE}, should the order of the y-axis
 be reversed so that the diagonal is from top left to bottom right?}
 
-\item{use_coord_fixed}{logical, should the heatmap tiles be squares? If yes, this uses \code{\link[ggplot2]{coord_fixed}}}
+\item{use_coord_fixed}{logical, should the heatmap tiles be squares?
+If yes, this uses \code{\link[ggplot2]{coord_fixed}}}
 
-\item{symmetric_aspect_ratio}{logical, should the plot panel be a square? If yes, uses ggplot2::theme(aspect.ratio = 1).}
+\item{symmetric_aspect_ratio}{logical, should the plot panel be a square?
+If yes, uses ggplot2::theme(aspect.ratio = 1).}
 
 \item{title, subtitle}{the title and subtitle of the plot}
 
-\item{fill_scale}{fill scale for the heatmap as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the effect variable.}
+\item{fill_scale}{fill scale for the heatmap as returned by a ggplot function.
+Set to NA to choose the appropriate scale based on the class of the effect variable.}
 }
 \value{
 a ggplot object
@@ -84,16 +87,19 @@ since \code{hclust} can't deal with missing values.
 \examples{
 # Compute correlations between variables
 correlations <- perform_correlation_tests(example_set,
-                                          x = featureNames(example_set),
-                                          duplicates = TRUE)
+  x = featureNames(example_set),
+  duplicates = TRUE
+)
 
 # Minimal example
 plot_effect_heatmap(correlations, x = "X", y = "Y", effect = "Correlation_coefficient")
 
 # Lower triangular with discrete effect and p-value dots
-plot_effect_heatmap(correlations, x = "X", y = "Y", effect = "Correlation_coefficient",
-                    p = "Correlation_P", point_size_range = c(2,8),
-                    discretize_effect = TRUE, breaks = 7, lower_tri = TRUE)
+plot_effect_heatmap(correlations,
+  x = "X", y = "Y", effect = "Correlation_coefficient",
+  p = "Correlation_P", point_size_range = c(2, 8),
+  discretize_effect = TRUE, breaks = 7, lower_tri = TRUE
+)
 
 }
 \seealso{

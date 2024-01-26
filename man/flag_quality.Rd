@@ -20,14 +20,18 @@ a MetaboSet object with the features flagged
 }
 \description{
 Flags low-quality features using the quality metrics defined in (Broadhurst 2018). The metrics are described in
-more detain in Details. A condition for keeping the features is given as a character, which is passed to \code{dplyr::filter}.
+more detain in Details. A condition for keeping the features is given as a character,
+which is passed to \code{dplyr::filter}.
 }
 \details{
-The quality metrics measure two things: internal spread of the QCs, and spread of the QCs compared to the spread of the biological samples.
+The quality metrics measure two things: internal spread of the QCs,
+and spread of the QCs compared to the spread of the biological samples.
   Internal spread is measured with relative standard deviation (RSD), also known as coefficient of variation (CV).
   \deqn{RSD = sd(QC) / mean(QC) }
-  Where \eqn{sd(QC)} is the standard deviation of the QC samples and \eqn{mean(QC)} is the sample mean of the signal in the QC samples.
-  RSD can also be replaced by a non-parametric, robust version based on the median and median absolute deviation (MAD):
+  Where \eqn{sd(QC)} is the standard deviation of the QC samples and \eqn{mean(QC)} is
+  the sample mean of the signal in the QC samples.
+  RSD can also be replaced by a non-parametric, robust version based on the median and
+  median absolute deviation (MAD):
   \deqn{RSD_r = 1.4826 * MAD(QC) / median(QC)}
   The spread of the QC samples compared to the biological samples is measured using a metric called D-ratio:
   \deqn{D_ratio = sd(QC) / sd(biological)}

@@ -43,7 +43,8 @@ If x is a data frame, it is used as is.}
 
 \item{title, subtitle}{the title and subtitle of the plot}
 
-\item{...}{parameters passed to \code{\link[ggplot2]{geom_point}}, such as shape and alpha values. New aesthetics can
+\item{...}{parameters passed to \code{\link[ggplot2]{geom_point}},
+such as shape and alpha values. New aesthetics can
 also be passed using \code{mapping = aes(...)}.}
 }
 \value{

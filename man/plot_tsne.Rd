@@ -28,7 +28,8 @@ plot_tsne(
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
@@ -44,15 +45,18 @@ plot_tsne(
 
 \item{label}{character, name of the column used for point labels}
 
-\item{density}{logical, whether to include density plots to both axes. The density curves will be split and colored by the 'color' variable.}
+\item{density}{logical, whether to include density plots to both axes.
+The density curves will be split and colored by the 'color' variable.}
 
 \item{title, subtitle}{the titles of the plot}
 
-\item{color_scale}{the color scale as returned by a ggplot function. Set to NA to choose the appropriate scale based on the class of the coloring variable.}
+\item{color_scale}{the color scale as returned by a ggplot function.
+Set to NA to choose the appropriate scale based on the class of the coloring variable.}
 
 \item{shape_scale}{the shape scale as returned by a ggplot function}
 
-\item{fill_scale}{the fill scale used for density curves. If a continuous variable is used as color, density curve will be colorless.}
+\item{fill_scale}{the fill scale used for density curves.
+If a continuous variable is used as color, density curve will be colorless.}
 
 \item{text_base_size}{numeric, base size for text}
 

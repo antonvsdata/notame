@@ -48,8 +48,9 @@ by the actual Feature IDs during model fitting, see the example
 # Features predicted by Group and Time as fixed effects with Subject ID as a random effect
 \dontrun{
 lmer_results <- perform_lmer(drop_qcs(example_set),
-                             formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
-                        ci_method = "Wald")
+  formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
+  ci_method = "Wald"
+)
 }
 }
 \seealso{
