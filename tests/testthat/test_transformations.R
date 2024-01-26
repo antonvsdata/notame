@@ -130,3 +130,64 @@ test_that("Simple imputation with only one feature works", {
   expect_equal(exprs(imputed)[2,5], 0)
 })
 
+test_that("PQN normalization works correctly using median of QC samples as reference", {
+  data <- exprs(example_set)
+  # Calculate the median of QC samples
+  reference <- apply(data[, example_set$QC == "QC"], 1, finite_median)
+    # do the normalization
+  quotient <- data / reference
+  quotient_md <- apply(quotient, 2, finite_median)
+  pqn_data <- t(t(data) / quotient_md)
+
+  expect_equal(pqn_data, exprs(pqn_normalization(example_set)))
+})
+
+test_that("PQN normalization works correctly using median of all samples as reference", {
+  data <- exprs(example_set)
+  # Calculate the median of all samples
+  reference <- apply(data, 1, finite_median)
+  # do the normalization
+  quotient <- data / reference
+  quotient_md <- apply(quotient, 2, finite_median)
+  pqn_data <- t(t(data) / quotient_md)
+
+  expect_equal(pqn_data, exprs(pqn_normalization(example_set, ref = "all")))
+})
+
+test_that("PQN normalization works correctly using mean of QC samples as reference", {
+  data <- exprs(example_set)
+  # Calculate the mean of QC samples
+  reference <- apply(data[, example_set$QC == "QC"], 1, finite_mean)
+  # do the normalization
+  quotient <- data / reference
+  quotient_md <- apply(quotient, 2, finite_median)
+  pqn_data <- t(t(data) / quotient_md)
+  
+  expect_equal(pqn_data, exprs(pqn_normalization(example_set, method = "mean")))
+})
+
+test_that("PQN normalization works correctly using mean of all samples as reference", {
+  data <- exprs(example_set)
+  # Calculate the mean of all samples
+  reference <- apply(data, 1, finite_mean)
+  # do the normalization
+  quotient <- data / reference
+  quotient_md <- apply(quotient, 2, finite_median)
+  pqn_data <- t(t(data) / quotient_md)
+  
+  expect_equal(pqn_data, exprs(pqn_normalization(example_set, ref = "all", method = "mean")))
+})
+
+test_that("PQN normalization works with flagged features", {
+  flagged_mset <- flag_quality(example_set)
+  ref_data <- exprs(drop_flagged(flagged_mset))
+  reference_spectrum <- apply(ref_data[, example_set$QC == "QC"], 1, finite_median)
+  quotient <- ref_data / reference_spectrum
+  quotient_md <- apply(quotient, 2, finite_median)
+  
+  data <- exprs(flagged_mset)
+  pqn_data <- t(t(data) / quotient_md)
+
+  pqn_mset <- pqn_normalization(flagged_mset)
+  expect_equal(pqn_data, exprs(pqn_mset))
+})

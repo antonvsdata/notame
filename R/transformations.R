@@ -465,3 +465,52 @@ setMethod("exponential", c(object = "MetaboSet"),
             exprs(object) <- base^exprs(object)
             object
           })
+
+
+#' Probabilistic quotient normalization
+#' 
+#' Apply probabilistic quotient normalization (PQN) to the exprs part of a MetaboSet object. By default, reference
+#' is calculated from high-quality QC samples and the median of the reference is used for normalization. Check parameters for
+#' more options. 
+#' 
+#' @param object a MetaboSet object
+#' @param ref character, the type of reference samples to use for normalization.
+#' @param method character, the method to use for calculating the reference sample.
+#' @param all_features logical, should all features be used for calculating the reference sample?
+#' 
+#' @return a MetaboSet object with altered feature abundances
+#' 
+#' @examples
+#' pqn_set <- pqn_normalization(merged_sample)
+#' 
+#' @export
+pqn_normalization <- function(object, ref = c("qc", "all"), method = c("median", "mean"), all_features = FALSE) {
+  log_text("Starting PQN normalization")
+  ref <- match.arg(ref)
+  method <- match.arg(method)
+  # Use only good-quality features for calculating reference spectra
+  ref_data <- exprs(drop_flagged(object, all_features))
+  # Select reference samples
+  switch(ref,
+         qc = reference <- ref_data[, object$QC == "QC"],
+         all = reference <- ref_data)
+  if (ncol(reference) == 0 || all(is.na(reference))) {
+    stop("No specified reference samples found")
+  }
+  # Calculate reference spectrum
+  switch(method,
+        median = reference_spectrum <- apply(reference, 1, finite_median),
+        mean = reference_spectrum <- apply(reference, 1, finite_mean))
+  log_text(paste("Using", method, "of", ref, "samples as reference spectrum"))
+  # Calculate median of quotients
+  quotients <- ref_data / reference_spectrum
+  quotient_md <- apply(quotients, 2, notame::finite_median)
+  # do the normalization
+  data <- exprs(object)
+  pqn_data <- t(t(data) / quotient_md)
+  colnames(pqn_data) <- colnames(data)
+  rownames(pqn_data) <- rownames(data)
+  exprs(object) <- pqn_data
+  
+  object
+}
