@@ -104,7 +104,7 @@ plot_pls <- function(model, Y, y, title) { # nolint: object_name_linter.
   scores[, y[1]] <- Y[, 1]
   # Explained variance as percentage
   var_exp <- 100 * model$explained_variance$X[1:2] %>% round(digits = 3)
-  p <- ggplot(scores, aes_string(x = "X1", y = "X2", color = y)) +
+  p <- ggplot(scores, aes(x = .data[["X1"]], y = .data[["X2"]], color = y)) +
     geom_point() +
     getOption("notame.color_scale_con") +
     theme_minimal() +

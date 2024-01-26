@@ -267,7 +267,7 @@ save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width
 
   # Create a helper function for plotting
   dc_plot_helper <- function(data, fname, title = NULL) {
-    p <- ggplot(mapping = aes_string(x = "Injection_order", y = fname)) +
+    p <- ggplot(mapping = aes(x = .data[["Injection_order"]], y = .data[[fname]])) +
       theme_bw() +
       theme(panel.grid = element_blank()) +
       color_scale +
@@ -291,7 +291,7 @@ save_dc_plots <- function(orig, dc, predicted, file, log_transform = TRUE, width
     }
     p +
       scale_y_continuous(sec.axis = sec_axis(~., breaks = y_intercepts, labels = names(y_intercepts))) +
-      geom_point(data = data, mapping = aes_string(color = color, shape = shape))
+      geom_point(data = data, mapping = aes(color = .data[[color]], shape = .data[[shape]]))
   }
 
   orig_data_log <- combined_data(log(orig))

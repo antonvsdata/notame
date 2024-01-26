@@ -418,10 +418,10 @@ plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window
 
   features_tmp <- features[features[, name_col] %in% cluster$features, ]
 
-  p1 <- ggplot(features_tmp, aes_string(mz_col, "MPA")) +
+  p1 <- ggplot(features_tmp, aes(.data[[mz_col]], .data[["MPA"]])) +
     geom_point(size = 3, color = "steelblue4") +
-    geom_segment(aes_string(x = mz_col, yend = "MPA", xend = mz_col), y = 0, color = "steelblue4") +
-    ggrepel::geom_label_repel(aes_string(label = mz_col), color = "steelblue4") +
+    geom_segment(aes(x = .data[[mz_col]], yend = .data[["MPA"]], xend = .data[[mz_col]]), y = 0, color = "steelblue4") +
+    ggrepel::geom_label_repel(aes(label = .data[[mz_col]]), color = "steelblue4") +
     theme_minimal() +
     xlim(
       0.9 * min(features_tmp[, mz_col], na.rm = TRUE),
@@ -433,7 +433,7 @@ plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window
   features_tmp$rtmin <- features_tmp[, rt_col] - rt_window
   features_tmp$rtmax <- features_tmp[, rt_col] + rt_window
 
-  p2 <- ggplot(features_tmp, aes_string(rt_col, mz_col)) +
+  p2 <- ggplot(features_tmp, aes(.data[[rt_col]], .data[[mz_col]])) +
     geom_point(size = 3, color = "steelblue4") +
     geom_errorbarh(aes(xmin = rtmin, xmax = rtmax), color = "steelblue4") +
     theme_minimal() +

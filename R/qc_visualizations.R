@@ -1,7 +1,7 @@
 density_plot <- function(data, x, fill, fill_scale = NULL, color_scale = NULL,
                          title = NULL, subtitle = NULL,
                          xlab = x, fill_lab = fill) {
-  p <- ggplot(data, aes_string(x, fill = fill, color = fill)) +
+  p <- ggplot(data, aes(.data[[x]], fill = .data[[fill]], color = .data[[fill]])) +
     geom_density(alpha = 0.2) +
     fill_scale +
     labs(title = title, subtitle = subtitle, x = xlab, fill = fill_lab, color = NULL) +

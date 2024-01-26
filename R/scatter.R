@@ -172,6 +172,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
                          shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape, apply_theme_bw = TRUE,
                          text_base_size = text_base_size, point_size = point_size, label_text_size = label_text_size) {
+  # Set right color scale
   if (!is.null(color_scale)) {
     if (!is.ggproto(color_scale)) {
       color_scale <- if (is.na(color_scale)) {
@@ -185,9 +186,14 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       }
     }
   }
-
-
-  p <- ggplot(data, aes_string(x = x, y = y, color = color)) +
+  #
+  if (!is.null(color)) {
+    color <- data[[color]]
+  }
+  p <- ggplot(data, aes(
+    x = .data[[x]], y = .data[[y]],
+    color = color
+  )) +
     color_scale +
     labs(
       title = title, subtitle = subtitle, x = xlab, y = ylab,
@@ -200,7 +206,6 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
   if (fixed) {
     p <- p + coord_fixed() + theme(aspect.ratio = 1)
   }
-
   if (class(data[, shape]) == "character") {
     data[shape] <- as.factor(data[, shape])
     warning(
@@ -211,11 +216,10 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       call. = FALSE
     )
   }
-
   if (class(data[, shape]) == "factor") {
     if (length(levels(data[, shape])) <= 8) {
       p <- p +
-        geom_point(aes_string(shape = shape), size = point_size) +
+        geom_point(aes(shape = .data[[shape]]), size = point_size) +
         shape_scale +
         labs(shape = shape_lab)
     } else if (is.null(shape_scale)) {
@@ -236,7 +240,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       )
     }
     p <- p +
-      ggrepel::geom_text_repel(aes_string(label = label), size = label_text_size)
+      ggrepel::geom_text_repel(aes(label = .data[[label]]), size = label_text_size)
   }
 
   # Add density plots to top and right
@@ -248,14 +252,14 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
     }
     xdens <- cowplot::axis_canvas(p, axis = "x") +
       geom_density(
-        data = data, aes_string(x = x, fill = color),
+        data = data, aes(x = .data[[x]], fill = .data[[color]]),
         alpha = 0.7, size = 0.2
       ) +
       fill_scale
 
     ydens <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
       geom_density(
-        data = data, aes_string(x = y, fill = color),
+        data = data, aes(x = .data[[y]], fill = .data[[color]]),
         alpha = 0.7, size = 0.2
       ) +
       coord_flip() +
@@ -325,7 +329,7 @@ plot_pca_loadings <- function(object, pcs = c(1, 2), all_features = FALSE, cente
 
   loads <- loads[union(features_pc1, features_pc2), ]
 
-  ggplot(loads, aes_string(x = pc_names[1], y = pc_names[2], label = "Feature_ID")) +
+  ggplot(loads, aes(x = .data[[pc_names[1]]], y = .data[[pc_names[2]]], label = .data[["Feature_ID"]])) +
     geom_point(size = point_size) +
     ggrepel::geom_text_repel(size = label_text_size) +
     theme_bw(base_size = text_base_size) +
@@ -452,7 +456,7 @@ hexbin_plot <- function(data, x, y, fill, summary_fun = "mean", bins = 10, fill_
     )
   }
 
-  p <- ggplot(data, aes_string(x = x, y = y, z = fill)) +
+  p <- ggplot(data, aes(x = .data[[x]], y = .data[[y]], z = .data[[fill]])) +
     stat_summary_hex(bins = bins, fun = summary_fun) +
     theme_bw() +
     fill_scale +
@@ -473,7 +477,7 @@ arrow_plot <- function(data, x, y, color, time, subject, alpha, arrow_style,
                        text_base_size, line_width) {
   data <- data[order(data[, subject], data[, time]), ]
 
-  p <- ggplot(data, aes_string(x = x, y = y, color = color, group = subject)) +
+  p <- ggplot(data, aes(x = .data[[x]], y = .data[[y]], color = .data[[color]], group = .data[[subject]])) +
     geom_path(arrow = arrow_style, alpha = alpha, linewidth = line_width) +
     theme_bw(base_size = text_base_size) +
     color_scale +
@@ -716,7 +720,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
   }
 
-  pl <- ggplot(data, aes_string(x = x, y = p, color = color)) +
+  pl <- ggplot(data, aes(x = .data[[x]], y = .data[[p]], color = .data[[color]])) +
     geom_point(...) +
     color_scale +
     theme_bw(base_size = text_base_size) +
@@ -777,7 +781,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
       pl <- pl +
         ggrepel::geom_label_repel(
           data = label_data,
-          mapping = aes_string(label = label),
+          mapping = aes(label = .data[[label]]),
           seed = 313,
           alpha = 0.5,
           size = label_text_size,
@@ -914,7 +918,7 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
     p_breaks <- sort(p_breaks)
   }
 
-  pl <- ggplot(data, aes_string(x = x, y = "y", color = color)) +
+  pl <- ggplot(data, aes(x = .data[[x]], y = .data[["y"]], color = .data[[color]])) +
     geom_point(...) +
     color_scale +
     theme_bw() +
@@ -1052,9 +1056,9 @@ mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subti
     rt_col <- rt_col %||% mz_rt_cols$rt_col
   }
 
-  p <- ggplot(x, aes_string(
-    x = rt_col, y = mz_col, size = p_col,
-    color = color
+  p <- ggplot(x, aes(
+    x = .data[[rt_col]], y = .data[[mz_col]], size = .data[[p_col]],
+    color = .data[[color]]
   )) +
     geom_point(alpha = 0.6) +
     scale_size_continuous(

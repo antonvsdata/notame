@@ -144,11 +144,11 @@ save_subject_line_plots <- function(object,
   subject_line_fun <- function(object, fname) {
     data <- combined_data(object)
 
-    p <- ggplot(data, aes_string(x = x, y = fname))
+    p <- ggplot(data, aes(x = .data[[x]], y = .data[[fname]]))
 
     if (is.na(color)) {
       p <- p +
-        geom_line(aes_string(group = id),
+        geom_line(aes(group = .data[[id]]),
           color = "grey20",
           alpha = 0.35,
           linewidth = line_width
@@ -161,11 +161,11 @@ save_subject_line_plots <- function(object,
         )
     } else {
       p <- p +
-        geom_line(aes_string(group = id, color = color),
+        geom_line(aes(group = .data[[id]], color = .data[[color]]),
           alpha = 0.35,
           size = line_width
         ) +
-        stat_summary(aes_string(group = color, color = color),
+        stat_summary(aes(group = .data[[color]], color = .data[[color]]),
           fun.data = "mean_se",
           geom = "line",
           size = mean_line_width
@@ -268,7 +268,7 @@ save_group_boxplots <- function(object,
   boxplot_fun <- function(object, fname) {
     data <- combined_data(object)
     dodge_amount <- box_width + 0.05
-    p <- ggplot(data, aes_string(x = x, y = fname, color = color)) +
+    p <- ggplot(data, aes(x = .data[[x]], y = .data[[fname]], color = .data[[color]])) +
       geom_boxplot(position = position_dodge(dodge_amount), width = box_width, size = line_width) +
       stat_summary(
         fun.data = mean_se,
@@ -368,7 +368,7 @@ save_beeswarm_plots <- function(object,
                                 ...) {
   beeswarm_fun <- function(object, fname) {
     data <- combined_data(object)
-    p <- ggplot(data, aes_string(x = x, y = fname, color = color))
+    p <- ggplot(data, aes(x = .data[[x]], y = .data[[fname]], color = .data[[color]]))
 
     if (add_boxplots) {
       p <- p +
@@ -444,7 +444,7 @@ save_beeswarm_plots <- function(object,
 #' )
 #' }
 #' # Plot one feature
-#' save_scatter_plots(merged_sample[5, ], save = FALSE)
+#' save_scatter_plots(merged_sample[5, ], save = FALSE, color = "Group")
 #' @export
 save_scatter_plots <- function(object,
                                x = "Injection_order",
@@ -576,7 +576,7 @@ save_group_lineplots <- function(object,
     data <- combined_data(object)
     p <- ggplot(
       data,
-      aes_string(x = x, y = fname, group = group, color = group)
+      aes(x = .data[[x]], y = .data[[fname]], group = .data[[group]], color = .data[[group]])
     ) +
       # Errorbars with solid lines
       stat_summary(

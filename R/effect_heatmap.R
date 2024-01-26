@@ -121,7 +121,7 @@ plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, poi
     data[effect] <- factor(data[, effect], levels = rev(levels(data[, effect])))
   }
 
-  ggp <- ggplot(data, aes_string(x = x, y = y, fill = effect)) +
+  ggp <- ggplot(data, aes(x = .data[[x]], y = .data[[y]], fill = .data[[effect]])) +
     geom_tile() +
     theme_minimal() +
     theme(
@@ -148,7 +148,7 @@ plot_effect_heatmap <- function(data, x, y, effect, p = NULL, p_limit = 0.1, poi
     small_p <- data[data[, p] < p_limit, ]
     small_p[p] <- -log10(small_p[, p])
     ggp <- ggp +
-      geom_point(aes_string(size = p),
+      geom_point(aes(size = .data[[p]]),
         data = small_p,
         colour = "grey10", fill = "grey30", alpha = 0.3, shape = 21
       ) +

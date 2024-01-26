@@ -363,9 +363,9 @@ save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
 
   batch_plot_helper <- function(data, fname, batch_means) {
     p <- ggplot() +
-      geom_point(data = data, mapping = aes_string(
-        x = "Injection_order", y = fname,
-        color = color, shape = shape
+      geom_point(data = data, mapping = aes(
+        x = .data[["Injection_order"]], y = .data[[fname]],
+        color = .data[[color]], shape = .data[[shape]]
       )) +
       theme_bw() +
       theme(panel.grid = element_blank()) +
@@ -374,10 +374,10 @@ save_batch_plots <- function(orig, corrected, file, width = 14, height = 10,
 
     p <- p +
       geom_segment(
-        data = batch_means, mapping = aes_string(
-          x = "start", xend = "end",
-          y = fname, yend = fname,
-          color = color, linetype = "QC"
+        data = batch_means, mapping = aes(
+          x = .data[["start"]], xend = .data[["end"]],
+          y = .data[[fname]], yend = .data[[fname]],
+          color = .data[[color]], linetype = .data[["QC"]]
         ),
         size = 1
       ) +

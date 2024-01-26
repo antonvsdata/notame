@@ -55,11 +55,10 @@ plot_dendrogram <- function(
     dplyr::mutate(label = as.character(label)) %>%
     dplyr::left_join(pData(object)[c("Sample_ID", color)], by = c("label" = "Sample_ID"))
   labels[, color] <- as.factor(labels[, color])
-
   p <- ggplot(ggdendro::segment(d_data)) +
     geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
     geom_text(
-      data = labels, aes_string(x = "x", y = "y", label = "label", color = color),
+      data = labels, aes(x = .data[["x"]], y = .data[["y"]], label = .data[["label"]], color = .data[[color]]),
       angle = 90, hjust = 1
     ) +
     ggdendro::theme_dendro() +
@@ -148,7 +147,7 @@ plot_sample_heatmap <- function(object, all_features = FALSE, dist_method = "euc
     pheno_data <- pData(object)
     pheno_data$Sample_ID <- factor(pheno_data$Sample_ID, levels = hc_order, ordered = TRUE)
 
-    gb <- ggplot(pheno_data, aes_string(x = "Sample_ID", y = 1, fill = group)) +
+    gb <- ggplot(pheno_data, aes(x = .data[["Sample_ID"]], y = 1, fill = .data[[group]])) +
       geom_tile(color = "white") +
       theme_void() +
       fill_scale_dis
