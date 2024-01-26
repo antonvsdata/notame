@@ -24,11 +24,12 @@ flag_detection(
 a MetaboSet object with the features flagged
 }
 \description{
-Flags features with too high amount of missing values. There are two detection rate limits, both defined as the minimum proportion of samples that need to
-have a value (not NA) for the feature to be kept. \code{qc_limit} is the detection rate limit for QC samples, \code{group_limit} is the detection rate limit
-for the actual study groups. If the group limit is passed for AT LEAST ONE GROUP, then the feature is kept. Features with low detection rate in QCs are
-flagged as "Low_qc_detection", while low detection rate in the study groups is flagged as "Low_group_detection". The detection rates for all the groups are
-recorded in \code{fData(object)}
+Flags features with too high amount of missing values. There are two detection rate limits, both defined as the
+minimum proportion of samples that need to have a value (not NA) for the feature to be kept. \code{qc_limit} is
+the detection rate limit for QC samples, \code{group_limit} is the detection rate limit for the actual study groups.
+If the group limit is passed for AT LEAST ONE GROUP, then the feature is kept. Features with low detection rate
+in QCs are flagged as "Low_qc_detection", while low detection rate in the study groups is flagged as
+"Low_group_detection". The detection rates for all the groups are recorded in \code{fData(object)}.
 }
 \examples{
 ex_set <- flag_detection(merged_sample)

@@ -24,9 +24,13 @@ This function is mainly used internally, but can be useful.
 ex_set <- merged_sample[1:5, 1:5]
 exprs(ex_set)
 # Create a matrix of replacment values for rows 1, 3, 5 and columns 1, 3, 4
-replacement <- matrix(1:9, ncol = 3,
-                      dimnames = list(featureNames(ex_set)[c(1, 3, 5)],
-                                      sampleNames(ex_set)[c(1, 3, 4)]))
+replacement <- matrix(1:9,
+  ncol = 3,
+  dimnames = list(
+    featureNames(ex_set)[c(1, 3, 5)],
+    sampleNames(ex_set)[c(1, 3, 4)]
+  )
+)
 replacement
 merged <- merge_exprs(ex_set, replacement)
 exprs(merged)

@@ -6,4 +6,3 @@ knitr::opts_chunk$set(
 
 ## ---- out.width = "600px", echo=FALSE------------------------------------
 knitr::include_graphics("Data_input.png")
-

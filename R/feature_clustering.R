@@ -1,6 +1,4 @@
-
 #' Cluster correlated features
-#'
 #'
 #' Clusters features potentially originating from the same compound. Features with high
 #' Pearson correlation coefficient and small retention time difference are linked together.
@@ -34,14 +32,14 @@
 #'
 #' @export
 cluster_features <- function(object, mz_col = NULL, rt_col = NULL,
-                             all_features = FALSE, rt_window = 1/60,
+                             all_features = FALSE, rt_window = 1 / 60,
                              corr_thresh = 0.9, d_thresh = 0.8,
                              plotting = FALSE, min_size_plotting = 3, prefix = NULL) {
   # Drop flagged compounds before clustering
   orig <- object
   object <- drop_flagged(object, all_features)
 
-  if (is.null(mz_col) | is.null(rt_col)) {
+  if (is.null(mz_col) || is.null(rt_col)) {
     cols <- find_mz_rt_cols(fData(object))
   }
   mz_col <- mz_col %||% cols$mz_col
@@ -59,13 +57,15 @@ cluster_features <- function(object, mz_col = NULL, rt_col = NULL,
     features_tmp <- features[features$Split == s, ]
     data_tmp <- data[, features_tmp$Feature_ID]
 
-    conn_tmp <- find_connections(data = data_tmp,
-                                 features = features_tmp,
-                                 corr_thresh = corr_thresh,
-                                 rt_window = rt_window,
-                                 name_col = "Feature_ID",
-                                 mz_col = mz_col,
-                                 rt_col = rt_col)
+    conn_tmp <- find_connections(
+      data = data_tmp,
+      features = features_tmp,
+      corr_thresh = corr_thresh,
+      rt_window = rt_window,
+      name_col = "Feature_ID",
+      mz_col = mz_col,
+      rt_col = rt_col
+    )
     conn <- rbind(conn, conn_tmp)
     log_text(paste("Found", nrow(conn_tmp), "connections in", s))
   }
@@ -74,26 +74,34 @@ cluster_features <- function(object, mz_col = NULL, rt_col = NULL,
 
   # Form clusters
   clusters <- find_clusters(conn, d_thresh)
-  lens <- sapply(clusters, function(x){length(x$features)})
-  log_text(paste("Found", sum(lens > 1),
-                 "clusters of 2 or more features, clustering finished at", Sys.time()))
+  lens <- sapply(clusters, function(x) {
+    length(x$features)
+  })
+  log_text(paste(
+    "Found", sum(lens > 1),
+    "clusters of 2 or more features, clustering finished at", Sys.time()
+  ))
 
   # Compute median peak area and assing cluster ID
   features$MPA <- apply(exprs(object), 1, finite_median)
   features <- assign_cluster_id(data, clusters, features, "Feature_ID")
 
   if (plotting) {
-    visualize_clusters(data = data,
-                       features = features, clusters = clusters,
-                       min_size = min_size_plotting,
-                       rt_window = rt_window, name_col = "Feature_ID",
-                       mz_col = mz_col, rt_col = rt_col, file_path = prefix)
+    visualize_clusters(
+      data = data,
+      features = features, clusters = clusters,
+      min_size = min_size_plotting,
+      rt_window = rt_window, name_col = "Feature_ID",
+      mz_col = mz_col, rt_col = rt_col, file_path = prefix
+    )
     log_text(paste("Saved cluster plots to:", prefix))
   }
   # Add cluster IDs to the ORIGINAL object (flagged features still there)
-  clustered <- join_fData(orig, features[c("Feature_ID", "MPA",
-                                             "Cluster_ID", "Cluster_size",
-                                             "Cluster_features")])
+  clustered <- join_fData(orig, features[c(
+    "Feature_ID", "MPA",
+    "Cluster_ID", "Cluster_size",
+    "Cluster_features"
+  )])
   clustered
 }
 
@@ -110,9 +118,8 @@ cluster_features <- function(object, mz_col = NULL, rt_col = NULL,
 #'
 #' @export
 assign_cluster_id <- function(data, clusters, features, name_col) {
-
   if (!"MPA" %in% colnames(features)) {
-    features$MPA <- sapply(data[, features[, name_col]] , finite_median)
+    features$MPA <- sapply(data[, features[, name_col]], finite_median)
   }
 
   features$Cluster_ID <- features[, name_col]
@@ -153,14 +160,14 @@ assign_cluster_id <- function(data, clusters, features, name_col) {
 #'
 #' @export
 compress_clusters <- function(object) {
-
   cluster_names <- fData(object)$Cluster_ID
   if (is.null(cluster_names)) {
     stop('No "Cluster_ID" found in fData(object), please run cluster_features first!')
   }
   # Get only "real" clusters
   clusters <- cluster_names[grepl("^Cluster_", cluster_names)] %>%
-    gsub("^Cluster_", "", .) %>% unique()
+    gsub("^Cluster_", "", .) %>%
+    unique()
   alone_features <- cluster_names[!grepl("^Cluster_", cluster_names)]
   # This ensures the order of the features stays the same
   idx <- fData(object)$Feature_ID %in% c(clusters, alone_features)
@@ -187,14 +194,14 @@ compress_clusters <- function(object) {
 #'
 #' @export
 pull_clusters <- function(data, features, name_col) {
-
   cluster_names <- features$Cluster_ID
   if (is.null(cluster_names)) {
     stop('No "Cluster_ID" found in features, please run assign_cluster_id first!')
   }
   # Get only "real" clusters
   clusters <- cluster_names[grepl("^Cluster_", cluster_names)] %>%
-    gsub("^Cluster_", "", .) %>% unique()
+    gsub("^Cluster_", "", .) %>%
+    unique()
   alone_features <- cluster_names[!grepl("^Cluster_", cluster_names)]
   # This ensures the order of the features stays the same
   idx <- features[, name_col] %in% c(clusters, alone_features)
@@ -234,27 +241,28 @@ pull_clusters <- function(data, features, name_col) {
 #' @importFrom foreach "%dopar%"
 #'
 #' @export
-find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1/60,
+find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1 / 60,
                              name_col, mz_col, rt_col) {
-
-  D <- data[features[,name_col]]
-  if (ncol(D) < 2) {
+  d <- data[features[, name_col]]
+  if (ncol(d) < 2) {
     stop("Need at least 2 features to do any clustering!")
   }
   n <- nrow(features)
-  connections <- foreach::foreach(i = seq_len(n-1), .combine = rbind) %dopar% {
-    if (i %% 100 == 0){
+  connections <- foreach::foreach(i = seq_len(n - 1), .combine = rbind) %dopar% {
+    if (i %% 100 == 0) {
       print(i)
     }
     connections_tmp <- data.frame()
-    for (j in (i+1):n){
+    for (j in (i + 1):n) {
       rt_diff <- features[j, rt_col] - features[i, rt_col]
-      cor_coef <- cor(D[, i], D[, j], use = "na.or.complete")
+      cor_coef <- cor(d[, i], d[, j], use = "na.or.complete")
       if (!is.na(cor_coef)) {
-        if (abs(rt_diff) < rt_window & cor_coef > corr_thresh){
+        if (abs(rt_diff) < rt_window && cor_coef > corr_thresh) {
           mz_diff <- features[j, mz_col] - features[i, mz_col]
-          connections_tmp <- rbind(connections_tmp, data.frame(x = features[i, name_col], y = features[j, name_col],
-                                                               cor = cor_coef, rt_diff = rt_diff, mz_diff = mz_diff))
+          connections_tmp <- rbind(connections_tmp, data.frame(
+            x = features[i, name_col], y = features[j, name_col],
+            cor = cor_coef, rt_diff = rt_diff, mz_diff = mz_diff
+          ))
         }
       }
     }
@@ -282,10 +290,11 @@ find_connections <- function(data, features, corr_thresh = 0.9, rt_window = 1/60
 #' }
 #'
 #' @export
-find_clusters <- function(connections, d_thresh = 0.8){
+find_clusters <- function(connections, d_thresh = 0.8) {
   if (!requireNamespace("igraph", quietly = TRUE)) {
-      stop("Package \"igraph\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"igraph\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   add_citation("igraph package was used to construct networks of features for feature clustering:", citation("igraph"))
 
@@ -298,7 +307,7 @@ find_clusters <- function(connections, d_thresh = 0.8){
   k <- 1
 
   # Repeatedly extract densely connected clusters from the graph
-  while(length(igraph::V(g))){
+  while (length(igraph::V(g))) {
     # Connected components of the remaining graph
     comp <- igraph::decompose(g)
     n_comp <- length(comp)
@@ -306,22 +315,21 @@ find_clusters <- function(connections, d_thresh = 0.8){
 
     # Only keep the densely connected part of each component (subgraph)
     clusters_tmp <- foreach::foreach(i = seq_len(n_comp), .combine = c) %dopar% {
-
       if (i %% 100 == 0) {
-        cat(paste("Component", i, "/", n_comp,"\n"))
+        cat(paste("Component", i, "/", n_comp, "\n"))
       }
       subg <- comp[[i]]
 
       n_nodes <- length(igraph::V(subg))
       d <- igraph::degree(subg)
       # The limit of the degree a node needs to be kept
-      d_lim <- round(d_thresh * (n_nodes-1))
+      d_lim <- round(d_thresh * (n_nodes - 1))
 
       #
-      if(n_nodes >= 3) {
+      if (n_nodes >= 3) {
         # Remove the node with the smallest degree until all nodes in the cluster have
         # a degree above the limit
-        while(any(d < d_lim)){
+        while (any(d < d_lim)) {
           idx <- which(d == min(d))
           if (length(idx) > 1) {
             edgesums <- igraph::strength(subg, vids = igraph::V(subg)$name[idx])
@@ -330,14 +338,15 @@ find_clusters <- function(connections, d_thresh = 0.8){
           subg <- igraph::delete.vertices(subg, v = igraph::V(subg)[idx])
           d <- igraph::degree(subg)
           n_nodes <- n_nodes - 1
-          d_lim <- round(d_thresh * (n_nodes-1))
+          d_lim <- round(d_thresh * (n_nodes - 1))
         }
       }
 
       # Record the final cluster and remove the nodes from the main graph
-      list(list(features = names(igraph::V(subg)),
-                graph = subg))
-
+      list(list(
+        features = names(igraph::V(subg)),
+        graph = subg
+      ))
     }
 
     for (j in seq_along(clusters_tmp)) {
@@ -346,7 +355,6 @@ find_clusters <- function(connections, d_thresh = 0.8){
       subg <- clusters_tmp[[j]]$graph
       g <- igraph::delete.vertices(g, v = names(igraph::V(subg)))
     }
-
   }
 
   clusters
@@ -367,8 +375,9 @@ rescale <- function(x, new_min, new_max) {
 # UNFINISHED!!
 plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
   if (!requireNamespace("igraph", quietly = TRUE)) {
-      stop("Package \"igraph\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"igraph\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   add_citation("igraph package was used to construct networks of features for feature clustering:", citation("igraph"))
 
@@ -390,32 +399,41 @@ plot_graph <- function(features, cluster, name_col, mz_col, rt_col) {
 
 
   g$palette <- RColorBrewer::brewer.pal(n = max(3, length(unique(igraph::degree(g)))), name = "Blues")
-  plot(g, vertex.label = as.character(features_tmp[, mz_col]), vertex.size = size, vertex.label.dist = 0.1*size, vertex.label.degree = -pi/2,
-       vertex.color = igraph::degree(g), edge.label = edge_labels)
+  plot(g,
+    vertex.label = as.character(features_tmp[, mz_col]),
+    vertex.size = size,
+    vertex.label.dist = 0.1 * size,
+    vertex.label.degree = -pi / 2,
+    vertex.color = igraph::degree(g),
+    edge.label = edge_labels
+  )
 }
 
 plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window) {
   if (!requireNamespace("ggrepel", quietly = TRUE)) {
-      stop("Package \"ggrepel\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"ggrepel\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
 
   features_tmp <- features[features[, name_col] %in% cluster$features, ]
 
-  p1 <- ggplot(features_tmp, aes_string(mz_col, "MPA")) +
+  p1 <- ggplot(features_tmp, aes(.data[[mz_col]], .data[["MPA"]])) +
     geom_point(size = 3, color = "steelblue4") +
-    geom_segment(aes_string(x = mz_col, yend = "MPA", xend = mz_col), y = 0, color = "steelblue4") +
-    ggrepel::geom_label_repel(aes_string(label = mz_col), color = "steelblue4") +
+    geom_segment(aes(x = .data[[mz_col]], yend = .data[["MPA"]], xend = .data[[mz_col]]), y = 0, color = "steelblue4") +
+    ggrepel::geom_label_repel(aes(label = .data[[mz_col]]), color = "steelblue4") +
     theme_minimal() +
-    xlim(0.9*min(features_tmp[, mz_col], na.rm = TRUE),
-         1.15*max(features_tmp[, mz_col], na.rm = FALSE)) +
-    expand_limits(y=0) +
+    xlim(
+      0.9 * min(features_tmp[, mz_col], na.rm = TRUE),
+      1.15 * max(features_tmp[, mz_col], na.rm = FALSE)
+    ) +
+    expand_limits(y = 0) +
     labs(x = "Mass-to-charge ratio", y = "Median Peak Area")
 
   features_tmp$rtmin <- features_tmp[, rt_col] - rt_window
   features_tmp$rtmax <- features_tmp[, rt_col] + rt_window
 
-  p2 <- ggplot(features_tmp, aes_string(rt_col, mz_col)) +
+  p2 <- ggplot(features_tmp, aes(.data[[rt_col]], .data[[mz_col]])) +
     geom_point(size = 3, color = "steelblue4") +
     geom_errorbarh(aes(xmin = rtmin, xmax = rtmax), color = "steelblue4") +
     theme_minimal() +
@@ -426,9 +444,6 @@ plot_features <- function(features, cluster, name_col, mz_col, rt_col, rt_window
 }
 
 plot_heatmaps <- function(data, features, cluster, name_col, mz_col, rt_col) {
-
-  D <- data[, cluster$features]
-
   features_tmp <- features[features[, name_col] %in% cluster$features, ]
 
   n <- length(cluster$features)
@@ -436,11 +451,13 @@ plot_heatmaps <- function(data, features, cluster, name_col, mz_col, rt_col) {
 
   for (i in seq_len(n)) {
     for (j in seq_len(n)) {
-      mz_rt <- rbind(mz_rt, data.frame(x = features_tmp[i, name_col],
-                                       y = features_tmp[j, name_col],
-                                       mz_diff = features_tmp[i, mz_col] - features_tmp[j, mz_col],
-                                       rt_diff = features_tmp[i, rt_col] - features_tmp[j, rt_col],
-                                       stringsAsFactors = FALSE))
+      mz_rt <- rbind(mz_rt, data.frame(
+        x = features_tmp[i, name_col],
+        y = features_tmp[j, name_col],
+        mz_diff = features_tmp[i, mz_col] - features_tmp[j, mz_col],
+        rt_diff = features_tmp[i, rt_col] - features_tmp[j, rt_col],
+        stringsAsFactors = FALSE
+      ))
     }
   }
 
@@ -479,7 +496,6 @@ plot_heatmaps <- function(data, features, cluster, name_col, mz_col, rt_col) {
 #'
 #' @export
 visualize_clusters <- function(data, features, clusters, min_size, rt_window, name_col, mz_col, rt_col, file_path) {
-
   for (i in seq_along(clusters)) {
     if (i %% 100 == 0) {
       print(paste(i, "/", length(clusters)))
@@ -496,6 +512,4 @@ visualize_clusters <- function(data, features, clusters, min_size, rt_window, na
       dev.off()
     }
   }
-
-
 }

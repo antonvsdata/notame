@@ -7,7 +7,8 @@
 save_group_boxplots(
   object,
   all_features = FALSE,
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   x = group_col(object),
   color = group_col(object),
@@ -15,6 +16,10 @@ save_group_boxplots(
   subtitle = NULL,
   color_scale = getOption("notame.color_scale_dis"),
   text_base_size = 14,
+  box_width = 0.8,
+  line_width = 0.5,
+  point_size = 3,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
@@ -23,6 +28,8 @@ save_group_boxplots(
 
 \item{all_features}{logical, should all features be used? If FALSE (the default),
 flagged features are removed before visualization.}
+
+\item{save}{logical, if false, the plots are not saved but returned as a list}
 
 \item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
@@ -39,6 +46,14 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{text_base_size}{integer, base size for text in figures}
 
+\item{box_width}{numeric, width of the boxes}
+
+\item{line_width}{numeric, width of the lines}
+
+\item{point_size}{numeric, size of the mean points}
+
+\item{theme}{a ggplot theme to be added to the plot}
+
 \item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
@@ -49,18 +64,19 @@ A separate plot is drawn and saved for each feature.
 \dontrun{
 # Default boxplots by group
 save_group_boxplots(drop_qcs(merged_sample),
-                    file_path = "./group_boxplots.pdf",
-                    format = "pdf", title= NULL
-                    )
+  file_path = "./group_boxplots.pdf",
+  format = "pdf", title = NULL
+)
 # x and color can be a different variable
 save_group_boxplots(drop_qcs(merged_sample)[1:10],
-                    file_path = "./time_boxplots/",
-                    format = "emf",
-                    x = "Time",
-                    color = "Group", title = NULL
-                    )
+  file_path = "./time_boxplots/",
+  format = "emf",
+  x = "Time",
+  color = "Group", title = NULL
+)
 }
-
+# Plot one feature
+save_group_boxplots(drop_qcs(merged_sample)[5, ], save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}}

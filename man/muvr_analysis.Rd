@@ -32,8 +32,8 @@ muvr_analysis(
 
 \item{multi_level_var}{character, column name in pData of the variable for splitting the data in multi-level modeling}
 
-\item{covariates, static_covariates}{character, column names of pData to use as covariates in the model, in addition to
-molecular features. For multi-level moddels, the change in \code{covariates} is computed, while
+\item{covariates, static_covariates}{character, column names of pData to use as covariates in the model,
+in addition to molecular features. For multi-level moddels, the change in \code{covariates} is computed, while
 \code{static_covariates} are taken from the first time point. \code{static_covariates} are ignored for
 non-multi-level models.}
 
@@ -66,8 +66,10 @@ is zero for all individuals, so computing the change and using that as a covaria
 rf_model <- muvr_analysis(drop_qcs(merged_sample), y = "Group", nRep = 1, method = "RF")
 
 # PLS on multilevel variable
-pls_model <- muvr_analysis(drop_qcs(example_set), multi_level = TRUE,
-id = "Subject_ID", multi_level_var = "Time")
+pls_model <- muvr_analysis(drop_qcs(example_set),
+  multi_level = TRUE,
+  id = "Subject_ID", multi_level_var = "Time"
+)
 }
 
 }

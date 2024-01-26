@@ -1,5 +1,3 @@
-
-
 #' Set default color scales on load
 #'
 #' @param libname,pkgname default parameters
@@ -7,10 +5,12 @@
 #' @importFrom grDevices rgb
 .onLoad <- function(libname, pkgname) {
   op <- options()
-  op.notame <- list(
-    notame.citations = list("Preprocessing and analyses were performed using notame package:" = utils::citation("notame"),
-                            "notame is built on a class from Biobase package:" = utils::citation("Biobase"),
-                            "visualizations in notame are built with ggplot2:" = utils::citation("ggplot2")),
+  op_notame <- list(
+    notame.citations = list(
+      "Preprocessing and analyses were performed using notame package:" = utils::citation("notame"),
+      "notame is built on a class from Biobase package:" = utils::citation("Biobase"),
+      "visualizations in notame are built with ggplot2:" = utils::citation("ggplot2")
+    ),
     notame.color_scale_con = ggplot2::scale_color_viridis_c(),
     notame.color_scale_dis = ggplot2::scale_color_brewer(palette = "Set1"),
     notame.fill_scale_con = ggplot2::scale_fill_viridis_c(),
@@ -19,8 +19,8 @@
     notame.fill_scale_div_dis = ggplot2::scale_fill_brewer(palette = "RdBu"),
     notame.shape_scale = ggplot2::scale_shape_manual(values = c(16, 17, 15, 3, 7, 8, 11, 13))
   )
-  toset <- !(names(op.notame) %in% names(op))
-  if(any(toset)) options(op.notame[toset])
+  toset <- !(names(op_notame) %in% names(op))
+  if (any(toset)) options(op_notame[toset])
 
   invisible()
 }
@@ -30,9 +30,14 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
     for (pckg in cran) {
       if (!requireNamespace(pckg, quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from CRAN\n"))
-        tryCatch({
-          install.packages(pckg, ...)
-        }, error = function(e) {cat(e$message)})
+        tryCatch(
+          {
+            install.packages(pckg, ...)
+          },
+          error = function(e) {
+            cat(e$message)
+          }
+        )
       }
     }
   }
@@ -41,9 +46,14 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
     for (pckg in bioconductor) {
       if (!requireNamespace(pckg, quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from Bioconductor\n"))
-        tryCatch({
-          BiocManager::install(pckg, ...)
-        }, error = function(e) {cat(e$message)})
+        tryCatch(
+          {
+            BiocManager::install(pckg, ...)
+          },
+          error = function(e) {
+            cat(e$message)
+          }
+        )
       }
     }
   }
@@ -52,9 +62,14 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
     for (pckg in github) {
       if (!requireNamespace(strsplit(pckg, split = "/")[[1]][2], quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from GitHub\n"))
-        tryCatch({
-          devtools::install_github(pckg, ...)
-        }, error = function(e) {cat(e$message)})
+        tryCatch(
+          {
+            devtools::install_github(pckg, ...)
+          },
+          error = function(e) {
+            cat(e$message)
+          }
+        )
       }
     }
   }
@@ -63,9 +78,14 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
     for (pckg in gitlab) {
       if (!requireNamespace(strsplit(pckg, split = "/")[[1]][2], quietly = TRUE)) {
         cat(paste("\nPackage", pckg, "missing, attempting to install from GitLab\n"))
-        tryCatch({
-          devtools::install_gitlab(pckg, ...)
-        }, error = function(e) {cat(e$message)})
+        tryCatch(
+          {
+            devtools::install_gitlab(pckg, ...)
+          },
+          error = function(e) {
+            cat(e$message)
+          }
+        )
       }
     }
   }
@@ -86,30 +106,34 @@ install_helper <- function(cran, bioconductor, github, gitlab, ...) {
 #' @export
 install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr = FALSE, misc = FALSE, ...) {
   # Core dependencies
-  core_cran <- c("BiocManager",
-                 "cowplot",
-                 "missForest",
-                 "openxlsx",
-                 "randomForest",
-                 "RColorBrewer",
-                 "Rtsne")
+  core_cran <- c(
+    "BiocManager",
+    "cowplot",
+    "missForest",
+    "openxlsx",
+    "randomForest",
+    "RColorBrewer",
+    "Rtsne"
+  )
   core_bioconductor <- "pcaMethods"
   # Extra parts for certain visualizations and statistics
-  extra_cran <- c("car",
-                  "doParallel",
-                  "devEMF",
-                  "ggbeeswarm",
-                  "ggdendro",
-                  "ggrepel",
-                  "Hmisc",
-                  "hexbin",
-                  "igraph",
-                  "lme4",
-                  "lmerTest",
-                  "MuMIn",
-                  "PERMANOVA",
-                  "PK",
-                  "rmcorr"
+  extra_cran <- c(
+    "car",
+    "doParallel",
+    "devEMF",
+    "ggbeeswarm",
+    "ggdendro",
+    "ggrepel",
+    "ggtext",
+    "Hmisc",
+    "hexbin",
+    "igraph",
+    "lme4",
+    "lmerTest",
+    "MuMIn",
+    "PERMANOVA",
+    "PK",
+    "rmcorr"
   )
   extra_bioconductor <- c("mixOmics", "supraHex")
   extra_gitlab <- "CarlBrunius/MUVR"
@@ -119,26 +143,31 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
   batch_github <- NULL
   batch_gitlab <- "CarlBrunius/batchCorr"
 
-  misc_cran <- c("knitr",
-                 "rmarkdown",
-                 "testthat")
+  misc_cran <- c(
+    "knitr",
+    "rmarkdown",
+    "testthat"
+  )
 
-  if (preprocessing){
+  if (preprocessing) {
     install_helper(cran = core_cran, bioconductor = core_bioconductor, ...)
   }
 
   if (extra) {
-    install_helper(cran = extra_cran, bioconductor = extra_bioconductor,
-                   gitlab = extra_gitlab, ...)
+    install_helper(
+      cran = extra_cran, bioconductor = extra_bioconductor,
+      gitlab = extra_gitlab, ...
+    )
   }
   if (batch_corr) {
-    install_helper(cran = batch_cran, bioconductor = batch_bioconductor,
-                   github = batch_github, gitlab = batch_gitlab, ...)
+    install_helper(
+      cran = batch_cran, bioconductor = batch_bioconductor,
+      github = batch_github, gitlab = batch_gitlab, ...
+    )
   }
   if (misc) {
     install_helper(cran = misc_cran, ...)
   }
-
 }
 
 add_citation <- function(name, ref) {
@@ -243,9 +272,9 @@ finite_quantile <- function(x, ...) {
 
 # Defaults for NULL values
 `%||%` <- function(a, b) {
-  suppressWarnings(if (is.null(a)){
+  suppressWarnings(if (is.null(a)) {
     b
-  } else if (is.na(a)){
+  } else if (is.na(a)) {
     b
   } else {
     a
@@ -274,7 +303,7 @@ best_class <- function(x) {
   x <- type.convert(as.character(x), as.is = TRUE)
   if (class(x) == "numeric") {
     x <- x
-  } else if (length(unique(x)) < length(x)/4) {
+  } else if (length(unique(x)) < length(x) / 4) {
     x <- as.factor(x)
   } else if (is.integer(x)) {
     x <- as.numeric(x)

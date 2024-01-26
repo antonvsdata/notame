@@ -43,7 +43,9 @@ the default scale only has 2 values, so it can only accomodate 2 shapes.
 # Batch correction
 batch_corrected <- normalize_batches(merged_sample, batch = "Batch", group = "QC", ref_label = "QC")
 # Plots of each features
-save_batch_plots(orig = merged_sample, corrected = batch_corrected,
-                 file = "batch_plots.pdf")
+save_batch_plots(
+  orig = merged_sample, corrected = batch_corrected,
+  file = "batch_plots.pdf"
+)
 }
 }

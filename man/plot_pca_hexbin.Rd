@@ -24,7 +24,8 @@ plot_pca_hexbin(
 
 \item{pcs}{numeric vector of length 2, the principal components to plot}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 

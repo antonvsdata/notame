@@ -1,4 +1,3 @@
-
 #' Suprahex plots
 #'
 #' Plots supraHex plots of each sample using functions from the supraHex package.
@@ -16,31 +15,38 @@
 #'
 #' @examples
 #' \dontrun{
-#' plot_sample_suprahex(merged_sample[, 1:20], xdim = 5, title.xy = c(0.35, 1),
-#'                      grid_xdim = 7, grid_ydim = 7, sample_labels = "Group")
+#' plot_sample_suprahex(merged_sample[, 1:20],
+#'   xdim = 5, title.xy = c(0.35, 1),
+#'   grid_xdim = 7, grid_ydim = 7, sample_labels = "Group"
+#' )
 #' }
-#' @seealso \code{\link[supraHex]{sPipeline}}, \code{\link[supraHex]{sCompReorder}}, \code{\link[supraHex]{visCompReorder}}
+#' @seealso \code{\link[supraHex]{sPipeline}},
+#' \code{\link[supraHex]{sCompReorder}},
+#'  \code{\link[supraHex]{visCompReorder}}
 #'
 #' @export
 plot_sample_suprahex <- function(object, all_features = FALSE,
                                  sample_labels = "Sample_ID",
                                  grid_xdim = NULL, grid_ydim = NULL,
-                                 title.xy = c(0.35,1), title.rotate = 0, fontsize = 10,
+                                 title.xy = c(0.35, 1), title.rotate = 0, fontsize = 10, # nolint: object_name_linter.
                                  colormap = "jet", ...) {
   if (!requireNamespace("supraHex", quietly = TRUE)) {
     stop("Package \"supraHex\" needed for this function to work. Please install it.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   add_citation("supraHex package was used for suprahexagonal maps:", citation("supraHex"))
 
   object <- drop_flagged(object, all_features = all_features)
   data <- scale(exprs(object))
-  colnames(data) <- pData(object)[,sample_labels]
+  colnames(data) <- pData(object)[, sample_labels]
 
-  sMap <- supraHex::sPipeline(data = data, ...)
-  sReorder <- supraHex::sCompReorder(sMap=sMap, xdim = grid_xdim, ydim = grid_ydim)
+  s_map <- supraHex::sPipeline(data = data, ...)
+  s_reorder <- supraHex::sCompReorder(sMap = s_map, xdim = grid_xdim, ydim = grid_ydim)
 
-  supraHex::visCompReorder(sMap=sMap, sReorder=sReorder, newpage = FALSE, colormap = colormap,
-                           title.xy = title.xy, title.rotate = title.rotate, height = height,
-                           gp = grid::gpar(fontsize = fontsize))
+  supraHex::visCompReorder(
+    sMap = s_map, sReorder = s_reorder, newpage = FALSE, colormap = colormap,
+    title.xy = title.xy, title.rotate = title.rotate, height = height,
+    gp = grid::gpar(fontsize = fontsize)
+  )
 }

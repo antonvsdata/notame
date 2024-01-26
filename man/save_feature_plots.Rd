@@ -6,7 +6,6 @@
 \usage{
 save_feature_plots(
   object,
-  all_features,
   file_path,
   format,
   title,

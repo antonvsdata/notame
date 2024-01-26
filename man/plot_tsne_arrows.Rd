@@ -19,13 +19,16 @@ plot_tsne_arrows(
   title = "t-SNE changes",
   subtitle = paste("Perplexity:", perplexity),
   color_scale = getOption("notame.color_scale_dis"),
+  text_base_size = 14,
+  line_width = 0.5,
   ...
 )
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
@@ -49,6 +52,10 @@ plot_tsne_arrows(
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
+\item{text_base_size}{the base size of the text}
+
+\item{line_width}{the width of the arrows}
+
 \item{...}{additional arguments passed to \code{Rtsne::Rtsne}}
 }
 \value{
@@ -66,7 +73,7 @@ the  method can be changed to "ppca" if nipals fails.
 plot_tsne_arrows(drop_qcs(example_set), perplexity = 5)
 # If the sample size is large, plot groups separately
 plot_tsne_arrows(drop_qcs(example_set), perplexity = 5) +
-facet_wrap(~ Group)
+  facet_wrap(~Group)
 
 }
 \seealso{

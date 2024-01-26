@@ -78,7 +78,8 @@ The object can then be passed to many of the mixOmics functions for prediction,
 performance evaluation etc.
 \itemize{
 \item{\code{mixomics_plsda} A simple PLS-DA model with set number of components and all features}
-\item{\code{mixomics_plsda_optimize} Test different numbers of components, choose the one with minimal balanced error rate}
+\item{\code{mixomics_plsda_optimize} Test different numbers of components,
+choose the one with minimal balanced error rate}
 \item{\code{mixomics_splsda_optimize} sPLS-DA model: Test different numbers of components and features,
 choose the one with minimal balanced error rate}
 }
@@ -90,8 +91,10 @@ plsda_res <- mixomics_plsda(noqc, y = "Group", ncomp = 2)
 set.seed(38)
 plsda_opt <- mixomics_plsda_optimize(noqc, y = "Group", ncomp = 3)
 set.seed(38)
-splsda_opt <- mixomics_splsda_optimize(noqc, y = "Group", dist = "max.dist", ncomp = 2,
-                                      n_features <- c(1:10, 12, 15, 20))
+splsda_opt <- mixomics_splsda_optimize(noqc,
+  y = "Group", dist = "max.dist", ncomp = 2,
+  n_features <- c(1:10, 12, 15, 20)
+)
 }
 }
 \seealso{

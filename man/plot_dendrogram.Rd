@@ -20,7 +20,8 @@ plot_dendrogram(
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{color}{character, name of the column used for coloring the sample labels}
 

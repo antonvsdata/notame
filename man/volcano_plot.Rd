@@ -20,6 +20,8 @@ volcano_plot(
   color_scale = getOption("notame.color_scale_con"),
   title = "Volcano plot",
   subtitle = NULL,
+  text_base_size = 14,
+  label_text_size = 4,
   ...
 )
 }
@@ -50,7 +52,10 @@ be on the middle of the plot. The "zero effect" is 0 if \code{log2_x = FALSE} an
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
-\item{title, subtitle}{the title and subtitle of the plot
+\item{title, subtitle}{the title and subtitle of the plot}
+
+\item{...}{parameters passed to \code{\link[ggplot2]{geom_point}},
+such as shape and alpha values. New aesthetics can
 also be passed using \code{mapping = aes(...)}.}
 }
 \value{
@@ -62,9 +67,11 @@ Draws a volcano plot of effect size and p-values.
 \examples{
 # naturally, this looks messy as there are not enough p-values
 lm_results <- perform_lm(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
-volcano_plot(lm_results, x = "GroupB_Estimate",
-             p = "GroupB_P", p_fdr = "GroupB_P_FDR",
-             label = "Feature_ID",
-             fdr_limit = 0.1)
+volcano_plot(lm_results,
+  x = "GroupB_Estimate",
+  p = "GroupB_P", p_fdr = "GroupB_P_FDR",
+  label = "Feature_ID",
+  fdr_limit = 0.1
+)
 
 }

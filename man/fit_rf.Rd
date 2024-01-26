@@ -32,8 +32,10 @@ An object of class randomForest
 }
 \description{
 Fits a random forest, where given response column in pheno data is predicted using the features. Can be used
-both for classification and regression. For more information, see the documentation of \code{randomForest::randomForest}.
-After fitting the random forest, use rf_importance as a shortcut for getting the feature importance in random forest prediction.
+both for classification and regression. For more information,
+see the documentation of \code{randomForest::randomForest}.
+After fitting the random forest, use rf_importance as a shortcut for getting the feature importance
+ in random forest prediction.
 }
 \examples{
 rf <- fit_rf(example_set, y = "Group")

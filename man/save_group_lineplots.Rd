@@ -7,7 +7,8 @@
 save_group_lineplots(
   object,
   all_features = FALSE,
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   x = time_col(object),
   group = group_col(object),
@@ -20,13 +21,17 @@ save_group_lineplots(
   position_dodge_amount = 0.2,
   color_scale = getOption("notame.color_scale_dis"),
   text_base_size = 14,
+  line_width = 0.5,
+  point_size = 4,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before visualization.}
 
 \item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
@@ -51,6 +56,12 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{text_base_size}{integer, base size for text in figures}
 
+\item{line_width}{numeric, width of the lines}
+
+\item{point_size}{numeric, size of the points}
+
+\item{theme}{a ggplot theme to be added to the plot}
+
 \item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
@@ -61,15 +72,16 @@ A separate plot is drawn for each feature.
 \examples{
 \dontrun{
 save_group_lineplots(drop_qcs(merged_sample),
-                    file_path = "./group_line_plots.pdf",
-                    format = "pdf"
+  file_path = "./group_line_plots.pdf",
+  format = "pdf"
 )
 save_group_lineplots(drop_qcs(merged_sample)[1:10],
-                    file_path = "./group_line_plots/",
-                    format = "png"
+  file_path = "./group_line_plots/",
+  format = "png"
 )
 }
-
+# Plot one feature
+save_group_lineplots(drop_qcs(merged_sample[5, ]), save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}},

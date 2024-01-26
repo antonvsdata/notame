@@ -34,6 +34,7 @@ Can also rename columns effectively.
 # Simple manipulation to linear model results
 lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 lm_results <- clean_stats_results(lm_results,
-rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1"))
+  rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1")
+)
 
 }

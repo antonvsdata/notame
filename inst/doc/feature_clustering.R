@@ -49,9 +49,11 @@ data <- combined_data(example_set)
 features <- fData(example_set)
 
 ## ------------------------------------------------------------------------
-conn <- find_connections(data = data, features = features,
-                 corr_thresh = 0.4, rt_window = 2,
-                 name_col = "Feature_ID", mz_col = "Mass", rt_col = "RetentionTime")
+conn <- find_connections(
+  data = data, features = features,
+  corr_thresh = 0.4, rt_window = 2,
+  name_col = "Feature_ID", mz_col = "Mass", rt_col = "RetentionTime"
+)
 head(conn)
 
 ## ------------------------------------------------------------------------
@@ -69,4 +71,3 @@ features_clustered <- assign_cluster_id(data, clusters, features, name_col = "Fe
 pulled <- pull_clusters(data, features_clustered, name_col = "Feature_ID")
 cluster_data <- pulled$cdata
 cluster_features <- pulled$cfeatures
-

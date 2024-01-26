@@ -1,4 +1,3 @@
-
 #' Initialize log to a file
 #'
 #' Initialize a log file with the current data and time.
@@ -20,7 +19,7 @@ init_log <- function(log_file) {
   log_text("Starting logging")
   # Pass errors to log
   options(error = function() {
-      futile.logger::flog.error(geterrmessage(), name = "notame")
+    futile.logger::flog.error(geterrmessage(), name = "notame")
   })
 }
 
@@ -56,7 +55,7 @@ finish_log <- function() {
   # Return default option for error
   options(error = NULL)
   # Log end of session info
-  futile.logger::flog.info(paste("Finished analysis. ", date(), "\nSession info:\n", sep=""))
+  futile.logger::flog.info(paste("Finished analysis. ", date(), "\nSession info:\n", sep = ""))
   futile.logger::flog.info(capture.output(sessionInfo()))
   invisible(futile.logger::flog.appender(futile.logger::appender.console(), name = "notame"))
 }

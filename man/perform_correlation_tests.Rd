@@ -63,15 +63,18 @@ correlations <- perform_correlation_tests(example_set, x = featureNames(example_
 # Drop QCs and convert time to numeric
 no_qc <- drop_qcs(example_set)
 no_qc$Time <- as.numeric(no_qc$Time)
-correlations <- perform_correlation_tests(no_qc, x = featureNames(example_set),
-                                         y = c("Time", "Injection_order"), method = "spearman")
+correlations <- perform_correlation_tests(no_qc,
+  x = featureNames(example_set),
+  y = c("Time", "Injection_order"), method = "spearman"
+)
 
 # Correlations between variables from two distinct MetaboSets
 cross_object_cor <- perform_correlation_tests(hilic_neg_sample,
-                                              x = featureNames(hilic_neg_sample),
-                                              object2 = hilic_pos_sample,
-                                              y = featureNames(hilic_pos_sample),
-                                              all_pairs = FALSE)
+  x = featureNames(hilic_neg_sample),
+  object2 = hilic_pos_sample,
+  y = featureNames(hilic_pos_sample),
+  all_pairs = FALSE
+)
 }
 \seealso{
 \code{\link{cor.test}}, \code{\link[rmcorr]{rmcorr}}

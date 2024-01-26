@@ -7,7 +7,8 @@
 save_subject_line_plots(
   object,
   all_features = FALSE,
-  file_path,
+  save = TRUE,
+  file_path = NULL,
   format = "emf",
   x = time_col(object),
   id = subject_col(object),
@@ -17,13 +18,19 @@ save_subject_line_plots(
   color_scale = getOption("notame.color_scale_dis"),
   facet = NULL,
   text_base_size = 14,
+  line_width = 0.3,
+  mean_line_width = 1.2,
+  theme = theme_bw(base_size = text_base_size),
   ...
 )
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before visualization.}
+\item{all_features}{logical, should all features be used?
+If FALSE (the default), flagged features are removed before visualization.}
+
+\item{save}{logical, if false, the plots are not saved but returned as a list}
 
 \item{file_path}{character, a file path for PDF or prefix added to the file paths for other formats}
 
@@ -44,6 +51,12 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{text_base_size}{integer, base size for text in figures}
 
+\item{line_width}{numeric, width of the lines}
+
+\item{mean_line_width}{numeric, width of the mean line}
+
+\item{theme}{a ggplot theme to be added to the plot}
+
 \item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
@@ -52,11 +65,14 @@ A line is drawn for each subject and a mean line is added.
 A separate plot is drawn and saved for each feature.
 }
 \examples{
-\dontrun{save_subject_line_plots(drop_qcs(example_set),
-                    file_path = "./subject_line_plots.pdf",
-                    format = "pdf"
-                    )}
-
+\dontrun{
+save_subject_line_plots(drop_qcs(example_set),
+  file_path = "./subject_line_plots.pdf",
+  format = "pdf"
+)
+}
+# Plot one feature
+save_subject_line_plots(drop_qcs(example_set[1, ]), save = FALSE)
 }
 \seealso{
 \code{\link[notame]{save_plot}}

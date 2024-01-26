@@ -25,7 +25,8 @@ so it was not possible to run drift correction. If the drift correction is run o
 values (not log-transformed), then there is also a need to check that the correction did not result
 in any negative values. This can sometimes happen if the prediction curve takes an extreme shape.
 If quality is monitored,
-a quality condition is checked for each feature. If the condition is fulfilled, the drift corrected feature is retained,
+a quality condition is checked for each feature. If the condition is fulfilled,
+the drift corrected feature is retained,
 otherwise the original feature is retained and the drift corrected feature is discarded.
 The result of this operation is recorded in the feature data.
 }
@@ -39,8 +40,10 @@ drift corrected feature is discarded and the original is retained.
 \examples{
 dc <- dc_cubic_spline(merged_sample)
 corrected <- dc$object
-inspected <- inspect_dc(orig = merged_sample, dc = corrected,
-                        check_quality = TRUE)
+inspected <- inspect_dc(
+  orig = merged_sample, dc = corrected,
+  check_quality = TRUE
+)
 
 }
 \seealso{

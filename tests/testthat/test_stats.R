@@ -38,7 +38,6 @@ test_that("summary statistics work with grouping", {
 })
 
 test_that("summary statistics work with all NA features", {
-
   ex_set_na <- mark_nas(example_set, 0)
   exprs(ex_set_na)[1, ] <- NA
 
@@ -62,26 +61,29 @@ test_that("Cohen's d works", {
 
   d <- c()
   for (feature in featureNames(ex)) {
-    tdiff <- data.frame(feature = cd2[, feature] - cd1[, feature],
-                        group = cd1$Group)
+    tdiff <- data.frame(
+      feature = cd2[, feature] - cd1[, feature],
+      group = cd1$Group
+    )
     mean_a <- finite_mean(tdiff$feature[tdiff$group == "A"])
     sd_a <- finite_sd(tdiff$feature[tdiff$group == "A"])
     mean_b <- finite_mean(tdiff$feature[tdiff$group == "B"])
     sd_b <- finite_sd(tdiff$feature[tdiff$group == "B"])
-    d <- c(d, (mean_b - mean_a)/sqrt(mean(c(sd_a^2, sd_b^2))))
+    d <- c(d, (mean_b - mean_a) / sqrt(mean(c(sd_a^2, sd_b^2))))
   }
 
   cohd <- cohens_d(ex, id = "Subject_ID", time = "Time")
 
-  df <- data.frame(Feature_ID = featureNames(ex),
-                   B_vs_A_2_minus_1_Cohen_d = d,
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    Feature_ID = featureNames(ex),
+    B_vs_A_2_minus_1_Cohen_d = d,
+    stringsAsFactors = FALSE
+  )
   rownames(df) <- df$Feature_ID
   expect_equal(cohd, df)
 })
 
 test_that("Cohen's d work with all NA features", {
-
   ex_set_na <- drop_qcs(mark_nas(example_set, 0))
   exprs(ex_set_na)[1:2, ] <- NA
 
@@ -98,7 +100,7 @@ test_that("Cohen's d data checking works", {
   expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "should be a factor")
 
   ex <- example_set
-  ex$Time <- c(1,2)
+  ex$Time <- c(1, 2)
   expect_error(cohens_d(ex, id = "Subject_ID", time = "Time"), "should be a factor")
 
   ex <- example_set
@@ -120,11 +122,13 @@ test_that("Fold change works", {
   cd1 <- cd[cd$Time == 1, ]
   cd2 <- cd[cd$Time == 2, ]
 
-  fc <- data.frame(Feature_ID = featureNames(ex),
-                   B_vs_A_FC = 1,
-                   QC_vs_A_FC = 1,
-                   QC_vs_B_FC = 1,
-                   stringsAsFactors = FALSE)
+  fc <- data.frame(
+    Feature_ID = featureNames(ex),
+    B_vs_A_FC = 1,
+    QC_vs_A_FC = 1,
+    QC_vs_B_FC = 1,
+    stringsAsFactors = FALSE
+  )
   rownames(fc) <- fc$Feature_ID
   for (i in seq_len(nrow(fc))) {
     feature <- fc$Feature_ID[i]
@@ -132,9 +136,9 @@ test_that("Fold change works", {
     mean_b <- finite_mean(cd[cd$Group == "B", feature])
     mean_qc <- finite_mean(cd[cd$Group == "QC", feature])
 
-    fc$B_vs_A_FC[i] <- mean_b/mean_a
-    fc$QC_vs_A_FC[i] <- mean_qc/mean_a
-    fc$QC_vs_B_FC[i] <- mean_qc/mean_b
+    fc$B_vs_A_FC[i] <- mean_b / mean_a
+    fc$QC_vs_A_FC[i] <- mean_qc / mean_a
+    fc$QC_vs_B_FC[i] <- mean_qc / mean_b
   }
 
   foldc <- fold_change(ex)
@@ -143,7 +147,6 @@ test_that("Fold change works", {
 })
 
 test_that("Fold change works with all NA features", {
-
   ex_set_na <- drop_qcs(mark_nas(example_set, 0))
   exprs(ex_set_na)[1:2, ] <- NA
 
@@ -156,11 +159,12 @@ test_that("Fold change works with all NA features", {
 
 # P-value correction ----
 test_that("P-value correction works", {
-
-  ps <- data.frame(x = letters,
-                   x_P = runif(26),
-                   P_x = runif(26),
-                   y_P = runif(26))
+  ps <- data.frame(
+    x = letters,
+    x_P = runif(26),
+    P_x = runif(26),
+    y_P = runif(26)
+  )
 
   adj <- adjust_p_values(ps, flags = rep(NA, 26))
 
@@ -168,30 +172,34 @@ test_that("P-value correction works", {
   expect_equal(adj[colnames(ps)], ps)
   expect_equal(ncol(adj), ncol(ps) + 2)
 
-  adj2 <- adjust_p_values(ps, flags = c("a", "a", "a",
-                                        rep(NA, 23)))
+  adj2 <- adjust_p_values(ps, flags = c(
+    "a", "a", "a",
+    rep(NA, 23)
+  ))
 
-  expect_equal(adj2$x_P_FDR,
-               c(rep(NA, 3), p.adjust(ps$x_P[4:26], method = "BH")))
-
+  expect_equal(
+    adj2$x_P_FDR,
+    c(rep(NA, 3), p.adjust(ps$x_P[4:26], method = "BH"))
+  )
 })
 
 # Linear model ----
 test_that("Linear model works", {
-
   cd <- combined_data(drop_qcs(example_set))
   lm_fit <- lm(HILIC_pos_259_9623a4_4322 ~ Time,
-               data = cd)
+    data = cd
+  )
   smry <- summary(lm_fit)
 
   # Works for a simple example
   lm_res <- perform_lm(drop_qcs(example_set),
-                       formula_char = "Feature ~ Time")
+    formula_char = "Feature ~ Time"
+  )
 
-  expect_equal(lm_res$Time2_Estimate[1], smry$coefficients[2,1])
-  expect_equal(lm_res$Time2_Std_Error[1], smry$coefficients[2,2])
-  expect_equal(lm_res$Time2_t_value[1], smry$coefficients[2,3])
-  expect_equal(lm_res$Time2_P[1], smry$coefficients[2,4])
+  expect_equal(lm_res$Time2_Estimate[1], smry$coefficients[2, 1])
+  expect_equal(lm_res$Time2_Std_Error[1], smry$coefficients[2, 2])
+  expect_equal(lm_res$Time2_t_value[1], smry$coefficients[2, 3])
+  expect_equal(lm_res$Time2_P[1], smry$coefficients[2, 4])
   expect_equal(lm_res$R2[1], smry$r.squared)
   expect_equal(lm_res$Adj_R2[1], smry$adj.r.squared)
 
@@ -200,7 +208,8 @@ test_that("Linear model works", {
   exprs(ex_set_na)[1:2, ] <- NA
 
   lm_res <- perform_lm(ex_set_na,
-                       formula_char = "Feature ~ Time")
+    formula_char = "Feature ~ Time"
+  )
   expect_equal(nrow(lm_res), nrow(exprs(example_set)))
   expect_equal(lm_res$Feature_ID, featureNames(example_set))
   expect_true(all(is.na(lm_res[1:2, 2:ncol(lm_res)])))
@@ -210,63 +219,65 @@ test_that("Linear model works", {
   lm_res2 <- perform_lm(ex_set_na, formula_char = "Feature ~ Group")
   flag_idx <- !is.na(flag(ex_set_na))
   expect_true(all(is.na(lm_res2$Group_P_FDR[flag_idx])))
-
 })
 
 # Logistic regression ----
 test_that("Logistic regression works", {
-
   cd <- combined_data(drop_qcs(example_set))
   glm_fit <- glm(Group ~ HILIC_pos_259_9623a4_4322,
-               data = cd,
-               family = binomial())
+    data = cd,
+    family = binomial()
+  )
   smry <- summary(glm_fit)
 
   glm_res <- perform_logistic(drop_qcs(example_set),
-                       formula_char = "Group ~ Feature")
+    formula_char = "Group ~ Feature"
+  )
 
 
-  expect_equal(glm_res$Feature_Estimate[1], smry$coefficients[2,1])
-  expect_equal(glm_res$Feature_Std_Error[1], smry$coefficients[2,2])
-  expect_equal(glm_res$Feature_z_value[1], smry$coefficients[2,3])
-  expect_equal(glm_res$Feature_P[1], smry$coefficients[2,4])
-  expect_equal(glm_res$Feature_LCI95[1], confint(glm_fit)[2,1])
-  expect_equal(glm_res$Feature_UCI95[1], confint(glm_fit)[2,2])
+  expect_equal(glm_res$Feature_Estimate[1], smry$coefficients[2, 1])
+  expect_equal(glm_res$Feature_Std_Error[1], smry$coefficients[2, 2])
+  expect_equal(glm_res$Feature_z_value[1], smry$coefficients[2, 3])
+  expect_equal(glm_res$Feature_P[1], smry$coefficients[2, 4])
+  expect_equal(glm_res$Feature_LCI95[1], confint(glm_fit)[2, 1])
+  expect_equal(glm_res$Feature_UCI95[1], confint(glm_fit)[2, 2])
 
 
   ex_set_na <- drop_qcs(mark_nas(example_set, 0))
   exprs(ex_set_na)[1:2, ] <- NA
 
   glm_res <- perform_logistic(ex_set_na,
-                       formula_char = "Group ~ Feature")
+    formula_char = "Group ~ Feature"
+  )
   expect_equal(nrow(glm_res), nrow(exprs(example_set)))
   expect_equal(glm_res$Feature_ID, featureNames(example_set))
   expect_true(all(is.na(glm_res[1:2, 2:ncol(glm_res)])))
 })
 
 test_that("Cohens D values are counted right", {
-
   object <- drop_qcs(example_set)
   pData(object)$Group <- factor(c("A", "B", "C"))
 
   data <- combined_data(object)
   features <- featureNames(object)
-  group1 <- data[which(data[, "Group"] == levels(data[,"Group"])[1]), ]
-  group2 <- data[which(data[, "Group"] == levels(data[,"Group"])[2]), ]
-  group3 <- data[which(data[, "Group"] == levels(data[,"Group"])[3]), ]
-  ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %do% {
+  group1 <- data[which(data[, "Group"] == levels(data[, "Group"])[1]), ]
+  group2 <- data[which(data[, "Group"] == levels(data[, "Group"])[2]), ]
+  group3 <- data[which(data[, "Group"] == levels(data[, "Group"])[3]), ]
+  ds <- foreach::foreach(i = seq_along(features), .combine = rbind) %do% {
     feature <- features[i]
     f1 <- group1[, feature]
     f2 <- group2[, feature]
     f3 <- group3[, feature]
-    d <- data.frame(Feature_ID = feature,
-                    B_vs_A_Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
-                      sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    C_vs_A_Cohen_d = (finite_mean(f3) - finite_mean(f1)) /
-                      sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-                    C_vs_B_Cohen_d = (finite_mean(f3) - finite_mean(f2)) /
-                      sqrt((finite_sd(f3)^2 + finite_sd(f2)^2) / 2),
-                    stringsAsFactors = FALSE)
+    d <- data.frame(
+      Feature_ID = feature,
+      B_vs_A_Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
+        sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
+      C_vs_A_Cohen_d = (finite_mean(f3) - finite_mean(f1)) /
+        sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
+      C_vs_B_Cohen_d = (finite_mean(f3) - finite_mean(f2)) /
+        sqrt((finite_sd(f3)^2 + finite_sd(f2)^2) / 2),
+      stringsAsFactors = FALSE
+    )
   }
   rownames(ds) <- ds$Feature_ID
   foreach::registerDoSEQ()
@@ -275,7 +286,6 @@ test_that("Cohens D values are counted right", {
 })
 
 test_that("Cohens D values between time points are counted right", {
-
   object <- drop_qcs(example_set)
   pData(object)$Group <- factor(rep(c(rep("A", 3), rep("B", 3), rep("C", 2)), 3))
   pData(object)$Subject_ID <- factor(rep(1:8, 3))
@@ -297,14 +307,14 @@ test_that("Cohens D values between time points are counted right", {
       new_data <- time2[time2[, "Subject_ID"] %in% common_ids, features] -
         time1[time1[, "Subject_ID"] %in% common_ids, features]
       # Split to groups
-      group1 <- new_data[which(time1[, "Group"] == levels(time1[,"Group"])[1]), ]
-      group2 <- new_data[which(time1[, "Group"] == levels(time1[,"Group"])[2]), ]
+      group1 <- new_data[which(time1[, "Group"] == levels(time1[, "Group"])[1]), ]
+      group2 <- new_data[which(time1[, "Group"] == levels(time1[, "Group"])[2]), ]
     }
   }
 
-  group1 <- data[which(data[, "Group"] == levels(data[,"Group"])[1]), ]
-  group2 <- data[which(data[, "Group"] == levels(data[,"Group"])[2]), ]
-  group3 <- data[which(data[, "Group"] == levels(data[,"Group"])[3]), ]
+  group1 <- data[which(data[, "Group"] == levels(data[, "Group"])[1]), ]
+  group2 <- data[which(data[, "Group"] == levels(data[, "Group"])[2]), ]
+  group3 <- data[which(data[, "Group"] == levels(data[, "Group"])[3]), ]
   time1 <- data[which(data[, "Time"] == levels(data[, "Time"])[1]), ]
   time2 <- data[which(data[, "Time"] == levels(data[, "Time"])[2]), ]
   time3 <- data[which(data[, "Time"] == levels(data[, "Time"])[3]), ]
@@ -320,16 +330,16 @@ test_that("Cohens D values between time points are counted right", {
     time2[time2$Subject_ID %in% common_ids_32, features]
   new_data <- rbind(new_data_21, new_data_31, new_data_32)
   # Split to groups
-  group1 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[1]), ] # A 2-1
-  group2 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[2]), ] # B 2-1
-  group3 <- new_data_21[which(time1[, "Group"] == levels(time1[,"Group"])[3]), ] # C 2-1
-  group4 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[1]), ] # A 3-1
-  group5 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[2]), ] # B 3-1
-  group6 <- new_data_31[which(time2[, "Group"] == levels(time2[,"Group"])[3]), ] # C 3-1
-  group7 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[1]), ] # A 3-2
-  group8 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[2]), ] # B 3-2
-  group9 <- new_data_32[which(time3[, "Group"] == levels(time3[,"Group"])[3]), ] # C 3-2
-  ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %do% {
+  group1 <- new_data_21[which(time1[, "Group"] == levels(time1[, "Group"])[1]), ] # A 2-1
+  group2 <- new_data_21[which(time1[, "Group"] == levels(time1[, "Group"])[2]), ] # B 2-1
+  group3 <- new_data_21[which(time1[, "Group"] == levels(time1[, "Group"])[3]), ] # C 2-1
+  group4 <- new_data_31[which(time2[, "Group"] == levels(time2[, "Group"])[1]), ] # A 3-1
+  group5 <- new_data_31[which(time2[, "Group"] == levels(time2[, "Group"])[2]), ] # B 3-1
+  group6 <- new_data_31[which(time2[, "Group"] == levels(time2[, "Group"])[3]), ] # C 3-1
+  group7 <- new_data_32[which(time3[, "Group"] == levels(time3[, "Group"])[1]), ] # A 3-2
+  group8 <- new_data_32[which(time3[, "Group"] == levels(time3[, "Group"])[2]), ] # B 3-2
+  group9 <- new_data_32[which(time3[, "Group"] == levels(time3[, "Group"])[3]), ] # C 3-2
+  ds <- foreach::foreach(i = seq_along(features), .combine = rbind) %do% {
     feature <- features[i]
     f1 <- group1[, feature] # A 2-1
     f2 <- group2[, feature] # B 2-1
@@ -340,26 +350,28 @@ test_that("Cohens D values between time points are counted right", {
     f7 <- group7[, feature] # A 3-2
     f8 <- group8[, feature] # B 3-2
     f9 <- group9[, feature] # C 3-2
-    d <- data.frame(Feature_ID = feature,
-                    "B_vs_A_2_minus_1_Cohen_d" = (finite_mean(f2) - finite_mean(f1)) /
-                      sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    "B_vs_A_3_minus_1_Cohen_d" = (finite_mean(f5) - finite_mean(f4)) /
-                      sqrt((finite_sd(f4)^2 + finite_sd(f5)^2) / 2),
-                    "B_vs_A_3_minus_2_Cohen_d" = (finite_mean(f8) - finite_mean(f7)) /
-                      sqrt((finite_sd(f7)^2 + finite_sd(f8)^2) / 2),
-                    "C_vs_A_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f1)) /
-                      sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-                    "C_vs_A_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f4)) /
-                      sqrt((finite_sd(f4)^2 + finite_sd(f6)^2) / 2),
-                    "C_vs_A_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f7)) /
-                      sqrt((finite_sd(f7)^2 + finite_sd(f9)^2) / 2),
-                    "C_vs_B_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f2)) /
-                      sqrt((finite_sd(f2)^2 + finite_sd(f3)^2) / 2),
-                    "C_vs_B_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f5)) /
-                      sqrt((finite_sd(f5)^2 + finite_sd(f6)^2) / 2),
-                    "C_vs_B_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f8)) /
-                      sqrt((finite_sd(f8)^2 + finite_sd(f9)^2) / 2),
-                    stringsAsFactors = FALSE)
+    d <- data.frame(
+      Feature_ID = feature,
+      "B_vs_A_2_minus_1_Cohen_d" = (finite_mean(f2) - finite_mean(f1)) /
+        sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
+      "B_vs_A_3_minus_1_Cohen_d" = (finite_mean(f5) - finite_mean(f4)) /
+        sqrt((finite_sd(f4)^2 + finite_sd(f5)^2) / 2),
+      "B_vs_A_3_minus_2_Cohen_d" = (finite_mean(f8) - finite_mean(f7)) /
+        sqrt((finite_sd(f7)^2 + finite_sd(f8)^2) / 2),
+      "C_vs_A_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f1)) /
+        sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
+      "C_vs_A_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f4)) /
+        sqrt((finite_sd(f4)^2 + finite_sd(f6)^2) / 2),
+      "C_vs_A_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f7)) /
+        sqrt((finite_sd(f7)^2 + finite_sd(f9)^2) / 2),
+      "C_vs_B_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f2)) /
+        sqrt((finite_sd(f2)^2 + finite_sd(f3)^2) / 2),
+      "C_vs_B_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f5)) /
+        sqrt((finite_sd(f5)^2 + finite_sd(f6)^2) / 2),
+      "C_vs_B_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f8)) /
+        sqrt((finite_sd(f8)^2 + finite_sd(f9)^2) / 2),
+      stringsAsFactors = FALSE
+    )
   }
   rownames(ds) <- ds$Feature_ID
   foreach::registerDoSEQ()
@@ -367,31 +379,31 @@ test_that("Cohens D values between time points are counted right", {
 })
 
 test_that("Cohens D warnings work", {
-
   object <- drop_qcs(example_set)
   pData(object)$Group <- factor(rep(c(rep("A", 3), rep("B", 3), rep("C", 2)), 3))
   pData(object)$Subject_ID <- factor(rep(1:8, 3))
   pData(object)$Time <- factor(c(rep(1, 8), rep(2, 8), rep(3, 8)))
   # Remove one sample
-  expect_warning(cohens_d(object[, -1],
-                          time = "Time",
-                          id = "Subject_ID",
-                          ),
-                 regexp = "[One or more subject(s) missing time points]"
+  expect_warning(
+    cohens_d(object[, -1],
+      time = "Time",
+      id = "Subject_ID",
+    ),
+    regexp = "[One or more subject(s) missing time points]"
   )
   # all time points missing in one group
   expect_warning(cohens_d(object[, -(23:24)], time = "Time", id = "Subject_ID"),
-                 regexp = "[Groups don't have two observations of at least two subjects]"
+    regexp = "[Groups don't have two observations of at least two subjects]"
   )
   # all but one time points missing in one group
   expect_warning(cohens_d(object[, -24], time = "Time", id = "Subject_ID"),
-                 regexp = "[Groups don't have two observations of at least two subjects]"
+    regexp = "[Groups don't have two observations of at least two subjects]"
   )
   # Same subject is in two groups
   tmp <- object
   pData(tmp)$Group[1] <- "B"
   expect_warning(cohens_d(tmp, time = "Time", id = "Subject_ID"),
-                 regexp = "[Same subject recorded in two groups]"
+    regexp = "[Same subject recorded in two groups]"
   )
 })
 
@@ -413,12 +425,14 @@ test_that("Paired t-test works", {
     "Feature_ID",
     paste0(
       "1_vs_2_t_test_",
-      c("Statistic",
+      c(
+        "Statistic",
         "Estimate",
         "LCI95",
         "UCI95",
         "P",
-        "P_FDR")
+        "P_FDR"
+      )
     )
   ))
 })
@@ -449,9 +463,9 @@ test_that("Pairwise t-test works", {
   # These shouldn't match cause paired mode
   # In this case 4 pairs in each
   expect_failure(expect_identical(perform_pairwise_t_test(object,
-                                                          group = "Time",
-                                                          id = "Subject_ID",
-                                                          is_paired = TRUE
+    group = "Time",
+    id = "Subject_ID",
+    is_paired = TRUE
   ), pwt_res))
 })
 
@@ -464,26 +478,27 @@ test_that("Pairwise paired t-test works", {
   flag(object)[1:2] <- "Flagged"
 
   pwpt_res <- perform_pairwise_t_test(object,
-                                      group = "Time",
-                                      id = "Subject_ID",
-                                      is_paired = TRUE
+    group = "Time",
+    id = "Subject_ID",
+    is_paired = TRUE
   )
 
   expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
   prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "t_test_")
   suffixes <- c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
   cols <- expand.grid(prefixes, suffixes)
-  expect_identical(colnames(pwpt_res), c("Feature_ID",
-                                        do.call(paste0, cols[order(cols$Var1), ])
+  expect_identical(colnames(pwpt_res), c(
+    "Feature_ID",
+    do.call(paste0, cols[order(cols$Var1), ])
   ))
   fdr_cols <- colnames(pwpt_res[grepl("P_FDR", colnames(pwpt_res))])
   expect(all(is.na(pwpt_res[1:2, fdr_cols])), "Pairwise paired t-tests don't skip flagged features")
   # Change Subject IDs
   pData(object)$Subject_ID <- factor(rep(1:12, 2))
   pwpt_res_2 <- perform_pairwise_t_test(object,
-                                        group = "Time",
-                                        id = "Subject_ID",
-                                        is_paired = TRUE
+    group = "Time",
+    id = "Subject_ID",
+    is_paired = TRUE
   )
   # These shouldn't match because means are counted only from paired samples
   # In this case 4 pairs in each
@@ -491,17 +506,18 @@ test_that("Pairwise paired t-test works", {
 })
 
 test_that("Mann-Whitney U-tests work", {
-
   object <- drop_qcs(example_set)
   median_diffs <- apply(exprs(object), 1, tapply, object$Group, finite_median) %>%
-    apply(2, function(x) {x[1] - x[2]})
+    apply(2, function(x) {
+      x[1] - x[2]
+    })
 
   get_u <- function(a) {
-    X <- a[object$Group == "A"]
-    Y <- a[object$Group == "B"]
+    x_mat <- a[object$Group == "A"]
+    y_mat <- a[object$Group == "B"]
     u <- 0
-    for (x in X) {
-      for (y in Y) {
+    for (x in x_mat) {
+      for (y in y_mat) {
         if (x > y) {
           u <- u + 1
         } else if (x == y) {
@@ -513,10 +529,14 @@ test_that("Mann-Whitney U-tests work", {
   }
   us <- apply(exprs(object), 1, get_u)
 
-  cols <- c("Feature_ID", paste0("A_vs_B_Mann_Whitney_",
-                                 c("U", "Estimate", "LCI95", "UCI95", "P", "P_FDR")))
+  cols <- c("Feature_ID", paste0(
+    "A_vs_B_Mann_Whitney_",
+    c("U", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
+  ))
 
-  mw_res <- suppressWarnings({perform_mann_whitney(object, formula_char = "Feature ~ Group")})
+  mw_res <- suppressWarnings({
+    perform_mann_whitney(object, formula_char = "Feature ~ Group")
+  })
 
   expect_identical(colnames(mw_res), cols)
 
@@ -526,29 +546,28 @@ test_that("Mann-Whitney U-tests work", {
 
 
 test_that("Wilcoxon signed rank tests work", {
-
   object <- drop_qcs(example_set)
   flag(object)[1:2] <- "Flagged"
   get_median_diffs <- function(a) {
-    X <- a[object$Time == 1][order(object$Subject_ID[object$Time == 1])]
-    Y <- a[object$Time == 2][order(object$Subject_ID[object$Time == 2])]
-    d <- X - Y
+    x_mat <- a[object$Time == 1][order(object$Subject_ID[object$Time == 1])]
+    y_mat <- a[object$Time == 2][order(object$Subject_ID[object$Time == 2])]
+    d <- x_mat - y_mat
     finite_median(d)
   }
   median_diffs <- apply(exprs(object), 1, get_median_diffs)
 
-  cols <- c("Feature_ID", paste0("1_vs_2_Wilcox_",
-                                 c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")))
+  cols <- c("Feature_ID", paste0(
+    "1_vs_2_Wilcox_",
+    c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
+  ))
 
   wil_res <- perform_wilcoxon_signed_rank(object, group = "Time", id = "Subject_ID")
 
   expect_identical(colnames(wil_res), cols)
   expect_equal(cor(sign(median_diffs), sign(wil_res$`1_vs_2_Wilcox_Estimate`)), 1)
-
 })
 
 test_that("Pairwise Mann-Whitney tests work", {
-
   object <- drop_qcs(example_set)
   pData(object)$Group <- factor(rep(c(rep("A", 3), rep("B", 3), rep("C", 2)), 3))
   pData(object)$Subject_ID <- factor(rep(1:8, 3))
@@ -556,7 +575,9 @@ test_that("Pairwise Mann-Whitney tests work", {
 
   medians <- apply(exprs(object), 1, tapply, object$Group, finite_median)
   median_diffs1 <- medians %>%
-    apply(2, function(x) {x[1] - x[2]})
+    apply(2, function(x) {
+      x[1] - x[2]
+    })
 
   pwnp_res <- suppressWarnings(perform_pairwise_non_parametric(object, group = "Time"))
 
@@ -572,10 +593,12 @@ test_that("Pairwise Mann-Whitney tests work", {
   expect_identical(suppressWarnings(perform_pairwise_non_parametric(object, group = "Time")), pwnp_res)
   # These shouldn't match cause paired mode
   # In this case 4 pairs in each
-  expect_failure(expect_identical(suppressWarnings(perform_pairwise_non_parametric(object,
-                                                                  group = "Time",
-                                                                  id = "Subject_ID",
-                                                                  is_paired = TRUE)),
-                                  pwnp_res))
-
+  expect_failure(expect_identical(
+    suppressWarnings(perform_pairwise_non_parametric(object,
+      group = "Time",
+      id = "Subject_ID",
+      is_paired = TRUE
+    )),
+    pwnp_res
+  ))
 })

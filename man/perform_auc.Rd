@@ -30,7 +30,7 @@ AUCs between groups.
 # Drop QC samples before computing AUCs
 aucs <- perform_auc(drop_qcs(example_set))
 # t-test with the AUCs
-t_test_results <- perform_t_test(aucs, formula_char =  "Feature ~ Group")
+t_test_results <- perform_t_test(aucs, formula_char = "Feature ~ Group")
 
 }
 \seealso{

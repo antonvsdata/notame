@@ -33,7 +33,8 @@ by the actual Feature IDs during model fitting, see the example
 # A simple example without QC samples
 # Time predicted by features
 logistic_results <- perform_logistic(drop_qcs(example_set),
-                                     formula_char = "Time ~ Feature + Group ")
+  formula_char = "Time ~ Feature + Group "
+)
 
 }
 \seealso{

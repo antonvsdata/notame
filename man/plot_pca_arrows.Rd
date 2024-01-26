@@ -18,6 +18,8 @@ plot_pca_arrows(
   title = "PCA changes",
   subtitle = NULL,
   color_scale = getOption("notame.color_scale_dis"),
+  text_base_size = 14,
+  line_width = 0.5,
   ...
 )
 }
@@ -47,6 +49,10 @@ flagged features are removed before visualization.}
 
 \item{color_scale}{the color scale as returned by a ggplot function}
 
+\item{text_base_size}{the base size of the text}
+
+\item{line_width}{the width of the arrows}
+
 \item{...}{additional arguments passed to pcaMethods::pca}
 }
 \value{
@@ -60,7 +66,7 @@ by an arrow ending at the last observation.
 plot_pca_arrows(drop_qcs(example_set))
 # If the sample size is large, plot groups separately
 plot_pca_arrows(drop_qcs(example_set)) +
-facet_wrap(~ Group)
+  facet_wrap(~Group)
 
 }
 \seealso{

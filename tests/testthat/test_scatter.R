@@ -22,4 +22,3 @@ test_that("Low quality features are dropped when they should", {
   expect_equal(gg_flagged$data, fData(no_low))
   expect_equal(gg_all$data, fData(flagged))
 })
-

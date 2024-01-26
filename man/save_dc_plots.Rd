@@ -53,10 +53,14 @@ is also used for shape
 \dontrun{
 dc <- dc_cubic_spline(merged_sample)
 corrected <- dc$object
-inspected <- inspect_dc(orig = merged_sample, dc = corrected,
-                        check_quality = TRUE)
-save_dc_plots(orig = merged_sample, dc = corrected, predicted = dc$predicted,
-              file = "drift_plots.pdf")
+inspected <- inspect_dc(
+  orig = merged_sample, dc = corrected,
+  check_quality = TRUE
+)
+save_dc_plots(
+  orig = merged_sample, dc = corrected, predicted = dc$predicted,
+  file = "drift_plots.pdf"
+)
 }
 }
 \seealso{

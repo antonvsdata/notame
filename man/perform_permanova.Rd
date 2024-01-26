@@ -22,7 +22,8 @@ perform_permanova(
 
 \item{transform}{Transformation to use in \code{IniTransform}. By default uses "Standardize columns".}
 
-\item{coef}{Coefficient to calculate continuous distances in \code{DistContinuous}. By default uses Pythagorean distances.}
+\item{coef}{Coefficient to calculate continuous distances in \code{DistContinuous}.
+By default uses Pythagorean distances.}
 
 \item{...}{other parameters to \code{\link[PERMANOVA]{PERMANOVA}}}
 }

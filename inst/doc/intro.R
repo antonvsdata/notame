@@ -6,4 +6,3 @@ knitr::opts_chunk$set(
 
 ## ---- out.heigth = "900px", echo=FALSE-----------------------------------
 knitr::include_graphics("notame_workflow.png")
-

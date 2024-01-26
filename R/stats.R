@@ -1,4 +1,3 @@
-
 #' Summary statistics
 #'
 #' Computes summary statistics for each feature, possibly grouped by a factor.
@@ -14,7 +13,7 @@
 #' # Group by "Group"
 #' sum_stats <- summary_statistics(example_set)
 #' # Group by Group and Time
-#'  sum_stats <- summary_statistics(example_set, grouping_cols = c("Group", "Time"))
+#' sum_stats <- summary_statistics(example_set, grouping_cols = c("Group", "Time"))
 #' # No Grouping
 #' sum_stats <- summary_statistics(example_set, grouping_cols = NA)
 #'
@@ -22,15 +21,18 @@
 #'
 #' @export
 summary_statistics <- function(object, grouping_cols = NA) {
-
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
   # Possible grouping
 
-  statistics <- foreach::foreach(i = seq_along(features), .combine = rbind,
-                                 .export = c("finite_sd", "finite_mad", "finite_mean",
-                                             "finite_max", "finite_min",
-                                             "finite_median", "finite_quantile")) %dopar% {
+  statistics <- foreach::foreach(
+    i = seq_along(features), .combine = rbind,
+    .export = c(
+      "finite_sd", "finite_mad", "finite_mean",
+      "finite_max", "finite_min",
+      "finite_median", "finite_quantile"
+    )
+  ) %dopar% {
     feature <- features[i]
     f_levels <- data[, feature]
     if (is.na(grouping_cols)[1]) {
@@ -54,18 +56,23 @@ summary_statistics <- function(object, grouping_cols = NA) {
         groups <- as.factor(gsub("^_", "", groups))
         group_names <- levels(groups)
       }
-
     }
 
     # Define functions to use
-    funs <- list(mean = finite_mean,
-                 sd = finite_sd,
-                 median = finite_median,
-                 mad = finite_mad,
-                 min = finite_min,
-                 Q25 = function(x){finite_quantile(x, probs = 0.25)},
-                 Q75 = function(x){finite_quantile(x, probs = 0.75)},
-                 max = finite_max)
+    funs <- list(
+      mean = finite_mean,
+      sd = finite_sd,
+      median = finite_median,
+      mad = finite_mad,
+      min = finite_min,
+      Q25 = function(x) {
+        finite_quantile(x, probs = 0.25)
+      },
+      Q75 = function(x) {
+        finite_quantile(x, probs = 0.75)
+      },
+      max = finite_max
+    )
     # Initialize named vector for the results
     result_row <- rep(0, times = length(group_names) * length(funs))
     if (!is.na(grouping_cols[1])) {
@@ -84,8 +91,10 @@ summary_statistics <- function(object, grouping_cols = NA) {
       }
     }
     # Combine as data frame
-    result_row <- data.frame(Feature_ID = feature, as.list(result_row),
-                             stringsAsFactors = FALSE)
+    result_row <- data.frame(
+      Feature_ID = feature, as.list(result_row),
+      stringsAsFactors = FALSE
+    )
 
     result_row
   }
@@ -109,7 +118,8 @@ summary_statistics <- function(object, grouping_cols = NA) {
 #' # Simple manipulation to linear model results
 #' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 #' lm_results <- clean_stats_results(lm_results,
-#' rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1"))
+#'   rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1")
+#' )
 #'
 #' @export
 clean_stats_results <- function(
@@ -127,8 +137,8 @@ clean_stats_results <- function(
   }
   if (summary) {
     ifelse(fdr,
-           p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))],
-           p_cols <- colnames(df)[grep("_P$", colnames(df))]
+      p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))],
+      p_cols <- colnames(df)[grep("_P$", colnames(df))]
     )
     df$Low_p_values <- apply(df[, p_cols], 1, function(x) {
       sum(x < p_limit, na.rm = TRUE)
@@ -154,8 +164,9 @@ cohens_d_fun <- function(object, group, id, time) {
   if (is.null(time)) {
     group1 <- data[which(data[, group] == group_levels[1]), ]
     group2 <- data[which(data[, group] == group_levels[2]), ]
-    log_text(paste("Starting to compute Cohen's D between groups",
-                   paste(rev(group_levels), collapse = " & ")
+    log_text(paste(
+      "Starting to compute Cohen's D between groups",
+      paste(rev(group_levels), collapse = " & ")
     ))
   } else {
     time_levels <- levels(data[, time])
@@ -169,28 +180,32 @@ cohens_d_fun <- function(object, group, id, time) {
     time2 <- time2[common_ids, ]
     if (!identical(time1[, group], time2[, group])) {
       stop("Groups of subjects do not match between time points",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     # Change between time points
     new_data <- time2[, features] - time1[, features]
     # Split to groups
-    group1 <- new_data[which(time1[, group] == levels(time1[,group])[1]), ]
-    group2 <- new_data[which(time1[, group] == levels(time1[,group])[2]), ]
+    group1 <- new_data[which(time1[, group] == levels(time1[, group])[1]), ]
+    group2 <- new_data[which(time1[, group] == levels(time1[, group])[2]), ]
 
-    log_text(paste("Starting to compute Cohen's D between groups",
-                   paste(rev(group_levels), collapse = " & "),
-                   "from time change",
-                   paste(rev(time_levels), collapse = " - ")
+    log_text(paste(
+      "Starting to compute Cohen's D between groups",
+      paste(rev(group_levels), collapse = " & "),
+      "from time change",
+      paste(rev(time_levels), collapse = " - ")
     ))
   }
-  ds <-  foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+  ds <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
     feature <- features[i]
     f1 <- group1[, feature]
     f2 <- group2[, feature]
-    d <- data.frame(Feature_ID = feature,
-                    Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
-                      sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-                    stringsAsFactors = FALSE)
+    d <- data.frame(
+      Feature_ID = feature,
+      Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
+        sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
+      stringsAsFactors = FALSE
+    )
   }
 
   rownames(ds) <- ds$Feature_ID
@@ -198,9 +213,10 @@ cohens_d_fun <- function(object, group, id, time) {
   if (is.null(time_levels)) {
     colnames(ds)[2] <- paste0(group_levels[2], "_vs_", group_levels[1], "_Cohen_d")
   } else {
-    colnames(ds)[2] <- paste0( group_levels[2], "_vs_", group_levels[1],
-                              "_", time_levels[2], "_minus_", time_levels[1],
-                              "_Cohen_d"
+    colnames(ds)[2] <- paste0(
+      group_levels[2], "_vs_", group_levels[1],
+      "_", time_levels[2], "_minus_", time_levels[1],
+      "_Cohen_d"
     )
   }
 
@@ -225,7 +241,8 @@ cohens_d_fun <- function(object, group, id, time) {
 #' @examples
 #' d_results <- cohens_d(drop_qcs(example_set))
 #' d_results_time <- cohens_d(drop_qcs(example_set),
-#'                            time = "Time", id = "Subject_ID")
+#'   time = "Time", id = "Subject_ID"
+#' )
 #'
 #' @export
 cohens_d <- function(object, group = group_col(object),
@@ -249,7 +266,7 @@ cohens_d <- function(object, group = group_col(object),
     sum(x >= n)
   }
 
-  if(is.null(time)) {
+  if (is.null(time)) {
     for (i in seq_len(ncol(group_combos))) {
       object_split <- object[, which(
         pData(object)[, group] %in% c(group_combos[1, i], group_combos[2, i])
@@ -258,10 +275,10 @@ cohens_d <- function(object, group = group_col(object),
 
       if (is.null(res)) {
         res <- cohens_d_fun(object_split, group, id, time)
-        } else {
+      } else {
         res <- dplyr::full_join(res,
-                                cohens_d_fun(object_split, group, id, time),
-                                by = "Feature_ID"
+          cohens_d_fun(object_split, group, id, time),
+          by = "Feature_ID"
         )
       }
     }
@@ -280,30 +297,35 @@ cohens_d <- function(object, group = group_col(object),
         # Check data is valid for Cohen's D
         group_table <- table(pData(object_split)[, c(id, group)])
         time_table <- table(pData(object_split)[, c(id, time)])
-        column <- paste0("Cohen_d_", group_combos[1, i], "_", group_combos[2, i],
-                         "_", time_combos[2, j], "_minus_", time_combos[1, j]
+        column <- paste0(
+          "Cohen_d_", group_combos[1, i], "_", group_combos[2, i],
+          "_", time_combos[2, j], "_minus_", time_combos[1, j]
         )
         if (any(apply(group_table, 2, count_obs_geq_than, 2) < 2)) {
-          warning(paste0("In ", column,
-                         ": Groups don't have two observations of at least two subjects, skipping!"
+          warning(paste0(
+            "In ", column,
+            ": Groups don't have two observations of at least two subjects, skipping!"
           ))
           next
         }
         if (any(apply(time_table, 1, count_obs_geq_than, 2) != 0)) {
-          warning(paste0("In ", column,
-                         ": Same subject recorded more than once at same time, skipping!"
+          warning(paste0(
+            "In ", column,
+            ": Same subject recorded more than once at same time, skipping!"
           ))
           next
         }
         if (any(apply(group_table, 1, count_obs_geq_than, 1) != 1)) {
-          warning(paste0("In ", column,
-                         ": Same subject recorded in two groups, skipping!"
+          warning(paste0(
+            "In ", column,
+            ": Same subject recorded in two groups, skipping!"
           ))
           next
         }
         if (!all(apply(time_table, 1, count_obs_geq_than, 1) != 1)) {
-          warning(paste("One or more subject(s) missing time points,",
-                        column, "will be counted using common subjects in time points!"
+          warning(paste(
+            "One or more subject(s) missing time points,",
+            column, "will be counted using common subjects in time points!"
           ))
         }
 
@@ -311,8 +333,8 @@ cohens_d <- function(object, group = group_col(object),
           res <- cohens_d_fun(object_split, group, id, time)
         } else {
           res <- dplyr::full_join(res,
-                                  cohens_d_fun(object_split, group, id, time),
-                                  by = "Feature_ID"
+            cohens_d_fun(object_split, group, id, time),
+            by = "Feature_ID"
           )
         }
       }
@@ -339,7 +361,6 @@ cohens_d <- function(object, group = group_col(object),
 #'
 #' @export
 fold_change <- function(object, group = group_col(object)) {
-
   log_text("Starting to compute fold changes.")
 
   data <- combined_data(object)
@@ -347,16 +368,18 @@ fold_change <- function(object, group = group_col(object)) {
 
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = rbind,
-                                 .export = "finite_mean") %dopar% {
+  results_df <- foreach::foreach(
+    i = seq_along(features), .combine = rbind,
+    .export = "finite_mean"
+  ) %dopar% {
     feature <- features[i]
     result_row <- rep(NA_real_, ncol(groups))
     # Calculate fold changes
     tryCatch({
-      for(i in 1:ncol(groups)){
-        group1 <- data[data[, group] == groups[1,i], feature]
-        group2 <- data[data[, group] == groups[2,i], feature]
-        result_row[i] <- finite_mean(group2)/finite_mean(group1)
+      for (i in seq_len(ncol(groups))) {
+        group1 <- data[data[, group] == groups[1, i], feature]
+        group2 <- data[data[, group] == groups[2, i], feature]
+        result_row[i] <- finite_mean(group2) / finite_mean(group1)
       }
     })
 
@@ -368,7 +391,7 @@ fold_change <- function(object, group = group_col(object)) {
     t() %>%
     as.data.frame() %>%
     tidyr::unite("Comparison", V2, V1, sep = "_vs_")
-  comp_labels <- paste0(comp_labels[,1], "_FC")
+  comp_labels <- paste0(comp_labels[, 1], "_FC")
   results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
   colnames(results_df) <- c("Feature_ID", comp_labels)
   rownames(results_df) <- results_df$Feature_ID
@@ -419,22 +442,24 @@ fold_change <- function(object, group = group_col(object)) {
 #' # Drop QCs and convert time to numeric
 #' no_qc <- drop_qcs(example_set)
 #' no_qc$Time <- as.numeric(no_qc$Time)
-#' correlations <- perform_correlation_tests(no_qc, x = featureNames(example_set),
-#'                                          y = c("Time", "Injection_order"), method = "spearman")
+#' correlations <- perform_correlation_tests(no_qc,
+#'   x = featureNames(example_set),
+#'   y = c("Time", "Injection_order"), method = "spearman"
+#' )
 #'
 #' # Correlations between variables from two distinct MetaboSets
 #' cross_object_cor <- perform_correlation_tests(hilic_neg_sample,
-#'                                               x = featureNames(hilic_neg_sample),
-#'                                               object2 = hilic_pos_sample,
-#'                                               y = featureNames(hilic_pos_sample),
-#'                                               all_pairs = FALSE)
+#'   x = featureNames(hilic_neg_sample),
+#'   object2 = hilic_pos_sample,
+#'   y = featureNames(hilic_pos_sample),
+#'   all_pairs = FALSE
+#' )
 #' @seealso \code{\link{cor.test}}, \code{\link[rmcorr]{rmcorr}}
 #'
 #' @importFrom foreach %do%
 #' @export
 perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NULL, fdr = TRUE,
                                       all_pairs = TRUE, duplicates = FALSE, ...) {
-
   log_text("Starting correlation tests.")
 
   data1 <- combined_data(object)
@@ -452,14 +477,16 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
   if (!is.null(id)) {
     if (!requireNamespace("rmcorr", quietly = TRUE)) {
       stop("Package \"rmcorr\" needed for this function to work. Please install it.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     if (!id %in% colnames(data1) || !id %in% colnames(data2)) {
       stop("id column not found", call. = FALSE)
     }
     if (!identical(data1[, id], data2[, id])) {
       stop("ids do not match between the two objects: make sure the subjects are in the same order!",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     add_citation("rmcorr package was used to compute correlations with repeated measuremtns:", citation("rmcorr"))
   }
@@ -468,19 +495,23 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
   not_found <- setdiff(x, colnames(data1))
   not_found <- c(not_found, setdiff(y, colnames(data2)))
   if (length(not_found)) {
-    stop(paste("Following variables do not match to know variables in the object(s):",
-               paste(not_found, collapse = ", ")))
+    stop(paste(
+      "Following variables do not match to know variables in the object(s):",
+      paste(not_found, collapse = ", ")
+    ))
   }
 
-  if (all_pairs){
+  if (all_pairs) {
     # If the same variable is present in x and y, the correlation would be computed
     # twice. This makes sure only unique combinations of variables are treated.
-    if (identical(x,y)) {
-      var_pairs <- combn(x, 2) %>% t() %>% data.frame(stringsAsFactors = FALSE)
+    if (identical(x, y)) {
+      var_pairs <- combn(x, 2) %>%
+        t() %>%
+        data.frame(stringsAsFactors = FALSE)
       colnames(var_pairs) <- c("x", "y")
       # Add correlations of all variables with themselves (useful for plotting)
       var_pairs <- rbind(var_pairs, data.frame(x = x, y = x, stringsAsFactors = FALSE))
-    } else if (is.null(object2) & length(intersect(x, y))) {
+    } else if (is.null(object2) && length(intersect(x, y))) {
       stop("Currently only identical x & y or completely separate x & y are supported for one object")
     } else {
       var_pairs <- expand.grid(x, y, stringsAsFactors = FALSE)
@@ -496,31 +527,39 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
 
   # Compute correlations
   cor_results <- foreach::foreach(i = seq_len(nrow(var_pairs)), .combine = rbind) %dopar% {
-    x_tmp = var_pairs$x[i]
-    y_tmp = var_pairs$y[i]
+    x_tmp <- var_pairs$x[i]
+    y_tmp <- var_pairs$y[i]
     cor_tmp <- NULL
-    tryCatch({
-      if (is.null(id)) {
-        cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp], ...)
-      } else {
-        id_tmp <- data1[, id]
-        df_tmp <- data.frame(id_var = id_tmp, x_var = data1[, x_tmp], y_var = data2[, y_tmp])
-        cor_tmp <- rmcorr::rmcorr(participant = id_var,
-                                  measure1 = x_var,
-                                  measure2 = y_var,
-                                  dataset = df_tmp)
-        cor_tmp <- list(estimate = cor_tmp$r, p.value = cor_tmp$p)
-      }
-    }, error = function(e) cat(paste0(x_tmp, " vs ", y_tmp, ": ", e$message, "\n")))
+    tryCatch(
+      {
+        if (is.null(id)) {
+          cor_tmp <- cor.test(data1[, x_tmp], data2[, y_tmp], ...)
+        } else {
+          id_tmp <- data1[, id]
+          df_tmp <- data.frame(id_var = id_tmp, x_var = data1[, x_tmp], y_var = data2[, y_tmp])
+          cor_tmp <- rmcorr::rmcorr(
+            participant = id_var,
+            measure1 = x_var,
+            measure2 = y_var,
+            dataset = df_tmp
+          )
+          cor_tmp <- list(estimate = cor_tmp$r, p.value = cor_tmp$p)
+        }
+      },
+      error = function(e) cat(paste0(x_tmp, " vs ", y_tmp, ": ", e$message, "\n"))
+    )
     if (is.null(cor_tmp)) {
-      cor_tmp <- list(estimate = NA,
-                      p.value = NA)
+      cor_tmp <- list(
+        estimate = NA,
+        p.value = NA
+      )
     }
-    data.frame(X = x_tmp, Y = y_tmp,
-               Correlation_coefficient = cor_tmp$estimate,
-               Correlation_P = cor_tmp$p.value,
-               stringsAsFactors = FALSE)
-
+    data.frame(
+      X = x_tmp, Y = y_tmp,
+      Correlation_coefficient = cor_tmp$estimate,
+      Correlation_P = cor_tmp$p.value,
+      stringsAsFactors = FALSE
+    )
   }
 
   if (duplicates) {
@@ -562,7 +601,7 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
 #' # Drop QC samples before computing AUCs
 #' aucs <- perform_auc(drop_qcs(example_set))
 #' # t-test with the AUCs
-#' t_test_results <- perform_t_test(aucs, formula_char =  "Feature ~ Group")
+#' t_test_results <- perform_t_test(aucs, formula_char = "Feature ~ Group")
 #'
 #' @seealso \code{\link[PK]{auc}}
 #'
@@ -570,8 +609,9 @@ perform_correlation_tests <- function(object, x, y = x, id = NULL, object2 = NUL
 perform_auc <- function(object, time = time_col(object), subject = subject_col(object),
                         group = group_col(object)) {
   if (!requireNamespace("PK", quietly = TRUE)) {
-      stop("Package \"PK\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"PK\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   add_citation("PK package was used to compute AUC:", citation("PK"))
 
@@ -595,10 +635,12 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
     result_row <- rep(NA_real_, nrow(pheno_data))
     # Compute AUC for each subject in each group
     tryCatch({
-      for(j in seq_len(nrow(pheno_data))){
+      for (j in seq_len(nrow(pheno_data))) {
         subset_idx <- data[, subject] == pheno_data[j, subject] & data[, group] == pheno_data[j, group]
-        result_row[j] <- PK::auc(time = as.numeric(data[subset_idx, time]),
-                                 conc = data[subset_idx, feature], design = "complete")$est[1]
+        result_row[j] <- PK::auc(
+          time = as.numeric(data[subset_idx, time]),
+          conc = data[subset_idx, feature], design = "complete"
+        )$est[1]
       }
     })
 
@@ -606,9 +648,11 @@ perform_auc <- function(object, time = time_col(object), subject = subject_col(o
   }
 
   # Construct new MetaboSet object (with all modes together)
-  new_object <- construct_metabosets(exprs = aucs, feature_data = fData(object),
-                                    pheno_data = pheno_data, group_col = group,
-                                    subject_col = subject) %>%
+  new_object <- construct_metabosets(
+    exprs = aucs, feature_data = fData(object),
+    pheno_data = pheno_data, group_col = group,
+    subject_col = subject
+  ) %>%
     merge_metabosets()
 
   log_text("AUC computation finished.")
@@ -621,9 +665,11 @@ adjust_p_values <- function(x, flags) {
   for (p_col in p_cols) {
     p_values <- x[, p_col, drop = TRUE]
     p_values[!is.na(flags)] <- NA
-    x <- tibble::add_column(.data = x,
-                            FDR = p.adjust(p_values, method = "BH"),
-                            .after = p_col)
+    x <- tibble::add_column(
+      .data = x,
+      FDR = p.adjust(p_values, method = "BH"),
+      .after = p_col
+    )
     p_idx <- which(colnames(x) == p_col)
     colnames(x)[p_idx + 1] <- paste0(p_col, "_FDR")
   }
@@ -650,19 +696,20 @@ fill_results <- function(results_df, features) {
 
 # Helper function for running a variety of simple statistical tests
 perform_test <- function(object, formula_char, result_fun, all_features, fdr = TRUE, packages = NULL) {
-
   data <- combined_data(object)
   features <- Biobase::featureNames(object)
 
-  results_df <- foreach::foreach(i = seq_along(features), .combine = dplyr::bind_rows,
-                                 .packages = packages) %dopar% {
+  results_df <- foreach::foreach(
+    i = seq_along(features), .combine = dplyr::bind_rows,
+    .packages = packages
+  ) %dopar% {
     feature <- features[i]
     # Replace "Feature" with the current feature name
     tmp_formula <- gsub("Feature", feature, formula_char)
     # Run test
     result_row <- result_fun(feature = feature, formula = as.formula(tmp_formula), data = data)
     # In case Feature is used as predictor, make the column names match
-    if (!is.null(result_row)){
+    if (!is.null(result_row)) {
       colnames(result_row) <- gsub(feature, "Feature", colnames(result_row))
     }
     result_row
@@ -671,7 +718,8 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
   # If the tests are run on parallel, the error messages from failing tests are not visible
   if (nrow(results_df) == 0) {
     stop("All the test failed, to see the individual error messages run the tests withot parallelization.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   # Rows full of NA for features where the test failed
   results_df <- fill_results(results_df, features)
@@ -715,16 +763,18 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #'
 #' @export
 perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
-
   log_text("Starting linear regression.")
 
   lm_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
-    tryCatch({
-      fit <- lm(formula, data = data, ...)
-    }, error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
-    if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
+    tryCatch(
+      {
+        fit <- lm(formula, data = data, ...)
+      },
+      error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+    )
+    if (is.null(fit) || sum(!is.na(data[, feature])) < 2) {
       result_row <- NULL
     } else {
       # Gather coefficients and CIs to one data frame row
@@ -733,11 +783,13 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
-      result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
-        dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value",
-                      "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
+      result_row <- dplyr::left_join(coefs, confints, by = "Variable") %>%
+        dplyr::rename(
+          "Std_Error" = "Std..Error", "t_value" = "t.value",
+          "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5.."
+        ) %>%
         tidyr::gather("Metric", "Value", -Variable) %>%
-        tidyr::unite("Column", Variable, Metric, sep="_") %>%
+        tidyr::unite("Column", Variable, Metric, sep = "_") %>%
         tidyr::spread(Column, Value)
       # Add R2 statistics and feature ID
       result_row$R2 <- summary(fit)$r.squared
@@ -791,17 +843,19 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
 #' @export
 perform_lm_anova <- function(object, formula_char, all_features = FALSE,
                              lm_args = NULL, anova_args = NULL) {
-
   log_text("Starting ANOVA tests")
 
   anova_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
-    tryCatch({
-      fit <- do.call(lm, c(list(formula = formula, data = data), lm_args))
-      anova_res <- do.call(anova, c(list(object = fit), anova_args))
-    }, error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
-    if(is.null(anova_res) | sum(!is.na(data[, feature])) < 2){
+    tryCatch(
+      {
+        fit <- do.call(lm, c(list(formula = formula, data = data), lm_args))
+        anova_res <- do.call(anova, c(list(object = fit), anova_args))
+      },
+      error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+    )
+    if (is.null(anova_res) || sum(!is.na(data[, feature])) < 2) {
       result_row <- NULL
     } else {
       effect_names <- c(names(fit$contrasts), "Residuals")
@@ -848,22 +902,25 @@ perform_lm_anova <- function(object, formula_char, all_features = FALSE,
 #' # A simple example without QC samples
 #' # Time predicted by features
 #' logistic_results <- perform_logistic(drop_qcs(example_set),
-#'                                      formula_char = "Time ~ Feature + Group ")
+#'   formula_char = "Time ~ Feature + Group "
+#' )
 #'
 #' @seealso \code{\link[stats]{glm}}
 #'
 #' @export
 perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
-
   log_text("Starting logistic regression.")
 
   logistic_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
-    tryCatch({
-      fit <- glm(formula, data = data, family = binomial(), ...)
-    }, error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
-    if(is.null(fit) | sum(!is.na(data[, feature])) < 2){
+    tryCatch(
+      {
+        fit <- glm(formula, data = data, family = binomial(), ...)
+      },
+      error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+    )
+    if (is.null(fit) || sum(!is.na(data[, feature])) < 2) {
       result_row <- NULL
     } else {
       # Gather coefficients and CIs to one data frame row
@@ -872,11 +929,13 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
       coefs <- data.frame(Variable = rownames(coefs), coefs, stringsAsFactors = FALSE)
       confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
 
-      result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
-        dplyr::rename("Std_Error" = "Std..Error", "z_value" ="z.value",
-                      "P" = "Pr...z..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
+      result_row <- dplyr::left_join(coefs, confints, by = "Variable") %>%
+        dplyr::rename(
+          "Std_Error" = "Std..Error", "z_value" = "z.value",
+          "P" = "Pr...z..", "LCI95" = "X2.5..", "UCI95" = "X97.5.."
+        ) %>%
         tidyr::gather("Metric", "Value", -Variable) %>%
-        tidyr::unite("Column", Variable, Metric, sep="_") %>%
+        tidyr::unite("Column", Variable, Metric, sep = "_") %>%
         tidyr::spread(Column, Value)
       result_row$Feature_ID <- feature
     }
@@ -896,9 +955,11 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
   estimate_cols <- colnames(results_df)[grepl("_Estimate$", colnames(results_df))]
   for (estimate_col in estimate_cols) {
     estimate_values <- results_df[, estimate_col]
-    results_df <- tibble::add_column(.data = results_df,
-                            OR = exp(estimate_values),
-                            .after = estimate_col)
+    results_df <- tibble::add_column(
+      .data = results_df,
+      OR = exp(estimate_values),
+      .after = estimate_col
+    )
     estimate_idx <- which(colnames(results_df) == estimate_col)
     colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
   }
@@ -939,8 +1000,9 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
 #' # Features predicted by Group and Time as fixed effects with Subject ID as a random effect
 #' \dontrun{
 #' lmer_results <- perform_lmer(drop_qcs(example_set),
-#'                              formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
-#'                         ci_method = "Wald")
+#'   formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
+#'   ci_method = "Wald"
+#' )
 #' }
 #' @seealso \code{\link[lmerTest]{lmer}} for model specification and
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
@@ -949,16 +1011,17 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
 perform_lmer <- function(object, formula_char, all_features = FALSE,
                          ci_method = c("Wald", "profile", "boot"),
                          test_random = FALSE, ...) {
-
   log_text("Starting fitting linear mixed models.")
 
   if (!requireNamespace("lmerTest", quietly = TRUE)) {
-      stop("Package \"lmerTest\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"lmerTest\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   if (!requireNamespace("MuMIn", quietly = TRUE)) {
-      stop("Package \"MuMIn\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"MuMIn\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   add_citation("lme4 package was used to fit linear mixed models:", citation("lme4"))
   add_citation("lmerTest package was used for statistical tests in linear mixed models:", citation("lmerTest"))
@@ -975,9 +1038,12 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
     fit <- NULL
     # If fitting causes an error, a NULL row is returned
     result_row <- NULL
-    tryCatch({
-      fit <- lmerTest::lmer(formula, data = data, ...)
-    },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
+    tryCatch(
+      {
+        fit <- lmerTest::lmer(formula, data = data, ...)
+      },
+      error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+    )
     if (!is.null(fit)) {
       # Extract model coefficients
       coefs <- summary(fit)$coefficients
@@ -985,50 +1051,62 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
       # Try to compute confidence intervals
       # If the computation fails, all CIs are NA
       confints <- data.frame(Variable = rownames(coefs), "X2.5.." = NA, "X97.5.." = NA)
-      tryCatch({
-        confints <- confint(fit, nsim = 1000, method = ci_method, oldNames = FALSE)
-        confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
-      },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
+      tryCatch(
+        {
+          confints <- confint(fit, nsim = 1000, method = ci_method, oldNames = FALSE)
+          confints <- data.frame(Variable = rownames(confints), confints, stringsAsFactors = FALSE)
+        },
+        error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+      )
 
       # Gather coefficients and CIs to one data frame row
-      result_row <- dplyr::left_join(coefs,confints, by = "Variable") %>%
-        dplyr::rename("Std_Error" = "Std..Error", "t_value" ="t.value",
-                      "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5..") %>%
+      result_row <- dplyr::left_join(coefs, confints, by = "Variable") %>%
+        dplyr::rename(
+          "Std_Error" = "Std..Error", "t_value" = "t.value",
+          "P" = "Pr...t..", "LCI95" = "X2.5..", "UCI95" = "X97.5.."
+        ) %>%
         tidyr::gather("Metric", "Value", -Variable) %>%
-        tidyr::unite("Column", Variable, Metric, sep="_") %>%
+        tidyr::unite("Column", Variable, Metric, sep = "_") %>%
         tidyr::spread(Column, Value)
       # Add R2 statistics
       result_row$Marginal_R2 <- NA
       result_row$Conditional_R2 <- NA
-      tryCatch({
-        R2s <- suppressWarnings(MuMIn::r.squaredGLMM(fit))
-        result_row$Marginal_R2 <- R2s[1]
-        result_row$Conditional_R2 <- R2s[2]
-      },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
+      tryCatch(
+        {
+          r2s <- suppressWarnings(MuMIn::r.squaredGLMM(fit))
+          result_row$Marginal_R2 <- r2s[1]
+          result_row$Conditional_R2 <- r2s[2]
+        },
+        error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+      )
       # Add Feature ID
       result_row$Feature_ID <- feature
     }
 
     # Add optional test results for the random effects
-    if(test_random) {
-      tryCatch({
-        r_tests <- as.data.frame(ranova(fit))[-1,c(4,6)]
-        r_tests$Variable <- rownames(r_tests) %>%
-          gsub("[(]1 [|] ", "", .) %>% gsub("[)]", "", .)
-        # Get confidence intervals for the standard deviations of the random effects
-        confints$Variable <- confints$Variable  %>%
-          gsub("sd_[(]Intercept[)][|]", "", .)
-        # Get standard deviations of the random effects
-        r_variances <- as.data.frame(summary(fit)$varcor)[c("grp", "sdcor")]
-        # Join all the information together
-        r_result_row <- dplyr::inner_join(r_variances, confints, by = c("grp" = "Variable")) %>%
-          dplyr::left_join(r_tests,  by = c("grp" = "Variable")) %>%
-          dplyr::rename(SD = sdcor, "LCI95" = "X2.5..", "UCI95" = "X97.5..", "P" = "Pr(>Chisq)") %>%
-          tidyr::gather("Metric", "Value", -grp) %>%
-          tidyr::unite("Column", grp, Metric, sep="_") %>%
-          tidyr::spread(Column, Value)
-        result_row <- cbind(result_row, r_result_row)
-      },error = function(e) cat(paste0(feature, ": ", e$message, "\n")))
+    if (test_random) {
+      tryCatch(
+        {
+          r_tests <- as.data.frame(ranova(fit))[-1, c(4, 6)]
+          r_tests$Variable <- rownames(r_tests) %>%
+            gsub("[(]1 [|] ", "", .) %>%
+            gsub("[)]", "", .)
+          # Get confidence intervals for the standard deviations of the random effects
+          confints$Variable <- confints$Variable %>%
+            gsub("sd_[(]Intercept[)][|]", "", .)
+          # Get standard deviations of the random effects
+          r_variances <- as.data.frame(summary(fit)$varcor)[c("grp", "sdcor")]
+          # Join all the information together
+          r_result_row <- dplyr::inner_join(r_variances, confints, by = c("grp" = "Variable")) %>%
+            dplyr::left_join(r_tests, by = c("grp" = "Variable")) %>%
+            dplyr::rename(SD = sdcor, "LCI95" = "X2.5..", "UCI95" = "X97.5..", "P" = "Pr(>Chisq)") %>%
+            tidyr::gather("Metric", "Value", -grp) %>%
+            tidyr::unite("Column", grp, Metric, sep = "_") %>%
+            tidyr::spread(Column, Value)
+          result_row <- cbind(result_row, r_result_row)
+        },
+        error = function(e) cat(paste0(feature, ": ", e$message, "\n"))
+      )
     }
 
     result_row
@@ -1083,8 +1161,9 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
 #' @export
 perform_homoscedasticity_tests <- function(object, formula_char, all_features = FALSE) {
   if (!requireNamespace("car", quietly = TRUE)) {
-      stop("Package \"car\" needed for this function to work. Please install it.",
-           call. = FALSE)
+    stop("Package \"car\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
   }
   add_citation("car package was used for Levene's test of homoscedasticity:", citation("car"))
 
@@ -1092,20 +1171,26 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 
   homosced_fun <- function(feature, formula, data) {
     result_row <- NULL
-    tryCatch({
-      bartlett <- bartlett.test(formula = formula, data = data)
-      levene <- car::leveneTest(y = formula, data = data)
-      fligner <- fligner.test(formula = formula, data = data)
+    tryCatch(
+      {
+        bartlett <- bartlett.test(formula = formula, data = data)
+        levene <- car::leveneTest(y = formula, data = data)
+        fligner <- fligner.test(formula = formula, data = data)
 
-      result_row <- data.frame(Feature_ID = feature,
-                               Bartlett_P = bartlett$p.value,
-                               Levene_P = levene$`Pr(>F)`[1],
-                               Fligner_P = fligner$p.value,
-                               stringsAsFactors = FALSE)
-    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+        result_row <- data.frame(
+          Feature_ID = feature,
+          Bartlett_P = bartlett$p.value,
+          Levene_P = levene$`Pr(>F)`[1],
+          Fligner_P = fligner$p.value,
+          stringsAsFactors = FALSE
+        )
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
 
     result_row
-
   }
 
   results_df <- perform_test(object, formula_char, homosced_fun, all_features)
@@ -1139,18 +1224,24 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 #'
 #' @export
 perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
-
   log_text("Starting Kruskal_wallis tests.")
 
   kruskal_fun <- function(feature, formula, data) {
     result_row <- NULL
-    tryCatch({
-      kruskal <- kruskal.test(formula = formula, data = data)
+    tryCatch(
+      {
+        kruskal <- kruskal.test(formula = formula, data = data)
 
-      result_row <- data.frame(Feature_ID = feature,
-                               Kruskal_P = kruskal$p.value,
-                               stringsAsFactors = FALSE)
-    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+        result_row <- data.frame(
+          Feature_ID = feature,
+          Kruskal_P = kruskal$p.value,
+          stringsAsFactors = FALSE
+        )
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
 
     result_row
   }
@@ -1190,21 +1281,26 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 #'
 #' @export
 perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...) {
-
   log_text("Starting ANOVA tests.")
 
   anova_fun <- function(feature, formula, data) {
     result_row <- NULL
-    tryCatch({
-      anova_res <- oneway.test(formula = formula, data = data, ...)
+    tryCatch(
+      {
+        anova_res <- oneway.test(formula = formula, data = data, ...)
 
-      result_row <- data.frame(Feature_ID = feature,
-                               ANOVA_P = anova_res$p.value,
-                               stringsAsFactors = FALSE)
-    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+        result_row <- data.frame(
+          Feature_ID = feature,
+          ANOVA_P = anova_res$p.value,
+          stringsAsFactors = FALSE
+        )
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
 
     result_row
-
   }
 
   results_df <- perform_test(object, formula_char, anova_fun, all_features)
@@ -1239,13 +1335,15 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #'
 #' @export
 perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
-  message(paste0("Remember that t.test returns difference between group means",
-                 " in different order than lm.\n",
-                 "This function mimics this behavior, so the effect size is",
-                 " mean of reference level minus mean of second level."))
+  message(paste0(
+    "Remember that t.test returns difference between group means",
+    " in different order than lm.\n",
+    "This function mimics this behavior, so the effect size is",
+    " mean of reference level minus mean of second level."
+  ))
   exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
   pair <- levels(pData(object)[, exp_var])
-  if(length(pair) != 2) {
+  if (length(pair) != 2) {
     stop("'", paste0(exp_var, "' in formula should contain exactly two levels"))
   }
 
@@ -1253,25 +1351,32 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
 
   t_fun <- function(feature, formula, data) {
     result_row <- NULL
-    tryCatch({
-      t_res <- t.test(formula = formula, data = data, ...)
+    tryCatch(
+      {
+        t_res <- t.test(formula = formula, data = data, ...)
 
-      conf_level <- attr(t_res$conf.int, "conf.level") * 100
+        conf_level <- attr(t_res$conf.int, "conf.level") * 100
 
-      result_row <- data.frame(Feature_ID = feature,
-                               Mean1 = t_res$estimate[1],
-                               Mean2 = t_res$estimate[2],
-                               Estimate = t_res$estimate[1] - t_res$estimate[2],
-                               "LCI" = t_res$conf.int[1],
-                               "UCI" = t_res$conf.int[2],
-                               t_test_P = t_res$p.value,
-                               stringsAsFactors = FALSE)
-      colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
-      colnames(result_row)[2:3] <- paste0(pair, "_Mean")
-      prefix <- paste0(pair[1], "_vs_", pair[2], "_")
-      colnames(result_row)[4] <- paste0(prefix, "Estimate")
-      colnames(result_row)[-(1:4)] <- paste0(prefix, colnames(result_row)[-(1:4)])
-    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+        result_row <- data.frame(
+          Feature_ID = feature,
+          Mean1 = t_res$estimate[1],
+          Mean2 = t_res$estimate[2],
+          Estimate = t_res$estimate[1] - t_res$estimate[2],
+          "LCI" = t_res$conf.int[1],
+          "UCI" = t_res$conf.int[2],
+          t_test_P = t_res$p.value,
+          stringsAsFactors = FALSE
+        )
+        colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
+        colnames(result_row)[2:3] <- paste0(pair, "_Mean")
+        prefix <- paste0(pair[1], "_vs_", pair[2], "_")
+        colnames(result_row)[4] <- paste0(prefix, "Estimate")
+        colnames(result_row)[-(1:4)] <- paste0(prefix, colnames(result_row)[-(1:4)])
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
 
     result_row
   }
@@ -1293,8 +1398,9 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
   if (class(groups) != "factor") groups <- as.factor(groups)
   if (length(levels(groups)) > 2) {
     warning(paste("More than two groups detected, only using the first two.",
-                  "For multiple comparisons, please see perform_pairwise_t_test()",
-                  sep = "\n"), call. = FALSE)
+      "For multiple comparisons, please see perform_pairwise_t_test()",
+      sep = "\n"
+    ), call. = FALSE)
   }
 
   # Split to groups
@@ -1317,32 +1423,40 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
   ) %dopar% {
     feature <- features[i]
     result_row <- NULL
-    tryCatch({
-      if (test == "t_test") {
-        res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
-      } else if (test == "Wilcox") {
-        res <- wilcox.test(group1[, feature], group2[, feature], paired = TRUE,
-                           conf.int = TRUE, ...)
+    tryCatch(
+      {
+        if (test == "t_test") {
+          res <- t.test(group1[, feature], group2[, feature], paired = TRUE, ...)
+        } else if (test == "Wilcox") {
+          res <- wilcox.test(group1[, feature], group2[, feature],
+            paired = TRUE,
+            conf.int = TRUE, ...
+          )
+        }
+
+        conf_level <- attr(res$conf.int, "conf.level") * 100
+
+        result_row <- data.frame(
+          Feature_ID = feature,
+          Statistic = res$statistic,
+          Estimate = res$estimate[1],
+          LCI = res$conf.int[1],
+          UCI = res$conf.int[2],
+          P = res$p.value,
+          stringsAsFactors = FALSE
+        )
+        ci_idx <- grepl("CI", colnames(result_row))
+        colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
+        colnames(result_row)[-1] <- paste0(
+          pair[1], "_vs_",
+          pair[2], "_",
+          test, "_",
+          colnames(result_row)[-1]
+        )
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
       }
-
-      conf_level <- attr(res$conf.int, "conf.level") * 100
-
-      result_row <- data.frame(Feature_ID = feature,
-                               Statistic = res$statistic,
-                               Estimate = res$estimate[1],
-                               LCI = res$conf.int[1],
-                               UCI = res$conf.int[2],
-                               P = res$p.value,
-                               stringsAsFactors = FALSE)
-      ci_idx <- grepl("CI", colnames(result_row))
-      colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
-      colnames(result_row)[-1] <- paste0(pair[1], "_vs_",
-                                         pair[2], "_",
-                                         test, "_",
-                                         colnames(result_row)[-1]
-      )
-    },
-    error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))}
     )
 
     result_row
@@ -1352,7 +1466,8 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
   # If the tests are run on parallel, the error messages from failing tests are not visible
   if (nrow(results_df) == 0) {
     stop("All the test failed, to see the individual error messages run the tests withot parallelization.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   rownames(results_df) <- results_df$Feature_ID
   # Rows full of NA for features where the test failed
@@ -1390,17 +1505,20 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
 #'
 #' @export
 perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
-  message(paste0("Remember that t.test returns difference between group means",
-                 " in different order than lm.\n",
-                 "This function mimics this behavior, so the effect size is",
-                 " mean of reference level minus mean of second level."))
+  message(paste0(
+    "Remember that t.test returns difference between group means",
+    " in different order than lm.\n",
+    "This function mimics this behavior, so the effect size is",
+    " mean of reference level minus mean of second level."
+  ))
 
-  perform_paired_test(object, group, id, test = "t_test",
-                      all_features = all_features, ...)
+  perform_paired_test(object, group, id,
+    test = "t_test",
+    all_features = all_features, ...
+  )
 }
 
 pairwise_fun <- function(object, fun, group_, ...) {
-
   df <- NULL
   groups <- levels(pData(object)[, group_])
   combinations <- combn(groups, 2)
@@ -1413,8 +1531,8 @@ pairwise_fun <- function(object, fun, group_, ...) {
 
     res <- fun(object_tmp, ...)
     ifelse(is.null(df),
-           df <- res,
-           df <- dplyr::left_join(df, res)
+      df <- res,
+      df <- dplyr::left_join(df, res)
     )
   }
   df
@@ -1448,8 +1566,8 @@ pairwise_fun <- function(object, fun, group_, ...) {
 #' \code{\link{t.test}}
 #'
 #' @export
-perform_pairwise_t_test <- function(object, group = group_col(object), is_paired = FALSE, id = NULL, all_features = FALSE, ...) {
-
+perform_pairwise_t_test <- function(object, group = group_col(object),
+                                    is_paired = FALSE, id = NULL, all_features = FALSE, ...) {
   results_df <- NULL
 
   if (!is.factor(pData(object)[, group])) {
@@ -1459,15 +1577,18 @@ perform_pairwise_t_test <- function(object, group = group_col(object), is_paired
   if (is_paired) {
     if (is.null(id)) stop("Subject ID column is missing, please provide it")
     log_text("Starting pairwise paired t-tests.")
-    results_df <- pairwise_fun(object, perform_paired_t_test, group_ = group,
-                               group = group, id = id,
-                               all_features = all_features, ...)
+    results_df <- pairwise_fun(object, perform_paired_t_test,
+      group_ = group,
+      group = group, id = id,
+      all_features = all_features, ...
+    )
     log_text("Pairwise paired t-tests performed.")
   } else {
     log_text("Starting pairwise t-tests.")
     results_df <- pairwise_fun(object, perform_t_test, group,
-                               formula_char = paste("Feature ~", group),
-                               all_features = all_features, ...)
+      formula_char = paste("Feature ~", group),
+      all_features = all_features, ...
+    )
     log_text("Pairwise t-tests performed.")
   }
   if (length(featureNames(object)) != nrow(results_df)) {
@@ -1504,33 +1625,40 @@ perform_pairwise_t_test <- function(object, group = group_col(object), is_paired
 #'
 #' @export
 perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...) {
-
   log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
   exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
   pair <- levels(pData(object)[, exp_var])
   prefix <- paste0(pair[1], "_vs_", pair[2], "_Mann_Whitney_")
   mw_fun <- function(feature, formula, data) {
     result_row <- NULL
-    tryCatch({
-      mw_res <- wilcox.test(formula = formula, data = data,
-                            conf.int = TRUE, ...)
+    tryCatch(
+      {
+        mw_res <- wilcox.test(
+          formula = formula, data = data,
+          conf.int = TRUE, ...
+        )
 
-      conf_level <- attr(mw_res$conf.int, "conf.level") * 100
+        conf_level <- attr(mw_res$conf.int, "conf.level") * 100
 
-      result_row <- data.frame(Feature_ID = feature,
-                               U = mw_res$statistic,
-                               Estimate = mw_res$estimate[1],
-                               LCI = mw_res$conf.int[1],
-                               UCI = mw_res$conf.int[2],
-                               P = mw_res$p.value,
-                               stringsAsFactors = FALSE)
-      ci_idx <- grepl("CI", colnames(result_row))
-      colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
-      colnames(result_row)[-1] <- paste0(prefix,  colnames(result_row)[-1])
-    }, error = function(e) {cat(paste0(feature, ": ", e$message, "\n"))})
+        result_row <- data.frame(
+          Feature_ID = feature,
+          U = mw_res$statistic,
+          Estimate = mw_res$estimate[1],
+          LCI = mw_res$conf.int[1],
+          UCI = mw_res$conf.int[2],
+          P = mw_res$p.value,
+          stringsAsFactors = FALSE
+        )
+        ci_idx <- grepl("CI", colnames(result_row))
+        colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
+        colnames(result_row)[-1] <- paste0(prefix, colnames(result_row)[-1])
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
 
     result_row
-
   }
 
   results_df <- perform_test(object, formula_char, mw_fun, all_features)
@@ -1566,8 +1694,10 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
 #'
 #' @export
 perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, ...) {
-  perform_paired_test(object, group, id, test = "Wilcox",
-                      all_features = all_features, ...)
+  perform_paired_test(object, group, id,
+    test = "Wilcox",
+    all_features = all_features, ...
+  )
 }
 
 #' Perform pairwise  non-parametric tests
@@ -1592,17 +1722,20 @@ perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE
 #' # Including QCs as a study group for example
 #' mann_whitney_results <- perform_pairwise_non_parametric(merged_sample, group = "Group")
 #' # Using paired mode (pairs with QC are skipped as there are no common IDs in 'example_set')
-#' wilcoxon_signed_results <- perform_pairwise_non_parametric(example_set, group = "Time", is_paired = TRUE, id = "Subject_ID")
+#' wilcoxon_signed_results <- perform_pairwise_non_parametric(example_set,
+#'   group = "Time",
+#'   is_paired = TRUE,
+#'   id = "Subject_ID"
+#' )
 #'
 #' @seealso \code{\link{perform_mann_whitney}},
 #' \code{\link{perform_wilcoxon_signed_rank}},
 #' \code{\link{wilcox.test}}
 #'
 #' @export
-perform_pairwise_non_parametric <- function(object, group = group_col(object),
+perform_pairwise_non_parametric <- function(object, group = group_col(object), # nolint: object_length_linter.
                                             is_paired = FALSE, id = NULL,
                                             all_features = FALSE, ...) {
-
   results_df <- NULL
 
   if (!is.factor(pData(object)[, group])) {
@@ -1612,14 +1745,17 @@ perform_pairwise_non_parametric <- function(object, group = group_col(object),
   if (is_paired) {
     if (is.null(id)) stop("Subject ID column is missing, please provide it")
     log_text("Starting pairwise Wilcoxon signed rank tests.")
-    results_df <- pairwise_fun(object, perform_wilcoxon_signed_rank, group_ = group,
-                               group = group, id = id, all_features = all_features, ...)
+    results_df <- pairwise_fun(object, perform_wilcoxon_signed_rank,
+      group_ = group,
+      group = group, id = id, all_features = all_features, ...
+    )
     log_text("Wilcoxon signed rank tests performed.")
   } else {
     log_text("Starting pairwise Mann-Whitney tests.")
     results_df <- pairwise_fun(object, perform_mann_whitney, group,
-                               formula_char = paste("Feature ~", group),
-                               all_features = all_features, ...)
+      formula_char = paste("Feature ~", group),
+      all_features = all_features, ...
+    )
     log_text("Mann-Whitney tests performed.")
   }
   if (length(featureNames(object)) != nrow(results_df)) {

@@ -19,7 +19,8 @@ pca_bhattacharyya_dist(
 
 \item{batch}{column name of pData givinh the batch labels}
 
-\item{all_features}{logical, should all features be used? If FALSE (the default), flagged features are removed before imputation.}
+\item{all_features}{logical, should all features be used? If FALSE (the default),
+flagged features are removed before imputation.}
 
 \item{center}{logical, should the data be centered prior to PCA? (usually yes)}
 
