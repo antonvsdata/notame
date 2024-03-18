@@ -19,6 +19,7 @@ save_group_boxplots(
   box_width = 0.8,
   line_width = 0.5,
   point_size = 3,
+  title_line_length = 40,
   theme = theme_bw(base_size = text_base_size),
   ...
 )
@@ -51,6 +52,8 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 \item{line_width}{numeric, width of the lines}
 
 \item{point_size}{numeric, size of the mean points}
+
+\item{title_line_length}{integer, maximum length of the title line in characters, passed to stringr::str_wrap}
 
 \item{theme}{a ggplot theme to be added to the plot}
 

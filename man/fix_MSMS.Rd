@@ -6,7 +6,7 @@
 \usage{
 fix_MSMS(
   object,
-  ms_ms_spectrum_col = "MS.MS.spectrum",
+  ms_ms_spectrum_col = "MS_MS_spectrum",
   peak_num = 10,
   min_abund = 5,
   deci_num = 3
@@ -41,7 +41,7 @@ m/z  (Abundance)
 }
 \examples{
 # Spectra before fixing
-fData(merged_sample)$MS.MS.spectrum[!is.na(fData(merged_sample)$MS.MS.spectrum)]
+fData(merged_sample)$MS_MS_spectrum[!is.na(fData(merged_sample)$MS_MS_spectrum)]
 # Fixing spectra with default settings
 fixed_MSMS_peaks <- fix_MSMS(merged_sample)
 # Spectra after fixing
