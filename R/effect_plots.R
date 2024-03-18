@@ -71,8 +71,7 @@ create_feature_plot_list <- function(object, plot_fun) {
       cat(paste0("Iteration ", i, "/", nrow(object), "\n"))
     }
     fname <- featureNames(object)[i]
-    p <- plot_fun(object, fname) +
-      theme(plot.title = ggtext::element_textbox_simple())
+    p <- plot_fun(object, fname)
     plot_list[[i]] <- p
   }
 
@@ -101,6 +100,7 @@ create_feature_plot_list <- function(object, plot_fun) {
 #' @param text_base_size integer, base size for text in figures
 #' @param line_width numeric, width of the lines
 #' @param mean_line_width numeric, width of the mean line
+#' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
@@ -132,6 +132,7 @@ save_subject_line_plots <- function(object,
                                     text_base_size = 14,
                                     line_width = 0.3,
                                     mean_line_width = 1.2,
+                                    title_line_length = 40,
                                     theme = theme_bw(base_size = text_base_size),
                                     ...) {
   if (is.na(x)) {
@@ -151,12 +152,12 @@ save_subject_line_plots <- function(object,
         geom_line(aes(group = .data[[id]]),
           color = "grey20",
           alpha = 0.35,
-          linewidth = line_width
+          size = line_width
         ) +
         stat_summary(aes(group = 1),
           fun.data = "mean_se",
           geom = "line",
-          linewidth = mean_line_width,
+          size = mean_line_width,
           color = color_scale$palette(1)[1]
         )
     } else {
@@ -183,12 +184,10 @@ save_subject_line_plots <- function(object,
       p <- p +
       theme +
       labs(
-        title = fData(object)[fname, title],
+        title = stringr::str_wrap(fData(object)[fname, title], title_line_length),
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
-    # Split long titles to multiple rows
-    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
@@ -225,6 +224,7 @@ save_subject_line_plots <- function(object,
 #' @param box_width numeric, width of the boxes
 #' @param line_width numeric, width of the lines
 #' @param point_size numeric, size of the mean points
+#' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
@@ -263,6 +263,7 @@ save_group_boxplots <- function(object,
                                 box_width = 0.8,
                                 line_width = 0.5,
                                 point_size = 3,
+                                title_line_length = 40,
                                 theme = theme_bw(base_size = text_base_size),
                                 ...) {
   boxplot_fun <- function(object, fname) {
@@ -280,15 +281,13 @@ save_group_boxplots <- function(object,
       color_scale +
       theme +
       labs(
-        title = fData(object)[fname, title],
+        title = stringr::str_wrap(fData(object)[fname, title], title_line_length),
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
     if (x == color) {
       p <- p + guides(color = "none")
     }
-    # Split long titles to multiple rows
-    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
@@ -326,6 +325,7 @@ save_group_boxplots <- function(object,
 #' @param text_base_size integer, base size for text in figures
 #' @param cex numeric, scaling for adjusting point spacing
 #' @param size numeric, size of points
+#' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
@@ -364,6 +364,7 @@ save_beeswarm_plots <- function(object,
                                 text_base_size = 14,
                                 cex = 2,
                                 size = 2,
+                                title_line_length = 40,
                                 theme = theme_bw(base_size = text_base_size),
                                 ...) {
   beeswarm_fun <- function(object, fname) {
@@ -380,15 +381,13 @@ save_beeswarm_plots <- function(object,
       color_scale +
       theme +
       labs(
-        title = fData(object)[fname, title],
+        title = stringr::str_wrap(fData(object)[fname, title], title_line_length),
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
     if (x == color) {
       p <- p + guides(color = "none")
     }
-    # Split long titles to multiple rows
-    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
@@ -426,6 +425,7 @@ save_beeswarm_plots <- function(object,
 #' @param shape_scale the shape scale as returned by a ggplot function
 #' @param text_base_size integer, base size for text in figures
 #' @param point_size numeric, size of the points
+#' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
@@ -460,6 +460,7 @@ save_scatter_plots <- function(object,
                                shape_scale = getOption("notame.shape_scale"),
                                text_base_size = 14,
                                point_size = 2,
+                               title_line_length = 40,
                                theme = theme_bw(base_size = text_base_size),
                                ...) {
   scatter_fun <- function(object, fname) {
@@ -478,12 +479,10 @@ save_scatter_plots <- function(object,
     ) +
       theme +
       labs(
-        title = fData(object)[fname, title],
+        title = stringr::str_wrap(fData(object)[fname, title], title_line_length),
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
-    # Split long titles to multiple rows
-    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
   object <- drop_flagged(object, all_features)
@@ -524,6 +523,7 @@ save_scatter_plots <- function(object,
 #' @param text_base_size integer, base size for text in figures
 #' @param line_width numeric, width of the lines
 #' @param point_size numeric, size of the points
+#' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
 #' @param ... other arguments to graphic device functions, like width and height
 #'
@@ -563,6 +563,7 @@ save_group_lineplots <- function(object,
                                  text_base_size = 14,
                                  line_width = 0.5,
                                  point_size = 4,
+                                 title_line_length = 40,
                                  theme = theme_bw(base_size = text_base_size),
                                  ...) {
   if (is.na(group)) {
@@ -609,15 +610,13 @@ save_group_lineplots <- function(object,
       color_scale +
       theme +
       labs(
-        title = fData(object)[fname, title],
+        title = stringr::str_wrap(fData(object)[fname, title], title_line_length),
         subtitle = fData(object)[fname, subtitle],
         y = "Abundance"
       )
     if (x == group) {
       p <- p + guides(color = "none")
     }
-    # Split long titles to multiple rows
-    p <- p + theme(plot.title = ggtext::element_textbox_simple())
     p
   }
 
