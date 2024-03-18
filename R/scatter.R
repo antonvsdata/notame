@@ -186,13 +186,10 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       }
     }
   }
-  #
-  if (!is.null(color)) {
-    color <- data[[color]]
-  }
+
   p <- ggplot(data, aes(
     x = .data[[x]], y = .data[[y]],
-    color = color
+    color = if (!is.null(color)) .data[[color]]
   )) +
     color_scale +
     labs(
@@ -240,7 +237,13 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       )
     }
     p <- p +
-      ggrepel::geom_text_repel(aes(label = .data[[label]]), size = label_text_size)
+      ggrepel::geom_text_repel(
+        mapping = aes(
+          label = .data[[label]]
+        ),
+        size = label_text_size
+      ) +
+      guides(color = guide_legend(override.aes = aes(label = ""))) # Removes "a" from the legend (ggrepel adds it by default)
   }
 
   # Add density plots to top and right
@@ -720,11 +723,14 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
   }
 
-  pl <- ggplot(data, aes(x = .data[[x]], y = .data[[p]], color = .data[[color]])) +
+  pl <- ggplot(data, aes(
+    x = .data[[x]], y = .data[[p]],
+    color = if (!is.null(color)) .data[[color]]
+  )) +
     geom_point(...) +
     color_scale +
     theme_bw(base_size = text_base_size) +
-    labs(title = title, subtitle = subtitle) +
+    labs(title = title, subtitle = subtitle, color = color) +
     theme(
       panel.grid.minor.y = element_blank(), # only show the specified p-values, which might be unevenly spaced
       axis.ticks.y = element_blank()
@@ -830,14 +836,14 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
 #' lm_data <- dplyr::left_join(fData(merged_sample), lm_results)
 #' # Traditional Manhattan plot from data frame
 #' manhattan_plot(lm_data,
-#'   x = "Average.Mz",
+#'   x = "Average_Mz",
 #'   p = "GroupB_P", p_fdr = "GroupB_P_FDR",
 #'   fdr_limit = 0.1
 #' )
 #' # Directed Manhattan plot from MetaboSet
 #' with_results <- join_fData(merged_sample, lm_results)
 #' manhattan_plot(with_results,
-#'   x = "Average.Mz", effect = "GroupB_Estimate",
+#'   x = "Average_Mz", effect = "GroupB_Estimate",
 #'   p = "GroupB_P", p_fdr = "GroupB_P_FDR",
 #'   fdr_limit = 0.1
 #' )
@@ -918,7 +924,10 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
     p_breaks <- sort(p_breaks)
   }
 
-  pl <- ggplot(data, aes(x = .data[[x]], y = .data[["y"]], color = .data[[color]])) +
+  pl <- ggplot(data, aes(
+    x = .data[[x]], y = .data[["y"]],
+    color = if (!is.null(color)) .data[[color]]
+  )) +
     geom_point(...) +
     color_scale +
     theme_bw() +
@@ -927,7 +936,7 @@ manhattan_plotter <- function(data, x, p, effect, p_fdr, color,
       axis.ticks.y = element_blank()
     ) +
     geom_hline(yintercept = 0, color = "grey") +
-    labs(title = title, subtitle = subtitle, y = "p-value")
+    labs(title = title, subtitle = subtitle, y = "p-value", color = color)
 
 
   if (!is.null(p_fdr)) {
@@ -1058,7 +1067,7 @@ mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subti
 
   p <- ggplot(x, aes(
     x = .data[[rt_col]], y = .data[[mz_col]], size = .data[[p_col]],
-    color = .data[[color]]
+    color = if (!is.null(color)) .data[[color]]
   )) +
     geom_point(alpha = 0.6) +
     scale_size_continuous(
@@ -1068,7 +1077,7 @@ mz_rt_plotter <- function(x, p_col, p_limit, mz_col, rt_col, color, title, subti
     theme_bw() +
     color_scale +
     labs(
-      title = title, subtitle = subtitle,
+      title = title, subtitle = subtitle, color = color,
       x = "Retention time", y = "Mass-to-charge ratio", size = "p-value"
     ) +
     # Scales for m/z and rt
