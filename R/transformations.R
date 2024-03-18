@@ -44,14 +44,14 @@ mark_nas <- function(object, value) {
 #'
 #' @examples
 #' # Spectra before fixing
-#' fData(merged_sample)$MS.MS.spectrum[!is.na(fData(merged_sample)$MS.MS.spectrum)]
+#' fData(merged_sample)$MS_MS_spectrum[!is.na(fData(merged_sample)$MS_MS_spectrum)]
 #' # Fixing spectra with default settings
 #' fixed_MSMS_peaks <- fix_MSMS(merged_sample)
 #' # Spectra after fixing
 #' fData(fixed_MSMS_peaks)$MS_MS_Spectrum_clean[!is.na(fData(fixed_MSMS_peaks)$MS_MS_Spectrum_clean)]
 #'
 #' @export
-fix_MSMS <- function(object, ms_ms_spectrum_col = "MS.MS.spectrum", # nolint: object_name_linter.
+fix_MSMS <- function(object, ms_ms_spectrum_col = "MS_MS_spectrum", # nolint: object_name_linter.
                      peak_num = 10,
                      min_abund = 5,
                      deci_num = 3) {
