@@ -240,8 +240,7 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       ggrepel::geom_text_repel(
         mapping = aes(
           label = .data[[label]]
-        ),
-        size = label_text_size
+        )
       ) +
       guides(color = guide_legend(override.aes = aes(label = ""))) # Removes "a" from the legend (ggrepel adds it by default)
   }
