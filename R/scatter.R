@@ -72,6 +72,7 @@ t_sne_helper <- function(object, center, scale, perplexity, pca_method, ...) {
 #' If a continuous variable is used as color, density curve will be colorless.
 #' @param text_base_size numeric, base size for text
 #' @param point_size numeric, size of the points
+#' @param label_text_size numeric, size of the labels
 #' @param ... additional arguments passed to pcaMethods::pca
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -87,7 +88,7 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
                      color = group_col(object), shape = color, label = NULL, density = FALSE, title = "PCA",
                      subtitle = NULL, color_scale = NA,
                      shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"),
-                     text_base_size = 14, point_size = 2, ...) {
+                     text_base_size = 14, point_size = 2, label_text_size = 4, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
 
@@ -102,7 +103,7 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
     x = pc_names[1], y = pc_names[2], xlab = pca_results$labels[1], ylab = pca_results$labels[2],
     color = color, shape = shape, label = label, density = density, title = title,
     subtitle = subtitle, color_scale = color_scale, shape_scale = shape_scale,
-    fill_scale = fill_scale, text_base_size = text_base_size, point_size = point_size
+    fill_scale = fill_scale, text_base_size = text_base_size, point_size = point_size, label_text_size = label_text_size
   )
 }
 
@@ -134,6 +135,7 @@ plot_pca <- function(object, pcs = c(1, 2), all_features = FALSE, center = TRUE,
 #' If a continuous variable is used as color, density curve will be colorless.
 #' @param text_base_size numeric, base size for text
 #' @param point_size numeric, size of the points
+#' @param label_text_size numeric, size of the labels
 #' @param ... additional arguments passed to \code{Rtsne::Rtsne}
 #'
 #' @return a ggplot object. If \code{density} is \code{TRUE}, the plot will consist of multiple
@@ -150,7 +152,7 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
                       color = group_col(object), shape = color, label = NULL, density = FALSE, title = "t-SNE",
                       subtitle = paste("Perplexity:", perplexity), color_scale = NA,
                       shape_scale = getOption("notame.shape_scale"), fill_scale = getOption("notame.fill_scale_dis"),
-                      text_base_size = 14, point_size = 2, ...) {
+                      text_base_size = 14, point_size = 2, label_text_size = 4, ...) {
   # Drop flagged compounds if not told otherwise
   object <- drop_flagged(object, all_features)
   # t-SNE
@@ -164,14 +166,14 @@ plot_tsne <- function(object, all_features = FALSE, center = TRUE, scale = "uv",
     x = "X1", y = "X2", color = color, shape = shape, label = label,
     density = density, title = title, subtitle = subtitle,
     color_scale = color_scale, shape_scale = shape_scale, fill_scale = fill_scale,
-    text_base_size = text_base_size, point_size = point_size
+    text_base_size = text_base_size, point_size = point_size, label_text_size = label_text_size
   )
 }
 
 scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE, fixed = TRUE, color_scale = NA,
                          shape_scale = NULL, fill_scale = NA, title = NULL, subtitle = NULL, xlab = x, ylab = y,
                          color_lab = color, shape_lab = shape, apply_theme_bw = TRUE,
-                         text_base_size = text_base_size, point_size = point_size, label_text_size = label_text_size) {
+                         text_base_size = 12, point_size = 2, label_text_size = 4) {
   # Set right color scale
   if (!is.null(color_scale)) {
     if (!is.ggproto(color_scale)) {
@@ -240,7 +242,8 @@ scatter_plot <- function(data, x, y, color, shape, label = NULL, density = FALSE
       ggrepel::geom_text_repel(
         mapping = aes(
           label = .data[[label]]
-        )
+        ),
+        size = label_text_size
       ) +
       guides(color = guide_legend(override.aes = aes(label = ""))) # Removes "a" from the legend (ggrepel adds it by default)
   }
