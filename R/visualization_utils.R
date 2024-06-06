@@ -1,62 +1,10 @@
 #' Save plot to chosen format
 #'
-#' Saves the given plot to a file. Supports pdf, svg, emf, png and tiff formats.
-#' If an error occurs with the plot, an empty file is created.
-#'
-#' @param p a ggplot object
-#' @param file the file path
-#' @param ... other arguments to plot function, like width and height
-#'
-#' @seealso \code{\link[grDevices]{pdf}},
-#' \code{\link[devEMF]{emf}},
-#' \code{\link[grDevices]{svg}},
-#' \code{\link[grDevices]{png}},
-#' \code{\link[grDevices]{tiff}}
+#' DEPRECATED: Please use \code{\link[ggsave]{ggsave}} instead.
 #'
 #' @export
 save_plot <- function(p, file, ...) {
-  # Create folder automatically
-  folder <- dirname(file)
-  if (!file.exists(folder)) {
-    dir.create(folder, recursive = TRUE)
-  }
-
-  format <- tail(unlist(strsplit(basename(file), split = "\\.")), 1)
-  switch(format,
-    "emf" = {
-      if (!requireNamespace("devEMF", quietly = TRUE)) {
-        stop("Package devEMF needed for this function to work.
-                   Please install it.",
-          call. = FALSE
-        )
-      }
-      devEMF::emf(file, ...)
-    },
-    "pdf" = {
-      pdf(file, ...)
-    },
-    "svg" = {
-      svg(file, ...)
-    },
-    "png" = {
-      png(file, ...)
-    },
-    "tiff" = {
-      tiff(file, ...)
-    },
-    stop(paste0("File format '", format, "' is not valid, saving failed"))
-  )
-  tryCatch(
-    {
-      plot(p)
-      dev.off()
-      log_text(paste("Saved to:", file))
-    },
-    error = function(e) {
-      dev.off()
-      stop(e$message, call. = FALSE)
-    }
-  )
+  stop("This function is deprecated, please use ggsave instead.")
 }
 
 #' Write all relevant visualizations to pdf
@@ -116,8 +64,6 @@ save_plot <- function(p, file, ...) {
 #' }
 #' }
 #'
-#' @seealso \code{\link[notame]{save_plot}}
-#'
 #' @export
 visualizations <- function(object,
                            prefix,
@@ -141,7 +87,7 @@ visualizations <- function(object,
 
     if (!is.null(p)) {
       file_name <- paste0(prefix, "_", name, ".", format)
-      save_plot(p, file = file_name, width = width, height = height)
+      ggsave(file = file_name, plot = p, width = width, height = height)
       file_names <<- paste(file_names, file_name)
     }
   }

@@ -58,7 +58,7 @@ Visualizations for results of statistical tests or correlations:
 - ```plot_effect_heatmap```: customizable heatmap of e.g. correlation coefficients and p-values
 - ```manhattan_plot```: Manhattan plot, usually with retention time or m/z as the x-axis
 
-To save these functions to a PDF file, use ```save_plot```
+To save these functions to a PDF file, use ```ggplot2::ggsave()```
 
 The following visualizations are applied to each feature and directly saved to a PDF file, one page per feature.
 
