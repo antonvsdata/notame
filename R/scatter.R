@@ -721,7 +721,7 @@ volcano_plotter <- function(data, x, p, p_fdr, color, p_breaks, fdr_limit,
     warning("Manually setting x-axis limits overrides x-axis centering")
     center_x_axis <- FALSE
   }
-  if (min(data[, p]) > max(p_breaks)) {
+  if (finite_min(data[, p]) > max(p_breaks)) {
     warning("All the p-values are larger than the p-value breaks supplied. Consider using larger p_breaks for plotting")
   }
 
