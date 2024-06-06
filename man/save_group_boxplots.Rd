@@ -57,7 +57,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{theme}{a ggplot theme to be added to the plot}
 
-\item{...}{other arguments to graphic device functions, like width and height}
+\item{...}{arguments to code{\link[ggplot2]{ggsave}}}
 }
 \description{
 Draws a boxplot of feature abundances in each group.
@@ -80,7 +80,4 @@ save_group_boxplots(drop_qcs(merged_sample)[1:10],
 }
 # Plot one feature
 save_group_boxplots(drop_qcs(merged_sample)[5, ], save = FALSE)
-}
-\seealso{
-\code{\link[notame]{save_plot}}
 }
