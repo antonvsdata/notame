@@ -71,33 +71,34 @@ visualizations <- function(object,
                            perplexity = 30,
                            merge = FALSE,
                            remove_singles = FALSE) {
-  # Record file names for merging
-  file_names <- ""
+  # Keep all plots in a list
+  plots <- list()
   # Helper function for handling errors and keeping track of file names
-  save_name <- function(fun, name, width = 7, height = 7, ...) {
+  save_name <- function(fun, name, ...) {
     p <- NULL
     tryCatch(
       {
         p <- fun(object, ...)
       },
       error = function(e) {
-        cat(paste0("Error with plot named ", name, ":\n", e$message, "\n"))
+        futile.logger::flog.warn(
+          paste0(
+            "Error on plot ", name, ": ", geterrmessage()
+          ),
+          name = "notame"
+        )
       }
     )
 
     if (!is.null(p)) {
-      file_name <- paste0(prefix, "_", name, ".", format)
-      ggsave(file = file_name, plot = p, width = width, height = height)
-      file_names <<- paste(file_names, file_name)
+      plots[[name]] <<- p
     }
   }
 
   if (sum(object$QC == "QC")) {
     save_name(
       fun = plot_dist_density,
-      name = "density_plot",
-      width = 8,
-      height = 6
+      name = "density_plot"
     )
     save_name(plot_injection_lm, "lm_p_histograms")
   }
@@ -106,7 +107,7 @@ visualizations <- function(object,
 
   # Plots with injection order
   save_name(plot_sample_boxplots, "boxplots_injection",
-    order_by = "Injection_order", fill_by = "QC", width = 15
+    order_by = "Injection_order", fill_by = "QC"
   )
   set.seed(38)
   save_name(plot_pca, "PCA_injection", color = "Injection_order")
@@ -116,8 +117,8 @@ visualizations <- function(object,
     color = "Injection_order"
   )
   # Clustering
-  save_name(plot_dendrogram, "dendrogram", width = 15)
-  save_name(plot_sample_heatmap, "heatmap_samples", width = 15, height = 16)
+  save_name(plot_dendrogram, "dendrogram")
+  save_name(plot_sample_heatmap, "heatmap_samples")
 
   # For large sets, plot hexbin plots
   if (ncol(object) > 60) {
@@ -147,13 +148,12 @@ visualizations <- function(object,
       perplexity = perplexity
     )
     save_name(plot_dendrogram, "dendrogram_time",
-      color = time_col(object),
-      width = 15
+      color = time_col(object)
     )
   }
   # Time point OR group
   if (!is.na(group_col(object)) || !is.na(time_col(object))) {
-    save_name(plot_sample_boxplots, "boxplots_group", width = 15)
+    save_name(plot_sample_boxplots, "boxplots_group")
   }
   # Time point AND group
   if (!is.na(group_col(object)) && !is.na(time_col(object))) {
@@ -181,53 +181,31 @@ visualizations <- function(object,
     save_name(plot_tsne_arrows, "tSNE_arrows", perplexity = perplexity)
   }
 
-  if (merge && format == "pdf") {
-    prefix <- gsub("_$", "", prefix)
-    merged_file <- paste0(prefix, ".pdf")
-    os <- Sys.info()[["sysname"]]
-    output <- NULL
-    if (os == "Windows") {
-      # Merge files
-      output <- shell(paste("pdftk", file_names, "cat output", merged_file),
-        intern = TRUE
-      )
-    } else if (os == "Linux") {
-      output <- system(paste("pdfunite", file_names, merged_file),
-        intern = TRUE
-      )
-    } else if (os == "Darwin") {
-      output <- system(
-        paste(
-          '"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o',
-          merged_file, file_names
-        ),
-        intern = TRUE
-      )
-    } else {
-      log_text("Unfortunately your operating system is not yet supported by the merging")
-      return()
+  # Save plots
+  if (merge) {
+    if (!requireNamespace("gridExtra", quietly = TRUE)) {
+      stop("gridExtra is required for merging plots.")
     }
-    if (length(output) && output != "0") {
-      log_text(paste(
-        "Merging plots resulted in the following message:",
-        paste0(output, collapse = " ")
-      ))
-    } else {
-      log_text(paste("Attempted merging plots to", merged_file))
-      if (remove_singles) {
-        log_text("Removing single plot files")
-        if (os == "Windows") {
-          output2 <- shell(paste("del", file_names), intern = TRUE)
-        } else {
-          output2 <- system(paste("rm", file_names), intern = TRUE)
-        }
-        if (length(output2) && output2 != "0") {
-          log_text(paste(
-            "Removing single plot files resulted in the following message:",
-            paste0(output2, collapse = " ")
-          ))
-        }
+    log_text("Merging plots to a single PDF file")
+    ggsave(paste0(prefix, ".pdf"),
+      plot = gridExtra::marrangeGrob(grobs = plots, nrow = 1, ncol = 1, top = NULL),
+      width = 12, height = 12
+    )
+  }
+  if (!remove_singles) {
+    log_text("Saving plots to separate files")
+    for (name in names(plots)) {
+      width <- 7
+      height <- 7
+      if (name %in% c("boxplots_injection", "dendrogram", "heatmap_samples", "boxplots_group", "dendrogram_time")) {
+        width <- 15
       }
+      if (name == "density_plot") height <- 6
+      if (name == "heatmap_samples") height <- 16
+      ggsave(paste0(prefix, "_", name, ".", format),
+        plot = plots[[name]],
+        width = width, height = height
+      )
     }
   }
 }
