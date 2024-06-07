@@ -3,7 +3,7 @@ Type: Package
 Title: Workflow for non-targeted LC-MS metabolic profiling
 Version: 0.3.1
 Authors@R: c(
-    person("Atte", "Lihtamo", email = "atte.lihtamo@afekta.com" role = c("aut", "cre")))
+    person("Atte", "Lihtamo", email = "atte.lihtamo@afekta.com", role = c("aut", "cre")))
     person("Anton", "Klåvus", email = "anton.klavus@iki.fi", role = "aut"),
     person("Jussi", "Paananen", role = "aut"),
     person("Oskari", "Timonen", role = "aut"),
