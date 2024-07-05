@@ -104,37 +104,36 @@ summary_statistics <- function(object, grouping_cols = NA) {
 
 #' Statistics cleaning
 #'
-#' Uses regexp to remove unnecessary columns from statistics results data frame.
-#' Can also rename columns effectively.
+#' Uses regular expression to remove unnecessary columns from statistics results data frame.
+#' Calculates how many significant p-values are below a certain limit and which is the lowest p-value
+#' and reports the columns. Defaults to use FDR fixed p-values in the summary. Plots histograms of p-values.
 #'
 #' @param df data frame, statistics results
 #' @param remove list, should contain strings that are matching to unwanted columns
-#' @param rename named list, names should contain matches that are replaced with values
+#' @param rename Deprecated
 #' @param summary logical, should summary columns be added
+#' @param plots logical, should histograms of p-values be plotted
 #' @param p_limit numeric, limit for p-values to be counted
 #' @param fdr logical, should summary be done with fdr-fixed values
 #'
 #' @examples
 #' # Simple manipulation to linear model results
-#' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
-#' lm_results <- clean_stats_results(lm_results,
-#'   rename = c("GroupB" = "GroupB_vs_A", "Time2" = "Time2_vs_1")
-#' )
+#' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group * Time")
+#' lm_results <- clean_stats_results(lm_results)
 #'
 #' @export
 clean_stats_results <- function(
     df,
-    remove = c("Intercept", "CI95", "Std_error", "t_value", "z_value", "R2"),
+    remove = c("Intercept", "CI", "Std_error", "t_value", "z_value", "R2"),
     rename = NULL,
     summary = TRUE,
+    plots = TRUE,
     p_limit = 0.05,
     fdr = TRUE) {
-  df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df))]
   if (!is.null(rename)) {
-    for (name in names(rename)) {
-      colnames(df) <- gsub(name, rename[name], colnames(df))
-    }
+    warning("Argument 'rename' is deprecated and will be removed in the future.")
   }
+  df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df), ignore.case = TRUE)]
   if (summary) {
     ifelse(fdr,
       p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))],
@@ -147,9 +146,19 @@ clean_stats_results <- function(
       finite_min(x)
     })
     df$Column <- apply(df[, p_cols], 1, function(x) {
-      m <- finite_min(x)
-      p_cols[which(x == m)]
+      significant <- x < p_limit
+      # Order significant by p-value, smallest first
+      if (sum(significant) > 0) {
+        significant <- significant[order(x)]
+        paste(names(significant[significant == TRUE]), collapse = ", ")
+      } else {
+        NA
+      }
     })
+  }
+
+  if (plots) {
+    sapply(plot_p_histogram(df[, p_cols], combine = FALSE), plot)
   }
 
   df
