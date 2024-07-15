@@ -148,7 +148,7 @@ clean_stats_results <- function(
     df$Column <- apply(df[, p_cols], 1, function(x) {
       significant <- x < p_limit
       # Order significant by p-value, smallest first
-      if (sum(significant) > 0) {
+      if (sum(significant, na.rm = TRUE) > 0) {
         significant <- significant[order(x)]
         paste(names(significant[significant == TRUE]), collapse = ", ")
       } else {
@@ -164,74 +164,25 @@ clean_stats_results <- function(
   df
 }
 
-cohens_d_fun <- function(object, group, id, time) {
-  data <- combined_data(object)
-  features <- Biobase::featureNames(object)
-  group_levels <- levels(data[, group])
-  time_levels <- NULL
-
-  if (is.null(time)) {
-    group1 <- data[which(data[, group] == group_levels[1]), ]
-    group2 <- data[which(data[, group] == group_levels[2]), ]
-    log_text(paste(
-      "Starting to compute Cohen's D between groups",
-      paste(rev(group_levels), collapse = " & ")
-    ))
-  } else {
-    time_levels <- levels(data[, time])
-    # Split to time points
-    time1 <- data[which(data[, time] == time_levels[1]), ]
-    time2 <- data[which(data[, time] == time_levels[2]), ]
-    common_ids <- intersect(time1[, id], time2[, id])
-    rownames(time1) <- time1[, id]
-    rownames(time2) <- time2[, id]
-    time1 <- time1[common_ids, ]
-    time2 <- time2[common_ids, ]
-    if (!identical(time1[, group], time2[, group])) {
-      stop("Groups of subjects do not match between time points",
-        call. = FALSE
-      )
-    }
-    # Change between time points
-    new_data <- time2[, features] - time1[, features]
-    # Split to groups
-    group1 <- new_data[which(time1[, group] == levels(time1[, group])[1]), ]
-    group2 <- new_data[which(time1[, group] == levels(time1[, group])[2]), ]
-
-    log_text(paste(
-      "Starting to compute Cohen's D between groups",
-      paste(rev(group_levels), collapse = " & "),
-      "from time change",
-      paste(rev(time_levels), collapse = " - ")
-    ))
+# Performs function separately for each level of a factor
+#
+# Helper function to perform a function separately for each level of a factor. Used when study contains multiple sample
+# types which should be processed separately.
+perform_separately <- function(object, separate_by, func) {
+  # Ensure that separate is a factor
+  if (!is.factor(pData(object)[, separate_by])) {
+    stop(paste0("Column ", separate_by, " should be a factor!"))
   }
-  ds <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
-    feature <- features[i]
-    f1 <- group1[, feature]
-    f2 <- group2[, feature]
-    d <- data.frame(
-      Feature_ID = feature,
-      Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
-        sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-      stringsAsFactors = FALSE
-    )
+  all_results <- data.frame(Feature_ID = featureNames(object))
+  for (lvl in levels(pData(object)[, separate_by])) {
+    temp <- object[, pData(object)[, separate_by] == lvl]
+    res <- func(temp)
+    colnames(res)[-1] <- paste0(separate_by, lvl, "_", colnames(res)[-1])
+    all_results <- dplyr::left_join(all_results, res, by = "Feature_ID")
   }
-
-  rownames(ds) <- ds$Feature_ID
-
-  if (is.null(time_levels)) {
-    colnames(ds)[2] <- paste0(group_levels[2], "_vs_", group_levels[1], "_Cohen_d")
-  } else {
-    colnames(ds)[2] <- paste0(
-      group_levels[2], "_vs_", group_levels[1],
-      "_", time_levels[2], "_minus_", time_levels[1],
-      "_Cohen_d"
-    )
-  }
-
-  log_text("Cohen's D computed.")
-  ds
+  all_results
 }
+
 
 
 #' Cohen's D
@@ -244,20 +195,25 @@ cohens_d_fun <- function(object, group, id, time) {
 #' @param id character, name of the subject ID column
 #' @param group character, name of the group column
 #' @param time character, name of the time column
-#'
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @return data frame with Cohen's d for each feature
 #'
 #' @examples
-#' d_results <- cohens_d(drop_qcs(example_set))
+#' # Between groups
+#' d_results <- cohens_d(drop_qcs(example_set), group = "Group")
+#' # Between time points in each group (simulates situation where Group would contain different sample types)
+#' d_results <- cohens_d(drop_qcs(example_set), group = "Time", separate_by = "Group")
+#' # Paired samples, between groups
 #' d_results_time <- cohens_d(drop_qcs(example_set),
+#'   group = "Group",
 #'   time = "Time", id = "Subject_ID"
 #' )
 #'
 #' @export
 cohens_d <- function(object, group = group_col(object),
-                     id = NULL, time = NULL) {
-  res <- NULL
-  # Check that both group and time are factors and have at least two levels
+                     id = NULL, time = NULL, separate_by = NULL) {
+  # Checks
   for (column in c(group, time)) {
     if (is.null(column)) {
       next
@@ -269,88 +225,171 @@ cohens_d <- function(object, group = group_col(object),
       stop(paste("Column", column, "should have at least two levels!"))
     }
   }
-  group_combos <- combn(levels(pData(object)[, group]), 2)
-
-  count_obs_geq_than <- function(x, n) {
-    sum(x >= n)
+  if (!is.null(time) && is.null(id)) {
+    stop("Please specify id column.", call. = FALSE)
   }
 
-  if (is.null(time)) {
-    for (i in seq_len(ncol(group_combos))) {
-      object_split <- object[, which(
-        pData(object)[, group] %in% c(group_combos[1, i], group_combos[2, i])
-      )]
-      pData(object_split) <- droplevels(pData(object_split))
+  # Function to calculate Cohen's D
+  test_fun <- function(object, group, id, time) {
+    data <- combined_data(object)
+    features <- Biobase::featureNames(object)
+    group_levels <- levels(data[, group])
+    time_levels <- NULL
 
-      if (is.null(res)) {
-        res <- cohens_d_fun(object_split, group, id, time)
-      } else {
-        res <- dplyr::full_join(res,
-          cohens_d_fun(object_split, group, id, time),
-          by = "Feature_ID"
+    if (is.null(time)) {
+      group1 <- data[which(data[, group] == group_levels[1]), ]
+      group2 <- data[which(data[, group] == group_levels[2]), ]
+      log_text(paste(
+        "Starting to compute Cohen's D between groups",
+        paste(rev(group_levels), collapse = " & ")
+      ))
+    } else {
+      time_levels <- levels(data[, time])
+      # Split to time points
+      time1 <- data[which(data[, time] == time_levels[1]), ]
+      time2 <- data[which(data[, time] == time_levels[2]), ]
+      common_ids <- intersect(time1[, id], time2[, id])
+      rownames(time1) <- time1[, id]
+      rownames(time2) <- time2[, id]
+      time1 <- time1[common_ids, ]
+      time2 <- time2[common_ids, ]
+      if (!identical(time1[, group], time2[, group])) {
+        stop(
+          "Groups of subjects do not match between time points",
+          call. = FALSE
         )
       }
+      # Change between time points
+      new_data <- time2[, features] - time1[, features]
+      # Split to groups
+      group1 <- new_data[which(time1[, group] == levels(time1[, group])[1]), ]
+      group2 <- new_data[which(time1[, group] == levels(time1[, group])[2]), ]
+
+      log_text(paste(
+        "Starting to compute Cohen's D between groups",
+        paste(rev(group_levels), collapse = " & "),
+        "from time change",
+        paste(rev(time_levels), collapse = " - ")
+      ))
     }
-  } else {
-    if (is.null(id)) {
-      stop("Please specify id column.", call. = FALSE)
+
+    ds <- foreach::foreach(i = seq_along(features), .combine = rbind) %dopar% {
+      feature <- features[i]
+      f1 <- group1[, feature]
+      f2 <- group2[, feature]
+      d <- data.frame(
+        Feature_ID = feature,
+        Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
+          sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
+        stringsAsFactors = FALSE
+      )
     }
-    time_combos <- combn(levels(pData(object)[, time]), 2)
-    for (i in seq_len(ncol(group_combos))) {
-      for (j in seq_len(ncol(time_combos))) {
+
+    rownames(ds) <- ds$Feature_ID
+
+    if (is.null(time_levels)) {
+      colnames(ds)[2] <- paste0(group_levels[2], "vs", group_levels[1], "_Cohen_d")
+    } else {
+      colnames(ds)[2] <- paste0(
+        group_levels[2], "vs", group_levels[1],
+        "_", time_levels[2], "minus", time_levels[1],
+        "_Cohen_d"
+      )
+    }
+
+    ds
+  }
+
+  # Function to call, selects paired/unpaired version
+  run_tests <- function(object, group, time, id) {
+    res <- NULL
+    group_combos <- combn(levels(pData(object)[, group]), 2)
+
+    if (is.null(time)) {
+      for (i in seq_len(ncol(group_combos))) {
         object_split <- object[, which(
-          pData(object)[, group] %in% group_combos[, i] &
-            pData(object)[, time] %in% time_combos[, j]
+          pData(object)[, group] %in% c(group_combos[1, i], group_combos[2, i])
         )]
         pData(object_split) <- droplevels(pData(object_split))
-        # Check data is valid for Cohen's D
-        group_table <- table(pData(object_split)[, c(id, group)])
-        time_table <- table(pData(object_split)[, c(id, time)])
-        column <- paste0(
-          "Cohen_d_", group_combos[1, i], "_", group_combos[2, i],
-          "_", time_combos[2, j], "_minus_", time_combos[1, j]
-        )
-        if (any(apply(group_table, 2, count_obs_geq_than, 2) < 2)) {
-          warning(paste0(
-            "In ", column,
-            ": Groups don't have two observations of at least two subjects, skipping!"
-          ))
-          next
-        }
-        if (any(apply(time_table, 1, count_obs_geq_than, 2) != 0)) {
-          warning(paste0(
-            "In ", column,
-            ": Same subject recorded more than once at same time, skipping!"
-          ))
-          next
-        }
-        if (any(apply(group_table, 1, count_obs_geq_than, 1) != 1)) {
-          warning(paste0(
-            "In ", column,
-            ": Same subject recorded in two groups, skipping!"
-          ))
-          next
-        }
-        if (!all(apply(time_table, 1, count_obs_geq_than, 1) != 1)) {
-          warning(paste(
-            "One or more subject(s) missing time points,",
-            column, "will be counted using common subjects in time points!"
-          ))
-        }
 
         if (is.null(res)) {
-          res <- cohens_d_fun(object_split, group, id, time)
+          res <- test_fun(object_split, group, id, time)
         } else {
           res <- dplyr::full_join(res,
-            cohens_d_fun(object_split, group, id, time),
+            test_fun(object_split, group, id, time),
             by = "Feature_ID"
           )
         }
       }
+    } else {
+      time_combos <- combn(levels(pData(object)[, time]), 2)
+      for (i in seq_len(ncol(group_combos))) {
+        for (j in seq_len(ncol(time_combos))) {
+          object_split <- object[, which(
+            pData(object)[, group] %in% group_combos[, i] &
+              pData(object)[, time] %in% time_combos[, j]
+          )]
+          pData(object_split) <- droplevels(pData(object_split))
+          # Check data is valid for Cohen's D
+          group_table <- table(pData(object_split)[, c(id, group)])
+          time_table <- table(pData(object_split)[, c(id, time)])
+          column <- paste0(group_combos[1, i], "vs", group_combos[2, i],
+            "_", time_combos[2, j], "minus", time_combos[1, j]
+          )
+          if (any(apply(group_table, 2, \(x, n) sum(x >= n), 2) < 2)) {
+            warning(paste0(
+              "In ", column,
+              ": Groups don't have two observations of at least two subjects, skipping!"
+            ))
+            next
+          }
+          if (any(apply(time_table, 1, \(x, n) sum(x >= n), 2) != 0)) {
+            warning(paste0(
+              "In ", column,
+              ": Same subject recorded more than once at same time, skipping!"
+            ))
+            next
+          }
+          if (any(apply(group_table, 1, \(x, n) sum(x >= n), 1) != 1)) {
+            warning(paste0(
+              "In ", column,
+              ": Same subject recorded in two groups, skipping!"
+            ))
+            next
+          }
+          if (!all(apply(time_table, 1, \(x, n) sum(x >= n), 1) != 1)) {
+            warning(paste(
+              "One or more subject(s) missing time points,",
+              column, "will be counted using common subjects in time points!"
+            ))
+          }
+
+          if (is.null(res)) {
+            res <- test_fun(object_split, group, id, time)
+          } else {
+            res <- dplyr::full_join(res,
+              test_fun(object_split, group, id, time),
+              by = "Feature_ID"
+            )
+          }
+        }
+      }
     }
+    rownames(res) <- res$Feature_ID
+    res
   }
-  rownames(res) <- res$Feature_ID
-  res
+
+  # Run
+  log_text("Starting to compute Cohen's D.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, time, id)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests, group = group, time = time, id = id)
+  }
+  log_text("Cohen's D computed.")
+
+  results
 }
 
 #' Fold change
@@ -359,56 +398,64 @@ cohens_d <- function(object, group = group_col(object),
 #'
 #' @param object a MetaboSet object
 #' @param group character, name of the group column
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #'
 #' @return data frame with fold changes for each feature
 #'
 #' @examples
 #' # Between groups
-#' fc <- fold_change(example_set)
-#' # Between time points
-#' fc <- fold_change(example_set, group = "Time")
+#' fc <- fold_change(drop_qcs(example_set))
+#' # Between time points in each group
+#' fc <- fold_change(drop_qcs(example_set), group = "Time", separate_by = "Group")
 #'
 #' @export
-fold_change <- function(object, group = group_col(object)) {
-  log_text("Starting to compute fold changes.")
+fold_change <- function(object, group = group_col(object), separate_by = NULL) {
+  run_tests <- function(object, group) {
+    data <- combined_data(object)
+    groups <- combn(levels(data[, group]), 2)
 
-  data <- combined_data(object)
-  groups <- combn(levels(data[, group]), 2)
+    features <- Biobase::featureNames(object)
 
-  features <- Biobase::featureNames(object)
+    results_df <- foreach::foreach(
+      i = seq_along(features), .combine = rbind,
+      .export = "finite_mean"
+    ) %dopar% {
+      feature <- features[i]
+      result_row <- rep(NA_real_, ncol(groups))
+      # Calculate fold changes
+      tryCatch({
+        for (i in seq_len(ncol(groups))) {
+          group1 <- data[data[, group] == groups[1, i], feature]
+          group2 <- data[data[, group] == groups[2, i], feature]
+          result_row[i] <- finite_mean(group2) / finite_mean(group1)
+        }
+      })
 
-  results_df <- foreach::foreach(
-    i = seq_along(features), .combine = rbind,
-    .export = "finite_mean"
-  ) %dopar% {
-    feature <- features[i]
-    result_row <- rep(NA_real_, ncol(groups))
-    # Calculate fold changes
-    tryCatch({
-      for (i in seq_len(ncol(groups))) {
-        group1 <- data[data[, group] == groups[1, i], feature]
-        group2 <- data[data[, group] == groups[2, i], feature]
-        result_row[i] <- finite_mean(group2) / finite_mean(group1)
-      }
-    })
+      result_row
+    }
 
-    result_row
+    # Create comparison labels for result column names
+    comp_labels <- paste0(group, apply(groups, 2, paste, collapse = "vs"), "_FC")
+    results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
+    colnames(results_df) <- c("Feature_ID", comp_labels)
+    rownames(results_df) <- results_df$Feature_ID
+
+    # Order the columns accordingly
+    results_df[c("Feature_ID", comp_labels[order(comp_labels)])]
   }
 
-  # Create comparison labels for result column names
-  comp_labels <- groups %>%
-    t() %>%
-    as.data.frame() %>%
-    tidyr::unite("Comparison", V2, V1, sep = "_vs_")
-  comp_labels <- paste0(comp_labels[, 1], "_FC")
-  results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
-  colnames(results_df) <- c("Feature_ID", comp_labels)
-  rownames(results_df) <- results_df$Feature_ID
-
+  # Run the function
+  log_text("Starting to compute fold changes.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests, group = group)
+  }
   log_text("Fold changes computed.")
 
-  # Order the columns accordingly
-  results_df[c("Feature_ID", comp_labels[order(comp_labels)])]
+  results
 }
 
 
@@ -429,7 +476,7 @@ fold_change <- function(object, group = group_col(object)) {
 #' to be correlated agains x
 #' @param id character, column name for subject IDs. If provided, the correlation will be computed
 #' using the rmcorr package
-#' @param object2 optional second MeatboSet object. If provided, x variables will be taken from object and
+#' @param object2 optional second MetaboSet object. If provided, x variables will be taken from object and
 #' y variables will be taken from object2. Both objects should have the same number of samples.
 #' @param fdr logical, whether p-values from the correlation test should be adjusted with FDR correction
 #' @param all_pairs logical, whether all pairs between x and y should be tested.
@@ -753,6 +800,8 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... additional parameters passed to lm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -768,13 +817,14 @@ perform_test <- function(object, formula_char, result_fun, all_features, fdr = T
 #' # Features predicted by Group and Time
 #' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 #'
+#' # Features predicted by Time in different Groups
+#' lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Time", separate_by = "Group")
 #' @seealso \code{\link[stats]{lm}}
 #'
 #' @export
-perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
-  log_text("Starting linear regression.")
-
-  lm_fun <- function(feature, formula, data) {
+perform_lm <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
+  # Function to calculate results
+  test_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
     tryCatch(
@@ -808,19 +858,36 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, lm_fun, all_features)
+  # Function to run the linear model
+  run_tests <- function(object, formula_char, all_features) {
+    results_df <- perform_test(object, formula_char, test_fun, all_features)
 
-  # Set a good column order
-  variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
-  statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
-  col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
-    tidyr::unite("Column", Var2, Var1)
-  col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
+    # Set a good column order
+    variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
+    statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
+    col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
+      tidyr::unite("Column", Var2, Var1)
+    col_order <- c("Feature_ID", col_order$Column, c("R2", "Adj_R2"))
 
 
+
+    results_df[col_order]
+  }
+
+  # Run
+  log_text("Starting linear regression.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("Linear regression performed.")
 
-  results_df[col_order]
+  results
 }
 
 #' Linear models ANOVA table
@@ -831,6 +898,8 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param lm_args list of arguments to lm, list names should be parameter names
 #' @param anova_args list of arguments to anova, list names should be parameter names
 #'
@@ -850,10 +919,8 @@ perform_lm <- function(object, formula_char, all_features = FALSE, ...) {
 #' @seealso \code{\link[stats]{lm}}
 #'
 #' @export
-perform_lm_anova <- function(object, formula_char, all_features = FALSE,
+perform_lm_anova <- function(object, formula_char, all_features = FALSE, separate_by = NULL,
                              lm_args = NULL, anova_args = NULL) {
-  log_text("Starting ANOVA tests")
-
   anova_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
@@ -881,11 +948,24 @@ perform_lm_anova <- function(object, formula_char, all_features = FALSE,
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, anova_fun, all_features)
+  run_tests <- function(object, formula_char, all_features) {
+    results_df <- perform_test(object, formula_char, anova_fun, all_features)
+    results_df
+  }
 
+  log_text("Starting ANOVA tests")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("ANOVA tests performed.")
 
-  results_df
+  results
 }
 
 
@@ -897,6 +977,8 @@ perform_lm_anova <- function(object, formula_char, all_features = FALSE,
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... additional parameters passed to glm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -917,10 +999,8 @@ perform_lm_anova <- function(object, formula_char, all_features = FALSE,
 #' @seealso \code{\link[stats]{glm}}
 #'
 #' @export
-perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
-  log_text("Starting logistic regression.")
-
-  logistic_fun <- function(feature, formula, data) {
+perform_logistic <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
+  test_fun <- function(feature, formula, data) {
     # Try to fit the linear model
     fit <- NULL
     tryCatch(
@@ -951,32 +1031,45 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, logistic_fun, all_features)
+  run_tests <- function(object, formula_char, all_features) {
+    results_df <- perform_test(object, formula_char, test_fun, all_features)
 
-  # Set a good column order
-  variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
-  statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "z_value", "P", "P_FDR")
-  col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
-    tidyr::unite("Column", Var2, Var1)
-  col_order <- c("Feature_ID", col_order$Column)
-  results_df <- results_df[col_order]
-  # Add odds ratios
-  estimate_cols <- colnames(results_df)[grepl("_Estimate$", colnames(results_df))]
-  for (estimate_col in estimate_cols) {
-    estimate_values <- results_df[, estimate_col]
-    results_df <- tibble::add_column(
-      .data = results_df,
-      OR = exp(estimate_values),
-      .after = estimate_col
-    )
-    estimate_idx <- which(colnames(results_df) == estimate_col)
-    colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
+    # Set a good column order
+    variables <- gsub("_P$", "", colnames(results_df)[grep("P$", colnames(results_df))])
+    statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "z_value", "P", "P_FDR")
+    col_order <- expand.grid(statistics, variables, stringsAsFactors = FALSE) %>%
+      tidyr::unite("Column", Var2, Var1)
+    col_order <- c("Feature_ID", col_order$Column)
+    results_df <- results_df[col_order]
+    # Add odds ratios
+    estimate_cols <- colnames(results_df)[grepl("_Estimate$", colnames(results_df))]
+    for (estimate_col in estimate_cols) {
+      estimate_values <- results_df[, estimate_col]
+      results_df <- tibble::add_column(
+        .data = results_df,
+        OR = exp(estimate_values),
+        .after = estimate_col
+      )
+      estimate_idx <- which(colnames(results_df) == estimate_col)
+      colnames(results_df)[estimate_idx + 1] <- gsub("Estimate", "OR", estimate_col)
+    }
+
+    results_df
   }
 
-
+  log_text("Starting logistic regression.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("Logistic regression performed.")
 
-  results_df
+  results
 }
 
 
@@ -989,6 +1082,8 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ci_method The method for calculating the confidence intervals, see documentation
 #' of confint below
 #' @param test_random logical, whether tests for the significance of the random effects
@@ -1012,16 +1107,20 @@ perform_logistic <- function(object, formula_char, all_features = FALSE, ...) {
 #'   formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
 #'   ci_method = "Wald"
 #' )
+#' # Features predicted by Time as fixed effects with Subject ID as a random effect in each Group
+#' lmer_results <- perform_lmer(drop_qcs(example_set),
+#'   formula_char = "Feature ~ Time + (1 | Subject_ID)",
+#'   separate_by = "Group",
+#'   ci_method = "Wald"
+#' )
 #' }
 #' @seealso \code{\link[lmerTest]{lmer}} for model specification and
 #' \code{\link[lme4]{confint.merMod}} for the computation of confidence intervals
 #'
 #' @export
-perform_lmer <- function(object, formula_char, all_features = FALSE,
+perform_lmer <- function(object, formula_char, all_features = FALSE, separate_by = NULL,
                          ci_method = c("Wald", "profile", "boot"),
                          test_random = FALSE, ...) {
-  log_text("Starting fitting linear mixed models.")
-
   if (!requireNamespace("lmerTest", quietly = TRUE)) {
     stop("Package \"lmerTest\" needed for this function to work. Please install it.",
       call. = FALSE
@@ -1039,7 +1138,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
   # Check that ci_method is one of the accepted choices
   ci_method <- match.arg(ci_method)
 
-  lmer_fun <- function(feature, formula, data) {
+  test_fun <- function(feature, formula, data) {
     # Set seed, needed for some of the CI methods
     set.seed(38)
 
@@ -1121,26 +1220,41 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, lmer_fun, all_features, packages = "lmerTest")
+  run_tests <- function(object, formula_char, all_features, test_random) {
+    results_df <- perform_test(object, formula_char, test_fun, all_features, packages = "lmerTest")
 
-  # Set a good column order
-  fixed_effects <- gsub("_Estimate$", "", colnames(results_df)[grep("Estimate$", colnames(results_df))])
-  statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
-  col_order <- expand.grid(statistics, fixed_effects, stringsAsFactors = FALSE) %>%
-    tidyr::unite("Column", Var2, Var1)
-  col_order <- c("Feature_ID", col_order$Column, c("Marginal_R2", "Conditional_R2"))
-
-  if (test_random) {
-    random_effects <- gsub("_SD$", "", colnames(results_df)[grep("SD$", colnames(results_df))])
-    statistics <- c("SD", "LCI95", "UCI95", "LRT", "P", "P_FDR")
-    random_effect_order <- expand.grid(statistics, random_effects, stringsAsFactors = FALSE) %>%
+    # Set a good column order
+    fixed_effects <- gsub("_Estimate$", "", colnames(results_df)[grep("Estimate$", colnames(results_df))])
+    statistics <- c("Estimate", "LCI95", "UCI95", "Std_Error", "t_value", "P", "P_FDR")
+    col_order <- expand.grid(statistics, fixed_effects, stringsAsFactors = FALSE) %>%
       tidyr::unite("Column", Var2, Var1)
-    col_order <- c(col_order, random_effect_order$Column)
+    col_order <- c("Feature_ID", col_order$Column, c("Marginal_R2", "Conditional_R2"))
+
+    if (test_random) {
+      random_effects <- gsub("_SD$", "", colnames(results_df)[grep("SD$", colnames(results_df))])
+      statistics <- c("SD", "LCI95", "UCI95", "LRT", "P", "P_FDR")
+      random_effect_order <- expand.grid(statistics, random_effects, stringsAsFactors = FALSE) %>%
+        tidyr::unite("Column", Var2, Var1)
+      col_order <- c(col_order, random_effect_order$Column)
+    }
+
+    results_df[col_order]
   }
 
+  # Run
+  log_text("Starting fitting linear mixed models.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features, test_random)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char, all_features = all_features,
+      test_random = test_random
+    )
+  }
   log_text("Linear mixed models fit.")
 
-  results_df[col_order]
+  results
 }
 
 #' Test homoscedasticity
@@ -1153,6 +1267,8 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
 #' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
@@ -1168,7 +1284,7 @@ perform_lmer <- function(object, formula_char, all_features = FALSE,
 #' @seealso \code{\link{bartlett.test}}, \code{\link[car]{leveneTest}}, \code{\link{fligner.test}}
 #'
 #' @export
-perform_homoscedasticity_tests <- function(object, formula_char, all_features = FALSE) {
+perform_homoscedasticity_tests <- function(object, formula_char, all_features = FALSE, separate_by = NULL) {
   if (!requireNamespace("car", quietly = TRUE)) {
     stop("Package \"car\" needed for this function to work. Please install it.",
       call. = FALSE
@@ -1176,9 +1292,8 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
   }
   add_citation("car package was used for Levene's test of homoscedasticity:", citation("car"))
 
-  log_text("Starting homoscedasticity tests.")
-
-  homosced_fun <- function(feature, formula, data) {
+  # Function to calculate results
+  test_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch(
       {
@@ -1202,11 +1317,25 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, homosced_fun, all_features)
+  # Function to call
+  run_tests <- function(object, formula_char, all_features) {
+    perform_test(object, formula_char, test_fun, all_features)
+  }
 
+  # Run
+  log_text("Starting homoscedasticity tests.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("Homoscedasticity tests performed.")
 
-  results_df
+  results
 }
 
 #' Perform Kruskal-Wallis Rank Sum Tests
@@ -1217,6 +1346,8 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
 #' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
@@ -1230,12 +1361,13 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 #'
 #' @examples
 #' perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
+#' # Perform Kruskal-Wallis tests on Time points separately in each Group
+#' perform_kruskal_wallis(drop_qcs(merged_sample), formula_char = "Feature ~ Time", separate_by = "Group")
 #'
 #' @export
-perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
-  log_text("Starting Kruskal_wallis tests.")
-
-  kruskal_fun <- function(feature, formula, data) {
+perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE, separate_by = NULL) {
+  # Function to calculate results
+  test_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch(
       {
@@ -1255,11 +1387,28 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, kruskal_fun, all_features)
+  # Function to call
+  run_tests <- function(object, formula_char, all_features) {
+    results <- perform_test(object, formula_char, test_fun, all_features)
+    prefix <- unlist(strsplit(formula_char, " ~ "))[2]
+    colnames(results)[-1] <- paste0(prefix, "_", colnames(results)[-1])
+    results
+  }
 
+  # Run
+  log_text("Starting Kruskal_wallis tests.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("Kruskal_wallis tests performed.")
 
-  results_df
+  results
 }
 
 
@@ -1273,6 +1422,8 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... other parameters to \code{\link{oneway.test}}
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
@@ -1289,10 +1440,10 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 #' perform_oneway_anova(example_set, formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...) {
-  log_text("Starting ANOVA tests.")
+perform_oneway_anova <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
 
-  anova_fun <- function(feature, formula, data) {
+  # Function to calculate results
+  test_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch(
       {
@@ -1312,11 +1463,30 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, anova_fun, all_features)
+  # Function to call
+  run_tests <- function(object, formula_char, all_features) {
+    # Extract independent variable
+    prefix <- unlist(strsplit(formula_char, " ~ "))[2]
+    results_df <- perform_test(object, formula_char, test_fun, all_features)
+    colnames(results_df)[-1] <- paste0(prefix, "_", colnames(results_df)[-1])
 
+    results_df
+  }
+
+  # Run
+  log_text("Starting ANOVA tests.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("ANOVA performed.")
 
-  results_df
+  results
 }
 
 #' Perform t-tests
@@ -1327,6 +1497,8 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... additional parameters to t.test
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
@@ -1339,11 +1511,14 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 #'
 #' @examples
 #' t_test_results <- perform_t_test(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+#' # Separately in each Group
+#' t_test_results <- perform_t_test(drop_qcs(merged_sample), formula_char = "Feature ~ Time", separate_by = "Group")
 #'
 #' @seealso \code{\link{t.test}}
 #'
 #' @export
-perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
+perform_t_test <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
+  # Checks
   message(paste0(
     "Remember that t.test returns difference between group means",
     " in different order than lm.\n",
@@ -1352,13 +1527,13 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
   ))
   exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
   pair <- levels(pData(object)[, exp_var])
+  prefix <- paste0(exp_var, pair[1], "vs", pair[2], "_")
   if (length(pair) != 2) {
     stop("'", paste0(exp_var, "' in formula should contain exactly two levels"))
   }
 
-  log_text(paste0("Starting t-tests for ", paste0(pair, collapse = " & ")))
-
-  t_fun <- function(feature, formula, data) {
+  # Function to calculate results, passed to perform_test
+  test_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch(
       {
@@ -1373,14 +1548,13 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
           Estimate = t_res$estimate[1] - t_res$estimate[2],
           "LCI" = t_res$conf.int[1],
           "UCI" = t_res$conf.int[2],
+          Statistic = t_res$statistic,
           t_test_P = t_res$p.value,
           stringsAsFactors = FALSE
         )
         colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
         colnames(result_row)[2:3] <- paste0(pair, "_Mean")
-        prefix <- paste0(pair[1], "_vs_", pair[2], "_")
-        colnames(result_row)[4] <- paste0(prefix, "Estimate")
-        colnames(result_row)[-(1:4)] <- paste0(prefix, colnames(result_row)[-(1:4)])
+        colnames(result_row)[-(1:3)] <- paste0(prefix, colnames(result_row)[-(1:3)])
       },
       error = function(e) {
         cat(paste0(feature, ": ", e$message, "\n"))
@@ -1390,12 +1564,28 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, ...) {
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, t_fun, all_features)
-  rownames(results_df) <- results_df$Feature_ID
+  # Function to call
+  run_tests <- function(object, formula_char, all_features) {
+    results_df <- perform_test(object, formula_char, test_fun, all_features)
+    rownames(results_df) <- results_df$Feature_ID
 
+    results_df
+  }
+
+  # Run
+  log_text(paste0("Starting t-tests for ", paste0(pair, collapse = " & ")))
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("t-tests performed.")
 
-  results_df
+  results
 }
 
 perform_paired_test <- function(object, group, id, test, all_features = FALSE, ...) {
@@ -1406,7 +1596,8 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
   pair <- levels(groups)[1:2]
   if (class(groups) != "factor") groups <- as.factor(groups)
   if (length(levels(groups)) > 2) {
-    warning(paste("More than two groups detected, only using the first two.",
+    warning(paste(
+      "More than two groups detected, only using the first two.",
       "For multiple comparisons, please see perform_pairwise_t_test()",
       sep = "\n"
     ), call. = FALSE)
@@ -1447,17 +1638,17 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
 
         result_row <- data.frame(
           Feature_ID = feature,
-          Statistic = res$statistic,
           Estimate = res$estimate[1],
           LCI = res$conf.int[1],
           UCI = res$conf.int[2],
+          Statistic = res$statistic,
           P = res$p.value,
           stringsAsFactors = FALSE
         )
         ci_idx <- grepl("CI", colnames(result_row))
         colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
         colnames(result_row)[-1] <- paste0(
-          pair[1], "_vs_",
+          pair[1], "vs",
           pair[2], "_",
           test, "_",
           colnames(result_row)[-1]
@@ -1503,6 +1694,8 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
 #' @param group character, column name of pData with the group information
 #' @param id character, column name of pData with the identifiers for the pairs
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... additional parameters to t.test
 #'
 #' @return data frame with the results
@@ -1513,7 +1706,7 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
 #' @seealso \code{\link{t.test}}
 #'
 #' @export
-perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) {
+perform_paired_t_test <- function(object, group, id, all_features = FALSE, separate_by = NULL, ...) {
   message(paste0(
     "Remember that t.test returns difference between group means",
     " in different order than lm.\n",
@@ -1521,10 +1714,25 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, ...) 
     " mean of reference level minus mean of second level."
   ))
 
-  perform_paired_test(object, group, id,
-    test = "t_test",
-    all_features = all_features, ...
-  )
+  # Function to call
+  run_tests <- function(object, group, id) {
+    perform_paired_test(object, group, id,
+      test = "t_test",
+      all_features = all_features, ...
+    )
+  }
+
+  # Run
+  log_text("Starting paired t-tests.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, id)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests, group = group, id = id)
+  }
+
+  log_text("Paired t-tests performed.")
+  results
 }
 
 pairwise_fun <- function(object, fun, group_, ...) {
@@ -1558,6 +1766,8 @@ pairwise_fun <- function(object, fun, group_, ...) {
 #' @param is_paired logical, use pairwise paired t-test
 #' @param id character, name of the subject identification column for paired version
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... other parameters passed to perform_t_test, and eventually to base R t.test
 #'
 #' @details P-values of each comparison are corrected separately from each other.
@@ -1576,35 +1786,53 @@ pairwise_fun <- function(object, fun, group_, ...) {
 #'
 #' @export
 perform_pairwise_t_test <- function(object, group = group_col(object),
-                                    is_paired = FALSE, id = NULL, all_features = FALSE, ...) {
-  results_df <- NULL
-
+                                    is_paired = FALSE, id = NULL, all_features = FALSE, separate_by = NULL, ...) {
   if (!is.factor(pData(object)[, group])) {
     stop("Group column should be a factor")
   }
+  # Function to call
+  run_tests <- function(object, group, is_paired, id, all_features) {
+    results_df <- NULL
+    if (is_paired) {
+      if (is.null(id)) stop("Subject ID column is missing, please provide it")
+      log_text("Starting pairwise paired t-tests.")
+      results_df <- pairwise_fun(object, perform_paired_t_test,
+        group_ = group,
+        group = group, id = id,
+        all_features = all_features,
+        ...
+      )
+      log_text("Pairwise paired t-tests performed.")
+    } else {
+      log_text("Starting pairwise t-tests.")
+      results_df <- pairwise_fun(object, perform_t_test, group,
+        formula_char = paste("Feature ~", group),
+        all_features = all_features,
+        ...
+      )
+      log_text("Pairwise t-tests performed.")
+    }
+    if (length(featureNames(object)) != nrow(results_df)) {
+      warning("Results don't contain all features")
+    }
+    rownames(results_df) <- results_df$Feature_ID
 
-  if (is_paired) {
-    if (is.null(id)) stop("Subject ID column is missing, please provide it")
-    log_text("Starting pairwise paired t-tests.")
-    results_df <- pairwise_fun(object, perform_paired_t_test,
-      group_ = group,
-      group = group, id = id,
-      all_features = all_features, ...
-    )
-    log_text("Pairwise paired t-tests performed.")
+    results_df
+  }
+
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, is_paired, id, all_features)
   } else {
-    log_text("Starting pairwise t-tests.")
-    results_df <- pairwise_fun(object, perform_t_test, group,
-      formula_char = paste("Feature ~", group),
-      all_features = all_features, ...
+    results <- perform_separately(object, separate_by, run_tests,
+      group = group,
+      is_paired = is_paired,
+      id = id,
+      all_features = all_features
     )
-    log_text("Pairwise t-tests performed.")
   }
-  if (length(featureNames(object)) != nrow(results_df)) {
-    warning("Results don't contain all features")
-  }
-  rownames(results_df) <- results_df$Feature_ID
-  results_df
+
+  results
 }
 
 
@@ -1617,6 +1845,8 @@ perform_pairwise_t_test <- function(object, group = group_col(object),
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' Defaults to "Feature ~ group_col(object)
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... other parameters to \code{\link{wilcox.test}}
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
@@ -1633,11 +1863,8 @@ perform_pairwise_t_test <- function(object, group = group_col(object),
 #' perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
 #'
 #' @export
-perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...) {
-  log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
-  exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
-  pair <- levels(pData(object)[, exp_var])
-  prefix <- paste0(pair[1], "_vs_", pair[2], "_Mann_Whitney_")
+perform_mann_whitney <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
+  # Function to calculate results
   mw_fun <- function(feature, formula, data) {
     result_row <- NULL
     tryCatch(
@@ -1651,16 +1878,15 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
 
         result_row <- data.frame(
           Feature_ID = feature,
-          U = mw_res$statistic,
-          Estimate = mw_res$estimate[1],
-          LCI = mw_res$conf.int[1],
-          UCI = mw_res$conf.int[2],
-          P = mw_res$p.value,
+          MW_Estimate = mw_res$estimate[1],
+          MW_LCI = mw_res$conf.int[1],
+          MW_UCI = mw_res$conf.int[2],
+          MW_U = mw_res$statistic,
+          MW_P = mw_res$p.value,
           stringsAsFactors = FALSE
         )
         ci_idx <- grepl("CI", colnames(result_row))
         colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
-        colnames(result_row)[-1] <- paste0(prefix, colnames(result_row)[-1])
       },
       error = function(e) {
         cat(paste0(feature, ": ", e$message, "\n"))
@@ -1670,11 +1896,35 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
     result_row
   }
 
-  results_df <- perform_test(object, formula_char, mw_fun, all_features)
+  # Function to call
+  run_tests <- function(object, formula_char, all_features) {
+    # Define prefix for column names
+    exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
+    pair <- levels(pData(object)[, exp_var])
+    prefix <- paste0(exp_var,
+                     pair[1], "vs", pair[2], "_")
+    res <- perform_test(object, formula_char, mw_fun, all_features)
+    colnames(res)[-1] <- paste0(prefix, colnames(res)[-1])
 
+    res
+  }
+
+  # Run
+  log_text("Starting Mann-Whitney (a.k.a. Wilcoxon) tests.")
+
+
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
   log_text("Mann-Whitney tests performed.")
 
-  results_df
+  results
 }
 
 #' Perform Wilcoxon signed rank test
@@ -1683,16 +1933,12 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
 #' Uses base R function \code{wilcox.test} with \code{paired = TRUE}.
 #'
 #' @param object a MetaboSet object
-#' @param formula_char character, the formula to be used in the linear model (see Details)
-#' Defaults to "Feature ~ group_col(object)
+#' @param group character, column name of pData giving the groups
+#' @param id character, column name of pData with the identifiers for the pairs
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... other parameters to \code{\link{wilcox.test}}
-#'
-#' @details The model is fit on combined_data(object). Thus, column names
-#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
-#' must be used to signal the role of the features in the formula. "Feature" will be replaced
-#' by the actual Feature IDs during model fitting. For example, if testing for equality of
-#' medians in study groups, use "Feature ~ Group".
 #'
 #' @return data frame with the results
 #'
@@ -1702,11 +1948,25 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, ...
 #' perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
 #'
 #' @export
-perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, ...) {
-  perform_paired_test(object, group, id,
-    test = "Wilcox",
-    all_features = all_features, ...
-  )
+perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, separate_by = NULL, ...) {
+  # Function to call
+  run_tests <- function(object, group, id, all_features) {
+    perform_paired_test(object, group, id,
+      test = "Wilcox",
+      all_features = all_features, ...
+    )
+  }
+
+  log_text("Starting Wilcoxon signed rank tests.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, id, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests, group = group, id = id)
+  }
+  log_text("Wilcoxon signed rank tests performed.")
+
+  results
 }
 
 #' Perform pairwise  non-parametric tests
@@ -1721,6 +1981,8 @@ perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE
 #' @param is_paired logical, use pairwise tests
 #' @param id character, name of the subject identification column for paired version
 #' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
 #' @param ... other parameters passed to test functions
 #'
 #' @details P-values of each comparison are corrected separately from each other.
@@ -1742,34 +2004,51 @@ perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE
 #' \code{\link{wilcox.test}}
 #'
 #' @export
-perform_pairwise_non_parametric <- function(object, group = group_col(object), # nolint: object_length_linter.
+perform_pairwise_non_parametric <- function(object, group = group_col(object),
                                             is_paired = FALSE, id = NULL,
-                                            all_features = FALSE, ...) {
-  results_df <- NULL
-
+                                            all_features = FALSE, separate_by = NULL, ...) {
   if (!is.factor(pData(object)[, group])) {
     stop("Group column should be a factor")
   }
 
-  if (is_paired) {
-    if (is.null(id)) stop("Subject ID column is missing, please provide it")
-    log_text("Starting pairwise Wilcoxon signed rank tests.")
-    results_df <- pairwise_fun(object, perform_wilcoxon_signed_rank,
-      group_ = group,
-      group = group, id = id, all_features = all_features, ...
-    )
-    log_text("Wilcoxon signed rank tests performed.")
+  # Function to call
+  run_tests <- function(object, group, is_paired, id, all_features) {
+    results_df <- NULL
+    if (is_paired) {
+      if (is.null(id)) stop("Subject ID column is missing, please provide it")
+      log_text("Starting pairwise Wilcoxon signed rank tests.")
+      results_df <- pairwise_fun(object, perform_wilcoxon_signed_rank,
+        group_ = group,
+        group = group, id = id, all_features = all_features, ...
+      )
+      log_text("Wilcoxon signed rank tests performed.")
+    } else {
+      log_text("Starting pairwise Mann-Whitney tests.")
+      results_df <- pairwise_fun(object, perform_mann_whitney, group,
+        formula_char = paste("Feature ~", group),
+        all_features = all_features, ...
+      )
+      log_text("Mann-Whitney tests performed.")
+    }
+    if (length(featureNames(object)) != nrow(results_df)) {
+      warning("Results don't contain all features")
+    }
+    rownames(results_df) <- results_df$Feature_ID
+    results_df
+  }
+
+  # Run
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, is_paired, id, all_features)
   } else {
-    log_text("Starting pairwise Mann-Whitney tests.")
-    results_df <- pairwise_fun(object, perform_mann_whitney, group,
-      formula_char = paste("Feature ~", group),
-      all_features = all_features, ...
+    results <- perform_separately(object, separate_by, run_tests,
+      group = group,
+      is_paired = is_paired,
+      id = id,
+      all_features = all_features
     )
-    log_text("Mann-Whitney tests performed.")
   }
-  if (length(featureNames(object)) != nrow(results_df)) {
-    warning("Results don't contain all features")
-  }
-  rownames(results_df) <- results_df$Feature_ID
-  results_df
+
+  results
 }
