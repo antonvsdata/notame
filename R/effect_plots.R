@@ -7,7 +7,7 @@
 #' data frame from combined_data(object)
 #' feature id
 #' Should return a ggplot object for plotting
-#' @param ... arguments to code{\link[ggplot2]{ggsave}}
+#' @param ... arguments to code{\link[ggplot2]{ggsave}} or if pdf is used, to code{\link[graphics]{pdf}}
 save_feature_plots <- function(object, file_path, format,
                                title, subtitle, text_base_size,
                                plot_fun, ...) {
@@ -150,24 +150,24 @@ save_subject_line_plots <- function(object,
         geom_line(aes(group = .data[[id]]),
           color = "grey20",
           alpha = 0.35,
-          size = line_width
+          linewidth = line_width
         ) +
         stat_summary(aes(group = 1),
           fun.data = "mean_se",
           geom = "line",
-          size = mean_line_width,
+          linewidth = mean_line_width,
           color = color_scale$palette(1)[1]
         )
     } else {
       p <- p +
         geom_line(aes(group = .data[[id]], color = .data[[color]]),
           alpha = 0.35,
-          size = line_width
+          linewidth = line_width
         ) +
         stat_summary(aes(group = .data[[color]], color = .data[[color]]),
           fun.data = "mean_se",
           geom = "line",
-          size = mean_line_width
+          linewidth = mean_line_width
         ) +
         color_scale
     }
