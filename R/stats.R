@@ -50,7 +50,7 @@ summary_statistics <- function(object, grouping_cols = NA) {
       } else {
         groups <- rep("", nrow(data))
         for (grouping_col in grouping_cols) {
-          tmp_group <- paste(grouping_col, data[, grouping_col], sep = "_")
+          tmp_group <- paste(grouping_col, data[, grouping_col], sep = "")
           groups <- paste(groups, tmp_group, sep = "_")
         }
         groups <- as.factor(gsub("^_", "", groups))
@@ -168,7 +168,7 @@ clean_stats_results <- function(
 #
 # Helper function to perform a function separately for each level of a factor. Used when study contains multiple sample
 # types which should be processed separately.
-perform_separately <- function(object, separate_by, func) {
+perform_separately <- function(object, separate_by, func, ...) {
   # Ensure that separate is a factor
   if (!is.factor(pData(object)[, separate_by])) {
     stop(paste0("Column ", separate_by, " should be a factor!"))
@@ -176,7 +176,7 @@ perform_separately <- function(object, separate_by, func) {
   all_results <- data.frame(Feature_ID = featureNames(object))
   for (lvl in levels(pData(object)[, separate_by])) {
     temp <- object[, pData(object)[, separate_by] == lvl]
-    res <- func(temp)
+    res <- func(temp, ...)
     colnames(res)[-1] <- paste0(separate_by, lvl, "_", colnames(res)[-1])
     all_results <- dplyr::left_join(all_results, res, by = "Feature_ID")
   }
@@ -436,7 +436,7 @@ fold_change <- function(object, group = group_col(object), separate_by = NULL) {
     }
 
     # Create comparison labels for result column names
-    comp_labels <- paste0(group, apply(groups, 2, paste, collapse = "vs"), "_FC")
+    comp_labels <- paste0(group, apply(groups, 2, paste0, collapse = "vs"), "_FC")
     results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
     colnames(results_df) <- c("Feature_ID", comp_labels)
     rownames(results_df) <- results_df$Feature_ID

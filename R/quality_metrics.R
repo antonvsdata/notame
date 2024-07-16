@@ -166,7 +166,7 @@ flag_detection <- function(object, qc_limit = 0.7, group_limit = 0.5, group = gr
       tidyr::spread(!!as.name(group), "proportion_found")
     # Remove a possible QC column
     proportions$QC <- NULL
-    colnames(proportions)[-1] <- paste0("Detection_rate_", group, "_", colnames(proportions)[-1])
+    colnames(proportions)[-1] <- paste0("Detection_rate_", group, colnames(proportions)[-1])
     # Check if any group has enough non-missing entries
     proportions$good <- apply(proportions[-1], 1, function(x) {
       any(x >= group_limit)

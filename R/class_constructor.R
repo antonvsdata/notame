@@ -545,26 +545,143 @@ construct_metabosets <- function(exprs, pheno_data, feature_data,
   }
 }
 
+# Find empty rows in a matrix
+#
+# Helper function to find empty rows in a matrix to split columns in Excel
+#
+find_empty_row <- function(empty1, cols, i) {
+  if (nrow(empty1) == i) {
+    return(NA)
+  }
+  if (all(is.na(empty1[nrow(empty1) - i, cols]))) {
+    return(nrow(empty1) - i)
+  } else {
+    find_empty_row(empty1, cols, i + 1)
+  }
+}
+
+find_consecutive_indices <- function(vec) {
+  start_col <- c(which(!is.na(vec))[1])
+  end_col <- c()
+  current <- start_col + 1
+  length_vec <- length(vec)
+
+  while (current <= length(vec)) {
+    if (is.na(vec[current]) && !is.na(vec[current - 1])) {
+      end_col <- c(end_col, current - 1)
+    } else if (!is.na(vec[current]) && is.na(vec[current - 1])) {
+      start_col <- c(start_col, current)
+    } else if (!is.na(vec[current]) && vec[current] != vec[current - 1]) {
+      end_col <- c(end_col, current - 1)
+      start_col <- c(start_col, current)
+    }
+    current <- current + 1
+  }
+  result <- cbind(start = start_col, end = end_col)
+  return(result)
+}
+
+# Save indices of columns
+#
+# Helper function to Save the indices of columns to be merged in the Excel file in a
+# list of vectors of length 3: (row, first column, last column).
+#
+save_indices <- function(mat, n_row) {
+  result <- list()
+  for (i in seq_len(nrow(mat))) {
+    indices <- find_consecutive_indices(mat[i, ])
+    # Make each row a vector of length 3
+    for (j in seq_len(nrow(indices))) {
+      name <- paste0(mat[i, indices[j, 1]], "_", j)
+      result[[length(result) + 1]] <- c("row" = n_row - nrow(mat) + i, indices[j, ])
+    }
+  }
+  result
+}
+
+# Save a workbook
+#
+# Helper function to save a workbook with custom title columns
+#
+save_workbook <- function(big, to_be_merged, file, overwrite) {
+  wb <- createWorkbook()
+  addWorksheet(wb, "Sheet1")
+  writeData(wb, 1, big, colNames = FALSE)
+  # Merge parent column cells
+  col_palette <- scales::hue_pal()(length(to_be_merged))
+  for (i in seq_along(to_be_merged)) {
+    indices <- to_be_merged[[i]]
+    try({
+      mergeCells(wb, 1, rows = indices[1], cols = indices[2:3])
+      addStyle(wb, 1,
+        createStyle(halign = "center", fgFill = col_palette[i]),
+        rows = indices[1],
+        cols = indices[2:3]
+      )
+    })
+  }
+  saveWorkbook(wb, file, overwrite = overwrite)
+  log_text(paste0("Saved the Excel file to ", file))
+}
 
 #' Write results to Excel file
 #'
 #' Writes all the data in a MetaboSet object to an Excel spreadsheet.
-#' The format is similar to the one used to read data in, except for the fact that
-#' EVERYTHING NEEDS TO BE WRITTEN AS TEXT. To fix numeric values in Excel,
+#' The format is similar to the one used to read data in, but not identical. See \link{details}.
+#' Therefore, reading the output file with \code{read_from_excel} might not work.
+#' The output file will have every cell as text. To fix numeric values in Excel,
 #' choose any cell with a number, press Ctrl + A, then go to the dropdown menu
 #' in upper left corner and choose "Convert to Number". This will fix the file,
-#' but can take quite a while.
+#' but can take some time.
+#'
+#' @details
+#' Prettifies the output by transforming MSMS spectra to publication ready form.
+#' Additionally, to make statistics columns easier to read, they can be split to separate title rows.
+#' Uses \code{\link[openxslx]{saveWorkbook}} for saving.
+#'
+#' If \code{separate_titles} is not \code{NULL}, the function will split the columns into multiple rows. Each list element
+#' corresponds to a new row in the output. The elements of the list are character vectors specifying which part of column
+#' names should be split into a new row. For example, if the column names are \code{Plasma_GroupB_Statistic}, \code{Plasma_GroupB_P},
+#' \code{Tissue_GroupB_Statistic} and \code{Tissue_GroupB_P}, the code in the examples
+#' will split the columns into three rows, where cells are merged based on the exported column names.
+#' In reality, results would contain more columns and the example would make more sense.
 #'
 #' @param object a MetaboSet object
 #' @param file path to the file to write
-#' @param ... Additional parameters passed to \code{openxlsx::write.xlsx}
+#' @param ms_ms_spectrum_col character, the name of the column in feature data containing MSMS spectra
+#' @param peak_num integer, the number of peaks to show in the MSMS spectra
+#' @param min_abund numeric, the minimum relative abundance to show in the MSMS spectra
+#' @param deci_num integer, the number of digits to show in the MSMS spectra
+#' @param separate_titles list, of character vectors of column titles to split into separate rows. See examples
+#' for more information.
+#' @param overwrite logical, whether to overwrite the file if it already exists
 #'
+#' @examples
+#' \dontrun{
+#' write_to_excel(object, "output.xlsx", separate_titles = list(c("Plasma", "Tissue"), c("Group")))
+#' }
 #' @export
-write_to_excel <- function(object, file, ...) {
+#' @import openxlsx
+write_to_excel <- function(object, file,
+                           ms_ms_spectrum_col = "MS_MS_spectrum",
+                           peak_num = 10,
+                           min_abund = 5,
+                           deci_num = 3,
+                           separate_titles = NULL,
+                           overwrite = TRUE) {
   if (!requireNamespace("openxlsx", quietly = TRUE)) {
     stop("Package \"openxlsx\" needed for this function to work. Please install it.",
       call. = FALSE
     )
+  }
+  warning("This function modifies the input, so reading the output file with 'read_from_excel' might not work.")
+  # Transform MSMS spectra to publication ready form
+  if (!is.null(ms_ms_spectrum_col) && ms_ms_spectrum_col %in% colnames(fData(object))) {
+    log_text("Transforming MSMS spectra to publication ready form")
+    object <- fix_MSMS(object, ms_ms_spectrum_col, peak_num, min_abund, deci_num)
+  }
+  if (!is.null(separate_titles) && !is.list(separate_titles)) {
+    stop("Parameter 'separate_titles' should be a list or NULL")
   }
 
   # Bottom part consists of (from left to right):
@@ -594,6 +711,76 @@ write_to_excel <- function(object, file, ...) {
     nrow = nrow(top),
     ncol = ncol(fData(object)) - 1
   )
+
+  # Store all indexes of parent columns in a list of vectors of length 3: (row, first column, last column)
+  to_be_merged <- list()
+
+  # Label chosen columns
+  new_columns <- matrix(NA_character_, nrow = length(separate_titles), ncol = ncol(empty1))
+  if (!is.null(separate_titles)) {
+    log_text("Splitting feature data columns into multiple rows")
+    column_names <- colnames(fData(object))
+    for (i in seq_along(separate_titles)) {
+      # Find the columns to split into two rows
+      titles <- separate_titles[[i]]
+      used_columns <- c(ncol(fData(object))) # Do not split the last column due to pheno data overlap
+      for (title in titles) {
+        # Find columns that match titles
+        match <- paste0("^", title, "|", "_", title)
+        idx <- grep(match, column_names, perl = TRUE)
+        # Do not overwrite already split columns
+        idx <- idx[!idx %in% used_columns]
+        used_columns <- c(used_columns, idx)
+        # Split columns
+        cols <- column_names[idx]
+        for (x in cols) {
+          c_idx <- idx[which(x == cols)]
+          splitted <- unlist(strsplit(x, "_"))
+          split <- grepl(title, splitted)
+          # Fill the empty1 matrix with the split columns
+          new_columns[i, c_idx] <- splitted[split]
+          column_names[c_idx] <- paste(splitted[!split], collapse = "_")
+        }
+      }
+    }
+  }
+  # Insert new columns to the bottom of empty1, keep original size
+  empty1[(nrow(empty1) - nrow(new_columns)):(nrow(empty1) - 1), ] <- new_columns
+  bottom[1, seq_along(column_names)] <- column_names
+  # Save indices for cell merging
+  to_be_merged <- c(to_be_merged, save_indices(new_columns, nrow(empty1) - 1))
+
+
+
+  # Label MS-DIAL output columns
+  ms_dial_cols <- which(colnames(fData(object)) == "Alignment_ID"):which(colnames(fData(object)) == "MS_MS_spectrum")
+  log_text(paste0("Labeling MS-DIAL output columns (", min(ms_dial_cols), " - ", max(ms_dial_cols), ")"))
+  empty_row <- find_empty_row(empty1, ms_dial_cols, 1)
+  empty1[empty_row, ms_dial_cols] <- "MS-DIAL output"
+  to_be_merged[["ms_dial"]] <- c(
+    "row" = empty_row,
+    "start_col" = ms_dial_cols[1],
+    "end_col" = ms_dial_cols[length(ms_dial_cols)]
+  )
+
+  # Label quality control columns
+  quality_cols <- which(colnames(fData(object)) == "Flag")
+  # Find last quality column (last "DC_note")
+  dc_cols <- grep("DC_note", colnames(fData(object)))
+  if (length(dc_cols)) {
+    quality_cols <- seq(quality_cols, min(max(dc_cols), ncol(empty1)))
+  }
+  log_text(paste0("Labeling quality control columns (", min(quality_cols), " - ", max(quality_cols), ")"))
+  empty_row <- find_empty_row(empty1, quality_cols, 1)
+  empty1[empty_row, quality_cols] <- "Quality columns"
+  to_be_merged[["qc"]] <- c(
+    "row" = empty_row,
+    "start_col" = quality_cols[1],
+    "end_col" = quality_cols[length(quality_cols)]
+  )
+
+
+  # Combine top part
   top <- cbind(empty1, top)
   colnames(top) <- colnames(bottom)
 
@@ -604,7 +791,8 @@ write_to_excel <- function(object, file, ...) {
   # All combined
   big <- rbind(top[seq_len(nrow(top) - 1), ], bottom)
 
-  openxlsx::write.xlsx(big, file = file, colNames = FALSE, ...)
+  # Write to excel
+  save_workbook(big, to_be_merged, file, overwrite)
 }
 
 
