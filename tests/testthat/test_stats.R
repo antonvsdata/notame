@@ -76,7 +76,7 @@ test_that("Cohen's d works", {
 
   df <- data.frame(
     Feature_ID = featureNames(ex),
-    B_vs_A_2_minus_1_Cohen_d = d,
+    BvsA_2minus1_Cohen_d = d,
     stringsAsFactors = FALSE
   )
   rownames(df) <- df$Feature_ID
@@ -124,9 +124,9 @@ test_that("Fold change works", {
 
   fc <- data.frame(
     Feature_ID = featureNames(ex),
-    B_vs_A_FC = 1,
-    QC_vs_A_FC = 1,
-    QC_vs_B_FC = 1,
+    GroupBvsA_FC = 1,
+    GroupQCvsA_FC = 1,
+    GroupQCvsB_FC = 1,
     stringsAsFactors = FALSE
   )
   rownames(fc) <- fc$Feature_ID
@@ -136,9 +136,9 @@ test_that("Fold change works", {
     mean_b <- finite_mean(cd[cd$Group == "B", feature])
     mean_qc <- finite_mean(cd[cd$Group == "QC", feature])
 
-    fc$B_vs_A_FC[i] <- mean_b / mean_a
-    fc$QC_vs_A_FC[i] <- mean_qc / mean_a
-    fc$QC_vs_B_FC[i] <- mean_qc / mean_b
+    fc$GroupBvsA_FC[i] <- mean_b / mean_a
+    fc$GroupQCvsA_FC[i] <- mean_qc / mean_a
+    fc$GroupQCvsB_FC[i] <- mean_qc / mean_b
   }
 
   foldc <- fold_change(ex)
@@ -270,11 +270,11 @@ test_that("Cohens D values are counted right", {
     f3 <- group3[, feature]
     d <- data.frame(
       Feature_ID = feature,
-      B_vs_A_Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
+      BvsA_Cohen_d = (finite_mean(f2) - finite_mean(f1)) /
         sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-      C_vs_A_Cohen_d = (finite_mean(f3) - finite_mean(f1)) /
+      CvsA_Cohen_d = (finite_mean(f3) - finite_mean(f1)) /
         sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-      C_vs_B_Cohen_d = (finite_mean(f3) - finite_mean(f2)) /
+      CvsB_Cohen_d = (finite_mean(f3) - finite_mean(f2)) /
         sqrt((finite_sd(f3)^2 + finite_sd(f2)^2) / 2),
       stringsAsFactors = FALSE
     )
@@ -352,23 +352,23 @@ test_that("Cohens D values between time points are counted right", {
     f9 <- group9[, feature] # C 3-2
     d <- data.frame(
       Feature_ID = feature,
-      "B_vs_A_2_minus_1_Cohen_d" = (finite_mean(f2) - finite_mean(f1)) /
+      "BvsA_2minus1_Cohen_d" = (finite_mean(f2) - finite_mean(f1)) /
         sqrt((finite_sd(f1)^2 + finite_sd(f2)^2) / 2),
-      "B_vs_A_3_minus_1_Cohen_d" = (finite_mean(f5) - finite_mean(f4)) /
+      "BvsA_3minus1_Cohen_d" = (finite_mean(f5) - finite_mean(f4)) /
         sqrt((finite_sd(f4)^2 + finite_sd(f5)^2) / 2),
-      "B_vs_A_3_minus_2_Cohen_d" = (finite_mean(f8) - finite_mean(f7)) /
+      "BvsA_3minus2_Cohen_d" = (finite_mean(f8) - finite_mean(f7)) /
         sqrt((finite_sd(f7)^2 + finite_sd(f8)^2) / 2),
-      "C_vs_A_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f1)) /
+      "CvsA_2minus1_Cohen_d" = (finite_mean(f3) - finite_mean(f1)) /
         sqrt((finite_sd(f1)^2 + finite_sd(f3)^2) / 2),
-      "C_vs_A_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f4)) /
+      "CvsA_3minus1_Cohen_d" = (finite_mean(f6) - finite_mean(f4)) /
         sqrt((finite_sd(f4)^2 + finite_sd(f6)^2) / 2),
-      "C_vs_A_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f7)) /
+      "CvsA_3minus2_Cohen_d" = (finite_mean(f9) - finite_mean(f7)) /
         sqrt((finite_sd(f7)^2 + finite_sd(f9)^2) / 2),
-      "C_vs_B_2_minus_1_Cohen_d" = (finite_mean(f3) - finite_mean(f2)) /
+      "CvsB_2minus1_Cohen_d" = (finite_mean(f3) - finite_mean(f2)) /
         sqrt((finite_sd(f2)^2 + finite_sd(f3)^2) / 2),
-      "C_vs_B_3_minus_1_Cohen_d" = (finite_mean(f6) - finite_mean(f5)) /
+      "CvsB_3minus1_Cohen_d" = (finite_mean(f6) - finite_mean(f5)) /
         sqrt((finite_sd(f5)^2 + finite_sd(f6)^2) / 2),
-      "C_vs_B_3_minus_2_Cohen_d" = (finite_mean(f9) - finite_mean(f8)) /
+      "CvsB_3minus2_Cohen_d" = (finite_mean(f9) - finite_mean(f8)) /
         sqrt((finite_sd(f8)^2 + finite_sd(f9)^2) / 2),
       stringsAsFactors = FALSE
     )
@@ -417,19 +417,19 @@ test_that("Paired t-test works", {
   mean1 <- finite_mean(cd[cd$Time == 1, colnames(cd) == feature])
   mean2 <- finite_mean(cd[cd$Time == 2, colnames(cd) == feature])
   # Check comparison order
-  expect_equal(t_res[t_res$Feature_ID == feature, 3], mean1 - mean2)
+  expect_equal(t_res[t_res$Feature_ID == feature, 2], mean1 - mean2)
   # Check row names
   expect_identical(rownames(t_res), featureNames(drop_qcs(example_set)))
   # Check column names
   expect_identical(colnames(t_res), c(
     "Feature_ID",
     paste0(
-      "1_vs_2_t_test_",
+      "1vs2_t_test_",
       c(
-        "Statistic",
         "Estimate",
         "LCI95",
         "UCI95",
+        "Statistic",
         "P",
         "P_FDR"
       )
@@ -447,15 +447,14 @@ test_that("Pairwise t-test works", {
   pwt_res <- perform_pairwise_t_test(object, group = "Time")
 
   expect_identical(rownames(pwt_res), featureNames(drop_qcs(example_set)))
-  prefixes <- c("1_vs_2_", "1_vs_3_", "2_vs_3_")
-  suffixes <- c("Estimate", "LCI95", "UCI95", "t_test_P", "t_test_P_FDR")
+  prefixes <- c("Time1vs2_", "Time1vs3_", "Time2vs3_")
+  suffixes <- c("Estimate", "LCI95", "UCI95", "Statistic", "t_test_P", "t_test_P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   # Check column names
   expect_identical(colnames(pwt_res), c(
-    "Feature_ID", "1_Mean", "2_Mean",
+    "Feature_ID",
     do.call(paste0, cols[order(cols$Var1) & cols$Var1 == prefixes[1], ]),
-    "3_Mean",
-    do.call(paste0, cols[order(cols$Var1), ])[6:15]
+    do.call(paste0, cols[order(cols$Var1), ])[7:18]
   ))
   # These should be identical as no paired mode
   pData(object)$Subject_ID <- factor(rep(1:12, 2))
@@ -484,8 +483,8 @@ test_that("Pairwise paired t-test works", {
   )
 
   expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
-  prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "t_test_")
-  suffixes <- c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
+  prefixes <- paste0(c("1vs2_", "1vs3_", "2vs3_"), "t_test_")
+  suffixes <- c("Estimate", "LCI95", "UCI95", "Statistic", "P", "P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   expect_identical(colnames(pwpt_res), c(
     "Feature_ID",
@@ -496,9 +495,9 @@ test_that("Pairwise paired t-test works", {
   # Change Subject IDs
   pData(object)$Subject_ID <- factor(rep(1:12, 2))
   pwpt_res_2 <- perform_pairwise_t_test(object,
-    group = "Time",
-    id = "Subject_ID",
-    is_paired = TRUE
+                                        group = "Time",
+                                        id = "Subject_ID",
+                                        is_paired = TRUE
   )
   # These shouldn't match because means are counted only from paired samples
   # In this case 4 pairs in each
@@ -530,8 +529,8 @@ test_that("Mann-Whitney U-tests work", {
   us <- apply(exprs(object), 1, get_u)
 
   cols <- c("Feature_ID", paste0(
-    "A_vs_B_Mann_Whitney_",
-    c("U", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
+    "GroupAvsB_MW_",
+    c("Estimate", "LCI95", "UCI95", "U", "P", "P_FDR")
   ))
 
   mw_res <- suppressWarnings({
@@ -540,8 +539,8 @@ test_that("Mann-Whitney U-tests work", {
 
   expect_identical(colnames(mw_res), cols)
 
-  expect_equal(cor(sign(median_diffs), sign(mw_res$A_vs_B_Mann_Whitney_Estimate), method = "spearman"), 1)
-  expect_identical(unname(us), mw_res$A_vs_B_Mann_Whitney_U)
+  expect_equal(unname(sign(median_diffs)), sign(mw_res$GroupAvsB_MW_Estimate))
+  expect_identical(unname(us), mw_res$GroupAvsB_MW_U)
 })
 
 
@@ -557,14 +556,14 @@ test_that("Wilcoxon signed rank tests work", {
   median_diffs <- apply(exprs(object), 1, get_median_diffs)
 
   cols <- c("Feature_ID", paste0(
-    "1_vs_2_Wilcox_",
-    c("Statistic", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
+    "1vs2_Wilcox_",
+    c("Estimate", "LCI95", "UCI95", "Statistic", "P", "P_FDR")
   ))
 
   wil_res <- perform_wilcoxon_signed_rank(object, group = "Time", id = "Subject_ID")
 
   expect_identical(colnames(wil_res), cols)
-  expect_equal(cor(sign(median_diffs), sign(wil_res$`1_vs_2_Wilcox_Estimate`)), 1)
+  expect_equal(cor(sign(median_diffs), sign(wil_res$`1vs2_Wilcox_Estimate`)), 1)
 })
 
 test_that("Pairwise Mann-Whitney tests work", {
@@ -582,8 +581,8 @@ test_that("Pairwise Mann-Whitney tests work", {
   pwnp_res <- suppressWarnings(perform_pairwise_non_parametric(object, group = "Time"))
 
   expect_identical(rownames(pwnp_res), featureNames(drop_qcs(example_set)))
-  prefixes <- paste0(c("1_vs_2_", "1_vs_3_", "2_vs_3_"), "Mann_Whitney_")
-  suffixes <- c("U", "Estimate", "LCI95", "UCI95", "P", "P_FDR")
+  prefixes <- paste0("Time", c("1vs2_", "1vs3_", "2vs3_"), "MW_")
+  suffixes <- c("Estimate", "LCI95", "UCI95", "U", "P", "P_FDR")
   cols <- expand.grid(suffixes, prefixes)
   cols <- c("Feature_ID", paste0(cols$Var2, cols$Var1))
   # Check column names
@@ -595,9 +594,9 @@ test_that("Pairwise Mann-Whitney tests work", {
   # In this case 4 pairs in each
   expect_failure(expect_identical(
     suppressWarnings(perform_pairwise_non_parametric(object,
-      group = "Time",
-      id = "Subject_ID",
-      is_paired = TRUE
+                                                     group = "Time",
+                                                     id = "Subject_ID",
+                                                     is_paired = TRUE
     )),
     pwnp_res
   ))
