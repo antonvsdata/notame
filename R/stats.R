@@ -436,7 +436,7 @@ fold_change <- function(object, group = group_col(object), separate_by = NULL) {
     }
 
     # Create comparison labels for result column names
-    comp_labels <- paste0(group, apply(groups, 2, paste0, collapse = "vs"), "_FC")
+    comp_labels <- paste0(group, apply(groups, 2, \(x) paste0(rev(x), collapse = "vs")), "_FC")
     results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
     colnames(results_df) <- c("Feature_ID", comp_labels)
     rownames(results_df) <- results_df$Feature_ID
