@@ -1543,8 +1543,6 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, separate_
 
         result_row <- data.frame(
           Feature_ID = feature,
-          Mean1 = t_res$estimate[1],
-          Mean2 = t_res$estimate[2],
           Estimate = t_res$estimate[1] - t_res$estimate[2],
           "LCI" = t_res$conf.int[1],
           "UCI" = t_res$conf.int[2],
@@ -1552,9 +1550,8 @@ perform_t_test <- function(object, formula_char, all_features = FALSE, separate_
           t_test_P = t_res$p.value,
           stringsAsFactors = FALSE
         )
-        colnames(result_row)[5:6] <- paste0(colnames(result_row)[5:6], conf_level)
-        colnames(result_row)[2:3] <- paste0(pair, "_Mean")
-        colnames(result_row)[-(1:3)] <- paste0(prefix, colnames(result_row)[-(1:3)])
+        colnames(result_row)[3:4] <- paste0(colnames(result_row)[3:4], conf_level)
+        colnames(result_row)[-1] <- paste0(prefix, colnames(result_row)[-1])
       },
       error = function(e) {
         cat(paste0(feature, ": ", e$message, "\n"))
@@ -1711,7 +1708,7 @@ perform_paired_t_test <- function(object, group, id, all_features = FALSE, separ
     "Remember that t.test returns difference between group means",
     " in different order than lm.\n",
     "This function mimics this behavior, so the effect size is",
-    " mean of reference level minus mean of second level."
+    " mean of first level minus mean of second level."
   ))
 
   # Function to call
