@@ -4,7 +4,13 @@
 \alias{perform_t_test}
 \title{Perform t-tests}
 \usage{
-perform_t_test(object, formula_char, all_features = FALSE, ...)
+perform_t_test(
+  object,
+  formula_char,
+  all_features = FALSE,
+  separate_by = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -12,6 +18,9 @@ perform_t_test(object, formula_char, all_features = FALSE, ...)
 \item{formula_char}{character, the formula to be used in the linear model (see Details)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{...}{additional parameters to t.test}
 }
@@ -31,6 +40,8 @@ means in study groups, use "Feature ~ Group".
 }
 \examples{
 t_test_results <- perform_t_test(drop_qcs(merged_sample), formula_char = "Feature ~ Group")
+# Separately in each Group
+t_test_results <- perform_t_test(drop_qcs(merged_sample), formula_char = "Feature ~ Time", separate_by = "Group")
 
 }
 \seealso{

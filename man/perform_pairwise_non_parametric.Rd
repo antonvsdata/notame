@@ -10,6 +10,7 @@ perform_pairwise_non_parametric(
   is_paired = FALSE,
   id = NULL,
   all_features = FALSE,
+  separate_by = NULL,
   ...
 )
 }
@@ -23,6 +24,9 @@ perform_pairwise_non_parametric(
 \item{id}{character, name of the subject identification column for paired version}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{...}{other parameters passed to test functions}
 }

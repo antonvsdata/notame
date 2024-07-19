@@ -4,7 +4,14 @@
 \alias{perform_paired_t_test}
 \title{Perform paired t-tests}
 \usage{
-perform_paired_t_test(object, group, id, all_features = FALSE, ...)
+perform_paired_t_test(
+  object,
+  group,
+  id,
+  all_features = FALSE,
+  separate_by = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -14,6 +21,9 @@ perform_paired_t_test(object, group, id, all_features = FALSE, ...)
 \item{id}{character, column name of pData with the identifiers for the pairs}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{...}{additional parameters to t.test}
 }

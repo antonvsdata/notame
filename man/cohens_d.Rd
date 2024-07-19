@@ -4,7 +4,13 @@
 \alias{cohens_d}
 \title{Cohen's D}
 \usage{
-cohens_d(object, group = group_col(object), id = NULL, time = NULL)
+cohens_d(
+  object,
+  group = group_col(object),
+  id = NULL,
+  time = NULL,
+  separate_by = NULL
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -14,6 +20,9 @@ cohens_d(object, group = group_col(object), id = NULL, time = NULL)
 \item{id}{character, name of the subject ID column}
 
 \item{time}{character, name of the time column}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 }
 \value{
 data frame with Cohen's d for each feature
@@ -24,8 +33,13 @@ change between two time points is computed for each subject,
 and Cohen's d is computed from the changes
 }
 \examples{
-d_results <- cohens_d(drop_qcs(example_set))
+# Between groups
+d_results <- cohens_d(drop_qcs(example_set), group = "Group")
+# Between time points in each group (simulates situation where Group would contain different sample types)
+d_results <- cohens_d(drop_qcs(example_set), group = "Time", separate_by = "Group")
+# Paired samples, between groups
 d_results_time <- cohens_d(drop_qcs(example_set),
+  group = "Group",
   time = "Time", id = "Subject_ID"
 )
 

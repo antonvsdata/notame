@@ -4,7 +4,13 @@
 \alias{perform_logistic}
 \title{Logistic regression}
 \usage{
-perform_logistic(object, formula_char, all_features = FALSE, ...)
+perform_logistic(
+  object,
+  formula_char,
+  all_features = FALSE,
+  separate_by = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -12,6 +18,9 @@ perform_logistic(object, formula_char, all_features = FALSE, ...)
 \item{formula_char}{character, the formula to be used in the linear model (see Details)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{...}{additional parameters passed to glm}
 }

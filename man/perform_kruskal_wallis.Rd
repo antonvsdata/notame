@@ -4,7 +4,12 @@
 \alias{perform_kruskal_wallis}
 \title{Perform Kruskal-Wallis Rank Sum Tests}
 \usage{
-perform_kruskal_wallis(object, formula_char, all_features = FALSE)
+perform_kruskal_wallis(
+  object,
+  formula_char,
+  all_features = FALSE,
+  separate_by = NULL
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -13,6 +18,9 @@ perform_kruskal_wallis(object, formula_char, all_features = FALSE)
 Defaults to "Feature ~ group_col(object)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 }
 \value{
 data frame with the results
@@ -29,6 +37,8 @@ means in study groups, use "Feature ~ Group".
 }
 \examples{
 perform_kruskal_wallis(example_set, formula_char = "Feature ~ Group")
+# Perform Kruskal-Wallis tests on Time points separately in each Group
+perform_kruskal_wallis(drop_qcs(merged_sample), formula_char = "Feature ~ Time", separate_by = "Group")
 
 }
 \seealso{

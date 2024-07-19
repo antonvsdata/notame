@@ -4,7 +4,12 @@
 \alias{perform_homoscedasticity_tests}
 \title{Test homoscedasticity}
 \usage{
-perform_homoscedasticity_tests(object, formula_char, all_features = FALSE)
+perform_homoscedasticity_tests(
+  object,
+  formula_char,
+  all_features = FALSE,
+  separate_by = NULL
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -13,6 +18,9 @@ perform_homoscedasticity_tests(object, formula_char, all_features = FALSE)
 Defaults to "Feature ~ group_col(object)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 }
 \value{
 data frame with the results

@@ -8,6 +8,7 @@ perform_lm_anova(
   object,
   formula_char,
   all_features = FALSE,
+  separate_by = NULL,
   lm_args = NULL,
   anova_args = NULL
 )
@@ -18,6 +19,9 @@ perform_lm_anova(
 \item{formula_char}{character, the formula to be used in the linear model (see Details)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{lm_args}{list of arguments to lm, list names should be parameter names}
 

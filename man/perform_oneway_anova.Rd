@@ -4,7 +4,13 @@
 \alias{perform_oneway_anova}
 \title{Perform ANOVA}
 \usage{
-perform_oneway_anova(object, formula_char, all_features = FALSE, ...)
+perform_oneway_anova(
+  object,
+  formula_char,
+  all_features = FALSE,
+  separate_by = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -13,6 +19,9 @@ perform_oneway_anova(object, formula_char, all_features = FALSE, ...)
 Defaults to "Feature ~ group_col(object)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{...}{other parameters to \code{\link{oneway.test}}}
 }

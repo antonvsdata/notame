@@ -27,7 +27,7 @@ to be correlated agains x}
 \item{id}{character, column name for subject IDs. If provided, the correlation will be computed
 using the rmcorr package}
 
-\item{object2}{optional second MeatboSet object. If provided, x variables will be taken from object and
+\item{object2}{optional second MetaboSet object. If provided, x variables will be taken from object and
 y variables will be taken from object2. Both objects should have the same number of samples.}
 
 \item{fdr}{logical, whether p-values from the correlation test should be adjusted with FDR correction}

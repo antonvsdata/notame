@@ -4,12 +4,15 @@
 \alias{fold_change}
 \title{Fold change}
 \usage{
-fold_change(object, group = group_col(object))
+fold_change(object, group = group_col(object), separate_by = NULL)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
 \item{group}{character, name of the group column}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 }
 \value{
 data frame with fold changes for each feature
@@ -19,8 +22,8 @@ Computes fold change between each group for each feature.
 }
 \examples{
 # Between groups
-fc <- fold_change(example_set)
-# Between time points
-fc <- fold_change(example_set, group = "Time")
+fc <- fold_change(drop_qcs(example_set))
+# Between time points in each group
+fc <- fold_change(drop_qcs(example_set), group = "Time", separate_by = "Group")
 
 }

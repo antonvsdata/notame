@@ -8,6 +8,7 @@ perform_lmer(
   object,
   formula_char,
   all_features = FALSE,
+  separate_by = NULL,
   ci_method = c("Wald", "profile", "boot"),
   test_random = FALSE,
   ...
@@ -19,6 +20,9 @@ perform_lmer(
 \item{formula_char}{character, the formula to be used in the linear model (see Details)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{ci_method}{The method for calculating the confidence intervals, see documentation
 of confint below}
@@ -49,6 +53,12 @@ by the actual Feature IDs during model fitting, see the example
 \dontrun{
 lmer_results <- perform_lmer(drop_qcs(example_set),
   formula_char = "Feature ~ Group + Time + (1 | Subject_ID)",
+  ci_method = "Wald"
+)
+# Features predicted by Time as fixed effects with Subject ID as a random effect in each Group
+lmer_results <- perform_lmer(drop_qcs(example_set),
+  formula_char = "Feature ~ Time + (1 | Subject_ID)",
+  separate_by = "Group",
   ci_method = "Wald"
 )
 }

@@ -4,20 +4,59 @@
 \alias{write_to_excel}
 \title{Write results to Excel file}
 \usage{
-write_to_excel(object, file, ...)
+write_to_excel(
+  object,
+  file,
+  ms_ms_spectrum_col = "MS_MS_spectrum",
+  peak_num = 10,
+  min_abund = 5,
+  deci_num = 3,
+  separate_titles = NULL,
+  overwrite = TRUE
+)
 }
 \arguments{
 \item{object}{a MetaboSet object}
 
 \item{file}{path to the file to write}
 
-\item{...}{Additional parameters passed to \code{openxlsx::write.xlsx}}
+\item{ms_ms_spectrum_col}{character, the name of the column in feature data containing MSMS spectra}
+
+\item{peak_num}{integer, the number of peaks to show in the MSMS spectra}
+
+\item{min_abund}{numeric, the minimum relative abundance to show in the MSMS spectra}
+
+\item{deci_num}{integer, the number of digits to show in the MSMS spectra}
+
+\item{separate_titles}{list, of character vectors of column titles to split into separate rows. See examples
+for more information.}
+
+\item{overwrite}{logical, whether to overwrite the file if it already exists}
 }
 \description{
 Writes all the data in a MetaboSet object to an Excel spreadsheet.
-The format is similar to the one used to read data in, except for the fact that
-EVERYTHING NEEDS TO BE WRITTEN AS TEXT. To fix numeric values in Excel,
+The format is similar to the one used to read data in, but not identical. See \link{details}.
+Therefore, reading the output file with \code{read_from_excel} might not work.
+The output file will have every cell as text. To fix numeric values in Excel,
 choose any cell with a number, press Ctrl + A, then go to the dropdown menu
 in upper left corner and choose "Convert to Number". This will fix the file,
-but can take quite a while.
+but can take some time.
+}
+\details{
+Prettifies the output by creating a new column transforming MSMS spectra to publication ready form.
+Additionally, to make statistics columns easier to read, they can be spanned across multiple rows.
+Uses \code{\link[openxslx]{saveWorkbook}} for saving.
+
+If \code{separate_titles} is a list of character vectors containing parts of feature data columns,
+the function will span column names across multiple rows. Each list element
+corresponds to a new row in the output. The elements of the list are character vectors specifying which part of column
+names should be split into a new row. For example, if the column names are \code{Plasma_GroupB_Statistic}, \code{Plasma_GroupB_P},
+\code{Tissue_GroupB_Statistic} and \code{Tissue_GroupB_P}, the code in the examples
+will split the columns into three rows, where cells are merged based on the exported column names.
+In reality, results contain more columns and the example would make more sense.
+}
+\examples{
+\dontrun{
+write_to_excel(object, "output.xlsx", separate_titles = list(c("Plasma", "Tissue"), c("Group")))
+}
 }

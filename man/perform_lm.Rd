@@ -4,7 +4,7 @@
 \alias{perform_lm}
 \title{Linear models}
 \usage{
-perform_lm(object, formula_char, all_features = FALSE, ...)
+perform_lm(object, formula_char, all_features = FALSE, separate_by = NULL, ...)
 }
 \arguments{
 \item{object}{a MetaboSet object}
@@ -12,6 +12,9 @@ perform_lm(object, formula_char, all_features = FALSE, ...)
 \item{formula_char}{character, the formula to be used in the linear model (see Details)}
 
 \item{all_features}{should all features be included in FDR correction?}
+
+\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
+with multiple sample types in the same object.}
 
 \item{...}{additional parameters passed to lm}
 }
@@ -34,6 +37,8 @@ by the actual Feature IDs during model fitting, see the example
 # Features predicted by Group and Time
 lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Group + Time")
 
+# Features predicted by Time in different Groups
+lm_results <- perform_lm(drop_qcs(example_set), formula_char = "Feature ~ Time", separate_by = "Group")
 }
 \seealso{
 \code{\link[stats]{lm}}
