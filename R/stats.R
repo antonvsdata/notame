@@ -333,7 +333,8 @@ cohens_d <- function(object, group = group_col(object),
           # Check data is valid for Cohen's D
           group_table <- table(pData(object_split)[, c(id, group)])
           time_table <- table(pData(object_split)[, c(id, time)])
-          column <- paste0(group_combos[1, i], "vs", group_combos[2, i],
+          column <- paste0(
+            group_combos[1, i], "vs", group_combos[2, i],
             "_", time_combos[2, j], "minus", time_combos[1, j]
           )
           if (any(apply(group_table, 2, \(x, n) sum(x >= n), 2) < 2)) {
@@ -457,6 +458,56 @@ fold_change <- function(object, group = group_col(object), separate_by = NULL) {
 
   results
 }
+
+#' Common Language Effect Size
+#'
+#' Computes Common Language Effect Size (CLES) for each feature.
+#'
+#' Calculates CLES using U statistic from Mann-Whitney u-test. Change levels of chosen variable
+#'
+#' @param object a MetaboSet object
+#' @param group character, name of the group column
+#' @param id character, name of the subject ID column for the paired version. If \code{NULL},
+#' the test is assumed to be between groups.
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' with multiple sample types in the same object.
+#' @examples
+#' # Basic example
+#' cles <- cles(drop_qcs(example_set))
+#'
+#' # Separately to each time point in each group
+#' cles <- cles(drop_qcs(example_set), group = "Time", separate_by = "Group")
+#' @export
+cles <- function(object, group = group_col(object), id = NULL, separate_by = NULL) {
+  # Function to call
+  run_tests <- function(object, group, id) {
+    if (is.null(id)) {
+      count_product <- prod(table(pData(object)[, group]))
+
+      res <- perform_pairwise_non_parametric(object, group, all_features = TRUE) %>%
+        dplyr::select("Feature_ID", dplyr::ends_with("_U")) %>%
+        dplyr::mutate(dplyr::across(dplyr::ends_with("_U"), ~ . / count_product)) %>%
+        dplyr::rename_with(~ gsub("_MW_U", "_CLES", .), dplyr::ends_with("_U"))
+    } else {
+
+    }
+
+    res
+  }
+
+  # Run main function
+  log_text("Starting to compute Common Language Effect Sizes.")
+  results <- data.frame(Feature_ID = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, id)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests, group = group, id = id)
+  }
+
+  results
+}
+
+#' Rank-biserial correlation
 
 
 
@@ -1411,6 +1462,80 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE, s
   results
 }
 
+#' Conover-Iman test
+#'
+#' Wrapper for the \link[conover.test]{\code{conover.test}}
+#'
+#' @return data frame containing Conover-Iman t-test statistics and p-values for each comparison for each feature
+#'
+#' @param object a MetaboSet object
+#' @param formula_char character, the formula to be used in the linear model (see Details)
+#' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#'
+#' @examples
+#' # Basic example
+#' conover_res <- perform_conover_test(example_set, "Feature ~ Group")
+#' # Separately, usually done when dealing with multiple sample types in the same object
+#' conover_res <- perform_conover_test(drop_qcs(example_set), "Feature ~ Group", separate_by = "Time")
+#' @export
+perform_conover_test <- function(object, formula_char, all_features = FALSE, separate_by = NULL) {
+  if (!requireNamespace("conover.test", quietly = TRUE)) {
+    stop("Package \"conover.test\" needed for this function to work. Please install it.",
+      call. = FALSE
+    )
+  }
+  add_citation("conover.test package was used for the Conover-Iman test:", citation("conover.test"))
+
+  test_fun <- function(feature, formula, data) {
+    result_row <- NULL
+    # Extract independent variable
+    group <- as.character(formula)[3]
+    sink(tempfile())
+    tryCatch(
+      {
+        conover <- conover.test::conover.test(
+          x = data[, feature],
+          g = data[, group],
+          kw = FALSE,
+          list = TRUE
+        )
+        result_row <- data.frame(
+          Feature_ID = feature
+        )
+        for (i in seq_along(conover$P)) {
+          prefix <- gsub(" - ", "vs", conover$comparisons[i])
+          result_row[paste0(prefix, "_Conover_Statistic")] <- conover$T[i]
+          result_row[paste0(prefix, "_Conover_P")] <- conover$P[i]
+        }
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
+    sink()
+    result_row
+  }
+
+  # Function to call
+  run_tests <- function(object, formula_char, all_features) {
+    results <- perform_test(object, formula_char, test_fun, all_features)
+  }
+  # Run main function
+  log_text("Starting Conover-Iman tests.")
+  results <- data.frame("Feature_ID" = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, formula_char, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      formula_char = formula_char,
+      all_features = all_features
+    )
+  }
+  log_text("Conover-Iman tests performed.")
+  results
+}
+
 
 #' Perform ANOVA
 #'
@@ -1441,7 +1566,6 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE, s
 #'
 #' @export
 perform_oneway_anova <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
-
   # Function to calculate results
   test_fun <- function(feature, formula, data) {
     result_row <- NULL
@@ -1898,8 +2022,10 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, sep
     # Define prefix for column names
     exp_var <- unlist(strsplit(formula_char, " ~ "))[2]
     pair <- levels(pData(object)[, exp_var])
-    prefix <- paste0(exp_var,
-                     pair[1], "vs", pair[2], "_")
+    prefix <- paste0(
+      exp_var,
+      pair[1], "vs", pair[2], "_"
+    )
     res <- perform_test(object, formula_char, mw_fun, all_features)
     colnames(res)[-1] <- paste0(prefix, colnames(res)[-1])
 
