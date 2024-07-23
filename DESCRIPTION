@@ -27,6 +27,7 @@ Imports:
     grDevices,
     methods,
     openxlsx,
+    PMCMRplus,
     tibble,
     tidyr
 Suggests:

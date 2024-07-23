@@ -180,6 +180,7 @@ perform_separately <- function(object, separate_by, func, ...) {
     colnames(res)[-1] <- paste0(separate_by, lvl, "_", colnames(res)[-1])
     all_results <- dplyr::left_join(all_results, res, by = "Feature_ID")
   }
+  rownames(all_results) <- all_results$Feature_ID
   all_results
 }
 
@@ -1537,6 +1538,156 @@ perform_conover_test <- function(object, formula_char, all_features = FALSE, sep
   log_text("Conover-Iman tests performed.")
   results
 }
+
+
+#' Friedman test
+#'
+#' Wrapper for the \link[PMCMRplus]{\code{friedmanTest}}. Performs Friedman test
+#' for a two-way balanced complete block design.
+#'
+#' @return data frame containing Friedman test statistics and p-values
+#' for each feature
+#'
+#' @param object a MetaboSet object
+#' @param group character, name of the column containing the grouping variable
+#' @param id character, name of the column containing the pairing variable.
+#' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#'
+#' @examples
+#' # Basic example
+#' friedman_res <- perform_friedman_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#'
+#' @export
+perform_friedman_test <- function(object, group, id, all_features = FALSE, separate_by = NULL) {
+  test_fun <-  function(feature, group, id, data) {
+    result_row <- NULL
+    tryCatch(
+      {
+        friedman <- PMCMRplus::friedmanTest(data[[feature]], data[[group]], data[[id]])
+        result_row <- data.frame(
+          Feature_ID = feature,
+          Friedman_Statistic = friedman$statistic,
+          Friedman_P = friedman$p.value,
+          stringsAsFactors = FALSE
+        )
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
+    result_row
+  }
+
+  # Function to call
+  run_tests <- function(object, group, id, all_features) {
+    results <- foreach::foreach(feature = featureNames(object), .combine = rbind) %do% {
+      test_fun(feature, group, id, combined_data(object))
+    }
+    rownames(results) <- results$Feature_ID
+    results
+  }
+  # Run main function
+  log_text("Starting Friedman tests.")
+  results <- data.frame("Feature_ID" = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, id, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      group = group,
+      id = id,
+      all_features = all_features
+    )
+  }
+
+  log_text("Friedman tests performed.")
+  results
+}
+
+#' Paired Conover-Iman test
+#'
+#' Wrapper for the \link[PMCMRplus]{\code{frdAllPairsConoverTest}}. Performs
+#' pairwise comparisons using Conover's all-pairs test for a two-way balanced
+#' complete block design. Should only be used as a post-hoc test after a
+#' significant Friedman test.
+#'
+#' Argument \code{p.adjust.method} is hard-coded to "none" as FDR correction is done outside
+#' \code{kwAllPairsConoverTest} similarly to other tests in notame.
+#'
+#' @return data frame containing Conover-Iman t-test statistics, p-values and FDR corrected p-values of each comparison
+#' for each feature
+#'
+#' @param object a MetaboSet object
+#' @param group character, name of the column containing the grouping variable
+#' @param id character, name of the column containing the pairing variable.
+#' @param all_features should all features be included in FDR correction?
+#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#'
+#' @examples
+#' # Basic example
+#' conover_res <- perform_paired_conover_test(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#' @export
+perform_paired_conover_test <- function(object, group, id, all_features = FALSE, separate_by = NULL) {
+  # Check correct design
+  if (any(table(pData(object)[, group], pData(object)[, id]) != 1))
+    stop("Design is not a two-way balanced complete block design.")
+
+  test_fun <- function(feature, group, id, data) {
+    result_row <- NULL
+    tryCatch(
+      {
+        conover <- PMCMRplus::frdAllPairsConoverTest(y = data[, feature],
+                                                    groups = data[, group],
+                                                    blocks = data[, id],
+                                                    p.adjust.method = "none"
+        )
+        result_row <- data.frame(
+          Feature_ID = feature,
+          stringsAsFactors = FALSE
+        )
+        p_vals <- as.data.frame(conover$p.value)
+        # Format output
+        for (i in seq_len(ncol(p_vals))) {
+          for (j in seq_len(nrow(p_vals))) {
+            var1 <- colnames(p_vals)[i]
+            var2 <- rownames(p_vals)[j]
+            if (var1 == var2) next # Skip self-comparisons
+            prefix <- paste0(group, var1, "vs", var2, "_")
+            result_row[paste0(prefix, "Conover_Statistic")] <- conover$statistic[j, i]
+            result_row[paste0(prefix, "Conover_P")] <- p_vals[j, i]
+          }
+        }
+      },
+      error = function(e) {
+        cat(paste0(feature, ": ", e$message, "\n"))
+      }
+    )
+    result_row
+  }
+
+  # Function to call
+  run_tests <- function(object, g, blocks, all_features) {
+    results <- foreach::foreach(feature = featureNames(object), .combine = rbind) %dopar% {
+      test_fun(feature, group, id, combined_data(object))
+    }
+    rownames(results) <- results$Feature_ID
+    results
+  }
+  # Run main function
+  log_text("Starting Conover-Iman tests.")
+  results <- data.frame("Feature_ID" = featureNames(object))
+  if (is.null(separate_by)) {
+    results <- run_tests(object, g, blocks, all_features)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests,
+      g = g,
+      blocks = blocks
+    )
+  }
+  log_text("Conover-Iman tests performed.")
+  results
+}
+
 
 #' Perform ANOVA
 #'
