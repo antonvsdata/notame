@@ -463,15 +463,15 @@ fold_change <- function(object, group = group_col(object), separate_by = NULL) {
 #' Common Language Effect Size
 #'
 #' Computes Common Language Effect Size (CLES) for each feature.
-#'
-#' Calculates CLES using U statistic from Mann-Whitney u-test. Change levels of chosen variable
+#' Calculates CLES using U statistic from Mann-Whitney u-test.
 #'
 #' @param object a MetaboSet object
 #' @param group character, name of the group column
-#' @param id character, name of the subject ID column for the paired version. If \code{NULL},
-#' the test is assumed to be between groups.
-#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
-#' with multiple sample types in the same object.
+#' @param id character, name of the subject ID column for the paired version.
+#' If \code{NULL}, the test is assumed to be between groups.
+#' @param separate_by character, name of the column on which you want to
+#' separate the tests. Usually used when dealing with multiple sample types
+#' in the same object.
 #' @examples
 #' # Basic example
 #' cles <- cles(drop_qcs(example_set))
@@ -507,9 +507,6 @@ cles <- function(object, group = group_col(object), id = NULL, separate_by = NUL
 
   results
 }
-
-#' Rank-biserial correlation
-
 
 
 #' Perform correlation tests
@@ -1029,8 +1026,9 @@ perform_lm_anova <- function(object, formula_char, all_features = FALSE, separat
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
-#' with multiple sample types in the same object.
+#' @param separate_by character, name of the column on which you want to
+#' separate the tests. Usually used when dealing with multiple sample types
+#' in the same object.
 #' @param ... additional parameters passed to glm
 #'
 #' @return a data frame with one row per feature, with all the
@@ -1395,17 +1393,19 @@ perform_homoscedasticity_tests <- function(object, formula_char, all_features = 
 #' Performs Kruskal-Wallis Rank Sum Test for equality
 #'
 #' @param object a MetaboSet object
-#' @param formula_char character, the formula to be used in the linear model (see Details)
-#' Defaults to "Feature ~ group_col(object)
+#' @param formula_char character, the formula to be used in the linear model
+#' (see Details). Defaults to "Feature ~ group_col(object).
 #' @param all_features should all features be included in FDR correction?
-#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' @param separate_by character, name of the column on which you want to
+#' separate the tests. Usually used when dealing
 #' with multiple sample types in the same object.
 #'
 #' @details The model is fit on combined_data(object). Thus, column names
-#' in pData(object) can be specified. To make the formulas flexible, the word "Feature"
-#' must be used to signal the role of the features in the formula. "Feature" will be replaced
-#' by the actual Feature IDs during model fitting. For example, if testing for equality of
-#' means in study groups, use "Feature ~ Group".
+#' in pData(object) can be specified. To make the formulas flexible, the word
+#' "Feature" must be used to signal the role of the features in the formula.
+#' "Feature" will be replaced by the actual Feature IDs during model fitting.
+#' For example, if testing for equality of means in study groups,
+#' use "Feature ~ Group".
 #'
 #' @return data frame with the results
 #'
@@ -1465,11 +1465,13 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE, s
 
 #' Conover-Iman test
 #'
-#' Wrapper for the \link[PMCMRplus]{\code{kwAllPairsConoverTest}}. Performs pairwise comparisons for all levels of the
-#' independent variable in the formula. Should only be used as a post-hoc test after a significant Kruskal-Wallis test.
+#' Wrapper for \code{\link[PMCMRplus]{kwAllPairsConoverTest}}.
+#' Performs Conover's non-parametric all-pairs comparison test for
+#' Kruskal-type ranked data. Should only be used as a post-hoc test after
+#' a significant Kruskal-Wallis test.
 #'
-#' Argument \code{p.adjust.method} is hard-coded to "none" as FDR correction is done outside
-#' \code{kwAllPairsConoverTest} similarly to other tests in notame.
+#' Argument \code{p.adjust.method} is hard-coded to "none" as FDR correction is
+#' done outside \code{kwAllPairsConoverTest} similarly to other tests in notame.
 #'
 #' @return data frame containing Conover-Iman t-test statistics, p-values and FDR corrected p-values of each comparison
 #' for each feature
@@ -1477,7 +1479,10 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE, s
 #' @param object a MetaboSet object
 #' @param formula_char character, the formula to be used in the linear model (see Details)
 #' @param all_features should all features be included in FDR correction?
-#' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#' @param separate_by character, name of the column on which you want to separate the tests.
+#' Usually used when dealing with multiple sample types in the same object.
+#'
+#' @seealso \code{\link[PMCMRplus]{kwAllPairsConoverTest}}
 #'
 #' @examples
 #' # Basic example
@@ -1542,7 +1547,7 @@ perform_conover_test <- function(object, formula_char, all_features = FALSE, sep
 
 #' Friedman test
 #'
-#' Wrapper for the \link[PMCMRplus]{\code{friedmanTest}}. Performs Friedman test
+#' Wrapper for the \code{\link[PMCMRplus]{friedmanTest}}. Performs Friedman test
 #' for a two-way balanced complete block design.
 #'
 #' @return data frame containing Friedman test statistics and p-values
@@ -1553,6 +1558,8 @@ perform_conover_test <- function(object, formula_char, all_features = FALSE, sep
 #' @param id character, name of the column containing the pairing variable.
 #' @param all_features should all features be included in FDR correction?
 #' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#'
+#' @seealso \code{\link[PMCMRplus]{friedmanTest}}
 #'
 #' @examples
 #' # Basic example
@@ -1606,7 +1613,7 @@ perform_friedman_test <- function(object, group, id, all_features = FALSE, separ
 
 #' Paired Conover-Iman test
 #'
-#' Wrapper for the \link[PMCMRplus]{\code{frdAllPairsConoverTest}}. Performs
+#' Wrapper for the \code{\link[PMCMRplus]{frdAllPairsConoverTest}}. Performs
 #' pairwise comparisons using Conover's all-pairs test for a two-way balanced
 #' complete block design. Should only be used as a post-hoc test after a
 #' significant Friedman test.
@@ -1622,6 +1629,8 @@ perform_friedman_test <- function(object, group, id, all_features = FALSE, separ
 #' @param id character, name of the column containing the pairing variable.
 #' @param all_features should all features be included in FDR correction?
 #' @param separate_by character, name of the column on which you want to separate the tests. Usually used when dealing
+#'
+#' @seealso \code{\link[PMCMRplus]{frdAllPairsConoverTest}}
 #'
 #' @examples
 #' # Basic example
