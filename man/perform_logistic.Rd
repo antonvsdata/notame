@@ -19,8 +19,9 @@ perform_logistic(
 
 \item{all_features}{should all features be included in FDR correction?}
 
-\item{separate_by}{character, name of the column on which you want to separate the tests. Usually used when dealing
-with multiple sample types in the same object.}
+\item{separate_by}{character, name of the column on which you want to
+separate the tests. Usually used when dealing with multiple sample types
+in the same object.}
 
 \item{...}{additional parameters passed to glm}
 }
