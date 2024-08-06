@@ -92,7 +92,8 @@ summary_statistics <- function(object, grouping_cols = NA) {
     }
     # Combine as data frame
     result_row <- data.frame(
-      Feature_ID = feature, as.list(result_row),
+      Feature_ID = feature,
+      as.list(result_row),
       stringsAsFactors = FALSE
     )
 
@@ -135,10 +136,11 @@ clean_stats_results <- function(
   }
   df <- df[, !grepl(paste(remove, collapse = "|"), colnames(df), ignore.case = TRUE)]
   if (summary) {
-    ifelse(fdr,
-      p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))],
+    if (fdr) {
+      p_cols <- colnames(df)[grep("_P_FDR$", colnames(df))]
+    } else {
       p_cols <- colnames(df)[grep("_P$", colnames(df))]
-    )
+    }
     df$Low_p_values <- apply(df[, p_cols], 1, function(x) {
       sum(x < p_limit, na.rm = TRUE)
     })
@@ -463,35 +465,30 @@ fold_change <- function(object, group = group_col(object), separate_by = NULL) {
 #' Common Language Effect Size
 #'
 #' Computes Common Language Effect Size (CLES) for each feature.
-#' Calculates CLES using U statistic from Mann-Whitney u-test.
+#' Calculates CLES using U statistic from Mann-Whitney u-test. Therefore, the effect size is probability
+#' that a randomly selected observation from the first level of the grouping variable is larger than a randomly
+#' selected observation from the second level of the grouping variable.
 #'
 #' @param object a MetaboSet object
 #' @param group character, name of the group column
-#' @param id character, name of the subject ID column for the paired version.
-#' If \code{NULL}, the test is assumed to be between groups.
 #' @param separate_by character, name of the column on which you want to
 #' separate the tests. Usually used when dealing with multiple sample types
 #' in the same object.
 #' @examples
 #' # Basic example
-#' cles <- cles(drop_qcs(example_set))
-#'
+#' cles <- common_language_effect_size(drop_qcs(example_set))
 #' # Separately to each time point in each group
-#' cles <- cles(drop_qcs(example_set), group = "Time", separate_by = "Group")
+#' cles <- common_language_effect_size(drop_qcs(example_set), group = "Time", separate_by = "Group")
 #' @export
-cles <- function(object, group = group_col(object), id = NULL, separate_by = NULL) {
+common_language_effect_size <- function(object, group = group_col(object), separate_by = NULL) {
   # Function to call
-  run_tests <- function(object, group, id) {
-    if (is.null(id)) {
-      count_product <- prod(table(pData(object)[, group]))
+  run_tests <- function(object, group) {
+    count_product <- prod(table(pData(object)[, group]))
 
-      res <- perform_pairwise_non_parametric(object, group, all_features = TRUE) %>%
-        dplyr::select("Feature_ID", dplyr::ends_with("_U")) %>%
-        dplyr::mutate(dplyr::across(dplyr::ends_with("_U"), ~ . / count_product)) %>%
-        dplyr::rename_with(~ gsub("_MW_U", "_CLES", .), dplyr::ends_with("_U"))
-    } else {
-
-    }
+    res <- perform_pairwise_non_parametric(object, group, all_features = TRUE) %>%
+      dplyr::select("Feature_ID", dplyr::ends_with("_U")) %>%
+      dplyr::mutate(dplyr::across(dplyr::ends_with("_U"), ~ . / count_product)) %>%
+      dplyr::rename_with(~ gsub("_MW_U", "_CLES", .), dplyr::ends_with("_U"))
 
     res
   }
@@ -500,14 +497,121 @@ cles <- function(object, group = group_col(object), id = NULL, separate_by = NUL
   log_text("Starting to compute Common Language Effect Sizes.")
   results <- data.frame(Feature_ID = featureNames(object))
   if (is.null(separate_by)) {
-    results <- run_tests(object, group, id)
+    results <- run_tests(object, group)
   } else {
-    results <- perform_separately(object, separate_by, run_tests, group = group, id = id)
+    results <- perform_separately(object, separate_by, run_tests, group = group)
   }
+  log_text("Common Language Effect Sizes computed.")
 
   results
 }
 
+
+#' Rank-biserial correlation
+#'
+#' Computes Glass's rank-biserial correlation for each feature. Treats the first level of grouping variable
+#' as the reference group. Therefore, the difference in rank means is calculated as (second level - first level).
+#' If \code{id} is specified, the correlation is computed for each pair of samples with the same ID.
+#'
+#' Correlation coefficient can be interpreted as proportion of favourable outcomes in the second group.
+#' Here favourable means that the ranks are lower in the second group and therefore feature values are higher.
+#' Thus, negative values mean that the first group have higher feature values.
+#'
+#' @param object a MetaboSet object
+#' @param group character, name of the group column
+#' @param id character, name of the column containing subject IDs
+#' @param separate_by character, name of the column on which you want to
+#' separate the tests. Usually used when dealing with multiple sample types
+#' in the same object.
+#'
+#' @examples
+#' # Basic example
+#' rrc <- rank_biserial_correlation(drop_qcs(example_set), group = "Group")
+#' # Paired
+#' rrc_paired <- rank_biserial_correlation(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#' # Separately to each time point in each group
+#' rrc_within_groups <- rank_biserial_correlation(drop_qcs(example_set), group = "Time", separate_by = "Group")
+#' @export
+rank_biserial_correlation <- function(object, group = group_col(object), id = NULL, separate_by = NULL) {
+  # Checks
+  if (!is.factor(pData(object)[[group]])) {
+    stop("Group column must be a factor.")
+  }
+  if (length(levels(pData(object)[[group]])) < 2) {
+    stop(paste("Column", column, "should have at least two levels!"))
+  }
+  if (!is.null(id) && length(levels(pData(object)[, group])) != 2) {
+    stop("Paired test can only be performed with two groups.")
+  }
+
+  # Function to calculate r value for two groups
+  test_fun <- function(object, group, id) {
+    data <- exprs(object)
+    features <- Biobase::featureNames(object)
+    group_col <- pData(object)[, group]
+    idx2 <- which(group_col == levels(group_col)[2])
+    idx1 <- which(group_col == levels(group_col)[1])
+    if (!is.null(id)) {
+      id_col <- pData(object)[, id]
+      # Order indices to match the levels of id column
+      idx2 <- idx2[order(id_col[idx2])]
+      idx1 <- idx1[order(id_col[idx1])]
+      # Calculate difference y - x
+      data <- data[, idx2] - data[, idx1]
+    }
+    results_df <- foreach::foreach(
+      i = seq_along(features),
+      .combine = rbind
+    ) %dopar% {
+      ranks <- rank(abs(data[i, ]))
+      result_row <- NA_real_
+      if (is.null(id)) {
+        y1 <- finite_mean(ranks[idx2])
+        y0 <- finite_mean(ranks[idx1])
+        # r = 2*(y1 - y0) / n (Glass's formula)
+        result_row <- 2 * (y1 - y0) / length(ranks)
+      } else {
+        # r = f - u (proportion of favourable - unfavourable pairs)
+        f <- sum(ranks[data[i, ] > 0]) / sum(ranks)
+        u <- sum(ranks[data[i, ] < 0]) / sum(ranks)
+        result_row <- f - u
+      }
+      result_row
+    }
+    # Create comparison labels for result column names
+    comp_labels <- paste0(group, paste0(rev(levels(group_col)), collapse = "vs"), "_RRC")
+    results_df <- data.frame(features, results_df, stringsAsFactors = FALSE)
+    colnames(results_df) <- c("Feature_ID", comp_labels)
+    rownames(results_df) <- results_df$Feature_ID
+
+    results_df
+  }
+
+  # Function to call
+  run_tests <- function(object, group, id) {
+    group_col <- pData(object)[, group]
+    groups <- combn(levels(group_col), 2)
+    results <- data.frame(Feature_ID = featureNames(object))
+    for (i in seq_len(ncol(groups))) {
+      idx <- which(pData(object)[, group] %in% groups[, i])
+      results <- dplyr::left_join(results, test_fun(object[, idx], group, id), by = "Feature_ID")
+    }
+    results
+  }
+
+
+  # Run the main function
+  results <- data.frame(Feature_ID = featureNames(object))
+  log_text("Starting to compute rank-biserial correlations.")
+  if (is.null(separate_by)) {
+    results <- run_tests(object, group, id)
+  } else {
+    results <- perform_separately(object, separate_by, run_tests, group = group, id = id)
+  }
+  log_text("Rank-biserial correlations computed.")
+
+  results
+}
 
 #' Perform correlation tests
 #'
@@ -1567,7 +1671,7 @@ perform_conover_test <- function(object, formula_char, all_features = FALSE, sep
 #'
 #' @export
 perform_friedman_test <- function(object, group, id, all_features = FALSE, separate_by = NULL) {
-  test_fun <-  function(feature, group, id, data) {
+  test_fun <- function(feature, group, id, data) {
     result_row <- NULL
     tryCatch(
       {
@@ -1638,17 +1742,19 @@ perform_friedman_test <- function(object, group, id, all_features = FALSE, separ
 #' @export
 perform_paired_conover_test <- function(object, group, id, all_features = FALSE, separate_by = NULL) {
   # Check correct design
-  if (any(table(pData(object)[, group], pData(object)[, id]) != 1))
+  if (any(table(pData(object)[, group], pData(object)[, id]) != 1)) {
     stop("Design is not a two-way balanced complete block design.")
+  }
 
   test_fun <- function(feature, group, id, data) {
     result_row <- NULL
     tryCatch(
       {
-        conover <- PMCMRplus::frdAllPairsConoverTest(y = data[, feature],
-                                                    groups = data[, group],
-                                                    blocks = data[, id],
-                                                    p.adjust.method = "none"
+        conover <- PMCMRplus::frdAllPairsConoverTest(
+          y = data[, feature],
+          groups = data[, group],
+          blocks = data[, id],
+          p.adjust.method = "none"
         )
         result_row <- data.frame(
           Feature_ID = feature,
@@ -1930,6 +2036,7 @@ perform_paired_test <- function(object, group, id, test, all_features = FALSE, .
         ci_idx <- grepl("CI", colnames(result_row))
         colnames(result_row)[ci_idx] <- paste0(colnames(result_row)[ci_idx], conf_level)
         colnames(result_row)[-1] <- paste0(
+          group,
           pair[1], "vs",
           pair[2], "_",
           test, "_",
@@ -2142,7 +2249,7 @@ perform_pairwise_t_test <- function(object, group = group_col(object),
 #' @seealso \code{\link{wilcox.test}}
 #'
 #' @examples
-#' perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
+#' mw <- perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
 #'
 #' @export
 perform_mann_whitney <- function(object, formula_char, all_features = FALSE, separate_by = NULL, ...) {
@@ -2229,7 +2336,7 @@ perform_mann_whitney <- function(object, formula_char, all_features = FALSE, sep
 #' @seealso \code{\link{wilcox.test}}
 #'
 #' @examples
-#' perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+#' wsr_res <- perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
 #'
 #' @export
 perform_wilcoxon_signed_rank <- function(object, group, id, all_features = FALSE, separate_by = NULL, ...) {

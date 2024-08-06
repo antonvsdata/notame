@@ -157,6 +157,17 @@ test_that("Fold change works with all NA features", {
   expect_true(all(is.na(foldc[1:2, 2:ncol(foldc)])))
 })
 
+
+# Rank Biserial ----
+
+test_that("Order of ID column does not change results in Rank Biserial Correlation", {
+  mset1 <- drop_qcs(example_set)
+  mset2 <- mset1[, c(1:12, 24:13)]
+  rrc1 <- rank_biserial_correlation(mset1, group = "Time", id = "Subject_ID")
+  rrc2 <- rank_biserial_correlation(mset2, group = "Time", id = "Subject_ID")
+  expect_equal(rrc1, rrc2)
+})
+
 # P-value correction ----
 test_that("P-value correction works", {
   ps <- data.frame(
