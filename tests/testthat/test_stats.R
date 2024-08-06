@@ -435,7 +435,7 @@ test_that("Paired t-test works", {
   expect_identical(colnames(t_res), c(
     "Feature_ID",
     paste0(
-      "1vs2_t_test_",
+      "Time1vs2_t_test_",
       c(
         "Estimate",
         "LCI95",
@@ -494,7 +494,7 @@ test_that("Pairwise paired t-test works", {
   )
 
   expect_identical(rownames(pwpt_res), featureNames(drop_qcs(example_set)))
-  prefixes <- paste0(c("1vs2_", "1vs3_", "2vs3_"), "t_test_")
+  prefixes <- paste0("Time", c("1vs2_", "1vs3_", "2vs3_"), "t_test_")
   suffixes <- c("Estimate", "LCI95", "UCI95", "Statistic", "P", "P_FDR")
   cols <- expand.grid(prefixes, suffixes)
   expect_identical(colnames(pwpt_res), c(
@@ -567,14 +567,14 @@ test_that("Wilcoxon signed rank tests work", {
   median_diffs <- apply(exprs(object), 1, get_median_diffs)
 
   cols <- c("Feature_ID", paste0(
-    "1vs2_Wilcox_",
+    "Time1vs2_Wilcox_",
     c("Estimate", "LCI95", "UCI95", "Statistic", "P", "P_FDR")
   ))
 
   wil_res <- perform_wilcoxon_signed_rank(object, group = "Time", id = "Subject_ID")
 
   expect_identical(colnames(wil_res), cols)
-  expect_equal(cor(sign(median_diffs), sign(wil_res$`1vs2_Wilcox_Estimate`)), 1)
+  expect_equal(cor(sign(median_diffs), sign(wil_res$`Time1vs2_Wilcox_Estimate`)), 1)
 })
 
 test_that("Pairwise Mann-Whitney tests work", {
