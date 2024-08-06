@@ -35,7 +35,7 @@ Performs Wilcoxon signed rank test
 Uses base R function \code{wilcox.test} with \code{paired = TRUE}.
 }
 \examples{
-perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
+wsr_res <- perform_wilcoxon_signed_rank(drop_qcs(example_set), group = "Time", id = "Subject_ID")
 
 }
 \seealso{

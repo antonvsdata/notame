@@ -40,7 +40,7 @@ by the actual Feature IDs during model fitting. For example, if testing for equa
 medians in study groups, use "Feature ~ Group".
 }
 \examples{
-perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
+mw <- perform_mann_whitney(drop_qcs(example_set), formula_char = "Feature ~ Group")
 
 }
 \seealso{
