@@ -1,5 +1,7 @@
 bibentry("Article",
-         title = '{"notame": Workflow for Non-Targeted LC–MS Metabolic Profiling}',
+         textVersion =
+         paste('Klåvus, A.; Kokla, M.; Noerman, S.; Koistinen, V.M.; Tuomainen, M.; Zarei, I.; Meuronen, T.; Häkkinen, M.R.; Rummukainen, S.; Farizah Babu, A.; Sallinen, T.; Kärkkäinen, O.; Paananen, J.; Broadhurst, D.; Brunius, C.; Hanhineva, K. "notame": Workflow for Non-Targeted LC–MS Metabolic Profiling. Metabolites 2020, 10, 135.'),
+         title = '"notame": Workflow for Non-Targeted LC–MS Metabolic Profiling',
          author = c(person("Anton", "Klåvus"),
 	 person("Marietta", "Kokla"),
 	 person("Stefania", "Noerman"),
@@ -9,7 +11,7 @@ bibentry("Article",
 	 person("Topi", "Meuronen"),
 	 person("Merja R.", "Häkkinen"),
 	 person("Soile", "Rummukainen"),
-	 person("Ambrin", "Farizah Babu"),
+	 person("Ambrin", "Farizah", "Babu"),
 	 person("Taisa", "Sallinen"),
 	 person("Olli", "Kärkkäinen"),
 	 person("Jussi", "Paananen"),
@@ -20,7 +22,5 @@ bibentry("Article",
          journal = "Metabolites",
 	 volume = "10",
          number = "135",
-	 url = "https://doi.org/10.3390/metabo10040135",
-         textVersion = 
-         paste('Klåvus, A.; Kokla, M.; Noerman, S.; Koistinen, V.M.; Tuomainen, M.; Zarei, I.; Meuronen, T.; Häkkinen, M.R.; Rummukainen, S.; Farizah Babu, A.; Sallinen, T.; Kärkkäinen, O.; Paananen, J.; Broadhurst, D.; Brunius, C.; Hanhineva, K. "notame": Workflow for Non-Targeted LC–MS Metabolic Profiling. Metabolites 2020, 10, 135.')
+	 url = "https://doi.org/10.3390/metabo10040135"
          )
