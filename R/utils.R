@@ -7,7 +7,7 @@
   op <- options()
   op_notame <- list(
     notame.citations = list(
-      # "Preprocessing and analyses were performed using notame package:" = utils::citation("notame"),
+      "Preprocessing and analyses were performed using notame package:" = utils::citation("notame"),
       "notame is built on a class from Biobase package:" = utils::citation("Biobase"),
       "visualizations in notame are built with ggplot2:" = utils::citation("ggplot2")
     ),
