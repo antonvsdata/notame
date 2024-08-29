@@ -1,6 +1,6 @@
 bibentry("Article",
          textVersion =
-         paste('Klåvus, A.; Kokla, M.; Noerman, S.; Koistinen, V.M.; Tuomainen, M.; Zarei, I.; Meuronen, T.; Häkkinen, M.R.; Rummukainen, S.; Farizah Babu, A.; Sallinen, T.; Kärkkäinen, O.; Paananen, J.; Broadhurst, D.; Brunius, C.; Hanhineva, K. "notame": Workflow for Non-Targeted LC–MS Metabolic Profiling. Metabolites 2020, 10, 135.'),
+         "Klåvus, A., Kokla, M., Noerman, S., Koistinen, V.M., Tuomainen, M., Zarei, I., Meuronen, T., Häkkinen, M.R., Rummukainen, S., Farizah Babu, A., Sallinen, T., Kärkkäinen, O., Paananen, J., Broadhurst, D., Brunius, C., Hanhineva, K., notame: Workflow for Non-Targeted LC–MS Metabolic Profiling. Metabolites 2020, 10, 135.",
          title = '"notame": Workflow for Non-Targeted LC–MS Metabolic Profiling',
          author = c(person("Anton", "Klåvus"),
 	 person("Marietta", "Kokla"),
