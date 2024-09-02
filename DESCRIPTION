@@ -3,10 +3,11 @@ Type: Package
 Title: Workflow for non-targeted LC-MS metabolic profiling
 Version: 0.3.1
 Authors@R: c(
-    person("Anton", "Klåvus", email = "anton.klavus@iki.fi", role = c("aut", "cre")),
+    person("Atte", "Lihtamo", email = "atte.lihtamo@afekta.com", role = c("aut", "cre")),
+    person("Anton", "Klåvus", email = "anton.klavus@iki.fi", role = "aut"),
     person("Jussi", "Paananen", role = "aut"),
-    person("Oskari", "Timonen", role = "aut"),
-    person("Atte", "Lihtamo", role = "aut"))
+    person("Oskari", "Timonen", role = "aut")
+    )
 Description: Automates common preprocessing steps in a LC-MS metabolomics workflow
     such as drift correction, quality control and common visualizations.
 License: MIT + file LICENSE
@@ -21,38 +22,39 @@ Depends:
     ggplot2,
     magrittr
 Imports:
+    cowplot,
+    doParallel,
     dplyr,
     foreach,
+    ggbeeswarm,
+    ggdendro,
+    ggrepel,
     grDevices,
+    gridExtra,
+    Hmisc,
+    hexbin,
+    lme4,
     methods,
+    missForest,
     openxlsx,
+    pcaMethods,
+    randomForest,
+    Rtsne,
     tibble,
     tidyr
 Suggests:
     car,
-    cowplot,
     devEMF,
-    doParallel,
     fpc,
-    ggbeeswarm,
-    ggdendro,
-    ggrepel,
-    Hmisc,
-    hexbin,
     igraph,
     knitr,
-    lme4,
     lmerTest,
-    missForest,
     mixOmics,
-    pcaMethods,
     PK,
-    randomForest,
     rmcorr,
     RColorBrewer,
-    Rtsne,
     RUVSeq,
     supraHex,
     testthat
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr

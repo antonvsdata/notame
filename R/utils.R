@@ -125,6 +125,7 @@ install_dependencies <- function(preprocessing = TRUE, extra = FALSE, batch_corr
     "ggdendro",
     "ggrepel",
     "ggtext",
+    "gridExtra",
     "Hmisc",
     "hexbin",
     "igraph",
