@@ -76,3 +76,6 @@ in both QCs and biological samples \code{\link{plot_p_histogram}}}
 }
 }
 }
+\seealso{
+\code{\link[notame]{save_plot}}
+}

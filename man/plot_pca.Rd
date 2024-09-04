@@ -21,7 +21,6 @@ plot_pca(
   fill_scale = getOption("notame.fill_scale_dis"),
   text_base_size = 14,
   point_size = 2,
-  label_text_size = 4,
   ...
 )
 }
@@ -59,8 +58,6 @@ If a continuous variable is used as color, density curve will be colorless.}
 \item{text_base_size}{numeric, base size for text}
 
 \item{point_size}{numeric, size of the points}
-
-\item{label_text_size}{numeric, size of the labels}
 
 \item{...}{additional arguments passed to pcaMethods::pca}
 }

@@ -6,6 +6,21 @@
 \usage{
 save_plot(p, file, ...)
 }
+\arguments{
+\item{p}{a ggplot object}
+
+\item{file}{the file path}
+
+\item{...}{other arguments to plot function, like width and height}
+}
 \description{
-DEPRECATED: Please use \code{\link[ggsave]{ggsave}} instead.
+Saves the given plot to a file. Supports pdf, svg, emf, png and tiff formats.
+If an error occurs with the plot, an empty file is created.
+}
+\seealso{
+\code{\link[grDevices]{pdf}},
+\code{\link[devEMF]{emf}},
+\code{\link[grDevices]{svg}},
+\code{\link[grDevices]{png}},
+\code{\link[grDevices]{tiff}}
 }

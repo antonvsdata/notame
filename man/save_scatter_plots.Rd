@@ -56,7 +56,7 @@ Set to NULL for no title/subtitle, this creates running numbered filenames}
 
 \item{theme}{a ggplot theme to be added to the plot}
 
-\item{...}{arguments to code{\link[ggplot2]{ggsave}}}
+\item{...}{other arguments to graphic device functions, like width and height}
 }
 \description{
 Draws a scatterplots with a feature on y-axis and another variable on x-axis.
@@ -75,4 +75,7 @@ save_scatter_plots(
 }
 # Plot one feature
 save_scatter_plots(merged_sample[5, ], save = FALSE, color = "Group")
+}
+\seealso{
+\code{\link[notame]{save_plot}}
 }

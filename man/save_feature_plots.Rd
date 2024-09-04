@@ -21,7 +21,7 @@ data frame from combined_data(object)
 feature id
 Should return a ggplot object for plotting}
 
-\item{...}{arguments to code{\link[ggplot2]{ggsave}}}
+\item{...}{other arguments to plotting function}
 }
 \description{
 Helper function for saving plots of individual features
