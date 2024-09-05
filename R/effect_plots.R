@@ -7,7 +7,7 @@
 #' data frame from combined_data(object)
 #' feature id
 #' Should return a ggplot object for plotting
-#' @param ... other arguments to plotting function
+#' @param ... arguments to code{\link[ggplot2]{ggsave}}
 save_feature_plots <- function(object, file_path, format,
                                title, subtitle, text_base_size,
                                plot_fun, ...) {
@@ -42,10 +42,10 @@ save_feature_plots <- function(object, file_path, format,
       if (is.null(title)) {
         file <- paste0(file_path, fname, ".", format)
       } else {
-        file <- paste0(file_path, gsub("[:/]", "_", name), ".", format)
+        file <- paste0(file_path, gsub("[:;/]", "_", name), ".", format)
       }
 
-      save_plot(p, file, ...)
+      ggsave(file, plot = p, device = format, ...)
     } else {
       print(p)
     }
@@ -102,10 +102,8 @@ create_feature_plot_list <- function(object, plot_fun) {
 #' @param mean_line_width numeric, width of the mean line
 #' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
-#' @param ... other arguments to graphic device functions, like width and height
+#' @param ... arguments to code{\link[ggplot2]{ggsave}}
 #'
-#' @seealso
-#' \code{\link[notame]{save_plot}}
 #'
 #' @examples
 #' \dontrun{
@@ -152,24 +150,24 @@ save_subject_line_plots <- function(object,
         geom_line(aes(group = .data[[id]]),
           color = "grey20",
           alpha = 0.35,
-          size = line_width
+          linewidth = line_width
         ) +
         stat_summary(aes(group = 1),
           fun.data = "mean_se",
           geom = "line",
-          size = mean_line_width,
+          linewidth = mean_line_width,
           color = color_scale$palette(1)[1]
         )
     } else {
       p <- p +
         geom_line(aes(group = .data[[id]], color = .data[[color]]),
           alpha = 0.35,
-          size = line_width
+          linewidth = line_width
         ) +
         stat_summary(aes(group = .data[[color]], color = .data[[color]]),
           fun.data = "mean_se",
           geom = "line",
-          size = mean_line_width
+          linewidth = mean_line_width
         ) +
         color_scale
     }
@@ -226,10 +224,7 @@ save_subject_line_plots <- function(object,
 #' @param point_size numeric, size of the mean points
 #' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
-#' @param ... other arguments to graphic device functions, like width and height
-#'
-#' @seealso
-#' \code{\link[notame]{save_plot}}
+#' @param ... arguments to code{\link[ggplot2]{ggsave}}
 #'
 #' @examples
 #' \dontrun{
@@ -327,10 +322,7 @@ save_group_boxplots <- function(object,
 #' @param size numeric, size of points
 #' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
-#' @param ... other arguments to graphic device functions, like width and height
-#'
-#' @seealso
-#' \code{\link[notame]{save_plot}}
+#' @param ... arguments to code{\link[ggplot2]{ggsave}}
 #'
 #' @examples
 #' \dontrun{
@@ -427,10 +419,7 @@ save_beeswarm_plots <- function(object,
 #' @param point_size numeric, size of the points
 #' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
-#' @param ... other arguments to graphic device functions, like width and height
-#'
-#' @seealso
-#' \code{\link[notame]{save_plot}}
+#' @param ... arguments to code{\link[ggplot2]{ggsave}}
 #'
 #' @examples
 #' \dontrun{
@@ -525,11 +514,7 @@ save_scatter_plots <- function(object,
 #' @param point_size numeric, size of the points
 #' @param title_line_length integer, maximum length of the title line in characters, passed to stringr::str_wrap
 #' @param theme a ggplot theme to be added to the plot
-#' @param ... other arguments to graphic device functions, like width and height
-#'
-#' @seealso
-#' \code{\link[notame]{save_plot}},
-#' \code{\link[ggplot2]{stat_summary}}
+#' @param ... arguments to code{\link[ggplot2]{ggsave}}
 #'
 #' @examples
 #' \dontrun{

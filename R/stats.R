@@ -1234,6 +1234,7 @@ perform_kruskal_wallis <- function(object, formula_char, all_features = FALSE) {
 
         result_row <- data.frame(
           Feature_ID = feature,
+          Kruskal_Statistic = kruskal$statistic,
           Kruskal_P = kruskal$p.value,
           stringsAsFactors = FALSE
         )
@@ -1291,6 +1292,7 @@ perform_oneway_anova <- function(object, formula_char, all_features = FALSE, ...
 
         result_row <- data.frame(
           Feature_ID = feature,
+          ANOVA_Statistic = anova_res$statistic,
           ANOVA_P = anova_res$p.value,
           stringsAsFactors = FALSE
         )
