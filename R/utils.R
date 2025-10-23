@@ -21,6 +21,29 @@
   )
   toset <- !(names(op_notame) %in% names(op))
   if (any(toset)) options(op_notame[toset])
+  
+
+  msg <- c(
+    sprintf("\n%s %s — ACTIVE DEVELOPMENT MOVED", pkgname, as.character(utils::packageVersion(pkgname))),
+    "",
+    "The 'notame' package is now distributed via Bioconductor and development has been moved to another Github repository.", 
+    "",
+    "To continue getting updates, install the latest version with:",
+    "  BiocManager::install('notame')",
+    "",
+    "This change introduced many breaking changes:", 
+    "The new package in Bioconductor contains only preprocessing functions. If you want to use statistics functions or vizualizations, install 'notameStats' and 'notameViz' packages from Bioconductor.",
+    "", 
+    "To see full list of breaking changes, see the NEWS file at:",
+    "  https://bioconductor.org/packages/release/bioc/news/notame/NEWS",
+    "",
+    "Detailed installation instructions, active development, issue tracking and pull requests are at:",
+    "  https://github.com/hanhineva-lab/notame",
+    "",
+    "This repository is retained for historical/reference purposes and may be archived."
+  )
+
+  packageStartupMessage(paste(msg, collapse = "\n"))
 
   invisible()
 }

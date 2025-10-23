@@ -1,3 +1,10 @@
+# ⚠️ Migrated — repository no longer maintained
+
+This repository is migrated and is no longer updated. Active development has moved to the new location:
+https://github.com/hanhineva-lab/notame
+
+Do not open new issues or pull requests here — they will not be monitored. Please open issues and PRs at the new repository above. This repository is retained only for historical reference and may be archived.
+
 # notame - Workflow for non-targeted LC-MS metabolic profiling 
 
 This package can be used to analyze preprocessed LC-MS data in non-targeted metabolomics. Notame was developed at the [research group of nutritional metabolomics at University of Eastern Finland](https://www3.uef.fi/en/web/kttravi/metabolomics2) and [Afekta Technologies](https://afekta.com/), a spinoff metabolomics company. We use notame as a way to bundle together all the preprocessing methods we use for our non-targeted LC-MS metabolomics data, so it mainly consists of methods found in other packages, and a bunch of visualizations we have found useful.
